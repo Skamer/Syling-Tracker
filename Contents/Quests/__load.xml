@@ -1,0 +1,8 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+  <Script file="QuestView.lua"/>
+  <Script file="QuestCategoryView.lua"/>
+  <Script file="QuestsContentView.lua"/>
+  <Script file="QuestModel.lua"/>
+  <Script file="Quests.lua"/>
+</Ui>

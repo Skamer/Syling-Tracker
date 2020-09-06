@@ -1,0 +1,25 @@
+## Interface: 80300
+## Title: SylingTracker
+## Version: 0.1-alpha
+## Author: Skamer
+## SavedVariables: SylingTrackerDB
+## Dependencies: PLoop, Scorpio, Scorpio.Widget
+## OptionalDeps: ViragDevTool
+# Embed libs
+# embeds.xml
+
+# Utils file
+Utils\__load.xml
+
+# Core files
+Core\__load.xml
+
+# UIElements files
+UIElements\__load.xml
+
+# Main file
+SylingTracker.lua
+
+# Content files
+Contents\__load.xml
+
