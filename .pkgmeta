@@ -1,0 +1,28 @@
+package-as: SylingTracker
+enable-nolib-creation: no
+
+manual-changelog:
+    filename: Changelog.txt
+    markup-type: plain
+
+required-dependencies:
+  - ploop
+  - scorpio
+
+externals:
+  Libs/LibStub:
+    url: svn://svn.wowace.com/wow/libstub/mainline/trunk
+    tag: latest
+  Libs/CallbackHandler-1.0:
+    url: svn://svn.wowace.com/wow/callbackhandler/mainline/trunk/CallbackHandler-1.0
+  Libs/LibSharedMedia-3.0:
+    url: https://repos.wowace.com/wow/libsharedmedia-3-0/trunk/LibSharedMedia-3.0
+  Libs/LibCompress:
+    url: https://repos.wowace.com/wow/libcompress/trunk
+  Libs/LibDataBroker-1.1:
+    url: https://repos.wowace.com/wow/libdatabroker-1-1
+  Libs/LibDBIcon-1.0:
+    url: https://repos.wowace.com/wow/libdbicon-1-0/trunk/LibDBIcon-1.0
+
+move-folders:
+  SylingTracker/Options: SylingTracker_Options

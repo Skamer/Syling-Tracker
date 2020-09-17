@@ -4,6 +4,7 @@
   <Script file="ContextMenu.lua"/>
   <Script file="Badge.lua"/>
   <Script file="ContentHeader.lua"/>
+  <Script file="ContentView.lua"/>
   <Script file="ProgressBar.lua"/>
   <Script file="ObjectiveView.lua"/>
   <!-- <Script file="AnimationFrame.lua"/> -->
