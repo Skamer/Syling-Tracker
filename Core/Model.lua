@@ -11,13 +11,42 @@ Scorpio                  "SylingTracker.Core.Model"                          ""
 namespace                          "SLT"
 -- ========================================================================= --
 WipeTable = System.Toolset.wipe
-MergeTable = Utils.MergeTable
+-------------------------------------------------------------------------------
+--                              Helpers Functions                            --
+-------------------------------------------------------------------------------
+local function RemoveNilDataFromTable(t)
+  for k, v in pairs(t) do 
+    if type(v) == "table" then 
+      RemoveNilDataFromTable(v)
+    elseif type(v) == "string" and v == Model.NIL_DATA then 
+      t[k] = nil 
+    end
+  end
+end
+
+
+local function MergeTable(t1, t2)
+  for k, v in pairs(t2) do
+        if (type(v) == "table") and (type(t1[k] or false) == "table") then
+            MergeTable(t1[k], t2[k])
+        else
+          if type(v) == "string" and v == Model.NIL_DATA then
+            t1[k] = nil 
+          else 
+            if type(v) == "table" then 
+              RemoveNilDataFromTable(v)
+            end 
+            t1[k] = v
+          end
+        end
+    end
+  return t1
+end
 
 class "Model" (function(_ENV)
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
-
   -- REVIEW: The view should not be updated if it's not active, but when the
   -- view become active, it should get a refresh
   __Arguments__{ IView }
@@ -34,30 +63,6 @@ class "Model" (function(_ENV)
   function RemoveView(self, view)
     self.views:Remove(view)
   end
-
-  -- __Arguments__ { Table, Variable.Rest(String + Number) }
-  -- function SetData(self, data, ...)
-  --   local count = select("#", ...)
-  --   if count == 0 then 
-  --     self:ClearData()
-  --     self.data = data 
-  --   else 
-  --     local currentTable = self.data
-  --     for i = 1, count do 
-  --       local key = select(i, ...)
-  --       local t = currentTable[key]
-  --       if not t then 
-  --         t = {}
-  --         currentTable[key] = t
-  --       end
-
-  --       currentTable = t
-  --     end
-
-  --     WipeTable(currentTable)
-  --     MergeTable(currentTable, data)
-  --   end
-  -- end
 
   __Arguments__ { Table, Variable.Rest(String + Number)}
   function SetData(self, data, ...)
@@ -161,8 +166,6 @@ class "Model" (function(_ENV)
   end 
 
   function GetData(self) return self.data end 
-
-  -- __Arguments__ { Table, Variable.Rest(String + Number )}
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
@@ -178,6 +181,11 @@ class "Model" (function(_ENV)
   property "data" {
     type = Table,
     default = function() return {} end
+  }
+
+  __Static__() property "NIL_DATA" {
+    type = String,
+    default = "NIL_DATA"
   }
 end)
 

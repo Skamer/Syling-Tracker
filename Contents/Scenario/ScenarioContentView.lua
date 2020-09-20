@@ -17,15 +17,6 @@ IterateFrameChildren  = Utils.IterateFrameChildren
 ValidateFlags         = System.Toolset.validateflags
 ResetStyles           = Utils.ResetStyles
 -- ========================================================================= --
-class "ScenarioContentHeader" (function(_ENV)
-  inherit "ContentHeader"
-
-  __Template__ {
-    Name = SLTFontString
-  }
-  function __ctor(self) end 
-end)
-
 __Recyclable__ "SylingTracker_ScenarioContentView%d"
 class "ScenarioContentView" (function(_ENV)
   inherit "ContentView"
@@ -122,29 +113,6 @@ class "ScenarioContentView" (function(_ENV)
     self.Flags = flags
   end
 
-  -- function OnAdjustHeight(self, useAnimation)
-  --   local height = 0
-  --   local maxOuterBottom 
-
-  --   for childName, child in self:GetChilds() do
-  --     local outerBottom = child:GetBottom() 
-  --     if outerBottom then 
-  --       if not maxOuterBottom or maxOuterBottom > outerBottom then 
-  --         maxOuterBottom = outerBottom
-  --       end 
-  --     end 
-  --   end
-    
-  --   if maxOuterBottom then 
-  --     local computeHeight = self:GetTop() - maxOuterBottom + self.PaddingBottom
-  --     if useAnimation then 
-  --       self:SetAnimatedHeight(computeHeight)
-  --     else 
-  --       self:SetHeight(computeHeight)
-  --     end
-  --   end
-  -- end
-
   function AcquireObjectives(self)
     local content = self:GetChild("Content")
     local objectives = content:GetChild("Objectives")
@@ -159,7 +127,6 @@ class "ScenarioContentView" (function(_ENV)
 
       objectives.OnSizeChanged = objectives.OnSizeChanged + self.OnObjectivesSizeChanged
     
-      -- self:AdjustContentHeight()
       self:AdjustHeight(true)
     end
 
@@ -181,7 +148,6 @@ class "ScenarioContentView" (function(_ENV)
       -- useless calls
       objectives:Release()
 
-      -- self:AdjustContentHeight()
       self:AdjustHeight(true)
     end
   end
@@ -215,7 +181,6 @@ class "ScenarioContentView" (function(_ENV)
 
       bonusObjectives.OnSizeChanged = bonusObjectives.OnSizeChanged + self.OnObjectivesSizeChanged
 
-      -- self:AdjustContentHeight()
       self:AdjustHeight(true)
     end
 
@@ -250,51 +215,23 @@ class "ScenarioContentView" (function(_ENV)
       bonusObjectivesText:Release()
       BonusObjectivesIcon:Release()
 
-      -- self:AdjustContentHeight()
       self:AdjustHeight(true)
     end 
   end
 
   function OnRelease(self)
-    -- First, release the children
+    -- First, release the children 
     self:ReleaseObjectives()
 
-    self:ClearAllPoints()
-    self:SetParent()
-    self:Hide()
-
-    -- "CancelAdjustHeight" and "CancelAnimatingHeight" wiil cancel the pending
-    -- computing stuff for height, so they not prevent "SetHeight" here doing 
-    -- its stuff.
-    self:CancelAdjustHeight()
-    self:CancelAnimatingHeight()
-    self:SetHeight(1)
+    -- We call the "Parent" OnRelease (see, ContentView)
+    super.OnRelease(self)
 
     -- Reset the class properties
     self.Flags  = nil
-
-    -- Will Remove all custom styles properties, so the  next time the object will
-    -- be used, this one will be in a clean state
-    ResetStyles(self)
-  end
-
-  function OnAcquire(self)
-    -- Important ! We need the frame is instantly styled as this may affect 
-    -- its height.
-    self:InstantApplyStyle()
-
-    self:Show()
-    self:AdjustContentHeight()
-    self:AdjustHeight(true)
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
-  property "PaddingBottom" {
-    type      = Number,
-    default   = 10
-  }
-
   property "Flags" {
     type    = ScenarioContentView.Flags,
     default = ScenarioContentView.Flags.NONE
@@ -316,17 +253,6 @@ class "ScenarioContentView" (function(_ENV)
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
   -----------------------------------------------------------------------------
-  -- __Template__ {
-  --   Header  = ScenarioContentHeader,
-  --   Stage   = Frame,
-  --   {
-  --     Stage = {
-  --       Counter = SLTFontString,
-  --       Name    = SLTFontString
-  --     }
-  --   }
-  -- }
-
   __Template__ {
     {
       Header = {
@@ -344,59 +270,16 @@ class "ScenarioContentView" (function(_ENV)
     }
   }
   function __ctor(self)
-    -- Important! As the frame ajusts its height depending of its children height
-    -- we need to set its height when contructed for the event "OnSizechanged" of
-    -- its children is triggered.
-    self:SetHeight(1) -- !important
-
     self.OnObjectivesSizeChanged = function() self:AdjustHeight(true) end
-
-    self:SetClipsChildren(true)
-
-    self:AdjustContentHeight()
   end
-
 end)
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
-  [ScenarioContentHeader] = {
-    Label = {
-      sharedMediaFont = FontType("PT Sans Narrow Bold", 13),
-      justifyV = "TOP",
-    },
-    Name = {
-      sharedMediaFont = FontType("PT Sans Caption Bold", 13),
-      textColor = Color(1, 233/255, 174/255),
-      justifyV = "BOTTOM",
-      textTransform = "UPPERCASE",
-      location = {
-        Anchor("TOP"),
-        Anchor("LEFT", 0, 0, "IconBadge", "RIGHT"),
-        Anchor("RIGHT"),
-        Anchor("BOTTOM", 0, 2)
-      }
-    }
-  },
-
   [ScenarioContentView] = {
-    backdrop = { 
-      bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
-      -- edgeFile = [[Interface\Buttons\WHITE8X8]],
-      -- edgeSize = 1
-    },
-    backdropColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
-
     Header = {
-      height = 32,
-      -- backdropColor = { r = 0, g = 74/255, b = 127/255, a = 0.73 },
       backdropBorderColor = { r = 0, g = 0, b = 0, a = 0 },
-      location = {
-        Anchor("TOPLEFT"),
-        Anchor("TOPRIGHT")
-      },
-
       IconBadge = {
         backdropColor = { r = 0, g = 0, b = 0, a = 0},
         Icon = {
@@ -405,17 +288,17 @@ Style.UpdateSkin("Default", {
       },
 
       Label = {
-        text = "Scenario",
+        text            = "Scenario",
         sharedMediaFont = FontType("PT Sans Narrow Bold", 14),
-        justifyV = "TOP"
+        justifyV        = "TOP"
       },
 
       ScenarioName = {
         sharedMediaFont = FontType("PT Sans Caption Bold", 13),
-        textColor = Color(1, 233/255, 174/255),
-        justifyV = "BOTTOM",
-        textTransform = "UPPERCASE",
-        location = {
+        textColor       = Color(1, 233/255, 174/255),
+        justifyV        = "BOTTOM",
+        textTransform   = "UPPERCASE",
+        location        = {
           Anchor("TOP"),
           Anchor("LEFT", 0, 0, "IconBadge", "RIGHT"),
           Anchor("RIGHT"),
@@ -424,9 +307,14 @@ Style.UpdateSkin("Default", {
       }
     },
     Content = {
+      backdrop = { 
+        bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
+      },
+      backdropColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
+
       Stage = {
-        height = 20,
-        location = {
+        height    = 20,
+        location  = {
           Anchor("TOP"),
           Anchor("LEFT"),
           Anchor("RIGHT")
@@ -434,8 +322,8 @@ Style.UpdateSkin("Default", {
 
         Counter = {
           sharedMediaFont = FontType("PT Sans Narrow Bold", 13),
-          textColor = Color(1, 1, 1),
-          location = {
+          textColor       = Color(1, 1, 1),
+          location        = {
             Anchor("TOP", 0, -4),
             Anchor("LEFT", 4, 0),
             Anchor("BOTTOM", 0, 4)
@@ -444,9 +332,9 @@ Style.UpdateSkin("Default", {
 
         Name = {
           sharedMediaFont = FontType("PT Sans Narrow Bold", 13),
-          textColor = Color(1, 1, 0),
-          justifyH = "LEFT",
-          location = {
+          textColor       = Color(1, 1, 0),
+          justifyH        = "LEFT",
+          location        = {
             Anchor("TOP", 0, -4),
             Anchor("LEFT", 10, 0, "Counter", "RIGHT"),
             Anchor("BOTTOM", 0, 4),
@@ -458,8 +346,9 @@ Style.UpdateSkin("Default", {
     FlagsStyles = {
       [ScenarioContentView.Flags.HAS_OBJECTIVES] = {
         Content = {
-          Objectives = {
-            location = {
+          Objectives  = {
+            spacing   = 5,
+            location  = {
               Anchor("TOP", 0, -4, "Stage", "BOTTOM"),
               Anchor("LEFT"),
               Anchor("RIGHT")
@@ -470,7 +359,8 @@ Style.UpdateSkin("Default", {
       [ScenarioContentView.Flags.HAS_OBJECTIVES + ScenarioContentView.Flags.HAS_BONUS_OBJECTIVES] = {
         Content = {
           Objectives = {
-            location = {
+            spacing   = 5,
+            location  = {
               Anchor("TOP", 0, -4, "Stage", "BOTTOM"),
               Anchor("LEFT"),
               Anchor("RIGHT")
@@ -478,21 +368,21 @@ Style.UpdateSkin("Default", {
           },
 
           BonusObjectivesText = {
-            text = TRACKER_HEADER_BONUS_OBJECTIVES,
-            height = 16,
+            text            = TRACKER_HEADER_BONUS_OBJECTIVES,
+            height          = 16,
             sharedMediaFont = FontType("PT Sans Narrow Bold", 13),
-            location = {
+            location        = {
               Anchor("TOP", 0, -8, "Objectives", "BOTTOM"),
             }
           },
 
           BonusObjectivesIcon = {
-            width = 16,
-            height = 16,
-            Icon = {
+            width   = 16,
+            height    = 16,
+            Icon      = {
               atlas = AtlasType("VignetteEventElite")
             },
-            location = {
+            location  = {
               Anchor("RIGHT", 0, 0, "BonusObjectivesText", "LEFT")
             }
           },

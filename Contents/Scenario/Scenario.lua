@@ -26,6 +26,7 @@ GetBasicCurrencyInfo              = C_CurrencyInfo.GetBasicCurrencyInfo
 IsInInstance                      = IsInInstance
 -- ========================================================================= --
 _ScenarioModel = RegisterModel(Model, "scenario-data")
+NIL_DATA       = Model.NIL_DATA
 -- ========================================================================= --
 RegisterContentType({
   ID = "scenario",
@@ -172,12 +173,13 @@ function UpdateObjectives(self)
           isWeightProgress  = isWeightProgress
         }
 
-        if duration and duration > 0 then
+        -- Hide the timer if the criteria has been complated or failed
+        if duration and duration > 0 and not criteriaFailed and not criteriaCompleted then
           data.hasTimer = true 
           data.startTime = GetTime() - elapsed
-        else 
-          data.hasTimer = nil 
-          data.startTime = nil 
+        else
+          data.hasTimer = NIL_DATA
+          data.startTime = NIL_DATA
         end
 
         bonusObjectivesData[index] = data
