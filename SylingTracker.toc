@@ -8,6 +8,9 @@
 # Embed libs
 # embeds.xml
 
+# Module Type file
+SylingModule.lua
+
 # Utils file
 Utils\__load.xml
 

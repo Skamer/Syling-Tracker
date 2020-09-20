@@ -6,7 +6,7 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Scorpio             "SylingTracker.Core.SLTFontString"                       ""
+Syling              "SylingTracker.Core.SLTFontString"                       ""
 -- ========================================================================= --
 namespace                          "SLT"
 -- ========================================================================= --

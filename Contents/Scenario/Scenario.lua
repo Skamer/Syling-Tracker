@@ -6,15 +6,14 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Scorpio                       "SylingTracker.Scenario"                       ""
+Syling                        "SylingTracker.Scenario"                       ""
 -- ========================================================================= --
 namespace                           "SLT"
 -- ========================================================================= --
--- TODO: Clear the model when the player is no longer in a scenario
--- TODO: Implement the bonus objectives and the timer 
+_Active                           = false 
 -- ========================================================================= --
-RegisterContentType = API.RegisterContentType
-RegisterModel = API.RegisterModel
+RegisterContentType               = API.RegisterContentType
+RegisterModel                     = API.RegisterModel
 -- ========================================================================= --
 IsInScenario                      = C_Scenario.IsInScenario
 GetInfo                           = C_Scenario.GetInfo
@@ -48,11 +47,29 @@ RegisterContentType({
 })
 
 
+function OnActive(self)
+  PLAYER_ENTERING_WORLD()
+end
+
+function OnInactive(self)
+  _ScenarioModel:ClearData()
+end
+
+__ActiveOnEvents__ "PLAYER_ENTERING_WORLD" "SCENARIO_POI_UPDATE" "SCENARIO_UPDATE"
+function ActiveOn(self)
+    -- Prevent the scenario content to be shown in dungeon
+    local inInstance, type = IsInInstance()
+    if inInstance and (type == "party") then 
+      return false 
+    end 
+
+    return IsInScenario()
+end
+
 __SystemEvent__()
 function PLAYER_ENTERING_WORLD()
   _M:UpdateScenario()
   _M:UpdateObjectives()
-
   _ScenarioModel:Flush()
 end
 

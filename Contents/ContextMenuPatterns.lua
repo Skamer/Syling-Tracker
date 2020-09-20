@@ -6,7 +6,7 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Scorpio                 "SylingTracker.ContextMenuPatterns"                  ""
+Syling                 "SylingTracker.ContextMenuPatterns"                  ""
 -- ========================================================================= --
 import                          "SLT"
 -- ========================================================================= --

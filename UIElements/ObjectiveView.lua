@@ -6,7 +6,7 @@
 --                   https://github.com/Skamer/EskaTracker2                  --
 --                                                                           --
 -- ========================================================================= --
-Scorpio               "SylingTracker.UIElements.ObjectiveView"               ""
+Syling                "SylingTracker.UIElements.ObjectiveView"               ""
 -- ========================================================================= --
 namespace                          "SLT"
 -- ========================================================================= --

@@ -6,7 +6,7 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Scorpio               "SylingTracker.Achievements.ContentView"               ""
+Syling                "SylingTracker.Achievements.ContentView"               ""
 -- ========================================================================= --
 namespace                          "SLT"
 -- ========================================================================= --

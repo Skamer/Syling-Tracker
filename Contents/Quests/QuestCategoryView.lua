@@ -6,7 +6,7 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Scorpio            "SylingTracker.Quests.QuestCategoryView"                  ""
+Syling             "SylingTracker.Quests.QuestCategoryView"                  ""
 -- ========================================================================= --
 namespace                          "SLT"
 -- ========================================================================= --

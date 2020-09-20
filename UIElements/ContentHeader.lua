@@ -6,7 +6,7 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Scorpio                 "SylingTracker.UIElements.ContentHeader"             ""
+Syling                  "SylingTracker.UIElements.ContentHeader"             ""
 -- ========================================================================= --
 namespace                           "SLT"
 -- ========================================================================= --

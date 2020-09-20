@@ -6,7 +6,7 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Scorpio                    "SylingTracker.Core.IView"                        ""
+Syling                     "SylingTracker.Core.IView"                        ""
 -- ========================================================================= --
 namespace                          "SLT"
 -- ========================================================================= --
@@ -113,12 +113,14 @@ interface "IView" (function(_ENV)
       local current = GetTime() 
       -- local ratio   = (current - start) / (target - start)
       -- PixelUtil.SetHeight(self, methodFunc(current - start, startHeight, height - startHeight, duration))
-      self:SetHeight(methodFunc(current - start, startHeight, height - startHeight, duration))
+      -- self:SetHeight(Round(methodFunc(current - start, startHeight, height - startHeight, duration)))
+      PixelUtil.SetHeight(self, methodFunc(current - start, startHeight, height - startHeight, duration))
       Next()
     end
 
     if not self.__cancelAnimatingHeight then
-      self:SetHeight(height)
+      -- self:SetHeight(height)
+      PixelUtil.SetHeight(self, height)
     end
     
     self.__cancelAnimatingHeight = nil

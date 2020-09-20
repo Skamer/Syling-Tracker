@@ -6,7 +6,7 @@
 --                   https://github.com/Skamer/EskaTracker2                  --
 --                                                                           --
 -- ========================================================================= --
-Scorpio              "SylingTracker.Achievements.AchievementView"            ""
+Syling                "SylingTracker.Achievements.AchievementView"           ""
 -- ========================================================================= --
 namespace                          "SLT"
 -- ========================================================================= --

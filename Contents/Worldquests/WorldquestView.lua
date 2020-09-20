@@ -6,7 +6,7 @@
 --                   https://github.com/Skamer/EskaTracker2                  --
 --                                                                           --
 -- ========================================================================= --
-Scorpio                "SylingTracker.Worldquests.WorldQuestView"            ""
+Syling                "SylingTracker.Worldquests.WorldQuestView"            ""
 -- ========================================================================= --
 namespace                          "SLT"
 -- ========================================================================= --

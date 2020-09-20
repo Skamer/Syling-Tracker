@@ -6,12 +6,14 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Scorpio                     "SylingTracker.Core.Tracker"                     ""
+Syling                      "SylingTracker.Core.Tracker"                     ""
 -- ========================================================================= --
 namespace                          "SLT"
 -- ========================================================================= --
 local function OnMinMaxValueSet(self)
     local height    = self:GetHeight()
+
+    --print("OnMinMaxValueSet")
  
     if not height then return end
  
@@ -77,6 +79,7 @@ class "Tracker"(function(_ENV)
 
   -- NOTE: Required
   function SetVerticalScroll(self, value)
+    self:GetChild("ScrollFrame"):UpdateScrollChildRect()
     self:GetChild("ScrollFrame"):SetVerticalScroll(value)
   end
   -----------------------------------------------------------------------------
@@ -96,13 +99,17 @@ class "Tracker"(function(_ENV)
   function AddView(self, view)
     self.Views:Insert(view)
     view:SetParent(self:GetChild("ScrollFrame"):GetChild("Content"))
+    -- view:SetParent(UIParent)
 
     -- Register the events
     view.OnSizeChanged = view.OnSizeChanged + self.OnViewSizeChanged
     view.OnOrderChanged = view.OnOrderChanged + self.OnViewOrderChanged
 
-    self:Layout()
-    self:AdjustHeight()
+    self:OnLayout()
+    self:OnAdjustHeight()
+
+    view:InstantApplyStyle()
+    view:ForceAdjustHeight()
   end
 
   __Arguments__ { IView }
@@ -129,7 +136,7 @@ class "Tracker"(function(_ENV)
         view:SetPoint("TOP", previousView, "BOTTOM", 0, -self.Spacing)
         view:SetPoint("LEFT")
         view:SetPoint("RIGHT")
-      else 
+      else
         view:SetPoint("TOP")
         view:SetPoint("LEFT")
         view:SetPoint("RIGHT")
@@ -174,9 +181,11 @@ class "Tracker"(function(_ENV)
       height  = height + view:GetHeight()
     end
     
-    height = height + self.Spacing * math.max(0, count-1)
+    height = height + 0 * math.max(0, count-1)
 
     content:SetHeight(height)
+
+    -- print("Height Tracker", height)
   end 
 
   --- This is helper function will call "OnAdjustHeight".
@@ -224,6 +233,11 @@ class "Tracker"(function(_ENV)
   property "ID" {
     type = Number + String
   }
+
+  property "ContentHeight" {
+    type = Number,
+    default = 1,
+  }
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
   -----------------------------------------------------------------------------
@@ -233,7 +247,8 @@ class "Tracker"(function(_ENV)
     Resizer = Resizer,
     {
       ScrollFrame = {
-        Content = Frame
+        Content = Frame,
+        FixBottom = Frame
       }
     }
   }
@@ -243,6 +258,7 @@ class "Tracker"(function(_ENV)
     scrollFrame:SetClipsChildren(true)
     
     scrollFrame.OnScrollRangeChanged = scrollFrame.OnScrollRangeChanged + function(_, xrange, yrange)
+      --print("OnScrollRangeChanged", xrange, yrange)
       OnScrollRangeChanged(self, xrange, yrange)
     end
 
@@ -268,7 +284,7 @@ class "Tracker"(function(_ENV)
 
     
     self.OnViewOrderChanged = function() self:Layout() end 
-    self.OnViewSizeChanged = function() self:AdjustHeight() end 
+    self.OnViewSizeChanged = function() self:OnAdjustHeight() end 
   end 
 end)
 
@@ -280,7 +296,38 @@ Style.UpdateSkin("Default", {
 
     -- [ScrollFrame] child properties 
     ScrollFrame = {
-      SetAllPoints = true,
+      -- SetAllPoints = true,
+      location = {
+        Anchor("TOP"),
+        Anchor("LEFT"),
+        Anchor("RIGHT"),
+        Anchor("BOTTOM")
+      },
+
+      backdrop = {
+            bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
+            -- edgeFile = [[Interface\Buttons\WHITE8X8]],
+            -- edgeSize = 1
+        },
+        backdropColor = { r = 0, g = 0, b = 1, a = 0},
+
+      Content = {
+        backdrop = {
+            bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
+            -- edgeFile = [[Interface\Buttons\WHITE8X8]],
+            -- edgeSize = 1
+        },
+        backdropColor = { r = 1, g = 0, b = 0, a = 0}
+      },
+
+      FixBottom = {
+        height = 1,
+        location = {
+          Anchor("BOTTOM"),
+          Anchor("BOTTOMLEFT"),
+          Anchor("BOTTOMRIGHT")
+        }
+      }
     },
 
     -- [ScrollBar] child properties
@@ -329,6 +376,8 @@ function OnLoad(self)
   tracker:TrackContentType("tasks")
   tracker:TrackContentType("quests")
   tracker:TrackContentType("world-quests")
+  -- tracker:TrackContentType("test")
+  -- tracker:TrackContentType("testtwo")
 
 end
 

@@ -6,7 +6,7 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Scorpio "SylingTracker.MathUtils" ""
+Syling "SylingTracker.MathUtils" ""
 
 namespace                          "SLT"
 

@@ -6,7 +6,7 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Scorpio               "SylingTracker.UIElements.ProgressBar"                 ""
+Syling                "SylingTracker.UIElements.ProgressBar"                 ""
 -- ========================================================================= --
 namespace                          "SLT"
 -- ========================================================================= --

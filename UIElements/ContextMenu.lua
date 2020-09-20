@@ -6,7 +6,7 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Scorpio                   "SylingTracker.UIElements.ContextMenu"             ""
+Syling                    "SylingTracker.UIElements.ContextMenu"             ""
 -- ========================================================================= --
 namespace                          "SLT"
 -- ========================================================================= --
