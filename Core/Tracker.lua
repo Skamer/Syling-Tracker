@@ -284,7 +284,7 @@ class "Tracker"(function(_ENV)
 
     
     self.OnViewOrderChanged = function() self:Layout() end 
-    self.OnViewSizeChanged = function() self:OnAdjustHeight() end 
+    self.OnViewSizeChanged = function() self:AdjustHeight() end 
   end 
 end)
 
@@ -375,6 +375,7 @@ function OnLoad(self)
   tracker:TrackContentType("bonus-tasks")
   tracker:TrackContentType("tasks")
   tracker:TrackContentType("quests")
+  tracker:TrackContentType("auto-quests")
   tracker:TrackContentType("world-quests")
   -- tracker:TrackContentType("test")
   -- tracker:TrackContentType("testtwo")

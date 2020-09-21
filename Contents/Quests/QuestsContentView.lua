@@ -94,21 +94,11 @@ class "QuestsContentView" (function(_ENV)
   end
 
   function OnRelease(self)
+    -- First, release the children 
     self:ReleaseQuestsList()
 
-    self:ClearAllPoints()
-    self:SetParent()
-    self:Hide()
-    self:CancelAdjustHeight()
-    self:CancelAnimatingHeight()
-    
-    self:SetHeight(1)
-
-    Utils.ResetStyles(self)
-  end
-
-  function OnAcquire(self)
-    self:Show()
+    -- We call the "Parent" OnRelease (see, ContentView)
+    super.OnRelease(self)
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
@@ -124,25 +114,9 @@ class "QuestsContentView" (function(_ENV)
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
   -----------------------------------------------------------------------------
-  -- __Template__{
-  --   Header = ContentHeader
-  -- }
   __Template__{}
   function __ctor(self)
-    -- Important ! We need the frame is instantly styled as this may affect 
-    -- its height.
-    self:InstantApplyStyle()
-
-    -- Important! As the frame ajusts its height depending of its children height
-    -- we need to set its height when contructed for the event "OnSizechanged" of
-    -- its children is triggered.
-    self:SetHeight(1) -- !important
-
-
-    self.OnChildrenSizeChanged = function() self:AdjustHeight() end
-
-
-    self:SetClipsChildren(true)
+    self.OnChildrenSizeChanged = function() self:AdjustHeight(true) end
   end
 end)
 
@@ -161,6 +135,7 @@ Style.UpdateSkin("Default", {
       }
     },
     Content = {
+      backdropColor = { r = 1, g = 0, b = 0, a = 1},
       location = {
         Anchor("TOP", 0, -5, "Header", "BOTTOM"),
         Anchor("LEFT", 5, 0),

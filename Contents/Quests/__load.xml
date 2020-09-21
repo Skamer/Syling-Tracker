@@ -5,4 +5,7 @@
   <Script file="QuestsContentView.lua"/>
   <Script file="QuestModel.lua"/>
   <Script file="Quests.lua"/>
+  <Script file="AutoQuestView.lua"/>
+  <Script file="AutoQuestsContentView.lua"/>
+  <Script file="AutoQuests.lua"/>
 </Ui>
