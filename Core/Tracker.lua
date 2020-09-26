@@ -120,8 +120,10 @@ class "Tracker"(function(_ENV)
     view.OnSizeChanged = view.OnSizeChanged - self.OnViewSizeChanged
     view.OnOrderChanged = view.OnOrderChanged - self.OnViewOrderChanged
 
-    self:Layout()
-    self:AdjustHeight()
+    -- We call an instant layout and adjust height for avoiding a
+    -- flashy behavior when the content has been removed. 
+    self:OnLayout()
+    self:OnAdjustHeight()
 
     -- NOTE: We don't call the "Release" method of view because it will be done by
     -- the content type.
@@ -361,26 +363,69 @@ Style.UpdateSkin("Default", {
 })
 
 
-tracer = nil
+function OnEnable(self)
+  Tracker = Tracker("Tracker #1235")
+  Tracker:SetPoint("CENTER", 600, 0)
+  Tracker:SetParent(UIParent)
+  Tracker.ID = "main"
 
-function OnLoad(self)
-  tracker = Tracker("Tracker #1235")
-  tracker:SetPoint("CENTER", 600, 0)
-  tracker:SetParent(UIParent)
-  tracker.ID = "main"
-
-  tracker:TrackContentType("scenario")
-  tracker:TrackContentType("dungeon")
-  tracker:TrackContentType("achievements")
-  tracker:TrackContentType("bonus-tasks")
-  tracker:TrackContentType("tasks")
-  tracker:TrackContentType("quests")
-  tracker:TrackContentType("auto-quests")
-  tracker:TrackContentType("world-quests")
-  -- tracker:TrackContentType("test")
-  -- tracker:TrackContentType("testtwo")
-
+  -- Tracker:TrackContentType("scenario")
+  -- Tracker:TrackContentType("dungeon")
+  -- Tracker:TrackContentType("achievements")
+  -- Tracker:TrackContentType("bonus-tasks")
+  -- Tracker:TrackContentType("tasks")
+  -- Tracker:TrackContentType("quests")
+  -- Tracker:TrackContentType("auto-quests")
+  -- Tracker:TrackContentType("world-quests")
+  -- Tracker:TrackContentType("keystone")
 end
+
+
+__SystemEvent__()
+__Async__()
+function PLAYER_ENTERING_WORLD(isInitialLogin, isReloadingUi)
+  if isInitialLogin or isReloadingUi then
+    local trackerBottom = Tracker:GetBottom()
+    -- Important ! We have to delay the tracking of content type after an 
+    -- initial and a reloading ui for they getting a valid "GetBottom" is important
+    -- to compute the height of their frame. 
+    -- So we delay until the tracker "GetBottom" returns a no nil value, saying GetBottom
+    -- now return valid value. 
+    while not trackerBottom do 
+      trackerBottom = Tracker:GetBottom()
+      Next()
+    end 
+
+    Tracker:TrackContentType("scenario")
+    Tracker:TrackContentType("dungeon")
+    Tracker:TrackContentType("achievements")
+    Tracker:TrackContentType("bonus-tasks")
+    Tracker:TrackContentType("tasks")
+    Tracker:TrackContentType("quests")
+    Tracker:TrackContentType("auto-quests")
+    Tracker:TrackContentType("world-quests")
+    Tracker:TrackContentType("keystone")
+  end 
+end
+
+-- __SystemEvent__()
+-- function PLAYER_ENTERING_WORLD()
+--   print("PLAYER_ENTERING_WORLD")
+--   Tracker = Tracker("Tracker #1235")
+--   Tracker:SetPoint("CENTER", 600, 0)
+--   Tracker:SetParent(UIParent)
+--   Tracker.ID = "main"
+
+--   Tracker:TrackContentType("scenario")
+--   Tracker:TrackContentType("dungeon")
+--   Tracker:TrackContentType("achievements")
+--   Tracker:TrackContentType("bonus-tasks")
+--   Tracker:TrackContentType("tasks")
+--   Tracker:TrackContentType("quests")
+--   Tracker:TrackContentType("auto-quests")
+--   Tracker:TrackContentType("world-quests")
+--   Tracker:TrackContentType("keystone")
+-- end
 
 __SlashCmd__ "tuntrack"
 function TestUnTrack(self)

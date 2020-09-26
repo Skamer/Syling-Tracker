@@ -7,4 +7,6 @@
   <Include file="Achievements\__load.xml"/>
   <Include file="Scenario\__load.xml"/>
   <Include file="Dungeon\__load.xml"/>
+  <Include file="Keystone\__load.xml"/>
+  <Include file="Test\__load.xml"/>
 </Ui>
