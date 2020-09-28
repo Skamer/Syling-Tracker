@@ -14,10 +14,11 @@ namespace                          "SLT"
 -- they are taken as account for their parent height
 IterateFrameChildren  = Utils.IterateFrameChildren
 -- ========================================================================= --
+ValidateFlags         = System.Toolset.validateflags
 ResetStyles           = Utils.ResetStyles
 -- ========================================================================= --
 GameTooltip           = GameTooltip
-
+-- ========================================================================= --
 __Recyclable__ "SylingTracker_KeyStoneAffix%d"
 class "KeystoneAffix" (function(_ENV)
   inherit "Frame"
@@ -25,7 +26,6 @@ class "KeystoneAffix" (function(_ENV)
   --                               Handlers                                  --
   -----------------------------------------------------------------------------
   local function OnSetTexture(self, new)
-    print("OnSetTexture", new)
     Style[self].Icon.fileID = new
   end
 
@@ -85,7 +85,6 @@ class "KeystoneAffixes" (function(_ENV)
       end 
     end
         
-
     -- Update the anchor
     local previousAffix
     local width = 0
@@ -106,11 +105,11 @@ class "KeystoneAffixes" (function(_ENV)
     
     self:SetWidth(width + math.max(0, new-1) * self.AffixSpacing)
 
-
-
     self:ReleaseUnusedAffixes(new)
   end
-
+  -----------------------------------------------------------------------------
+  --                               Methods                                   --
+  -----------------------------------------------------------------------------
   function AcquireAffix(self, index)
     local affix = self.affixesCache[index]
     if not affix then 
@@ -131,7 +130,6 @@ class "KeystoneAffixes" (function(_ENV)
       end
     end 
   end 
-
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
@@ -149,76 +147,62 @@ class "KeystoneAffixes" (function(_ENV)
     type = Number,
     default = 5,
   }
-  
+  -----------------------------------------------------------------------------
+  --                            Constructors                                 --
+  -----------------------------------------------------------------------------
   function __ctor(self)
     self:InstantApplyStyle()
 
     self.affixesCache = setmetatable({}, { __mode = "v"})
   end
-
 end)
 
 
-
--- -- class "KeystoneAffixesView" (function(_ENV)
--- --   inherit "Frame" extend "IView"
-
--- --   function OnViewUpdate(self, data)
--- --     local affixeIndex = 0
--- --     for _, affixData in pairs(data) do 
--- --       affixeIndex = affixeIndex + 1
-
--- --       local affix = self:AcquireAffix(affixeIndex)
-
--- --       -- if affixeIndex > 1 then 
-
-
-
--- --     end 
--- --   end
-
--- --   function AcquireAffix(self, id)
-
--- --   end
-
--- --   function ReleaseIconBadge(self, id)
-
--- --   end
-
--- --   function __ctor(self)
-
-
--- --   end
-
--- -- end)
-
--- class "KeystoneTimer" (function(_ENV)
---   inherit "Frame"
--- end)
-
-
--- timer chromietime-32x32
--- unitframeicon-chromietime
 class "KeystoneTimer" (function(_ENV)
   inherit "Frame" extend "ITimer"
   -----------------------------------------------------------------------------
+  --                               Handlers                                  --
+  -----------------------------------------------------------------------------  
+  local function OnTimeLimitChanged(self, new, old)
+      local timeLimit2Key = new * 0.8
+      local timeLimit3Key = new * 0.6
+
+      local timerText         = self:GetChild("TimerText")
+      local timeLimitPlus2FS  = self:GetChild("TimeLimitPlus2")
+      local timeLimitPlus3FS  = self:GetChild("TimeLimitPlus3")
+
+
+      if self.ShowRemainingTime then 
+        Style[timerText].text = HIGHLIGHT_FONT_COLOR:WrapTextInColorCode(SecondsToClock(self.TimeLimit))
+      else 
+        Style[timerText].text = string.format("%s / %s", 
+        HIGHLIGHT_FONT_COLOR:WrapTextInColorCode(SecondsToClock(0)), 
+        SecondsToClock(self.TimeLimit))
+      end
+
+      Style[timeLimitPlus2FS].text = string.format("[+2] %s", SecondsToClock(timeLimit2Key))
+      Style[timeLimitPlus3FS].text = string.format("[+3] %s", SecondsToClock(timeLimit3Key))
+  end
+
+  local function OnPlusFailedChanged(self, new, old, prop)
+    local color
+    if new then 
+      color = Color(1, 0, 0)
+    else 
+      color = Color(38/255, 127/255, 0)
+    end
+
+    if prop == "Plus2Failed" then 
+      local timeLimitPlus2FS = self:GetChild("TimeLimitPlus2")
+      Style[timeLimitPlus2FS].textColor = color 
+    elseif prop == "Plus3Failed" then 
+      local timeLimitPlus3FS = self:GetChild("TimeLimitPlus3")
+      Style[timeLimitPlus3FS].textColor = color 
+    end 
+  end
+  -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
-  -- function OnTimerUpdate(self, elapsedTime)
-  --   local timeLeft = math.max(0, self.TimeLimit - elapsedTime)
-  --   local timerBar = self:GetChild("TimerBar")
-  --   local timerText = self:GetChild("TimerText")
-  --   timerBar:SetValue(timeLeft)
-
-  --   if timeLeft == 0 then 
-  --     timerText:SetTextColor(RED_FONT_COLOR:GetRGB())
-  --   else
-  --     timerText:SetTextColor(HIGHLIGHT_FONT_COLOR:GetRGB())
-  --   end
-
-  --   Style[timerText].text = SecondsToClock(timeLeft)
-  -- end
-
   function OnTimerUpdate(self, elapsedTime)
     local timerBar    = self:GetChild("TimerBar")
     local timerText   = self:GetChild("TimerText")
@@ -242,17 +226,34 @@ class "KeystoneTimer" (function(_ENV)
 
     timerBar:SetMinMaxValues(0, self.TimeLimit)
     timerBar:SetValue(timeLeft)
+
+    self.Plus2Failed = elapsedTime > (self.TimeLimit * 0.8)
+    self.Plus3Failed = elapsedTime > (self.TimeLimit * 0.6)
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
   property "TimeLimit" {
-    type = Number
+    type = Number,
+    default = 0,
+    handler = OnTimeLimitChanged
   }
-
+  
   property "ShowRemainingTime" {
     type = Boolean,
     default = false 
+  }
+
+  property "Plus2Failed" {
+    type = Boolean,
+    default = false,
+    handler = OnPlusFailedChanged
+  }
+
+  property "Plus3Failed" {
+    type = Boolean,
+    default = false,
+    handler = OnPlusFailedChanged
   }
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
@@ -260,19 +261,13 @@ class "KeystoneTimer" (function(_ENV)
   __Template__{
     TimerText = SLTFontString,
     TimerBar = ProgressBar,
+    TimeLimitPlus2 = SLTFontString,
+    TimeLimitPlus3 = SLTFontString
   }
   function __ctor(self)
   end
 
 end)
-
--- baseTime = ElapsedTime
--- timeSincdeBase = 0
--- OnUpdate  -> self.timeSinceBase = self.timeSinceBase + elapsed 
---              -> self.update(floor(self.baseTime + self.timeSinceBase))
---
-
-
 
 __Recyclable__ "SylingTracker_KeystoneContentView%d"
 class "KeystoneContentView" (function(_ENV)
@@ -301,10 +296,11 @@ class "KeystoneContentView" (function(_ENV)
     -- Get the elements
     local contentFrame    = self:GetChild("Content")
     local headerFrame     = self:GetChild("Header")
+    local topInfoFrame    = contentFrame:GetChild("TopInfo")
     local dungeonNameFS   = headerFrame:GetChild("DungeonName")
-    local levelFS         = contentFrame:GetChild("Level")
-    local deathCountFrame = contentFrame:GetChild("DeathCount")
-    local affixesFrame    = contentFrame:GetChild("Affixes")
+    local levelFS         = topInfoFrame:GetChild("Level")
+    local deathCountFrame = topInfoFrame:GetChild("DeathCount")
+    local affixesFrame    = topInfoFrame:GetChild("Affixes")
     local dungeonIcon     = contentFrame:GetChild("DungeonIcon")
     local timerFrame      = contentFrame:GetChild("Timer")
 
@@ -314,7 +310,7 @@ class "KeystoneContentView" (function(_ENV)
     -- Determine the flags 
     local flags = Flags.NONE 
 
-    if keystoneData.Objectives then 
+    if keystoneData.objectives then 
       flags = flags + Flags.HAS_OBJECTIVES
     end
 
@@ -358,7 +354,12 @@ class "KeystoneContentView" (function(_ENV)
       end
     end
 
-    -- UPDATE FROM DATA PART
+    -- Update the elements with data
+
+    -- Update dungeon Name 
+    if dungeonNameFS then 
+      Style[dungeonNameFS].text = keystoneData.name
+    end 
 
     -- Update Level
     local level = keystoneData.level 
@@ -367,12 +368,24 @@ class "KeystoneContentView" (function(_ENV)
     end 
 
     -- Update Death
-    local death = keystoneData.death 
+    local death = keystoneData.death
+    local timeLost = keystoneData.timeLost or 0
     if death and death > 0 then 
       Style[deathCountFrame].visible = true 
-      Style[deathCountFrame].Label.text = tostring(death)
+      Style[deathCountFrame].TextFS.text = tostring(death)
+
+      deathCountFrame.OnEnter = function()
+        GameTooltip:SetOwner(deathCountFrame, "ANCHOR_TOPRIGHT")
+        GameTooltip:SetText(CHALLENGE_MODE_DEATH_COUNT_TITLE:format(death), 1, 1, 1)
+        GameTooltip:AddLine(CHALLENGE_MODE_DEATH_COUNT_DESCRIPTION:format(GetTimeStringFromSeconds(timeLost, false, true)))
+        GameTooltip:Show()
+      end
+
+      deathCountFrame.OnLeave = function() GameTooltip:Hide() end 
     else
-      Style[deathCountFrame].visible = false 
+      Style[deathCountFrame].visible = false
+      deathCountFrame.OnEnter = nil 
+      deathCountFrame.OnLeave = nil
     end 
 
     -- Update Affixes
@@ -395,67 +408,26 @@ class "KeystoneContentView" (function(_ENV)
 
     -- Update Timer
     local timeLimit = keystoneData.timeLimit 
-    local elapsed = keystoneData.elapsed
+    local startTime = keystoneData.startTime
 
-    if timeLimit and elapsed then 
-      timerFrame.BaseTime = elapsed
+    if timeLimit then 
       timerFrame.TimeLimit = timeLimit
-      timerFrame:StartTimer()
     end
+
+    if startTime then
+      timerFrame.StartTime = startTime
+      timerFrame:Start()
+    end
+
+    -- Update Objectives if exists 
+    local objectivesData = keystoneData.objectives
+    if objectivesData then 
+      local objectivesView = self:AcquireObjectives()
+      objectivesView:UpdateView(objectivesData)
+    end 
 
     self.Flags = flags 
     self.State = state 
-
-    -- local content = self:GetChild("Content")
-    -- local dungeonNameFS = self:GetChild("Header"):GetChild("DungeonName")
-    -- if dungeonNameFS then 
-    --   Style[dungeonNameFS].text = keystoneData.name
-    -- end 
-
-
-    -- local level = keystoneData.level 
-    -- if level then 
-    --   local levelFS = content:GetChild("Level")
-    --   Style[levelFS].text = CHALLENGE_MODE_POWER_LEVEL:format(level)
-    -- end
-
-    -- local death = keystoneData.death
-    -- local deathCountFrame = content:GetChild("DeathCount")
-    -- if death and death > 0 then
-    --   Style[deathCountFrame].visible = true 
-    --   Style[deathCountFrame].Label.text = tostring(death) 
-    -- else 
-    --   Style[deathCountFrame].visible = false
-    -- end
-
-    -- -- Update Affixes
-    -- local affixes = keystoneData.affixes 
-    -- local numAffixes = #affixes
-    -- local affixesFrame = content:GetChild("Affixes")
-    -- affixesFrame.AffixesCount = numAffixes
-    -- for affixIndex, affixData in ipairs(affixes) do 
-    --     local affixFrame = affixesFrame:AcquireAffix(affixIndex)
-    --     affixFrame.Name = affixData.name 
-    --     affixFrame.Texture = affixData.texture 
-    --     affixFrame.Desc = affixData.desc
-    -- end
-
-    -- -- Update Dungeon Icon
-    -- local dungeonIcon = content:GetChild("DungeonIcon")
-    -- if keystoneData.texture then
-    --   Style[dungeonIcon].Icon.fileID = keystoneData.texture
-    -- end
-
-    -- -- Update Timer
-    -- local timeLimit = keystoneData.timeLimit 
-    -- local elapsed = keystoneData.elapsed
-
-    -- if timeLimit and elapsed then 
-    --   local keystoneTimer = content:GetChild("Timer")
-    --   keystoneTimer.BaseTime = elapsed
-    --   keystoneTimer.TimeLimit = timeLimit
-    --   keystoneTimer:StartTimer()
-    -- end
   end
 
   function AcquireObjectives(self)
@@ -470,6 +442,7 @@ class "KeystoneContentView" (function(_ENV)
 
       objectives:SetParent(content)
       objectives:SetName("Objectives")
+      objectives:InstantApplyStyle()
 
       objectives.OnSizeChanged = objectives.OnSizeChanged + self.OnObjectivesSizeChanged
 
@@ -499,17 +472,25 @@ class "KeystoneContentView" (function(_ENV)
     end
   end
 
+  function OnRelease(self)
+    -- First, release the children
+    self:ReleaseObjectives()
 
+    -- Reset the timer 
+    local timer =self:GetChild("Content"):GetChild("Timer")
+    timer:Stop()
+    timer.TimeLimit = nil 
+    timer.ShowRemainingTime = nil 
+    timer.Plus2Failed = nil 
+    timer.Plus3Failed = nil
 
-  -- __Async__()
-  -- function OnAdjustHeight(self, duration)
-  --   -- Next()
-  --   -- Next()
-  --   -- Next()
-  --   -- Next()
+    -- We call the "Parent" onRelease (see, ContentView)
+    super.OnRelease(self)
 
-  --   super.OnAdjustHeight(self, duration)
-  -- end
+    -- Reset the class properties
+    self.Flags = nil
+    self.State = nil
+  end 
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
@@ -545,23 +526,33 @@ class "KeystoneContentView" (function(_ENV)
         DungeonName = SLTFontString
       },
       Content = {
-        Level       = SLTFontString,
-        Affixes     = KeystoneAffixes,
-        DeathCount  = Badge,
+        TopInfo     = Frame, 
         DungeonIcon = IconBadge,
-        Timer       = KeystoneTimer
+        Timer       = KeystoneTimer,
+        {
+          TopInfo = {
+            Level       = SLTFontString,
+            Affixes     = KeystoneAffixes,
+            DeathCount  = Frame,
+            {
+              DeathCount = {
+                IconTex  = Texture,
+                TextFS   = SLTFontString
+              }
+            }
+          }
+        }
       }
     }
   }
-  function __ctor(self) end
+  function __ctor(self)
+    self.OnObjectivesSizeChanged = function() self:AdjustHeight(true) end
+  end
 end)
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
-  -- [KeystoneAffixes] = {
-
-  -- },
   [KeystoneAffix] = {
     width   = 24,
     height  = 24,
@@ -573,12 +564,12 @@ Style.UpdateSkin("Default", {
   },
 
   [KeystoneTimer] = {
-    height = 60,
+    height = 64,
 
     TimerText = {
       height = 24,
       textColor = Color(1, 1, 1),
-      sharedMediaFont = FontType("PT Sans Narrow", 22),
+      sharedMediaFont = FontType("PT Sans Narrow Bold", 21),
       location = {
         Anchor("TOP"),
         Anchor("LEFT"),
@@ -592,6 +583,25 @@ Style.UpdateSkin("Default", {
         Anchor("TOP", 0, -2, "TimerText", "BOTTOM"),
         Anchor("LEFT", 10, 0),
         Anchor("RIGHT", -10, 0)
+      }
+    },
+
+    TimeLimitPlus2 = {
+      height = 16,
+      textColor = Color(38/255, 127/255, 0),
+      sharedMediaFont = FontType("PT Sans Narrow Bold", 14),
+      location = {
+        Anchor("TOPRIGHT", 0, -5, "TimerBar", "BOTTOM"),
+        Anchor("LEFT", 0, 0),
+      }
+    },
+    TimeLimitPlus3 = {
+      height = 16,
+      textColor = Color(38/255, 127/255, 0),
+      sharedMediaFont = FontType("PT Sans Narrow Bold", 14),
+      location = {
+        Anchor("TOPLEFT", 0, -5, "TimerBar", "BOTTOM"),
+        Anchor("RIGHT", 0, 0),
       }
     }
   },
@@ -630,56 +640,95 @@ Style.UpdateSkin("Default", {
       },
       backdropColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
 
-      Level = {
-        height = 24,
-        sharedMediaFont = FontType("PT Sans Narrow Bold", 13),
-        textTransform   = "UPPERCASE",
+      TopInfo = {
+        height = 28,
+        backdrop = { 
+          bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
+        },
+        backdropColor = { r = 0.1, g = 0.1, b = 0.1, a = 0.7},
         location = {
           Anchor("TOP"),
-          Anchor("LEFT", 5, 0),
-        }
-      },
-
-      Affixes = {
-        height = 24,
-        location = {
-          Anchor("TOP", 0, -3)
-        }
-      },
-
-      DeathCount = {
-        height = 24,
-        width = 40,
-        location = {
-          Anchor("TOP"),
-          Anchor("RIGHT", -5, 0)
+          Anchor("LEFT"),
+          Anchor("RIGHT")
         },
 
-        Label = {
-          text = "14"
+        Level = {
+          height = 24,
+          sharedMediaFont = FontType("PT Sans Narrow Bold", 13),
+          textTransform   = "UPPERCASE",
+          location = {
+            Anchor("TOP"),
+            Anchor("LEFT", 5, 0),
+          }
         },
 
-        Icon = {
-          height = 14,
-          width  = 14,
-          atlas = AtlasType("poi-graveyard-neutral", true)
-        }
+        Affixes = {
+          height = 28,
+          location = {
+            Anchor("TOP", 0, -2)
+          }
+        },
+
+        DeathCount = {
+          height = 24,
+          width = 38,
+          location = {
+            Anchor("TOP"),
+            Anchor("RIGHT", -5, 0),
+          },
+
+          IconTex = {
+            atlas = AtlasType("poi-graveyard-neutral", true),
+            location = {
+              Anchor("LEFT")
+            }
+          },
+
+          TextFS = {
+            sharedMediaFont = FontType("PT Sans Caption Bold", 10),
+            shadowOffset = { x = 0.5, y = 0},
+            shadowColor = Color(0, 0, 0, 1),
+            justifyH = "LEFT",
+            
+            location = {
+              Anchor("TOP"),
+              Anchor("LEFT", 5, 0, "IconTex", "RIGHT"),
+              Anchor("RIGHT"),
+              Anchor("BOTTOM")              
+            }
+          }
+        },
       },
 
       DungeonIcon = {
         width = 64,
         height = 64,
         location = {
-          Anchor("TOP", 0, -5, "Level", "BOTTOM"),
+          Anchor("TOP", 0, -5, "TopInfo", "BOTTOM"),
           Anchor("LEFT", 5, 0)
         }
       },
 
       Timer = {
         location = {
-          Anchor("TOP", 0, 0, "Affixes", "BOTTOM"),
-          Anchor("LEFT", 0, 0, "DungeonIcon", "RIGHT"),
-          Anchor("RIGHT")
+          Anchor("TOP", 0, -5, "TopInfo", "BOTTOM"),
+          Anchor("LEFT", 5, 0, "DungeonIcon", "RIGHT"),
+          Anchor("RIGHT", -5, 0)
+        }
+      }
+    },
+
+    FlagsStyles = {
+      [KeystoneContentView.Flags.HAS_OBJECTIVES] = {
+        Content = {
+          Objectives = {
+            spacing = 5,
+            location = {
+              Anchor("TOP", 0, -10, "DungeonIcon", "BOTTOM"),
+              Anchor("LEFT", 5, 0),
+              Anchor("RIGHT", -5, 0)
+            }
+          }
         }
       }
     }

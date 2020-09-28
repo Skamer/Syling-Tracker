@@ -14,6 +14,7 @@ _Active                           = false
 -- ========================================================================= --
 RegisterContentType               = API.RegisterContentType
 RegisterModel                     = API.RegisterModel
+TruncateDecimal                   = Utils.Math.TruncateDecimal
 -- ========================================================================= --
 GetPowerLevelDamageHealthMod      = C_ChallengeMode.GetPowerLevelDamageHealthMod
 GetActiveKeystoneInfo             = C_ChallengeMode.GetActiveKeystoneInfo
@@ -61,10 +62,21 @@ end
 function OnInactive(self)
   _KeystoneModel:ClearData()
 end
+-- ========================================================================= --
+-- Helper function for getting the enemy forces percentage
+local function GetPercentageString(current, total)
+  local decimal = 2
 
--- function OnEnable(self)
---   self:LoadFixtures()
--- end
+  if decimal == 0 then
+    return format("%i%%", math.floor(current/total*100))
+  elseif decimal == 1 then
+    return format("%.1f%%", TruncateDecimal(current/total*100, 1))
+  elseif decimal == 2 then
+    return format("%.2f%%", TruncateDecimal(current/total*100, 2))
+  end
+
+  return format("%i", current/total*100)
+end
 
 __SystemEvent__ "SCENARIO_CRITERIA_UPDATE" "CRITERIA_UPDATE" "SCENARIO_UPDATE"
 function UpdateObjectives()
@@ -90,7 +102,8 @@ function UpdateObjectives()
       data.progress = quantity
       data.minProgress = 0
       data.maxProgress = totalQuantity
-      data.progressText = string.format("%i/%i", quantity, totalQuantity)
+      -- data.progressText = string.format("%i/%i", quantity, totalQuantity)
+      data.progressText = format("%i/%i (%s)", quantity, totalQuantity, GetPercentageString(quantity, totalQuantity))
     else 
       data.hasProgressBar = nil 
     end
@@ -115,17 +128,28 @@ function CHALLENGE_MODE_DEATH_COUNT_UPDATED()
   _KeystoneModel:Flush()
 end
 
-
+__Async__()
 function UpdateTimer(self)
-  local _, elapsed = GetWorldElapsedTime(1)
-  _KeystoneModel:AddData({
-    elapsed = elapsed
-  }, "keystone")
+  local _, elapsed, type = GetWorldElapsedTime(1)
+  if type == LE_WORLD_ELAPSED_TIMER_TYPE_CHALLENGE_MODE then 
+    local nextElapsed = elapsed + 1
+    local nextTime
+    
+    while elapsed ~= nextElapsed do
+      _, elapsed = GetWorldElapsedTime(1)
+      nextTime   = GetTime()
+      
+      Next()
+    end 
+
+    _KeystoneModel:AddData({ startTime = nextTime - elapsed}, "keystone")
+    _KeystoneModel:Flush()
+  end
 end
 
 __SystemEvent__()
 function WORLD_STATE_TIMER_START(timerID)
-  self:UpdateTimer()
+  _M:UpdateTimer()
   _KeystoneModel:Flush()
 end
 
@@ -155,7 +179,6 @@ end
 
 function UpdateInstanceMap(self)
   local mapID = GetActiveChallengeMapID()
-  print("ActivatedByEvent", self:IsActiveByEvent("PLAYER_ENTERING_WORLD"))
   if mapID then
     local _, _, timeLimit, texture = GetMapInfo(mapID)
     _KeystoneModel:AddData({
@@ -172,12 +195,17 @@ function UpdateDeathCount()
     death = death,
     timeLost = timeLost,
   }, "keystone")
-
+end
+-- ========================================================================= --
+-- Debug Utils Tools
+-- ========================================================================= --
+if ViragDevTool_AddData then 
+  ViragDevTool_AddData(_KeystoneModel, "SLT Keystone Model")
 end
 
-
-
-
+-----------------------------------------------------------------------------
+-- Fixture DATA  --
+-----------------------------------------------------------------------------
 -- function LoadFixtures(self)
 --   local affixesData = {}
 --   for i = 1, 4 do 
@@ -219,9 +247,3 @@ end
 --   _KeystoneModel:AddData(data, "keystone")
 --   _KeystoneModel:Flush()
 -- end
--- ========================================================================= --
--- Debug Utils Tools
--- ========================================================================= --
-if ViragDevTool_AddData then 
-  ViragDevTool_AddData(_KeystoneModel, "Keystone Model")
-end

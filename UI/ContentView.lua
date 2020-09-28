@@ -6,7 +6,7 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling                  "SylingTracker.UIElements.ContentView"               ""
+Syling                      "SylingTracker.UI.ContentView"                   ""
 -- ========================================================================= --
 namespace                           "SLT"
 -- ========================================================================= --
@@ -21,12 +21,13 @@ class "ContentView" (function(_ENV)
   -----------------------------------------------------------------------------
   --                               Handlers                                  --
   -----------------------------------------------------------------------------
+  
   __Async__()
   function OnAdjustHeight(self, useAnimation)
     -- First, we need to compute the content height
     local content = self:GetChild("Content")
     local contentMaxOuterBottom
-    for childName, child in IterateFrameChildren(content) do 
+    for childName, child in IterateFrameChildren(content) do
       local outerBottom = child:GetBottom()
       if outerBottom then 
         if not contentMaxOuterBottom or contentMaxOuterBottom > outerBottom then 
@@ -35,21 +36,18 @@ class "ContentView" (function(_ENV)
       end 
     end
 
-    if contentMaxOuterBottom then 
+    if contentMaxOuterBottom then
       local computeHeight = content:GetTop() - contentMaxOuterBottom + self.ContentPaddingBottom
       content:SetHeight(computeHeight)
+      -- We need to wait the next "OnUpdate" for the "Self" frame take as 
+      -- account the new content height has been computed.
+      Next()
     end
 
-    -- We need to wait the next "OnUpdate" for the "Self" frame take as 
-    -- account the new content height has been computed.
-    Next()
-
-
-    -- And to finish, we compute the "Self" height
     local maxOuterBottom 
     for childName, child in IterateFrameChildren(self) do
       if child then 
-        local outerBottom = child:GetBottom() 
+        local outerBottom = child:GetBottom()
         if outerBottom then 
           if not maxOuterBottom or maxOuterBottom > outerBottom then 
             maxOuterBottom = outerBottom
@@ -57,7 +55,7 @@ class "ContentView" (function(_ENV)
         end
       end
     end
-    
+
     if maxOuterBottom then
       local computeHeight = self:GetTop() - maxOuterBottom + self.PaddingBottom
       if useAnimation then 
@@ -65,15 +63,19 @@ class "ContentView" (function(_ENV)
       else 
         self:SetHeight(computeHeight)
       end
+
+      if Class.IsObjectType(self, KeystoneContentView) then 
+        print("HEIGHT", computeHeight, useAnimation)
+      end 
     end
   end
 
   function OnRelease(self)
     local content = self:GetChild("Content")
 
+    self:Hide()
     self:ClearAllPoints()
     self:SetParent()
-    self:Hide()
 
     -- "CancelAdjustHeight" and "CancelAnimatingHeight" wiil cancel the pending
     -- computing stuff for height, so they not prevent "SetHeight" here doing 

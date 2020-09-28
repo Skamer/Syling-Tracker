@@ -6,7 +6,7 @@
 --                   https://github.com/Skamer/EskaTracker2                  --
 --                                                                           --
 -- ========================================================================= --
-Syling                "SylingTracker.UIElements.ObjectiveView"               ""
+Syling                        "SylingTracker.UI.ObjectiveView"               ""
 -- ========================================================================= --
 namespace                          "SLT"
 -- ========================================================================= --
@@ -205,7 +205,7 @@ class "ObjectiveView" (function(_ENV)
     if data.hasProgressBar then 
       local progressBar = self:AcquireProgressBar()
       progressBar:SetMinMaxValues(data.minProgress or 0, data.maxProgress)
-      progressBar:SetValue(data.progress)
+      progressBar:SetValue(data.progress or 0)
       
       Style[progressBar].Text.text = data.progressText or ""
     end

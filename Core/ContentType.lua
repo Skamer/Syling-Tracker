@@ -14,6 +14,9 @@ namespace                          "SLT"
 --- If the content type isn't enabled, this will remove the views related to it
 --  from trackers. 
 class "ContentType" (function(_ENV)
+  -----------------------------------------------------------------------------
+  --                               Handlers                                  --
+  -----------------------------------------------------------------------------
   local function HandleEnabledChange(self, new)
     if new then 
       for tracker in pairs(self.Trackers) do 
@@ -31,33 +34,22 @@ class "ContentType" (function(_ENV)
       end 
     end 
   end
-  
+  -----------------------------------------------------------------------------
+  --                               Methods                                   --
+  -----------------------------------------------------------------------------
   __Arguments__ { Tracker }
   function RegisterTracker(self, tracker)
     if self.Views[tracker] then 
       return 
     end
 
-    print("RegisterTracker", tracker, tracker.ID)
-
-    local view = self.ViewClass.Acquire()
-
-    -- Check if the tracker has overrided the order for this content type
-    -- Profiles.PrepareDatabase()
-    -- if Database.SelectTable(false, "trackers", self.id, "contents", contentID) then 
-    --   view.order = Database.GetValue("order")
-    -- end
-    view.Order = self.Order
-
-    -- Add it to tracker 
-    tracker:AddView(view)
-
-    -- Add it to model, it will refresh the date to new view
-    self.Model:AddView(view)
-
     -- Register the tracker and its view
-    self.Views[tracker] = view 
     self.Trackers[tracker] = true
+
+    -- IMPORTANT ! Prepare the view only if the content type is enable or relevant
+    if self.Enabled then 
+      self:PrepareViewForTracker(tracker)
+    end
   end
 
   __Arguments__ { Tracker }
@@ -87,6 +79,8 @@ class "ContentType" (function(_ENV)
     --   view.order = Database.GetValue("order")
     -- end
 
+    view.Order = self.Order
+
     -- Add it to tracker 
     tracker:AddView(view)
 
@@ -95,8 +89,9 @@ class "ContentType" (function(_ENV)
 
     self.Views[tracker] = view
   end
-
-
+  -----------------------------------------------------------------------------
+  --                               Properties                                --
+  -----------------------------------------------------------------------------
   --- The ID of content type (e.g, "quests")
   property "ID" { 
     type = String + Number
@@ -166,7 +161,6 @@ class "ContentType" (function(_ENV)
     -- Put a handler
   }
 end)
-
 -------------------------------------------------------------------------------
 -- Enhancing the API                                                         --
 -------------------------------------------------------------------------------

@@ -76,5 +76,14 @@ class "Utils" (function(_ENV)
         return c / 2 * 1.0005 * (-pow(2, -10 * t) + 2) + b
       end  
     end
+
+  
+    __Arguments__ { Number, Variable.Optional(Number, 0) }
+    __Static__() function TruncateDecimal(number, decimal)
+      local tenPower = math.pow(10, decimal)
+
+      return math.floor(number * tenPower)/ tenPower
+    end
+    
   end)
 end)

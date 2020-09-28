@@ -107,9 +107,6 @@ class "Tracker"(function(_ENV)
 
     self:OnLayout()
     self:OnAdjustHeight()
-
-    view:InstantApplyStyle()
-    view:ForceAdjustHeight()
   end
 
   __Arguments__ { IView }

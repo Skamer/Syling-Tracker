@@ -6,7 +6,7 @@
 --                   https://github.com/Skamer/EskaTracker2                  --
 --                                                                           --
 -- ========================================================================= --
-Syling                "SylingTracker.UIElements.ITimer"               ""
+Syling                      "SylingTracker.UI.ITimer"                        ""
 -- ========================================================================= --
 namespace                          "SLT"
 -- ========================================================================= --
@@ -15,26 +15,25 @@ interface "ITimer" (function(_ENV)
   -----------------------------------------------------------------------------
   --                               Handlers                                  --
   -----------------------------------------------------------------------------
-  local function OnUpdateHandler(self, elapsed)
-    self.TimeSinceBase = self.TimeSinceBase + elapsed
-    self:OnTimerUpdate(math.floor(self.BaseTime + self.TimeSinceBase))
+  local function OnUpdateHandler(self)
+    self:OnTimerUpdate(GetTime() - self.StartTime)
   end
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
   function OnTimerUpdate(self, elapsedTime) end
 
-  function StartTimer(self)
+  function Start(self)
     self.OnUpdate = self.OnUpdate + OnUpdateHandler
   end
 
-  function StopTimer(self)
+  function Stop(self)
     self.OnUpdate = self.OnUpdate - OnUpdateHandler
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
-  property "BaseTime" {
+  property "StartTime" {
     type = Number
   }
 
@@ -42,6 +41,4 @@ interface "ITimer" (function(_ENV)
     type = Number,
     default = 0
   }
-
-  property "Update"
 end)

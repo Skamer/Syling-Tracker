@@ -71,6 +71,32 @@ interface "IView" (function(_ENV)
   end
 
 
+  -- __Async__()
+  -- function AdjustHeight(self, useAnimation)
+  --   self._useAnimation = useAnimation
+  --   if self._pendingAjustHeight then 
+  --     return 
+  --   end
+    
+  --   self._pendingAdjustHeight = true 
+
+  --   Delay(0.1)
+
+  --   local aborted = false 
+  --   if self._cancelAdjustHeight then 
+  --     aborted = self._cancelAdjustHeight
+  --   end
+
+  --   if not aborted then 
+  --     self:OnAdjustHeight(self._useAnimation)
+  --   end
+
+  --   self._pendingAdjustHeight = nil
+  --   self._cancelAdjustHeight = nil
+  --   self._useAnimation = nil
+  -- end
+
+
   function ForceAdjustHeight(self, useAnimation)
     self:CancelAdjustHeight()
     self:CancelAnimatingHeight()
@@ -87,7 +113,7 @@ interface "IView" (function(_ENV)
       Next()
     end
 
-    local duration = self.AnimationInfo and self.AnimationInfo.duration or 0.75
+    local duration = self.AnimationInfo and self.AnimationInfo.duration or 1
     local method = self.AnimationInfo and self.AnimationInfo.method or "Linear"
     local start = GetTime()
     local target = start + duration
@@ -119,8 +145,8 @@ interface "IView" (function(_ENV)
     end
 
     if not self.__cancelAnimatingHeight then
-      -- self:SetHeight(height)
-      PixelUtil.SetHeight(self, height)
+      self:SetHeight(height)
+      -- PixelUtil.SetHeight(self, height)
     end
     
     self.__cancelAnimatingHeight = nil
