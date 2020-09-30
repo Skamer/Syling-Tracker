@@ -1,6 +1,6 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
-  <Script file="WorldquestView.lua"/>
-  <Script file="WorldquestsContentView.lua"/>
-  <Script file="Worldquests.lua"/>
+  <Script file="WorldQuestView.lua"/>
+  <Script file="WorldQuestsContentView.lua"/>
+  <Script file="WorldQuests.lua"/>
 </Ui>

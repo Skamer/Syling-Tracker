@@ -6,17 +6,16 @@
 --                   https://github.com/Skamer/EskaTracker2                  --
 --                                                                           --
 -- ========================================================================= --
-Syling                "SylingTracker.Worldquests.WorldQuestView"            ""
+Syling                "SylingTracker.WorldQuests.WorldQuestView"             ""
 -- ========================================================================= --
 namespace                          "SLT"
 -- ========================================================================= --
 -- Iterator helper for ignoring the children are used for backdrop, and avoiding
 -- they are taken as account for their parent height
 IterateFrameChildren = Utils.IterateFrameChildren
-
+-- ========================================================================= --
 __Recyclable__ "SylingTracker_WorldQuestView%d"
 class "WorldQuestView" { TaskView }
-
 
 __Recyclable__ "SylingTracker_WorldQuestListView%d"
 class "WorldQuestListView" (function(_ENV)
@@ -106,9 +105,9 @@ class "WorldQuestListView" (function(_ENV)
     wipe(self.questsID)
     self:ReleaseUnusedQuests()
 
+    self:Hide()
     self:ClearAllPoints()
     self:SetParent()
-    self:Hide()
     self:CancelAdjustHeight()
     self:CancelAnimatingHeight()
 
@@ -119,7 +118,9 @@ class "WorldQuestListView" (function(_ENV)
     self:Show()
     -- Important ! We need the frame is instantly styled as this may affect 
     -- its height.
-    -- self:InstantApplyStyle()
+    self:InstantApplyStyle()
+
+    self:AdjustHeight()
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --

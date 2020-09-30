@@ -53,7 +53,7 @@ class "AutoQuestsContentView" (function(_ENV)
 
   function AcquireAutoQuests(self)
     local autoQuests = self:GetChild("AutoQuests")
-    if not worldQuests then 
+    if not autoQuests then 
       autoQuests = AutoQuestListView.Acquire()
 
       -- We need to keep the old name when we'll release it

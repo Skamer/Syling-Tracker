@@ -26,7 +26,7 @@ class "AutoQuestView" (function(_ENV)
 
   inherit "Button" extend "IView"
   function OnViewUpdate(self, data)
-    local type, questName      = data.type, data.name
+    local type, questName, questID  = data.type, data.name, data.questID
     local questNameText   = self:GetChild("QuestName")
 
     -- Determine the state
@@ -56,11 +56,33 @@ class "AutoQuestView" (function(_ENV)
       end
     end
 
+    if state == State.Offer then 
+      self.OnClick = function()
+        ShowQuestOffer(GetQuestLogIndexByID(questID))
+        AutoQuestPopupTracker_RemovePopUp(questID)
+      end
+    elseif state == State.Complete then 
+      self.OnClick = function()
+        ShowQuestComplete(GetQuestLogIndexByID(questID))
+        AutoQuestPopupTracker_RemovePopUp(questID)
+      end
+    end 
+
     if questName then 
       Style[questNameText].text = questName
     end
 
     self.State = state
+  end
+
+  function OnRelease(self)
+    self:Hide()
+    self:SetParent()
+    self:ClearAllPoints()
+
+    self:CancelAdjustHeight()
+    self:CancelAnimatingHeight()
+    self:SetHeight(1)
   end
 
   function OnAcquire(self)
@@ -70,7 +92,7 @@ class "AutoQuestView" (function(_ENV)
 
     self:Show()
 
-    -- self:AdjustHeight()
+    self:AdjustHeight()
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
@@ -96,7 +118,7 @@ class "AutoQuestView" (function(_ENV)
     -- Important! As the frame ajusts its height depending of its children height
     -- we need to set its height when contructed for the event "OnSizechanged" of
     -- its children is triggered.
-    -- self:SetHeight(1)
+    self:SetHeight(1)
 
     self:SetClipsChildren(true)
   end
@@ -240,7 +262,6 @@ end)
 Style.UpdateSkin("Default", {
   [AutoQuestView] = {
     height = 46,
-    -- width  = 300, 
     backdrop = { 
       bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
       edgeFile = [[Interface\Buttons\WHITE8X8]],
@@ -269,9 +290,7 @@ Style.UpdateSkin("Default", {
     },
 
     HeaderText = {
-      -- text = "Quête decouverte",
       sharedMediaFont = FontType("PT Sans Narrow Bold", 12),
-      -- textColor       = Color(1, 216/255, 0),
       location = {
         Anchor("TOP", 0, -2),
         Anchor("LEFT", 0, 0, "IconBadge", "RIGHT"),
@@ -280,7 +299,6 @@ Style.UpdateSkin("Default", {
     },
 
     QuestName = {
-      -- text = "L'Assaut de Haut Roc",
       sharedMediaFont = FontType("PT Sans Narrow Bold", 13),
       textTransform = "UPPERCASE",
       textColor       = Color(0.9, 0.9, 0.9),
@@ -292,7 +310,6 @@ Style.UpdateSkin("Default", {
     },
 
     SubText = {
-      -- text = "Cliquer pour consulter la quête",
       sharedMediaFont = FontType("PT Sans Narrow Bold", 12),
       textColor       = Color(0.55, 0.55, 0.55),
       location = {

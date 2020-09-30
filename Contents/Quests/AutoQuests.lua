@@ -19,7 +19,7 @@ _AutoQuestModel = RegisterModel(QuestModel, "auto-quests-data")
 GetNumAutoQuestPopUps             = GetNumAutoQuestPopUps
 GetAutoQuestPopUp                 = GetAutoQuestPopUp
 IsQuestBounty                     = IsQuestBounty
-RequestLoadQuestByID              = RequestLoadQuestByID
+RequestLoadQuestByID              = C_QuestLog.RequestLoadQuestByID
 GetQuestName                      = QuestUtils_GetQuestName
 -- ========================================================================= --
 RegisterContentType({
@@ -64,6 +64,7 @@ function AddAutoQuest(self, questID, type)
 end
 
 function RemoveAutoQuest(self, questID)
+  RemoveAutoQuestPopUp(questID)
   _AutoQuestModel:RemoveQuestData(questID)
   _M:FireSystemEvent("SLT_AUTOQUEST_REMOVED")
 end

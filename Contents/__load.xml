@@ -3,7 +3,7 @@
   <Script file="ContextMenuPatterns.lua"/>
   <Include file="Quests\__load.xml"/>
   <Include file="Tasks\__load.xml"/>
-  <Include file="Worldquests\__load.xml"/>
+  <Include file="WorldQuests\__load.xml"/>
   <Include file="Achievements\__load.xml"/>
   <Include file="Scenario\__load.xml"/>
   <Include file="Dungeon\__load.xml"/>

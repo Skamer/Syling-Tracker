@@ -6,7 +6,7 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling                   "SylingTracker.Worldquest"                          ""
+Syling                   "SylingTracker.WorldQuest"                          ""
 -- ========================================================================= --
 import                          "SLT"
 -- ========================================================================= --
@@ -24,7 +24,7 @@ RegisterContentType({
   Description = "Display the world quests",
   DefaultOrder = 5,
   DefaultModel = _WorldQuestsModel,
-  DefaultViewClass = WorldquestsContentView,
+  DefaultViewClass = WorldQuestsContentView,
   Events = { "PLAYER_ENTERING_WORLD", "SLT_WORLD_QUEST_ACCEPTED", "SLT_WORLD_QUEST_REMOVED"},
   Status = function(event, ...) return _M:HasWorldQuest() end
 })
@@ -96,6 +96,16 @@ function UpdateWorldQuest(self, questID)
     isInArea        = isInArea,
     isOnMap         = isOnMap
   }
+
+  -- Is the quest has an item quest ?
+  local itemLink, itemTexture = GetQuestLogSpecialItemInfo(GetQuestLogIndexByID(questID))
+
+  if itemLink and itemTexture then
+    questData.item = {
+      link    = itemLink,
+      texture = itemTexture
+    }
+  end
 
   if numObjectives > 0 then 
     local objectivesData = {}
