@@ -13,6 +13,8 @@ namespace                          "SLT"
 -- Iterator helper for ignoring the children are used for backdrop, and avoiding
 -- they are taken as account for their parent height
 IterateFrameChildren  = Utils.IterateFrameChildren
+-- Check if the player is on the Shadowlands environment
+IsOnShadowlands       = Utils.IsOnShadowlands
 -- ========================================================================= --
 ResetStyles           = Utils.ResetStyles
 ShowContextMenu       = API.ShowContextMenu
@@ -66,8 +68,21 @@ class "QuestView" (function(_ENV)
 
     -- Update the context menu
     if data.questID then 
-      self.OnClick = function()
-        ShowContextMenu("quest", self, data.questID)
+      self.OnClick = function(_, mouseButton)
+        if mouseButton == "RightButton" then 
+          ShowContextMenu("quest", self, data.questID)
+        else
+          if data.isAutoComplete and data.isComplete then
+            AutoQuestPopupTracker_RemovePopUp(data.questID)
+            if IsOnShadowlands() then 
+              ShowQuestComplete(data.questID)
+            else 
+              ShowQuestComplete(data.questLogIndex)
+            end
+          else 
+            QuestMapFrame_OpenToQuestDetails(data.questID)
+          end
+        end
       end
     end
 
@@ -127,7 +142,14 @@ class "QuestView" (function(_ENV)
     -- Update the conditionnal children if exists
     local objectivesView = self.__objectivesView
     if objectivesView then
-      objectivesView:UpdateView(data.objectives)
+      if data.isAutoComplete and data.isComplete then
+        objectivesView:UpdateView({
+          [1] = { isCompleted = true, text = QUEST_WATCH_QUEST_COMPLETE},
+          [2] = { isCompleted = false, text = QUEST_WATCH_CLICK_TO_COMPLETE}
+        })
+      else 
+        objectivesView:UpdateView(data.objectives)
+      end
     end
 
     local itemBadge = self.__itemBadge
@@ -136,7 +158,7 @@ class "QuestView" (function(_ENV)
       if data.item.link then 
         itemBadge.OnLeave = function() GameTooltip:Hide() end
         itemBadge.OnEnter = function()
-          GameTooltip:SetOwner(item, "ANCHOR_LEFT")
+          GameTooltip:SetOwner(itemBadge, "ANCHOR_LEFT")
           GameTooltip:SetHyperlink(data.item.link)
           GameTooltip:Show()
         end
@@ -652,7 +674,7 @@ Style.UpdateSkin("Default", {
       -- edgeSize = 1
     },
     backdropColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
-    registerForClicks = { "RightButtonDown" },
+    registerForClicks = { "LeftButtonDown", "RightButtonDown" },
 
     -- NormalTexture = {
     --   file = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],

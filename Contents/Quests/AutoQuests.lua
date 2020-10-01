@@ -21,6 +21,7 @@ GetAutoQuestPopUp                 = GetAutoQuestPopUp
 IsQuestBounty                     = IsQuestBounty
 RequestLoadQuestByID              = C_QuestLog.RequestLoadQuestByID
 GetQuestName                      = QuestUtils_GetQuestName
+AddAutoQuestPopUp                 = AddAutoQuestPopUp
 -- ========================================================================= --
 RegisterContentType({
   ID = "auto-quests",
@@ -29,7 +30,7 @@ RegisterContentType({
   DefaultOrder = 1,
   DefaultModel = _AutoQuestModel,
   DefaultViewClass = AutoQuestsContentView,
-  Events = { "PLAYER_ENTERING_WORLD", "SLT_AUTOQUEST_ADDED", "SLT_AUTOQUEST_REMOVED" },
+  Events = { "PLAYER_ENTERING_WORLD", "SLT_AUTOQUEST_ADDED", "SLT_AUTOQUEST_REMOVED", "QUEST_AUTOCOMPLETE" },
   Status = function() return GetNumAutoQuestPopUps() > 0 end
 })
 -- ========================================================================= --
@@ -41,7 +42,6 @@ function LoadAutoQuests()
   for i = 1, GetNumAutoQuestPopUps() do 
     local questID, popupType = GetAutoQuestPopUp(i)
 
-    -- ???
     if not IsQuestBounty(questID) then
       _M:AddAutoQuest(questID, popupType)
     end
@@ -90,10 +90,16 @@ end
 
 __SystemEvent__()
 function QUEST_AUTOCOMPLETE(questID)
+  -- Important ! Don't forget adding the auto quest popup when it's autocomplate 
+  -- else it will be ignored by GetNumAutoQuestPopUps
+  AddAutoQuestPopUp(questID, "COMPLETE")
+
   _M:AddAutoQuest(questID, "COMPLETE")
   _AutoQuestModel:Flush()
 end
 
+-- For these below hooks, don't need calling AddAutoQuestPopUp or RemoveAutoQuestPopUp
+-- as it's already done by original function.
 __SecureHook__()
 function AutoQuestPopupTracker_AddPopUp(questID, popupType)
   _M:AddAutoQuest(questID, popupType)
@@ -109,5 +115,5 @@ end
 -- Debug Utils Tools
 -- ========================================================================= --
 if ViragDevTool_AddData then 
-  ViragDevTool_AddData(_AutoQuestModel, "Auto Quest Model")
+  ViragDevTool_AddData(_AutoQuestModel, "SLT Auto Quest Model")
 end
