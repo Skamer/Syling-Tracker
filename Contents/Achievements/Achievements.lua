@@ -8,16 +8,19 @@
 -- ========================================================================= --
 Syling                  "SylingTracker.Achievements"                         ""
 -- ========================================================================= --
-import                          "SLT"
+import                              "SLT"
+-- ========================================================================= --
+_Active                             = false 
 -- ========================================================================= --
 RegisterContentType = API.RegisterContentType
 RegisterModel       = API.RegisterModel
-
-HasAchievements = Utils.Achievement.HasAchievements
-
+-- ========================================================================= --
 _AchievementModel = RegisterModel(AchievementModel, "achievements-data")
-
-
+-- ========================================================================= --
+HasAchievements                     = Utils.Achievement.HasAchievements
+GetAchievementInfo                  = GetAchievementInfo
+GetAchievementNumCriteria           = GetAchievementNumCriteria
+IsAchievementEligible               = IsAchievementEligible
 -- ========================================================================= --
 -- Register the achievements content type
 -- ========================================================================= --
@@ -32,39 +35,93 @@ RegisterContentType({
   Status = function() return HasAchievements() end
 })
 -- ========================================================================= --
-GetAchievementInfo                  = GetAchievementInfo
-GetAchievementNumCriteria           = GetAchievementNumCriteria
-IsAchievementEligible               = IsAchievementEligible
+_AchievementsCache = {}
+_ReadyForFetching  = false
 -- ========================================================================= --
-_AchievementCache = {}
+__ActiveOnEvents__ "PLAYER_ENTERING_WORLD" "TRACKED_ACHIEVEMENT_LIST_CHANGED"
+function ActivateOn(self, event)
+  if event == "PLAYER_ENTERING_WORLD" then 
+    _ReadyForFetching = true 
+  end
 
-function OnEnable(self)
-  self:LoadAchievements()
+  return HasAchievements()
+end
+-- ========================================================================= --
+function OnActive(self)
+  -- NOTE: This seems the first time the player enters in the game, the achievements
+  -- details may be incorrect and missing. The workaround is to wait the 
+  -- PLAYER_ENTERING_WORLD event which will set _ReadyForFetching to true for 
+  -- saying it's ready for fetching the information.
+  if _ReadyForFetching then 
+    self:LoadAchievements()
+  end
+end
+
+function OnInactive(self)
+  _AchievementModel:ClearData()
+
+  -- Clear the cache 
+  wipe(_AchievementsCache)
+end
+-- ========================================================================= --
+__SystemEvent__()
+function TRACKED_ACHIEVEMENT_UPDATE(achievementID)
+  -- NOTE: We need to check the achievement is tracked for avoiding to add 
+  -- untracked achievements. 
+  if _AchievementsCache[achievementID] then 
+    _M:UpdateAchievement(achievementID)
+    _AchievementModel:Flush()
+  end
 end
 
 __SystemEvent__()
-function TRACKED_ACHIEVEMENT_UPDATE(achievementID)
-  _M:UpdateAchievement(achievementID)
-  _AchievementModel:Flush()
+function PLAYER_ENTERING_WORLD()
+  _ReadyForFetching = true
+  
+  -- The information are now ready to be fetched, so we can load achievements
+  _M:LoadAchievements()
 end
 
 __SystemEvent__()
 function TRACKED_ACHIEVEMENT_LIST_CHANGED(achievementID, isAdded)
-  if isAdded then 
-    _M:UpdateAchievement(achievementID)
-    _AchievementModel:Flush()
-  else 
-    _AchievementModel:RemoveAchievementData(achievementID)
-    _AchievementModel:Flush()
-  end 
+  if not _ReadyForFetching then 
+    return 
+  end
+
+  -- NOTE: When an achievement has failed, TRACKED_ACHIEVEMENT_LIST_CHANGED is triggered with
+  -- achievementID and isAdded having a nil value
+  if achievementID then
+    if isAdded then 
+      _AchievementsCache[achievementID] = true
+      _M:UpdateAchievement(achievementID)
+    else
+      _AchievementModel:RemoveAchievementData(achievementID)
+      _AchievementsCache[achievementID] = nil 
+    end
+
+    _AchievementModel:Flush() 
+  else
+    -- NOTE: When an anchievement has failed, achievementID and isAdded have a nil value.
+    -- We must update all for the achievement eligibility is correctly updated.
+    -- Infortunnaly we don't know which achievement has an eligibility change.
+    _M:UpdateAllAchievements()
+  end
 end
+
 
 function LoadAchievements(self)
   local trackedAchievements = { GetTrackedAchievements() }
-  for i = 1, #trackedAchievements do
+  for i = 1, #trackedAchievements do 
     local achievementID = trackedAchievements[i]
-    _M:UpdateAchievement(achievementID)
+    TRACKED_ACHIEVEMENT_LIST_CHANGED(achievementID, true)
   end
+end
+
+function UpdateAllAchievements(self)
+  for achievementID in pairs(_AchievementsCache) do 
+    self:UpdateAchievement(achievementID)
+  end
+  
   _AchievementModel:Flush()
 end
 
@@ -108,6 +165,16 @@ function UpdateAchievement(self, achievementID)
         isCompleted = criteriaCompleted
       }
 
+      if bit.band(flags, EVALUATION_TREE_FLAG_PROGRESS_BAR) == EVALUATION_TREE_FLAG_PROGRESS_BAR then 
+        data.text = description
+        data.hasProgressBar = true
+        print("Quantity", quantity, totalQuantity, criteriaString, quantityString) 
+        data.progress = quantity
+        data.minProgress = 0
+        data.maxProgress = totalQuantity 
+        data.progressText = format("%i / %i", quantity, totalQuantity)
+      end 
+
       objectivesData[index] = data
     end
 
@@ -116,10 +183,9 @@ function UpdateAchievement(self, achievementID)
 
   _AchievementModel:AddAchievementData(achievementID, achievementData)
 end
-
 -- ========================================================================= --
 -- Debug Utils Tools
 -- ========================================================================= --
 if ViragDevTool_AddData then 
-  ViragDevTool_AddData(_AchievementModel, "AchievementModel")
+  ViragDevTool_AddData(_AchievementModel, "SLT Achievement Model")
 end

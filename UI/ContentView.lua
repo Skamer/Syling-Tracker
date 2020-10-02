@@ -24,6 +24,7 @@ class "ContentView" (function(_ENV)
   
   __Async__()
   function OnAdjustHeight(self, useAnimation)
+    Next()
     -- First, we need to compute the content height
     local content = self:GetChild("Content")
     local contentMaxOuterBottom
@@ -38,7 +39,7 @@ class "ContentView" (function(_ENV)
 
     if contentMaxOuterBottom then
       local computeHeight = content:GetTop() - contentMaxOuterBottom + self.ContentPaddingBottom
-      content:SetHeight(computeHeight)
+      PixelUtil.SetHeight(content, computeHeight)
       -- We need to wait the next "OnUpdate" for the "Self" frame take as 
       -- account the new content height has been computed.
       Next()
@@ -61,12 +62,8 @@ class "ContentView" (function(_ENV)
       if useAnimation then 
         self:SetAnimatedHeight(computeHeight)
       else 
-        self:SetHeight(computeHeight)
+        PixelUtil.SetHeight(self, computeHeight)
       end
-
-      if Class.IsObjectType(self, KeystoneContentView) then 
-        print("HEIGHT", computeHeight, useAnimation)
-      end 
     end
   end
 
@@ -182,6 +179,10 @@ Style.UpdateSkin("Default", {
     },
 
     Content = {
+      -- backdrop = {
+      --   bgFile    = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],     
+      -- },
+      -- backdropColor       = { r = 255/255, g = 0, b = 0, a = 0.87},
       location = {
         Anchor("TOP", 0, 0, "Header", "BOTTOM"),
         Anchor("LEFT"),

@@ -26,12 +26,27 @@ PLoop(function(_ENV)
     end
 
 
+    function GetActivatingEvent(self)
+      return self._ActiveByEvent
+    end
+
+    function GetActivatingEventArgs(self)
+      return self._ActivatingEventArgs and unpack(self._ActivatingEventArgs)
+    end
+
     __Arguments__ { String }
-    function IsActiveByEvent(self, evt)
+    function IsActivateByEvent(self, evt)
       if self._ActiveByEvent and self._ActiveByEvent == evt then
         return true
       end
       return false
+    end
+
+
+
+    __Arguments__ { String }
+    function IsActiveByEvent(self, evt)
+      return self:IsActivateByEvent(evt)
     end
 
     __Arguments__ { NEString }
@@ -90,6 +105,7 @@ PLoop(function(_ENV)
             local active = self._ActiveOnHandler(self, evt, ...)
             if active then
               self._ActiveByEvent = evt
+              self._ActivatingEventArgs = { ... }
             end
 
             self._Active = active

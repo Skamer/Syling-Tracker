@@ -13,42 +13,95 @@ namespace                          "SLT"
 -- Iterator helper for ignoring the children are used for backdrop, and avoiding
 -- they are taken as account for their parent height
 IterateFrameChildren = Utils.IterateFrameChildren
-ShowContextMenu = API.ShowContextMenu
-wipe = wipe 
+-- ========================================================================= --
+ShowContextMenu       = API.ShowContextMenu
+wipe                  = wipe 
+ValidateFlags         = System.Toolset.validateflags
+ResetStyles           = Utils.ResetStyles
 -- ========================================================================= --
 __Recyclable__ "SylingTracker_AchievementView%d"
 class "AchievementView" (function(_ENV)
   inherit "Button" extend "IView"
 
+  __Flags__()
+  enum "Flags" {
+    NONE = 0,
+    HAS_OBJECTIVES = 1,
+    HAS_PROGRESS_BAR = 2
+  }
+
   function OnViewUpdate(self, data)
-    local nameFrame   = self:GetChild("Name")
-    local descFrame   = self:GetChild("Description")
-    local IconBadge   = self:GetChild("IconBadge")
+    local nameFS = self:GetChild("Name")
+    local descFS = self:GetChild("Description")
+    local iconBadge = self:GetChild("IconBadge")
 
-    -- REVIEW: Probably need to use "Style"
-    nameFrame:SetText(data.name)
-    descFrame:SetText(data.description)
+    -- Determines the flags
+    local flags = Flags.NONE 
+    local hasProgressBar = false 
+    local objectivesData = data.objectives
+    local firstObjectiveData
+    if objectivesData then 
+      local firstObjectiveData = objectivesData[1]
+      if firstObjectiveData then 
+        hasProgressBar = firstObjectiveData.hasProgressBar 
+      end 
 
-    Style[IconBadge].Icon.fileID = data.icon
+      if hasProgressBar then 
+        flags = Flags.HAS_PROGRESS_BAR + Flags.HAS_OBJECTIVES
+      else 
+        flags = Flags.HAS_OBJECTIVES
+      end
+    end
 
-    if data.objectives then 
-      local objectives  = self:AcquireObjectiveListView()
-      objectives:UpdateView(data.objectives)
-    else
-      self:ReleaseObjectiveListView()
+    if flags ~= self.Flags then 
+      ResetStyles(self)
+      ResetStyles(nameFS)
+      ResetStyles(descFS)
+
+      -- Is the achievement has objectives
+      if ValidateFlags(Flags.HAS_OBJECTIVES, flags) then 
+        self:AcquireObjectives()
+      else
+        self:ReleaseObjectives()
+      end
+
+      -- Styling stuff 
+      if flags ~= Flags.NONE then 
+        local styles = self.FlagsStyles and self.FlagsStyles[flags]
+        if styles then 
+          Style[self] = styles 
+        end 
+      end
     end 
 
+    -- Update the achievement name 
+    Style[nameFS].text = data.name 
+
+    -- Update the description 
+    Style[descFS].text = data.description 
+
+    -- Update the icon 
+    Style[iconBadge].Icon.fileID = data.icon
+
+    -- Update the context menu 
     if data.achievementID then 
       self.OnClick = function() 
         ShowContextMenu("achievement", self, data.achievementID)
       end 
+    end
+
+    -- Update the objectives if needed 
+    if objectivesData then 
+      local objectivesView = self:AcquireObjectives() 
+      objectivesView:UpdateView(objectivesData)
     end 
-  end
+
+    self.Flags = flags 
+  end 
 
   function OnAdjustHeight(self, useAnimation)
     local maxOuterBottom
     for childName, child in IterateFrameChildren(self) do
-
       local outerBottom = child:GetBottom()
       if outerBottom then 
         if not maxOuterBottom or maxOuterBottom > outerBottom then 
@@ -58,31 +111,30 @@ class "AchievementView" (function(_ENV)
     end
 
     if maxOuterBottom then 
-      local computeHeight = self:GetTop() - maxOuterBottom
-      -- PixelUtil.SetHeight(self, computeHeight)
+      local computeHeight = self:GetTop() - maxOuterBottom + self.PaddingBottom
       if useAnimation then 
         self:SetAnimatedHeight(computeHeight)
       else 
         self:SetHeight(computeHeight)
       end
-      -- self:SetAnimatedHeight(computeHeight + self.PaddingBottom)
     end
   end
 
-  function AcquireObjectiveListView(self)
+  function AcquireObjectives(self)
     local objectives = self:GetChild("Objectives")
     if not objectives then
       objectives = ObjectiveListView.Acquire() 
 
       -- We need to keep the old name when we'll release the objective list 
-      self.__previousObjectiveListViewName = objectives:GetName()
+      self.__PreviousObjectivesName = objectives:GetName()
 
       objectives:SetParent(self)
       objectives:SetName("Objectives")
+      objectives:InstantApplyStyle()
       
-      if self.Objectives then 
-        Style[objectives] = self.Objectives 
-      end
+      -- if self.Objectives then 
+      --   Style[objectives] = self.Objectives 
+      -- end
 
       -- Register the events 
       objectives.OnSizeChanged = objectives.OnSizeChanged + self.OnObjectivesSizeChanged
@@ -93,11 +145,11 @@ class "AchievementView" (function(_ENV)
     return objectives
   end
 
-  function ReleaseObjectiveListView(self)
+  function ReleaseObjectives(self)
     local objectives = self:GetChild("Objectives")
     if objectives then 
-      objectives:SetName(self.__previousObjectiveListViewName)
-      self.__previousObjectiveListViewName = nil 
+      objectives:SetName(self.__PreviousObjectivesName)
+      self.__PreviousObjectivesName = nil 
 
       -- Unregister the events 
       objectives.OnSizeChanged = objectives.OnSizeChanged - self.OnObjectivesSizeChanged
@@ -106,31 +158,62 @@ class "AchievementView" (function(_ENV)
 
       self:AdjustHeight()
     end
-  end 
+  end
 
   function OnRelease(self)
-    self:ReleaseObjectiveListView()
+    -- Release first the children
+    self:ReleaseObjectives()
 
+    self:Hide()
     self:ClearAllPoints()
     self:SetParent()
-    self:Hide()
+
+    -- "CancelAdjustHeight" and "CancelAnimatingHeight" wiil cancel the pending
+    -- computing stuff for height, so they not prevent "SetHeight" here doing 
+    -- its stuff.
     self:CancelAdjustHeight()
     self:CancelAnimatingHeight()
-
     self:SetHeight(1)
 
-    self:InstantApplyStyle()
+    -- Reset the class properties
+    self.Flags = nil
+
+    -- Will Remove all custom styles properties, so the  next time the object will
+    -- be used, this one will be in a clean state
+    ResetStyles(self)
   end
 
   function OnAcquire(self)
+    -- Important ! We need the frame is instantly styled as this may affect 
+    -- its height.
+    self:InstantApplyStyle()
+
     self:Show()
-    -- REVIEW:
     self:AdjustHeight()
   end 
 
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
+  property "FlagsStyles" {
+    type = Table
+  }
+
+  property "Flags" {
+    type    = AchievementView.Flags,
+    default = AchievementView.Flags.NONE
+  }
+
+  property "ObjectivesClass" {
+    type    = ClassType,
+    default = ObjectiveListView
+  }
+
+  property "PaddingBottom" {
+    type = Number,
+    default = 5
+  }
+
   property "Objectives" {
     type = Table
   }
@@ -219,16 +302,13 @@ class "AchievementListView" (function(_ENV)
   function ReleaseUnusedAchievements(self)
     for achievementID, achievement in pairs(self.achievementsCache) do 
       if not self.achievementsID[achievementID] then
-        print("Release -----------")
         self.achievementsCache[achievementID] = nil
 
         achievement.OnSizeChanged = achievement.OnSizeChanged - self.OnAchievementSizeChanged
 
-
         achievement:Release()
 
         self:AdjustHeight()
-        print("---------------")
       end
     end
   end
@@ -244,9 +324,6 @@ class "AchievementListView" (function(_ENV)
 
     height = height + self.AchievementSpacing * math.max(0, count-1)
 
-    -- self:SetAnimatedHeight(height)
-    -- PixelUtil.SetHeight(self, height)
-    -- print("OnAdjustHeight",  useAnimation)
     if useAnimation then 
       self:SetAnimatedHeight(height)
     else 
@@ -258,20 +335,25 @@ class "AchievementListView" (function(_ENV)
     wipe(self.achievementsID)
     self:ReleaseUnusedAchievements()
 
+    self:Hide()
     self:ClearAllPoints()
     self:SetParent()
-    self:Hide()
     self:CancelAdjustHeight()
     self:CancelAnimatingHeight()
 
     self:SetHeight(1)
-    self:InstantApplyStyle()
+   
+    ResetStyles(self)
   end 
 
   function OnAcquire(self)
+    -- Important ! We need the frame is instantly styled as this may affect 
+    -- its height.
+    self:InstantApplyStyle()
+
     self:Show()
 
-    -- self:AdjustHeight()
+    self:AdjustHeight()
   end 
   -----------------------------------------------------------------------------
   --                               Properties                                --
@@ -354,16 +436,31 @@ Style.UpdateSkin("Default", {
       }
     },
 
-    Objectives = {
-      -- backdrop = {
-      --   bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]]
-      -- },
-      -- backdropColor = { r = 1, g = 0, b = 0, a = 0.5},
-      spacing = 5,
-      location = {
-        Anchor("TOP", 0, -5, "IconBadge", "BOTTOM"),
-        Anchor("LEFT"),
-        Anchor("RIGHT")
+    FlagsStyles = {
+      [AchievementView.Flags.HAS_OBJECTIVES] = {
+        Objectives = {
+          spacing = 5,
+          location = {
+            Anchor("TOP", 0, -10, "IconBadge", "BOTTOM"),
+            Anchor("LEFT"),
+            Anchor("RIGHT")
+          }
+        }
+      },
+
+      [AchievementView.Flags.HAS_OBJECTIVES + AchievementView.Flags.HAS_PROGRESS_BAR] = {
+        Description = {
+          visible = false 
+        },
+
+        Objectives = {
+          spacing = 5,
+          location = {
+            Anchor("TOP", 0, -5, "Name", "BOTTOM"),
+            Anchor("LEFT", 5, 0, "IconBadge", "RIGHT"),
+            Anchor("RIGHT", -5, 0)
+          }
+        }
       }
     }
   }
