@@ -31,7 +31,9 @@ PLoop(function(_ENV)
     end
 
     function GetActivatingEventArgs(self)
-      return self._ActivatingEventArgs and unpack(self._ActivatingEventArgs)
+      if self._ActivatingEventArgs then 
+        return unpack(self._ActivatingEventArgs) 
+      end
     end
 
     __Arguments__ { String }

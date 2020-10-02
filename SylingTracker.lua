@@ -49,6 +49,15 @@ function OpenOptions()
   local loaded, reason = LoadAddOn("SylingTracker_Options")
 end
 
+__SystemEvent__()
+function PLAYER_ENTERING_WORLD(initialLogin, reloadingUI)
+  IsInitialLogin  = initialLogin
+  IsReloadingUI   = reloadingUI
+end
+
+
+
+
 -------------------------------------------------------------------------------
 -- LibSharedMedia: register the fonts
 -------------------------------------------------------------------------------

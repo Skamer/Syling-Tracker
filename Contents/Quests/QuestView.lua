@@ -498,9 +498,23 @@ class "QuestListView" (function(_ENV)
     local questIndex = 0
 
     wipe(self.questsID)
+    wipe(self.questsOrder)
+    
+    for _, questData in pairs(data) do 
+      tinsert(self.questsOrder, questData)
+    end
+
+    table.sort(self.questsOrder, function(a, b)
+      local aDistance, bDistance = a.distance, b.distance
+      if aDistance and bDistance then 
+        return aDistance < bDistance 
+      end
+
+      return a.questID < b.questID
+    end)
 
     local previousQuest
-    for _, questData in pairs(data) do
+    for _, questData in ipairs(self.questsOrder) do
       questIndex = questIndex + 1
 
       local questID     = questData.questID
@@ -616,6 +630,7 @@ class "QuestListView" (function(_ENV)
 
   function OnRelease(self)
     wipe(self.questsID)
+    wipe(self.questsOrder)
     self:ReleaseUnusedQuests()
 
     self:ClearAllPoints()
@@ -651,6 +666,8 @@ class "QuestListView" (function(_ENV)
     -- unused quests
     -- use: self.questsID[questID] = true or nil
     self.questsID = {}
+
+    self.questsOrder = {}
 
 
     self.OnQuestSizeChanged = function() self:AdjustHeight() end

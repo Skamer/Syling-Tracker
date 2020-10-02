@@ -10,8 +10,14 @@ Syling                      "SylingTracker.Quests"                           ""
 -- ========================================================================= --
 import                          "SLT"
 -- ========================================================================= --
+_Active                         = false
+-- ========================================================================= --
 -- Check if the player is on the Shadowlands environment
 IsOnShadowlands               = Utils.IsOnShadowlands
+RegisterContentType           = API.RegisterContentType
+RegisterModel                 = API.RegisterModel
+-- ========================================================================= --
+_QuestModel                   = RegisterModel(QuestModel, "quests-data")
 -- ========================================================================= --
 RequestLoadQuestByID          = C_QuestLog.RequestLoadQuestByID
 GetQuestName                  = QuestUtils_GetQuestName
@@ -55,33 +61,9 @@ GetQuestLogCompletionText     = GetQuestLogCompletionText
 SelectQuestLogEntry           = SelectQuestLogEntry
 GetQuestLogSpecialItemInfo    = GetQuestLogSpecialItemInfo
 -- ========================================================================= --
-DISTANCE_UPDATER_ENABLED      = false
-
--- Need invistigate this function
--- C_QuestLog.GetQuestObjectives -- GetQuestObjectiveInfo 
-
--- NEW: C_QuestLog.GetQuestWatchType
--- C_QuestLog.GetRequiredMoney
--- C_QuestLog.GetSuggestedGroupSize
--- C_QuestLog.GetTimeAllowed
--- C_QuestLog.IsAccountQuest
--- C_QuestLog.IsComplete
--- C_QuestLog.IsFailed
--- C_QuestLog.IsLegendaryQuest
--- C_QuestLog.IsOnMap
-
--- C_QuestLog.RequestLoadQuestByID (8.3 + 9.0)
--- EVENT : QUEST_DATA_LOAD_RESULT
-
--- QUEST_LOG_CRITERIA_UPDATE
--- QUEST_WATCH_UPDATE
-
-QUESTS_CACHE = {}
-QUEST_HEADERS_CACHE = {}
-
-_QuestModel = SLT.API.RegisterModel(QuestModel, "quests-data")
-
-API.RegisterContentType({
+-- Register the achievements content type
+-- ========================================================================= --
+RegisterContentType({
   ID = "quests",
   DisplayName = "Quests",
   Description = "Track the watched quests",
@@ -90,91 +72,37 @@ API.RegisterContentType({
   Events = { "PLAYER_ENTERING_WORLD", "QUEST_WATCH_LIST_CHANGED"},
   Status = function() return GetNumQuestWatches() > 0 end
 })
-
--- SLT.API.RegisterContentType({
---   id = "quests",
---   displayName = "Quests",
---   defaultModel = _QuestModel,
---   defaultViewClass = QuestsContentView,
---   description = "Track the watched quests",
---   status = 
--- })
-
--- SLT.Loader:RegisterModule(_M, {
---   events = ["QUEST_WATCH_CHANGED"],
---   status = function()
---     if quest > 0 then 
---       return true 
---     end
-
---     return false
---   end 
--- })
-
--- _QuestModel = SLT.RegisterModel("quest-model", "quests")
-
--- Quest Data Docuementation
---   local QuestData = {
---     title = String,  -- title and name are equivalent
---     name = String,   -- name and title are equivalent
---     header = String,  -- header and category are equivalent
---     category = String, -- category and header are equivalent
---     questLogIndex = Number,
---     questID = Number,
---     level = Number, 
---     difficultyLevel = Unknown, -- TODO Need Check
---     distance = Number,
---     isBounty = Boolean,
---     isStory = Boolean,
---     isScaling = Boolean,
---     isOnMap = Boolean,
---     hasLocalPOI = Boolean,
---     isHidden = Boolean,
---     isAutoComplete = Boolean,
---     overridesSortOrder = Unknown,
---     readyForTranslation = Unknown,
---     isLegendary = Boolean,
---     isRaidQuest = Boolean,
---     isDungeonQuest = Boolean,
---     failureTime = Number,
---     timeElapsed = Number,
---     completionText = String,
-
---     objectives = Table[ObjectiveData]
---   }
-
--- ObjectiveData Docuementation
---   local ObjectiveData = {
---     text = String,
---     type = String,
---     isCompleted = Boolean,
---   }
-
--- __Async__()
--- __SystemEvent__()
--- function PLAYER_ENTERING_WORLD(initialLogin, reloadingUI)
---   if initialLogin then 
---     Wait("QUEST_LOG_UPDATE")
-
---     Delay(0.5)
---   end
-
---   _M:LoadQuests()
--- end 
+-- ========================================================================= --
+DISTANCE_UPDATER_ENABLED      = false
+QUESTS_CACHE                  = {}
+QUEST_HEADERS_CACHE           = {}
+QUESTS_WITH_PROGRESS          = {}
+-- ========================================================================= --
+__ActiveOnEvents__ "PLAYER_ENTERING_WORLD" "QUEST_WATCH_LIST_CHANGED"
+function ActivateOn(self, event, ...)
+  return GetNumQuestWatches() > 0
+end
+-- ========================================================================= --
 __Async__()
-__SystemEvent__()
-function PLAYER_ENTERING_WORLD(initialLogin, reloadingUI)
-  if initialLogin then 
-    -- If it's the first login, we need to wait "QUEST_LOG_UPDATE" is fired
-    -- to get valid informations about quests
-    Wait("QUEST_LOG_UPDATE")
-
+function OnActive(self)
+  if self:IsActivateByEvent("PLAYER_ENTERING_WORLD") then 
+    local initialLogin = self:GetActivatingEventArgs()
+    if initialLogin then 
+      -- If it's the first login, we need to wait "QUEST_LOG_UPDATE" is fired
+      -- to get valid informations about quests
+      Wait("QUEST_LOG_UPDATE")
+    end
   end
 
   _M:LoadQuests()
 end
-  
 
+function OnInactive(self)
+  _QuestModel:ClearData()
+  
+  wipe(QUESTS_CACHE)
+end
+-- ========================================================================= --
 function LoadQuests(self)
   local numEntries, numQuests = GetNumQuestLogEntries()
   local currentHeader = "Misc"
@@ -213,39 +141,17 @@ function LoadQuests(self)
         category = currentHeader, 
       }
 
-      -- _QuestModel:SetData(questData, "quests", questID)
-
       _QuestModel:SetQuestData(questID, questData)
 
       RequestLoadQuestByID(questID)
-      -- _M:UpdateQuest(questID)
     end 
   end
 
-  -- local data = _QuestModel:GetData()
-  -- for k,v in pairs(data.quests) do 
-  --   print(k, v.title)
-  -- end 
   _QuestModel:Flush()
 end
 
 function UpdateQuest(self, questID)
-  -- local questLogIndex   = GetQuestLogIndexByID(questID)
-  -- local questWatchIndex = GetQuestWatchIndex(questLogIndex)
-
-  -- if not questWatchIndex then 
-  --   return 
-  -- end
-
-  -- local _, title, questLogIndex, numObjectives, requiredMoney,
-  -- isComplete, startEvent, isAutoComplete, failureTime, timeElapsed,
-  -- questType, isTask, isBounty, isStory, isOnMap, hasLocalPOI = GetQuestWatchInfo(questWatchIndex)
-
-  -- local header = self:GetQuestHeader(questID)
-  -- local name = GetQuestName(questID)
-
   -- Cross function & unchanged fonction
-
   local title = GetQuestName(questID)
   local level = GetQuestDifficultyLevel(questID)
   local header = self:GetQuestHeader(questID)
@@ -293,8 +199,6 @@ function UpdateQuest(self, questID)
     questType, isTask, isBounty, isStory, isOnMap, hasLocalPOI = GetQuestWatchInfo(questWatchIndex)
   end
 
-
-
   local questData = {
     questID         = questID,
     title           = title,
@@ -323,7 +227,7 @@ function UpdateQuest(self, questID)
     isLegendary     = isLegendary
   }
 
-  -- Is the quest has an intem quest ?
+  -- Is the quest has an item quest ?
   local itemLink, itemTexture = GetQuestLogSpecialItemInfo(questLogIndex)
 
   if itemLink and itemTexture then
@@ -344,6 +248,18 @@ function UpdateQuest(self, questID)
           type = type, 
           isCompleted = finished
         }
+      
+        if type == "progressbar" then
+          local progress = GetQuestProgressBarPercent(questID)
+          data.hasProgressBar = true
+          data.progress = progress
+          data.minProgress = 0
+          data.maxProgress = 100
+          data.progressText = PERCENTAGE_STRING:format(progress)
+          QUESTS_WITH_PROGRESS[questID] = true
+        else 
+          QUESTS_WITH_PROGRESS[questID] = nil 
+        end
 
         objectivesData[index] = data
       end 
@@ -380,19 +296,14 @@ end
 
 __SystemEvent__ "ZONE_CHANGED" "ZONE_CHANGED_NEW_ARED" "AREA_POIS_UPDATED"
 function QUESTS_ON_MAP_UPDATE()
-    QUESTS_UPDATE()
+  QUESTS_UPDATE()
 
-  -- _M:UpdateDistance()
+  _M:UpdateDistance()
 end
 
 __Async__()
 __SystemEvent__()
 function QUEST_WATCH_LIST_CHANGED(questID, isAdded)
-
-  -- if questID == nil and isAdded == nil then 
-  --   _M:LoadQuests()
-  -- end
-
   if not questID then 
     return 
   end 
@@ -418,11 +329,19 @@ function QUEST_DATA_LOAD_RESULT(questID, success)
   end
 end
 
+__SystemEvent__()
+function QUEST_LOG_UPDATE()
+  for questID in pairs(QUESTS_WITH_PROGRESS) do
+    _M:UpdateQuest(questID)
+  end
+
+  _QuestModel:Flush()
+end
+
+
 __SystemEvent__() 
 __Async__()
 function QUEST_WATCH_UPDATE(questID)
-  print("QUEST_WATCH_UPDATE", questID)
-
   -- Experiment: We need to wait the next "QUEST_LOG_UPDATE" in order to the 
   -- objectives are correctly updated.
   NextEvent("QUEST_LOG_UPDATE")
@@ -494,7 +413,6 @@ function VEHICLE_ANGLE_SHOW()
   IN_TAXI = false
 end
 
-
 function UpdateDistance()
   for questID in pairs(QUESTS_CACHE) do 
     local distanceSq = GetDistanceSqToQuest(questID)
@@ -505,16 +423,9 @@ function UpdateDistance()
   
   _QuestModel:Flush()
 end
-
-__SlashCmd__ "qrefresh"
-function RefreshView()
-  print("Refresh Views for quests")
-  _QuestModel:Flush()
-end
-
 -- ========================================================================= --
 -- Debug Utils Tools
 -- ========================================================================= --
 if ViragDevTool_AddData then 
-  ViragDevTool_AddData(_QuestModel, "QuestModel")
+  ViragDevTool_AddData(_QuestModel, "SLT Quest Model")
 end
