@@ -52,7 +52,7 @@ class "Database" (function(_ENV)
   --                               Methods                                   --
   -----------------------------------------------------------------------------
   __Arguments__{ Any, Variable.Optional() }
-  __Static__() function SetValue(self, index, value)
+  __Static__() function SetValue(index, value)
     CURRENT_TABLE[index] = value
   end
 

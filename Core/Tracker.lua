@@ -13,8 +13,6 @@ namespace                          "SLT"
 local function OnMinMaxValueSet(self)
     local height    = self:GetHeight()
 
-    --print("OnMinMaxValueSet")
- 
     if not height then return end
  
     local min, max  = self:GetMinMaxValues()
@@ -183,8 +181,6 @@ class "Tracker"(function(_ENV)
     height = height + 0 * math.max(0, count-1)
 
     content:SetHeight(height)
-
-    -- print("Height Tracker", height)
   end 
 
   --- This is helper function will call "OnAdjustHeight".
@@ -257,7 +253,6 @@ class "Tracker"(function(_ENV)
     scrollFrame:SetClipsChildren(true)
     
     scrollFrame.OnScrollRangeChanged = scrollFrame.OnScrollRangeChanged + function(_, xrange, yrange)
-      --print("OnScrollRangeChanged", xrange, yrange)
       OnScrollRangeChanged(self, xrange, yrange)
     end
 
@@ -287,11 +282,38 @@ class "Tracker"(function(_ENV)
   end 
 end)
 
+class "TrackerMover" (function(_ENV)
+  inherit "Mover"
+
+  __Template__{
+    Text = SLTFontString
+  }
+  function __ctor() end
+end)
+
 
 Style.UpdateSkin("Default", {
+  [TrackerMover] = {
+    backdrop = {
+      bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]]
+    },
+    backdropColor = { r = 0, g = 1, b = 0, a = 0.3},
+    location = {
+      Anchor("BOTTOMLEFT", 0, 0, nil, "TOPLEFT"),
+      Anchor("BOTTOMRIGHT", 0, 0, nil, "TOPRIGHT")
+    },
+
+    Text = {
+      text = "Click here to move the tracker",
+      setAllPoints = true,
+      sharedMediaFont = FontType("PT Sans Narrow Bold", 13)
+    }
+  },
+
   [Tracker] = {
-    size = Size(300, 325),
-    resizable = false,
+    size = Size(300, 325), -- 300 325
+    resizable = true,
+    movable = true,
 
     -- [ScrollFrame] child properties 
     ScrollFrame = {
@@ -361,250 +383,124 @@ Style.UpdateSkin("Default", {
 
 
 function OnEnable(self)
-  Tracker = Tracker("Tracker #1235")
-  Tracker:SetPoint("CENTER", 600, 0)
-  Tracker:SetParent(UIParent)
-  Tracker.ID = "main"
+  _DB_READ_ONLY = true
 
-  -- Tracker:TrackContentType("scenario")
-  -- Tracker:TrackContentType("dungeon")
-  -- Tracker:TrackContentType("achievements")
-  -- Tracker:TrackContentType("bonus-tasks")
-  -- Tracker:TrackContentType("tasks")
-  -- Tracker:TrackContentType("quests")
-  -- Tracker:TrackContentType("auto-quests")
-  -- Tracker:TrackContentType("world-quests")
-  -- Tracker:TrackContentType("keystone")
+  _Tracker = Tracker("SylingTracker_MainTracker", UIParent)
+  _Tracker.ID = "main"
+
+  _TrackerMover = TrackerMover("MainTracker_Mover", _Tracker)
+  _TrackerMover.MoveTarget = _Tracker
+
+  Profiles.PrepareDatabase()
+  local width, height, xPos, yPos, locked
+  if Database.SelectTable(false, "trackers", _Tracker.ID) then 
+    xPos    = Database.GetValue("xPos")
+    yPos    = Database.GetValue("yPos")
+    width   = Database.GetValue("width")  or 300
+    height  = Database.GetValue("height") or 325
+    locked  = Database.GetValue("locked")
+  end
+
+  if not xPos and not yPos then 
+    _Tracker:SetPoint("RIGHT", -40, 0)
+  else 
+    _Tracker:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", xPos or 0, yPos or 0)
+  end
+  
+  Style[_Tracker].width   = width
+  Style[_Tracker].height  = height
+
+  if locked then 
+    self:LockMainTracker()
+  else
+    self:UnlockMainTracker()
+  end
+  
+  _Tracker.OnSizeChanged = function(tracker, width, height)
+    if _DB_READ_ONLY then 
+      return 
+    end
+
+    Profiles.PrepareDatabase()
+    if Database.SelectTable(true, "trackers", tracker.ID) then 
+      Database.SetValue("width", Round(width))
+      Database.SetValue("height", Round(height))
+    end 
+  end
+
+  _TrackerMover.OnStopMoving = function(mover, ...)
+    if _DB_READ_ONLY then 
+      return 
+    end
+
+    local tracker = mover.MoveTarget
+    local top     = tracker:GetTop()
+    local left    = tracker:GetLeft()
+
+    Profiles.PrepareDatabase()
+    if Database.SelectTable(true, "trackers", tracker.ID) then 
+      Database.SetValue("xPos", left)
+      Database.SetValue("yPos", top)
+    end
+  end
+
+
+  _DB_READ_ONLY = false
 end
 
+__SlashCmd__ "slt" "lock"
+function LockMainTracker()
+  _TrackerMover:Hide()
+
+  Style[_Tracker].resizable = false
+  Style[_Tracker].movable = false 
+
+  if not _DB_READ_ONLY then 
+    Profiles.PrepareDatabase()
+    if Database.SelectTable(true, "trackers", _Tracker.ID) then 
+      Database.SetValue("locked", true)
+    end
+  end 
+end
+
+__SlashCmd__ "slt" "unlock"
+function UnlockMainTracker()
+  _TrackerMover:Show()
+
+  Style[_Tracker].resizable = true 
+  Style[_Tracker].movable = true
+
+  if not _DB_READ_ONLY then 
+    Profiles.PrepareDatabase()
+    if Database.SelectTable(true, "trackers", _Tracker.ID) then 
+      Database.SetValue("locked", false)
+    end
+  end
+end
 
 __SystemEvent__()
 __Async__()
 function PLAYER_ENTERING_WORLD(isInitialLogin, isReloadingUi)
   if isInitialLogin or isReloadingUi then
-    local trackerBottom = Tracker:GetBottom()
+    local trackerBottom = _Tracker:GetBottom()
     -- Important ! We have to delay the tracking of content type after an 
     -- initial and a reloading ui for they getting a valid "GetBottom" is important
     -- to compute the height of their frame. 
     -- So we delay until the tracker "GetBottom" returns a no nil value, saying GetBottom
     -- now return valid value. 
     while not trackerBottom do 
-      trackerBottom = Tracker:GetBottom()
+      trackerBottom = _Tracker:GetBottom()
       Next()
     end 
 
-    Tracker:TrackContentType("scenario")
-    Tracker:TrackContentType("dungeon")
-    Tracker:TrackContentType("achievements")
-    Tracker:TrackContentType("bonus-tasks")
-    Tracker:TrackContentType("tasks")
-    Tracker:TrackContentType("quests")
-    Tracker:TrackContentType("auto-quests")
-    Tracker:TrackContentType("world-quests")
-    Tracker:TrackContentType("keystone")
+    _Tracker:TrackContentType("scenario")
+    _Tracker:TrackContentType("dungeon")
+    _Tracker:TrackContentType("achievements")
+    _Tracker:TrackContentType("bonus-tasks")
+    _Tracker:TrackContentType("tasks")
+    _Tracker:TrackContentType("quests")
+    _Tracker:TrackContentType("auto-quests")
+    _Tracker:TrackContentType("world-quests")
+    _Tracker:TrackContentType("keystone")
   end 
 end
-
--- __SystemEvent__()
--- function PLAYER_ENTERING_WORLD()
---   print("PLAYER_ENTERING_WORLD")
---   Tracker = Tracker("Tracker #1235")
---   Tracker:SetPoint("CENTER", 600, 0)
---   Tracker:SetParent(UIParent)
---   Tracker.ID = "main"
-
---   Tracker:TrackContentType("scenario")
---   Tracker:TrackContentType("dungeon")
---   Tracker:TrackContentType("achievements")
---   Tracker:TrackContentType("bonus-tasks")
---   Tracker:TrackContentType("tasks")
---   Tracker:TrackContentType("quests")
---   Tracker:TrackContentType("auto-quests")
---   Tracker:TrackContentType("world-quests")
---   Tracker:TrackContentType("keystone")
--- end
-
-__SlashCmd__ "tuntrack"
-function TestUnTrack(self)
-  tracker:UntrackContentType("quests")
-end 
-
-__SlashCmd__ "ttrack"
-function TestTrack(self)
-  tracker:TrackContentType("quests")
-end 
-
--- function OnLoad(self)
---   local tracker = Tracker("Tracker #1235")
---   tracker:SetPoint("CENTER", 600, 0)
---   tracker:SetParent(UIParent)
-
---   local scrollFrame = tracker:GetChild("ScrollFrame")
---   local content = scrollFrame:GetChild("Content")
-
---   local questOne = QuestView.Acquire()
---   tracker:AddView(questOne)
---   questOne:Update({
---     name = "A New Court",
---     completed = "text",
---     objectives = {
---       [1] = { completed = false, text = "Picky Stefan recruited"},
---       [2] = { completed = false, text = "Hips recruited"},
---       [3] = { completed = true, text = "Lord Garridan recruited"},
---       [4] = { completed = false, text = "The Accuser recruited"},
---       [5] = { completed = false, type = "progress", text = "Bat used to reach Sinfall's surface"}
---     }
---   })
---   -- questOne:Update({
---   --   name = "A New Court",
---   --   completed = "text",
---   --   objectives = {
---   --     [1] = { completed = false, text = "Picky Stefan recruited"},
---   --     [2] = { completed = false, text = "Hips recruited"},
---   --     [3] = { completed = false, text = "Lord Garridan recruited"},
---   --     [4] = { completed = false, text = "The Accuser recruited"},
---   --     [5] = { completed = true, text = "Bat used to reach Sinfall's surface"}
---   --   }
---   -- })
-
---   local questTwo = QuestView.Acquire()
---   tracker:AddView(questTwo)
---   questTwo:Update({
---     name = "The Rescue of Herbert Gloomburst",
---     completed = "text",
---     objectives = {
---       [1] = { completed = false, text = "Rescue Herbert Gloomburst from the harpy's necrotic ritual"}
---     }
---   })
-  
---   local questThree = QuestView.Acquire()
---   tracker:AddView(questThree)
---   questThree:Update({
---     name = "The Way to Hibernal Hollow",
---     completed = "text",
---     objectives = {
---       [1] = { completed = false, text = "Recruit Niya to escort the strange wildseed to Tirna Glayn."},
---     }
---   })
-
---   local questFourth = QuestView.Acquire()
---   tracker:AddView(questFourth)
---   questFourth:Update({
---     name = "A Good Heart",
---     completed = "text",
---     objectives = {
---       [1] = { completed = false, text = "Heart collected"},
---       [2] = { completed = false, text = "Heart placed in Emeni's construct."}
---     }
---   })
---   local questFive = QuestView.Acquire()
---   tracker:AddView(questFive)
---   questFive:Update({
---     name = "A Call to Maldraxxus",
---     completed = "text",
---     objectives = {
---       [1] = { completed = false, text = "Defend Maldraxxus by completing Daily Quests and World Quests, looting treasures, and slaying rare creatures. You may also defeat powerful foes in the Plaguefall and Theatre of Pain dungeons."},
---     }
---   })
-
--- end
-
--- function OnLoad(self)
---   local tracker = Tracker("Tracker #1235")
---   tracker:SetPoint("CENTER", 600, 0)
---   tracker:SetParent(UIParent)
-
--- --   local questList = QuestListView.Acquire()
--- --   tracker:AddView(questList)
--- --   questList:Update({
--- --     [150] = {
--- --       name = "A New Court",
--- --       completed = "text",
--- --       objectives = {
--- --         [1] = { completed = false, text = "Picky Stefan recruited"},
--- --         [2] = { completed = false, text = "Hips recruited"},
--- --         [3] = { completed = true, text = "Lord Garridan recruited"},
--- --         [4] = { completed = false, text = "The Accuser recruited"},
--- --         [5] = { completed = false, type = "progress", text = "Bat used to reach Sinfall's surface"}
--- --       }
--- --     },
--- --     [350] = {
--- --       name = "A Good Heart",
--- --       completed = "text",
--- --       objectives = {
--- --         [1] = { completed = false, text = "Heart collected"},
--- --         [2] = { completed = false, text = "Heart placed in Emeni's construct."}
--- --       }
--- --     }
--- --   }
--- -- )
-
---   local scrollFrame = tracker:GetChild("ScrollFrame")
---   local content = scrollFrame:GetChild("Content")
-
---   local questOne = QuestView.Acquire()
---   tracker:AddView(questOne)
---   questOne:Update({
---     name = "A New Court",
---     completed = "text",
---     objectives = {
---       [1] = { completed = false, text = "Picky Stefan recruited"},
---       [2] = { completed = false, text = "Hips recruited"},
---       [3] = { completed = true, text = "Lord Garridan recruited"},
---       [4] = { completed = false, text = "The Accuser recruited", failed = true},
---       [5] = { completed = false, type = "progress", text = "Bat used to reach Sinfall's surface"}
---     }
---   })
---   -- questOne:Update({
---   --   name = "A New Court",
---   --   completed = "text",
---   --   objectives = {
---   --     [1] = { completed = false, text = "Picky Stefan recruited"},
---   --     [2] = { completed = false, text = "Hips recruited"},
---   --     [3] = { completed = false, text = "Lord Garridan recruited"},
---   --     [4] = { completed = false, text = "The Accuser recruited"},
---   --     [5] = { completed = true, text = "Bat used to reach Sinfall's surface"}
---   --   }
---   -- })
-
---   local questTwo = QuestView.Acquire()
---   tracker:AddView(questTwo)
---   questTwo:Update({
---     name = "The Rescue of Herbert Gloomburst",
---     completed = "text",
---     objectives = {
---       [1] = { completed = false, text = "Rescue Herbert Gloomburst from the harpy's necrotic ritual"}
---     }
---   })
-  
---   local questThree = QuestView.Acquire()
---   tracker:AddView(questThree)
---   questThree:Update({
---     name = "The Way to Hibernal Hollow",
---     completed = "text",
---     objectives = {
---       [1] = { completed = false, text = "Recruit Niya to escort the strange wildseed to Tirna Glayn."},
---     }
---   })
-
---   local questFourth = QuestView.Acquire()
---   tracker:AddView(questFourth)
---   questFourth:Update({
---     name = "A Good Heart",
---     completed = "text",
---     objectives = {
---       [1] = { completed = false, text = "Heart collected"},
---       [2] = { completed = false, text = "Heart placed in Emeni's construct."}
---     }
---   })
---   local questFive = QuestView.Acquire()
---   tracker:AddView(questFive)
---   questFive:Update({
---     name = "A Call to Maldraxxus",
---     completed = "text",
---     objectives = {
---       [1] = { completed = false, text = "Defend Maldraxxus by completing Daily Quests and World Quests, looting treasures, and slaying rare creatures. You may also defeat powerful foes in the Plaguefall and Theatre of Pain dungeons."},
---     }
---   })
-
--- end 
