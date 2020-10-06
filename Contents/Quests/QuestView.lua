@@ -680,15 +680,11 @@ end)
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
---- TODO: Need update this part later for final style
-
 Style.UpdateSkin("Default", {
   [QuestView] = {
     width = 300,
     backdrop = { 
       bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
-      -- edgeFile = [[Interface\Buttons\WHITE8X8]],
-      -- edgeSize = 1
     },
     backdropColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
     registerForClicks = { "LeftButtonDown", "RightButtonDown" },
@@ -724,8 +720,6 @@ Style.UpdateSkin("Default", {
 
       -- Header/Name child 
       Name = {
-        --text = "Exploration approfondi",
-        --setAllPoints = true,
         location = {
           Anchor("TOP"),
           Anchor("LEFT", 0, 0, "Tag", "RIGHT"),
@@ -733,15 +727,11 @@ Style.UpdateSkin("Default", {
           Anchor("BOTTOM")
         },
         sharedMediaFont = FontType("DejaVuSansCondensed Bold", 10)
-        -- font = FontType([[Interface\AddOns\SylingTracker\Media\Fonts\DejaVuSansCondensed-Bold.ttf]], 10)
       },
       -- Header/Level child 
       Level = {
         height = 16,
         width  = 30,
-        -- backdrop = {
-        --   bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
-        -- },
         backdropColor = { r = 160/255, g = 160/255, b = 160/255, a = 0.5},
         location = {
           Anchor("RIGHT", -5, 0)
@@ -750,26 +740,8 @@ Style.UpdateSkin("Default", {
         Label = {
           justifyH = "RIGHT"
         }
-        -- Header/Level/Text Child
-        -- Label = {
-        --   setAllPoints = true,
-        --   font = FontType([[Interface\AddOns\SylingTracker\Media\Fonts\PTSans-Caption-Bold.ttf]], 10),
-        --   textColor = Color(160/255, 160/255, 160/255),
-        --   shadowOffset = { x = 0.5, y = 0},
-        --   shadowColor = Color(0, 0, 0, 1)
-        -- }
       },
     },
-
-    -- -- Child Objective Test
-    -- Objectives = {
-    --   spacing = 5,
-    --   location = {
-    --     Anchor("TOP", 0, -4, "Header", "BOTTOM"),
-    --     Anchor("LEFT"),
-    --     Anchor("RIGHT")
-    --   }
-    -- },
 
     FlagsStyles = {
       [QuestView.Flags.HAS_OBJECTIVES] = {
@@ -817,107 +789,3 @@ Style.UpdateSkin("Default", {
     backdropColor = { r = 38/255, g = 97/255, b = 0/255, a = 0.73 }
   }
 })
-
-_Quest = nil
-_QuestDataCountObj = 5
-_QuestData = {
-      name = "A New Court",
-      completed = "text",
-      item = {
-        texture = 134337
-      },
-      objectives = {
-        [1] = { completed = false, text = "Picky Stefan recruited"},
-        [2] = { completed = false, text = "Hips recruited"},
-        [3] = { completed = true, text = "Lord Garridan recruited"},
-        [4] = { completed = false, text = "The Accuser recruited"},
-        [5] = { completed = false, type = "progress", text = "Bat used to reach Sinfall's surface"}
-      }
-    }
-
-ViragDevTool_AddData(_QuestData, "QuestTest")
-
-function OnLoad(self)
-  local quest = QuestView.Acquire()
-  quest:SetParent(UIParent)
-  quest:SetPoint("LEFT", 300, 0)
-  quest:SetWidth(300)
-  quest:UpdateView(_QuestData)
-
-  _Quest = quest
-end
-
-__SlashCmd__ "oi"
-function TestAddItem()
-  if _QuestData.item then 
-    _QuestData.item = nil
-    print("Remove item")
-  else 
-    _QuestData.item = { texture = 134337 }
-    print("Add Item")
-  end
-
-  _Quest:UpdateView(_QuestData)
-end
-
-__SlashCmd__ "oa"
-function TestAddObj()
-  _QuestDataCountObj = _QuestDataCountObj + 1
-  _QuestData.objectives[_QuestDataCountObj] = {
-    text = "New objectives",
-    completed = false
-  }
-
-  _Quest:UpdateView(_QuestData)
-end
-
-__SlashCmd__ "or"
-function TestRemoveObj()
-  _QuestData.objectives[_QuestDataCountObj] = nil
-
-  _QuestDataCountObj = _QuestDataCountObj - 1
-  _Quest:UpdateView(_QuestData)
-end 
-
-
-__SlashCmd__ "op"
-function TestProgresObj()
-  local progress = _QuestData.objectives[_QuestDataCountObj].type
-  if not progress then 
-    _QuestData.objectives[_QuestDataCountObj].type = "progress"
-  else 
-    _QuestData.objectives[_QuestDataCountObj].type = nil 
-  end 
-
-  _Quest:UpdateView(_QuestData)
-end 
-__SlashCmd__ "oc"
-function TestCompletedObj()
-  local completed = _QuestData.objectives[_QuestDataCountObj].completed
-  if not completed then 
-    _QuestData.objectives[_QuestDataCountObj].completed = true 
-  else 
-    _QuestData.objectives[_QuestDataCountObj].completed = false
-  end 
-
-  _Quest:UpdateView(_QuestData)
-end
-
-
-__SlashCmd__ "ot"
-function TestTimerObj()
-  local hasTimer = _QuestData.objectives[_QuestDataCountObj].hasTimer
-  if not hasTimer then 
-    print("Add Timer")
-    _QuestData.objectives[_QuestDataCountObj].hasTimer = true
-    _QuestData.objectives[_QuestDataCountObj].startTime = GetTime()
-    _QuestData.objectives[_QuestDataCountObj].duration = 120
-  else 
-    print("Remove Timer")
-    _QuestData.objectives[_QuestDataCountObj].hasTimer = nil
-    _QuestData.objectives[_QuestDataCountObj].startTime = nil
-    _QuestData.objectives[_QuestDataCountObj].duration = nil
-  end
-
-  _Quest:UpdateView(_QuestData)
-end 

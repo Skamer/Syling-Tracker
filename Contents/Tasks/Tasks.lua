@@ -27,8 +27,6 @@ _TasksModel      = RegisterModel(QuestModel, "tasks-data")
 _TASKS_CACHE = {}
 _BONUS_TASKS_CACHE = {}
 
-
-
 RegisterContentType({
   ID = "bonus-tasks",
   DisplayName = "Bonus Tasks",
@@ -56,7 +54,6 @@ end
 
 __SystemEvent__()
 function QUEST_ACCEPTED(_, questID)
-  print("QUEST_ACCEPTED", questID)
 
   if not IsQuestTask(questID) or IsWorldQuest(questID) then 
     return 
@@ -105,9 +102,6 @@ end
 
 function UpdateTask(self, questID)
   local isInArea, isOnMap, numObjectives, taskName, displayAsObjective = GetTaskInfo(questID)
-
-  print("UpdateTasks", taskName, displayAsObjective)
-
   local questData = {
     questID = questID,
     title = taskName,
@@ -116,6 +110,16 @@ function UpdateTask(self, questID)
     isInArea = isInArea,
     isOnMap = isOnMap
   }
+
+  -- Is the quest has an item quest ?
+  local itemLink, itemTexture = GetQuestLogSpecialItemInfo(GetQuestLogIndexByID(questID))
+
+  if itemLink and itemTexture then
+    questData.item = {
+      link    = itemLink,
+      texture = itemTexture
+    }
+  end 
 
   if numObjectives > 0 then 
     local objectivesData = {}

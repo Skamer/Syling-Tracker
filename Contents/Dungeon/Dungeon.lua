@@ -48,9 +48,6 @@ __SystemEvent__ "SCENARIO_CRITERIA_UPDATE" "CRITERIA_COMPLETE" "SCENARIO_UPDATE"
 function Update()
   local name, _, numObjectives = C_Scenario.GetStepInfo()
 
-  print("Name", name, "NumObjectives", numObjectives)
-
-
   local dungeonData = {
     name = name,
     numObjectives = numObjectives
@@ -97,8 +94,6 @@ function UpdateDungeonIcon(self)
     local texture = select(6, EJ_GetInstanceInfo(currentInstance))
     _DungeonModel:AddData({ icon = texture}, "dungeon")
     _DungeonModel:Flush()
-
-    print("texture", texture)
   end
 end
 -- ========================================================================= --

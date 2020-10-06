@@ -25,30 +25,6 @@ class "TasksContentView" (function(_ENV)
     end
   end
 
-
-  -- function OnAdjustHeight(self, useAnimation)
-  --   local height = 0
-  --   local maxOuterBottom 
-
-  --   for childName, child in self:GetChilds() do 
-  --     local outerBottom = child:GetBottom() 
-  --     if outerBottom then 
-  --       if not maxOuterBottom or maxOuterBottom > outerBottom then 
-  --         maxOuterBottom = outerBottom
-  --       end 
-  --     end 
-  --   end
-    
-  --   if maxOuterBottom then 
-  --     local computeHeight = self:GetTop() - maxOuterBottom + self.PaddingBottom
-  --     if useAnimation then 
-  --       self:SetAnimatedHeight(computeHeight)
-  --     else 
-  --       self:SetHeight(computeHeight)
-  --     end
-  --   end
-  -- end
-
   function AcquireTasks(self)
     local content = self:GetChild("Content")
     local tasks = content:GetChild("Tasks")
@@ -96,9 +72,9 @@ class "TasksContentView" (function(_ENV)
   function OnRelease(self)
     self:ReleaseTasks()
 
+    self:Hide()
     self:ClearAllPoints()
     self:SetParent()
-    self:Hide()
     self:CancelAdjustHeight()
     self:CancelAnimatingHeight()
 
@@ -184,6 +160,7 @@ Style.UpdateSkin("Default", {
         text = TRACKER_HEADER_OBJECTIVE
       } 
     },
+
     Tasks = {
       location = {
         Anchor("TOP"),

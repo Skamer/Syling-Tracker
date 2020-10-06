@@ -37,21 +37,4 @@ class "QuestModel" (function(_ENV)
   function RemoveQuestData(self, questID)
     self:RemoveData("quests", questID)
   end
-
-  function Print(self)
-    local data = self:GetData()
-    if data.quests then 
-      for questID, questData in pairs(data.quests) do 
-        print("Title:", questData.title)
-      end 
-    end 
-  end
-  
-  -- function Flush(self)
-  --   super.Flush(self)
-
-  --   -- print("--------------------")
-  --   -- self:Print()
-  --   -- print("-------------------")
-  -- end 
 end)

@@ -145,7 +145,7 @@ class "Settings" (function(_ENV)
 
   __Arguments__ { Setting }
   __Static__() function Register(setting)
-    SETTINGS[setting.id] = setting
+    SETTINGS[setting.ID] = setting
   end
 
   __Arguments__ { Variable.Optional(String, "global") }

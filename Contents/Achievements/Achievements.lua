@@ -168,7 +168,6 @@ function UpdateAchievement(self, achievementID)
       if bit.band(flags, EVALUATION_TREE_FLAG_PROGRESS_BAR) == EVALUATION_TREE_FLAG_PROGRESS_BAR then 
         data.text = description
         data.hasProgressBar = true
-        print("Quantity", quantity, totalQuantity, criteriaString, quantityString) 
         data.progress = quantity
         data.minProgress = 0
         data.maxProgress = totalQuantity 

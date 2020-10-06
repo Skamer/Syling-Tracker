@@ -26,7 +26,7 @@ class "Callback" (function(_ENV)
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
   -----------------------------------------------------------------------------
-  __Arguments__{ Callback + String }
+  __Arguments__{ Callable + String }
   function __ctor(self, func)
     self.func = func 
   end 

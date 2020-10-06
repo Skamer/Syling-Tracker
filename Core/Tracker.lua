@@ -290,8 +290,9 @@ class "TrackerMover" (function(_ENV)
   }
   function __ctor() end
 end)
-
-
+-------------------------------------------------------------------------------
+--                                Styles                                     --
+-------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
   [TrackerMover] = {
     backdrop = {
@@ -399,6 +400,7 @@ function OnEnable(self)
     width   = Database.GetValue("width")  or 300
     height  = Database.GetValue("height") or 325
     locked  = Database.GetValue("locked")
+    hidden  = Database.GetValue("hidden")
   end
 
   if not xPos and not yPos then 
@@ -414,6 +416,10 @@ function OnEnable(self)
     self:LockMainTracker()
   else
     self:UnlockMainTracker()
+  end
+
+  if hidden then 
+    self:HideMainTracker()
   end
   
   _Tracker.OnSizeChanged = function(tracker, width, height)
@@ -448,7 +454,7 @@ function OnEnable(self)
   _DB_READ_ONLY = false
 end
 
-__SlashCmd__ "slt" "lock"
+__SlashCmd__ "slt" "lock" "- lock the tracker, preventing to be moved or resized"
 function LockMainTracker()
   _TrackerMover:Hide()
 
@@ -463,7 +469,7 @@ function LockMainTracker()
   end 
 end
 
-__SlashCmd__ "slt" "unlock"
+__SlashCmd__ "slt" "unlock" "- unlock the tracker, allowing you to resize or move it"
 function UnlockMainTracker()
   _TrackerMover:Show()
 
@@ -474,6 +480,30 @@ function UnlockMainTracker()
     Profiles.PrepareDatabase()
     if Database.SelectTable(true, "trackers", _Tracker.ID) then 
       Database.SetValue("locked", false)
+    end
+  end
+end
+
+__SlashCmd__ "slt" "show" "- show the tracker"
+function ShowMainTracker()
+  _Tracker:Show()
+
+  if not _DB_READ_ONLY then 
+    Profiles.PrepareDatabase()
+    if Database.SelectTable(true, "trackers", _Tracker.ID) then 
+      Database.SetValue("hidden", false)
+    end
+  end
+end
+
+__SlashCmd__ "slt" "hide" "- hide the tracker"
+function HideMainTracker()
+  _Tracker:Hide()
+
+  if not _DB_READ_ONLY then 
+    Profiles.PrepareDatabase()
+    if Database.SelectTable(true, "trackers", _Tracker.ID) then 
+      Database.SetValue("hidden", true)
     end
   end
 end
