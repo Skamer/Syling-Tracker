@@ -31,22 +31,72 @@ _LibSharedMedia     = LibStub("LibSharedMedia-3.0")
 _LibDataBroker      = LibStub("LibDataBroker-1.1")
 _LibDBIcon          = LibStub("LibDBIcon-1.0")
 -- ========================================================================= --
+_SLT_LOGO           = [[Interface\AddOns\SylingTracker\Media\logo]]
 
 function OnLoad(self)
   -- Create and init the DB 
   _DB = SVManager("SylingTrackerDB")
+
+  -- Regiser the options 
+  Settings.Register("replace-blizzard-objective-tracker", true, "Blizzard/UpdateTrackerVisibility")
+  -- Register the callbacks
+  CallbackManager.Register("Blizzard/UpdateTrackerVisibility", Callback(function(replace) BLIZZARD_TRACKER_VISIBLITY_CHANGED(not replace) end))
+
+  --
+  _DB:SetDefault{ dbVersion = 1 }
+  _DB:SetDefault{ minimap = { hide = false }}
+
+  -- Setup the minimap button
+  self:SetupMinimapButton()
 end
 
+function OnEnable(self)
+  BLIZZARD_TRACKER_VISIBLITY_CHANGED(not Settings.Get("replace-blizzard-objective-tracker"))
+end
+
+__SystemEvent__()
+function BLIZZARD_TRACKER_VISIBLITY_CHANGED(isVisible)
+  if isVisible then
+    ObjectiveTracker_Initialize(ObjectiveTrackerFrame)
+    ObjectiveTrackerFrame:SetScript("OnEvent", ObjectiveTracker_OnEvent)
+    ObjectiveTrackerFrame:Show()
+    ObjectiveTracker_Update()
+  else
+    ObjectiveTrackerFrame:Hide()
+    ObjectiveTrackerFrame:SetScript("OnEvent", nil)
+  end
+end
 
 function OnQuit(self)
   -- Do a clean in the database (remove empty table) when the player log out
   Database.Clean()
 end 
 
+function SetupMinimapButton(self)
+  local LDBObject = _LibDataBroker:NewDataObject("SylingTracker", {
+    type = "launcher",
+    icon = _SLT_LOGO,
+    OnClick = function(_, button, down)
 
-__SlashCmd__ "slt" "config"
-function OpenOptions()
-  local loaded, reason = LoadAddOn("SylingTracker_Options")
+    end,
+
+    OnTooltipShow = function(tooltip)
+      tooltip:AddDoubleLine("Syling Tracker", _SLT_VERSION, 1, 106/255, 0, 1, 1, 1)
+    end
+  })
+
+  _LibDBIcon:Register("SylingTracker", LDBObject, _DB.minimap)
+end
+
+
+-- __SlashCmd__ "slt" "config"
+-- function OpenOptions()
+--   local loaded, reason = LoadAddOn("SylingTracker_Options")
+-- end
+
+__SlashCmd__ "slt" "bot" "- enable/disable the blizzard objective tracker"
+function ToggleBlizzardObjectiveTracker()
+  Settings.Set("replace-blizzard-objective-tracker", ObjectiveTrackerFrame:IsShown())
 end
 
 __SystemEvent__()
@@ -54,9 +104,6 @@ function PLAYER_ENTERING_WORLD(initialLogin, reloadingUI)
   IsInitialLogin  = initialLogin
   IsReloadingUI   = reloadingUI
 end
-
-
-
 
 -------------------------------------------------------------------------------
 -- LibSharedMedia: register the fonts
