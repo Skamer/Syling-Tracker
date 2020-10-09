@@ -141,7 +141,7 @@ class "QuestCategoryView" (function(_ENV)
 
   function OnRelease(self)
     -- Release first the children
-    self:ReleaseQuestsz()
+    self:ReleaseQuests()
 
     self:Hide()
     self:ClearAllPoints()

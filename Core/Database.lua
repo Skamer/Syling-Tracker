@@ -65,7 +65,6 @@ class "Database" (function(_ENV)
     return pairs(CURRENT_TABLE)
   end
 
-  __Arguments__ { ClassType }
   __Static__() function Clean()
     local function ClearEmptyTables(t)
       for k,v in pairs(t) do
@@ -236,7 +235,6 @@ class "Database" (function(_ENV)
     return _DB.Char.Spec
   end
 
-  __Arguments__ { ClassType }
   __Static__() function GetRaw()
     return SylingTrackerDB
   end

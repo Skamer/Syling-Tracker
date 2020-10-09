@@ -1,2 +1,5 @@
+#### 0.1.4
+* Fixed [ticket #2](https://github.com/Skamer/Syling-Tracker/issues/2) : an important error when a category has been removed. 
+* Fixed [ticket #2](https://github.com/Skamer/Syling-Tracker/issues/2) : an error relative to Database.Clean
 #### 0.1.3
 * Fixed an issue where the things related to Blizzard objective tracker wasn't added.
