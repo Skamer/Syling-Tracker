@@ -106,7 +106,6 @@ do
   stopWatching.order = 50
   stopWatching.icon = { atlas = AtlasType("transmog-icon-hidden") }
   stopWatching.handler = function(questID)
-    print(questID)
     local questLogIndex = GetQuestLogIndexByID(questID)
     RemoveQuestWatch(questLogIndex)
   end

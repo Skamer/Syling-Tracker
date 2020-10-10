@@ -101,6 +101,7 @@ function OnInactive(self)
   _QuestModel:ClearData()
   
   wipe(QUESTS_CACHE)
+  wipe(QUESTS_WITH_PROGRESS)
 end
 -- ========================================================================= --
 function LoadQuests(self)

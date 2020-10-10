@@ -435,8 +435,7 @@ class "ObjectiveView" (function(_ENV)
     self.State = nil 
     self.Flags = nil
 
-    -- REVIEW: Should be enought ?
-    ResetStyles(self, nil, true)
+    ResetStyles(self)
   end 
 
   function OnAcquire(self)

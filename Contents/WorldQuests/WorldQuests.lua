@@ -10,14 +10,16 @@ Syling                   "SylingTracker.WorldQuest"                          ""
 -- ========================================================================= --
 import                          "SLT"
 -- ========================================================================= --
+_Active                         = false 
+-- ========================================================================= --
 RegisterContentType = API.RegisterContentType
 RegisterModel = API.RegisterModel
 -- ========================================================================= --
 _WorldQuestsModel = RegisterModel(QuestModel, "world-quests-data")
 -- ========================================================================= --
-IsWorldQuest                        = QuestUtils_IsQuestWorldQuest
+RequestLoadQuestByID          = C_QuestLog.RequestLoadQuestByID
+IsWorldQuest                  = QuestUtils_IsQuestWorldQuest
 -- ========================================================================= --
-
 RegisterContentType({
   ID = "world-quests",
   DisplayName = "World Quests",
@@ -26,14 +28,32 @@ RegisterContentType({
   DefaultModel = _WorldQuestsModel,
   DefaultViewClass = WorldQuestsContentView,
   Events = { "PLAYER_ENTERING_WORLD", "SLT_WORLD_QUEST_ACCEPTED", "SLT_WORLD_QUEST_REMOVED"},
-  Status = function(event, ...) return _M:HasWorldQuest() end
+  Status = function(event, ...) return _M:HasWorldQuests() end
 })
-
-__SystemEvent__()
-function PLAYER_ENTERING_WORLD()
+-- ========================================================================= --
+-- Keep a memory the list of world quests id 
+WORLD_QUESTS_CACHE = {}
+-- ========================================================================= --
+__ActiveOnEvents__ "PLAYER_ENTERING_WORLD" "QUEST_ACCEPTED" "QUEST_REMOVED"
+function ActivateOn(self)
+  return self:HasWorldQuests()
+end
+-- ========================================================================= --
+function OnActive(self)
   _M:LoadWorldQuests()
 end
 
+function OnInactive(self)
+  wipe(WORLD_QUESTS_CACHE)
+end 
+
+__SystemEvent__()
+function QUEST_DATA_LOAD_RESULT(questID, success)
+  if success and WORLD_QUESTS_CACHE[questID] then
+    _M:UpdateWorldQuest(questID)
+    _WorldQuestsModel:Flush()
+  end 
+end
 
 __SystemEvent__()
 function QUEST_REMOVED(questID)
@@ -41,6 +61,10 @@ function QUEST_REMOVED(questID)
     return 
   end
 
+  -- Remove the world quest from cache
+  WORLD_QUESTS_CACHE[questID] = nil
+
+  -- Remove the data from model, and send an update
   _WorldQuestsModel:RemoveQuestData(questID)
   _WorldQuestsModel:Flush()
 
@@ -53,37 +77,51 @@ function QUEST_ACCEPTED(_, questID)
     return 
   end
 
-  _M:UpdateWorldQuest(questID)
+  -- Add the world quest into cache
+  WORLD_QUESTS_CACHE[questID] = true
 
-  _WorldQuestsModel:Flush()
+  -- Send a request for get the world quest information, the update will be 
+  -- continued by the QUEST_DATA_LOAD_RESULT event 
+  RequestLoadQuestByID(questID)
 
+  -- Trigger a custom event
   _M:FireSystemEvent("SLT_WORLD_QUEST_ACCEPTED", questID)
 end
 
-function HasWorldQuest(self)
-  local tasks = GetTasksTable()
-  for _, questID in ipairs(tasks) do 
-    local isInArea = GetTaskInfo(questID)
-    if IsWorldQuest(questID) and isInArea then 
-      return true 
-    end 
+
+__SystemEvent__()
+function QUEST_LOG_UPDATE()
+  for questID in pairs(WORLD_QUESTS_CACHE) do
+    _M:UpdateWorldQuest(questID)
   end
-  
-  return false
+
+  _WorldQuestsModel:Flush()
 end
 
 function LoadWorldQuests(self)
   local tasks = GetTasksTable()
   for _, questID in ipairs(tasks) do 
     local isInArea = GetTaskInfo(questID) 
-    if IsWorldQuest(questID) and isInArea then 
-      self:UpdateWorldQuest(questID)
+    if IsWorldQuest(questID) and isInArea then
+      -- Add the world quest into cache
+      WORLD_QUESTS_CACHE[questID] = true
+
+      -- Send a request for get the world quest information, the update will be 
+      -- continued by the QUEST_DATA_LOAD_RESULT event 
+      RequestLoadQuestByID(questID)
     end
   end
   
   _WorldQuestsModel:Flush()
 end
 
+function UpdateWorldQuests()
+  for questID in pairs(WORLD_QUESTS_CACHE) do 
+    _M:UpdateQuest(questID)
+  end
+  
+   _WorldQuestsModel:Flush()
+end
 
 function UpdateWorldQuest(self, questID)
   local isInArea, isOnMap, numObjectives, questName, displayAsObjective = GetTaskInfo(questID)
@@ -125,7 +163,6 @@ function UpdateWorldQuest(self, questID)
         data.maxProgress = 100
         data.progressText = PERCENTAGE_STRING:format(progress)
       end
-      
       objectivesData[index] = data 
     end
     questData.objectives = objectivesData
@@ -133,9 +170,22 @@ function UpdateWorldQuest(self, questID)
 
   _WorldQuestsModel:AddQuestData(questID, questData)
 end
+
+
+function HasWorldQuests(self)
+  local tasks = GetTasksTable()
+  for _, questID in ipairs(tasks) do 
+    local isInArea = GetTaskInfo(questID)
+    if IsWorldQuest(questID) and isInArea then 
+      return true 
+    end 
+  end
+  
+  return false
+end
 -- ========================================================================= --
 -- Debug Utils Tools
 -- ========================================================================= --
 if ViragDevTool_AddData then 
-  ViragDevTool_AddData(_WorldQuestsModel, "WorldQuestsModel")
+  ViragDevTool_AddData(_WorldQuestsModel, "SLT World Quest Model")
 end
