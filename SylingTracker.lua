@@ -99,6 +99,26 @@ function ToggleBlizzardObjectiveTracker()
   Settings.Set("replace-blizzard-objective-tracker", ObjectiveTrackerFrame:IsShown())
 end
 
+__SlashCmd__ "slt" "lock" "- lock the Tracker and the Item Bar, preventing them to be moved or resized"
+function LockCommand(self)
+  _M:FireSystemEvent("SLT_LOCK_COMMAND")
+end
+
+__SlashCmd__ "slt" "unlock" "- unlock the Tracker and the Item Bar, allowing you to resize or move them"
+function UnlockCommand(self)
+  _M:FireSystemEvent("SLT_UNLOCK_COMMAND")
+end
+
+__SlashCmd__ "slt" "show" "- show the Tracker and the Item bar"
+function ShowCommand(self)
+  _M:FireSystemEvent("SLT_SHOW_COMMAND")
+end
+
+__SlashCmd__ "slt" "hide" "- hide the Tracker and the Item Bar"
+function HideCommand(self)
+  _M:FireSystemEvent("SLT_HIDE_COMMAND")
+end
+
 __SystemEvent__()
 function PLAYER_ENTERING_WORLD(initialLogin, reloadingUI)
   IsInitialLogin  = initialLogin

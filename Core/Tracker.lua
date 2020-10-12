@@ -393,7 +393,7 @@ function OnEnable(self)
   _TrackerMover.MoveTarget = _Tracker
 
   Profiles.PrepareDatabase()
-  local width, height, xPos, yPos, locked
+  local width, height, xPos, yPos, locked, hidden
   if Database.SelectTable(false, "trackers", _Tracker.ID) then 
     xPos    = Database.GetValue("xPos")
     yPos    = Database.GetValue("yPos")
@@ -454,7 +454,7 @@ function OnEnable(self)
   _DB_READ_ONLY = false
 end
 
-__SlashCmd__ "slt" "lock" "- lock the tracker, preventing to be moved or resized"
+__SystemEvent__ "SLT_LOCK_COMMAND"
 function LockMainTracker()
   _TrackerMover:Hide()
 
@@ -469,7 +469,7 @@ function LockMainTracker()
   end 
 end
 
-__SlashCmd__ "slt" "unlock" "- unlock the tracker, allowing you to resize or move it"
+__SystemEvent__ "SLT_UNLOCK_COMMAND"
 function UnlockMainTracker()
   _TrackerMover:Show()
 
@@ -484,7 +484,7 @@ function UnlockMainTracker()
   end
 end
 
-__SlashCmd__ "slt" "show" "- show the tracker"
+__SystemEvent__ "SLT_SHOW_COMMAND"
 function ShowMainTracker()
   _Tracker:Show()
 
@@ -496,7 +496,7 @@ function ShowMainTracker()
   end
 end
 
-__SlashCmd__ "slt" "hide" "- hide the tracker"
+__SystemEvent__ "SLT_HIDE_COMMAND"
 function HideMainTracker()
   _Tracker:Hide()
 

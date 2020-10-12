@@ -11,4 +11,5 @@
   <Script file="Model.lua"/>
   <Script file="Tracker.lua"/>
   <Script file="ContentType.lua"/>
+  <Script file="ItemBar.lua"/>
 </Ui>

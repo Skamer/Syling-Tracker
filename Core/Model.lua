@@ -163,7 +163,19 @@ class "Model" (function(_ENV)
 
   function ForceFlush(self) 
     self:OnFlush()
-  end 
+  end
+
+  function SecureFlush(self)
+    if not self._pendingFlush then
+      self._pendingFlush = true 
+
+      Scorpio.Delay(0.1, function()
+        NoCombat()
+        self:OnFlush()
+        self._pendingFlush = nil 
+      end)
+    end
+  end
 
   function GetData(self) return self.data end 
   -----------------------------------------------------------------------------
