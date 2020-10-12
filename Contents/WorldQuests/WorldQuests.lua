@@ -12,8 +12,11 @@ import                          "SLT"
 -- ========================================================================= --
 _Active                         = false 
 -- ========================================================================= --
-RegisterContentType = API.RegisterContentType
-RegisterModel = API.RegisterModel
+RegisterContentType           = API.RegisterContentType
+RegisterModel                 = API.RegisterModel
+ItemBar_AddItemData           = API.ItemBar_AddItemData
+ItemBar_RemoveItemData        = API.ItemBar_RemoveItemData
+ItemBar_Update                = API.ItemBar_Update
 -- ========================================================================= --
 _WorldQuestsModel = RegisterModel(QuestModel, "world-quests-data")
 -- ========================================================================= --
@@ -32,7 +35,8 @@ RegisterContentType({
 })
 -- ========================================================================= --
 -- Keep a memory the list of world quests id 
-WORLD_QUESTS_CACHE = {}
+WORLD_QUESTS_CACHE        = {}
+WORLD_QUESTS_WITH_ITEMS   = {}
 -- ========================================================================= --
 __ActiveOnEvents__ "PLAYER_ENTERING_WORLD" "QUEST_ACCEPTED" "QUEST_REMOVED"
 function ActivateOn(self)
@@ -45,6 +49,13 @@ end
 
 function OnInactive(self)
   wipe(WORLD_QUESTS_CACHE)
+
+  for questID in pairs(WORLD_QUESTS_WITH_ITEMS) do 
+    ItemBar_RemoveItemData(questID)
+  end
+  ItemBar_Update()
+
+  wipe(WORLD_QUESTS_WITH_ITEMS)
 end 
 
 __SystemEvent__()
@@ -63,6 +74,14 @@ function QUEST_REMOVED(questID)
 
   -- Remove the world quest from cache
   WORLD_QUESTS_CACHE[questID] = nil
+
+  -- If the world quest had an item, remove it 
+  if WORLD_QUESTS_WITH_ITEMS[questID] then 
+    ItemBar_RemoveItemData(questID)
+    ItemBar_Update()
+
+    WORLD_QUESTS_WITH_ITEMS[questID] = nil 
+  end
 
   -- Remove the data from model, and send an update
   _WorldQuestsModel:RemoveQuestData(questID)
@@ -137,12 +156,25 @@ function UpdateWorldQuest(self, questID)
 
   -- Is the quest has an item quest ?
   local itemLink, itemTexture = GetQuestLogSpecialItemInfo(GetQuestLogIndexByID(questID))
-
   if itemLink and itemTexture then
     questData.item = {
       link    = itemLink,
       texture = itemTexture
     }
+
+    -- We check if the world quest has already the item for avoiding useless data 
+    -- update.
+    if not WORLD_QUESTS_WITH_ITEMS[questID] then 
+      ItemBar_AddItemData(questID, {
+        link = itemLink, 
+        texture = itemTexture
+      })
+      ItemBar_Update()
+
+      WORLD_QUESTS_WITH_ITEMS[questID] = true 
+    end
+  else 
+    WORLD_QUESTS_WITH_ITEMS[questID] = nil
   end
 
   if numObjectives > 0 then 

@@ -16,6 +16,9 @@ _Active                         = false
 IsOnShadowlands               = Utils.IsOnShadowlands
 RegisterContentType           = API.RegisterContentType
 RegisterModel                 = API.RegisterModel
+ItemBar_AddItemData           = API.ItemBar_AddItemData
+ItemBar_RemoveItemData        = API.ItemBar_RemoveItemData
+ItemBar_Update                = API.ItemBar_Update
 -- ========================================================================= --
 _QuestModel                   = RegisterModel(QuestModel, "quests-data")
 -- ========================================================================= --
@@ -77,6 +80,7 @@ DISTANCE_UPDATER_ENABLED      = false
 QUESTS_CACHE                  = {}
 QUEST_HEADERS_CACHE           = {}
 QUESTS_WITH_PROGRESS          = {}
+QUESTS_WITH_ITEMS             = {}
 -- ========================================================================= --
 __ActiveOnEvents__ "PLAYER_ENTERING_WORLD" "QUEST_WATCH_LIST_CHANGED"
 function ActivateOn(self, event, ...)
@@ -102,6 +106,13 @@ function OnInactive(self)
   
   wipe(QUESTS_CACHE)
   wipe(QUESTS_WITH_PROGRESS)
+
+  for questID in pairs() do
+    ItemBar_RemoveItemData(questID)
+  end
+  ItemBar_Update()
+
+  wipe(QUESTS_WITH_ITEMS)
 end
 -- ========================================================================= --
 function LoadQuests(self)
@@ -236,7 +247,21 @@ function UpdateQuest(self, questID)
       link    = itemLink,
       texture = itemTexture
     }
-  end 
+
+    -- We check if the quest has already the item for avoiding useless data 
+    -- update.
+    if not QUESTS_WITH_ITEMS[questID] then 
+      ItemBar_AddItemData(questID, {
+        link = itemLink, 
+        texture = itemTexture
+      })
+      ItemBar_Update()
+
+      QUESTS_WITH_ITEMS[questID] = true 
+    end
+  else 
+    QUESTS_WITH_ITEMS[questID] = nil 
+  end
 
   -- Fetch the objectives
   if numObjectives > 0 then
@@ -315,7 +340,13 @@ function QUEST_WATCH_LIST_CHANGED(questID, isAdded)
 
     _M:UpdateQuest(questID)
   else 
-    QUESTS_CACHE[questID] = nil 
+    QUESTS_CACHE[questID] = nil
+    
+    if QUESTS_WITH_ITEMS[questID] then 
+      ItemBar_RemoveItemData(questID)
+      ItemBar_Update()
+      QUESTS_WITH_ITEMS[questID] = nil
+    end
 
     _QuestModel:RemoveQuestData(questID)
     _QuestModel:Flush()
