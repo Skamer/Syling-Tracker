@@ -18,17 +18,14 @@ RegisterContextMenuPattern = API.RegisterContextMenuPattern
 -- Quest Pattern                                                             --
 -------------------------------------------------------------------------------
 do
-  local SetSuperTrackedQuestID = SetSuperTrackedQuestID
+  local SetSuperTrackedQuestID = C_SuperTrack.SetSuperTrackedQuestID
   local QuestSuperTracking_ChooseClosestQuest = QuestSuperTracking_ChooseClosestQuest
   local GetQuestLink = GetQuestLink
   local ChatFrame_OpenChat = ChatFrame_OpenChat
-  local GetQuestLogIndexByID = GetQuestLogIndexByID
-  local IsQuestComplete = IsQuestComplete
-  local GetQuestLogIsAutoComplete = GetQuestLogIsAutoComplete
   local QuestLogPopupDetailFrame_Show = QuestLogPopupDetailFrame_Show
   local ShowQuestComplete = ShowQuestComplete
   local LFGListUtil_FindQuestGroup = LFGListUtil_FindQuestGroup
-  local RemoveQuestWatch = RemoveQuestWatch
+  local RemoveQuestWatch = C_QuestLog.RemoveQuestWatch
   local QuestMapQuestOptions_AbandonQuest = QuestMapQuestOptions_AbandonQuest
 
 
@@ -73,12 +70,12 @@ do
   showDetails.text = "Show details"
   showDetails.order = 30
   showDetails.icon = { atlas = AtlasType("adventureguide-icon-whatsnew")}
-  showDetails.handler = function(questID) 
-      local questLogIndex = GetQuestLogIndexByID(questID)
-      if IsQuestComplete(questID) and GetQuestLogIsAutoComplete(questLogIndex) then
-        ShowQuestComplete(questLogIndex)
-      else
-        QuestLogPopupDetailFrame_Show(questLogIndex)
+  showDetails.handler = function(questID)
+      local quest = QuestCache:Get(questID)
+      if quest.isAutoComplete and quest:IsComplete() then 
+        ShowQuestComplete(questID)
+      else 
+        QuestLogPopupDetailFrame_Show(quest:GetQuestLogIndex())
       end
   end
   questPattern:AddAction(showDetails)
@@ -105,10 +102,7 @@ do
   stopWatching.text = "Stop watching"
   stopWatching.order = 50
   stopWatching.icon = { atlas = AtlasType("transmog-icon-hidden") }
-  stopWatching.handler = function(questID)
-    local questLogIndex = GetQuestLogIndexByID(questID)
-    RemoveQuestWatch(questLogIndex)
-  end
+  stopWatching.handler = function(questID) RemoveQuestWatch(questID) end
   questPattern:AddAction(stopWatching)
 
   -- The abandon quest part

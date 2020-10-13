@@ -58,12 +58,12 @@ class "AutoQuestView" (function(_ENV)
 
     if state == State.Offer then 
       self.OnClick = function()
-        ShowQuestOffer(GetQuestLogIndexByID(questID))
+        ShowQuestOffer(questID)
         AutoQuestPopupTracker_RemovePopUp(questID)
       end
     elseif state == State.Complete then 
       self.OnClick = function()
-        ShowQuestComplete(GetQuestLogIndexByID(questID))
+        ShowQuestComplete(questID)
         AutoQuestPopupTracker_RemovePopUp(questID)
       end
     end 

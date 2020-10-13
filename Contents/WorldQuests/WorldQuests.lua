@@ -8,20 +8,26 @@
 -- ========================================================================= --
 Syling                   "SylingTracker.WorldQuest"                          ""
 -- ========================================================================= --
-import                          "SLT"
+import                              "SLT"
 -- ========================================================================= --
-_Active                         = false 
+_Active                             = false 
 -- ========================================================================= --
-RegisterContentType           = API.RegisterContentType
-RegisterModel                 = API.RegisterModel
-ItemBar_AddItemData           = API.ItemBar_AddItemData
-ItemBar_RemoveItemData        = API.ItemBar_RemoveItemData
-ItemBar_Update                = API.ItemBar_Update
+RegisterContentType                 = API.RegisterContentType
+RegisterModel                       = API.RegisterModel
+ItemBar_AddItemData                 = API.ItemBar_AddItemData
+ItemBar_RemoveItemData              = API.ItemBar_RemoveItemData
+ItemBar_Update                      = API.ItemBar_Update
 -- ========================================================================= --
-_WorldQuestsModel = RegisterModel(QuestModel, "world-quests-data")
+RequestLoadQuestByID                =  C_QuestLog.RequestLoadQuestByID
+IsWorldQuest                        = QuestUtils_IsQuestWorldQuest
+GetTaskInfo                         = GetTaskInfo
+GetTasksTable                       = GetTasksTable
+GetLogIndexForQuestID               = C_QuestLog.GetLogIndexForQuestID
+GetQuestLogSpecialItemInfo          = GetQuestLogSpecialItemInfo
+GetQuestObjectiveInfo               = GetQuestObjectiveInfo
+GetQuestProgressBarPercent          = GetQuestProgressBarPercent
 -- ========================================================================= --
-RequestLoadQuestByID          = C_QuestLog.RequestLoadQuestByID
-IsWorldQuest                  = QuestUtils_IsQuestWorldQuest
+_WorldQuestsModel                   = RegisterModel(QuestModel, "world-quests-data")
 -- ========================================================================= --
 RegisterContentType({
   ID = "world-quests",
@@ -35,8 +41,8 @@ RegisterContentType({
 })
 -- ========================================================================= --
 -- Keep a memory the list of world quests id 
-WORLD_QUESTS_CACHE        = {}
-WORLD_QUESTS_WITH_ITEMS   = {}
+WORLD_QUESTS_CACHE                  = {}
+WORLD_QUESTS_WITH_ITEMS             = {}
 -- ========================================================================= --
 __ActiveOnEvents__ "PLAYER_ENTERING_WORLD" "QUEST_ACCEPTED" "QUEST_REMOVED"
 function ActivateOn(self)
@@ -155,7 +161,7 @@ function UpdateWorldQuest(self, questID)
   }
 
   -- Is the quest has an item quest ?
-  local itemLink, itemTexture = GetQuestLogSpecialItemInfo(GetQuestLogIndexByID(questID))
+  local itemLink, itemTexture, charges, showItemWhenComplete = GetQuestLogSpecialItemInfo(GetLogIndexForQuestID(questID))
   if itemLink and itemTexture then
     questData.item = {
       link    = itemLink,

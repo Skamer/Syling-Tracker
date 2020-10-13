@@ -127,8 +127,8 @@ class "QuestView" (function(_ENV)
 
     -- Tag 
     local tag = data.tag 
-    if tag and tag ~= 0 then
-      local coords = QUEST_TAG_TCOORDS[tag]
+    if tag then
+      local coords = QUEST_TAG_TCOORDS[tag.tagID]
       if coords then
         tagIcon:SetTexCoord(unpack(coords))
         tagIcon:Show() 
@@ -166,93 +166,7 @@ class "QuestView" (function(_ENV)
     end
 
     self.Flags = flags
-  end 
-
-
-  -- function OnViewUpdate(self, data, updater)
-
-  --   local header = self:GetChild("Header")
-  --   local objectives
-  --   local name = header:GetChild("Name")
-  --   local levelBadge = header:GetChild("Level")
-  --   local levelTextBadge = levelBadge:GetChild("Label")
-  --   -- local levelText = levelFrame:GetChild("Text")
-
-  --   name:SetText(data.name)
-
-  --   levelTextBadge:SetText(data.level)
-
-  --   if data.level then 
-  --     local difficultyColor = GetQuestDifficultyColor(data.level)
-  --     if difficultyColor then 
-  --       Style[levelTextBadge].textColor = Color(difficultyColor)
-  --       Style[levelBadge].backdropColor = {
-  --         r = difficultyColor.r,
-  --         g = difficultyColor.g,
-  --         b = difficultyColor.b, 
-  --         a = 0.5
-  --       }
-  --     end 
-  --   end
-
-  --   if data.objectives then 
-  --     objectives = self:AcquireObjectives()
-  --     objectives:Update(data.objectives, updater)
-  --   else 
-  --     self:ReleaseObjectives()
-  --   end
-
-  --   if data.questID then
-  --     self.OnClick = function() 
-  --       ShowContextMenu("quest", self, data.questID)
-  --     end 
-  --   end
-
-  --   local flags = Flags.NONE
-  --   if data.item then 
-  --     flags = Flags.HAS_ITEM
-  --   end
-
-  --   if flags ~= self.Flags then
-  --     print("Reset self")
-  --     ResetStyles(self, nil, true)
-
-  --     if objectives then
-  --       print("Reset objectives")
-  --       ResetStyles(objectives, nil, true)
-  --       Style[objectives] = self.Objectives
-  --     end
-  --     ResetStyles(name)
-  --     ResetStyles(header)
-
-  --     if ValidateFlags(Flags.HAS_ITEM, flags) then 
-  --       local item = self:AcquireItemBadge()
-  --       item:Show()
-  --       Style[item].Icon.fileID = data.item.texture 
-
-  --       if data.item.link then 
-  --         item.OnLeave = function() GameTooltip:Hide() end 
-
-  --         item.OnEnter = function()
-  --           GameTooltip:SetOwner(item, "ANCHOR_LEFT")
-  --           GameTooltip:SetHyperlink(data.item.link)
-  --           GameTooltip:Show()
-  --         end
-  --       end
-  --     else 
-  --       self:ReleaseItemBadge()
-  --     end
-
-  --     if flags ~= Flags.NONE then 
-  --       local styles = self.FlagsStyles and self.FlagsStyles[flags]
-  --       if styles then 
-  --         Style[self] = styles 
-  --       end 
-  --     end
-  --   end 
-
-  --   self.Flags = flags
-  -- end
+  end
 
   function OnAdjustHeight(self, useAnimation)
     local height = 0
@@ -777,15 +691,14 @@ Style.UpdateSkin("Default", {
       }
     }
   },
-  [LegendaryQuestView] = {
-    backdropColor = { r = 11/255, g = 101/255, b = 142/255, a = 0.73 }
-  },
+  -- [LegendaryQuestView] = {
+  --   backdropColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
+  -- },
 
   [RaidQuestView] = {
     backdropColor = { r = 0, g = 84/255, b = 2/255, a = 0.73}
   },
   [DungeonQuestView] = {
-    -- backdropColor = { r = 11/255, g = 101/255, b = 142/255, a = 0.83 }
-    backdropColor = { r = 38/255, g = 97/255, b = 0/255, a = 0.73 }
+    backdropColor = { r = 0, g = 72/255, b = 124/255, a = 0.73 }
   }
 })

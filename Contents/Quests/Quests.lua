@@ -8,46 +8,41 @@
 -- ========================================================================= --
 Syling                      "SylingTracker.Quests"                           ""
 -- ========================================================================= --
-import                          "SLT"
+import                              "SLT"
 -- ========================================================================= --
-_Active                         = false
+_Active                             = false
 -- ========================================================================= --
 -- Check if the player is on the Shadowlands environment
-IsOnShadowlands               = Utils.IsOnShadowlands
-RegisterContentType           = API.RegisterContentType
-RegisterModel                 = API.RegisterModel
-ItemBar_AddItemData           = API.ItemBar_AddItemData
-ItemBar_RemoveItemData        = API.ItemBar_RemoveItemData
-ItemBar_Update                = API.ItemBar_Update
+IsOnShadowlands                     = Utils.IsOnShadowlands
+RegisterContentType                 = API.RegisterContentType
+RegisterModel                       = API.RegisterModel
+ItemBar_AddItemData                 = API.ItemBar_AddItemData
+ItemBar_RemoveItemData              = API.ItemBar_RemoveItemData
+ItemBar_Update                      = API.ItemBar_Update
 -- ========================================================================= --
-_QuestModel                   = RegisterModel(QuestModel, "quests-data")
--- ========================================================================= --
-RequestLoadQuestByID          = C_QuestLog.RequestLoadQuestByID
-GetQuestName                  = QuestUtils_GetQuestName
-IsWorldQuest                  = QuestUtils_IsQuestWorldQuest
-IsRaidQuest                   = Utils.Quest.IsRaidQuest
-IsDungeonQuest                = Utils.Quest.IsDungeonQuest
-SelectQuestLogEntry           = SelectQuestLogEntry
-GetNumQuestObjectives         = C_QuestLog.GetNumQuestObjectives
-IsQuestBounty                 = Utils.Quest.IsQuestBounty_CrossSupport
-IsQuestTask                   = Utils.Quest.IsQuestTask_CrossSupport
-IsQuestTrivial                = C_QuestLog.IsQuestTrivial
-GetQuestDifficultyLevel       = C_QuestLog.GetQuestDifficultyLevel
--- ========================================================================= --
--- Function with cross Support (8.3 & Shadowlands)
--- TODO: Need later to edit these function when the prepatch hits live 
--- servers
--- ========================================================================= --
-IsQuestWatched                = Utils.Quest.IsQuestWatched_CrossSupport
-GetNumQuestWatches            = Utils.Quest.GetNumQuestWatches_CrossSupport
-GetNumQuestLogEntries         = Utils.Quest.GetNumQuestLogEntries_CrossSupport
-GetQuestLogIndexByID          = Utils.Quest.GetQuestLogIndexByID_CrossSupport
-GetInfo                       = Utils.Quest.GetInfo_CrossSupport
-IsLegendaryQuest              = Utils.Quest.IsLegendaryQuest_CrossSupport
-GetDistanceSqToQuest          = Utils.Quest.GetDistanceSqToQuest_CrossSupport
-IsQuestBounty                 = Utils.Quest.IsQuestBounty_CrossSupport
-IsQuestTask                   = Utils.Quest.IsQuestTask_CrossSupport
-IsComplete                    = Utils.Quest.IsComplete_CrossSupport
+RequestLoadQuestByID                = C_QuestLog.RequestLoadQuestByID
+GetQuestName                        = QuestUtils_GetQuestName
+IsWorldQuest                        = QuestUtils_IsQuestWorldQuest
+IsRaidQuest                         = Utils.Quest.IsRaidQuest
+IsDungeonQuest                      = Utils.Quest.IsDungeonQuest
+SelectQuestLogEntry                 = SelectQuestLogEntry
+GetNumQuestObjectives               = C_QuestLog.GetNumQuestObjectives
+IsQuestBounty                       = C_QuestLog.IsQuestBounty
+IsQuestTask                         = C_QuestLog.IsQuestTask
+IsQuestTrivial                      = C_QuestLog.IsQuestTrivial
+GetQuestDifficultyLevel             = C_QuestLog.GetQuestDifficultyLevel
+IsQuestWatched                      = QuestUtils_IsQuestWatched
+GetNumQuestWatches                  = C_QuestLog.GetNumQuestWatches
+GetNumQuestLogEntries               = C_QuestLog.GetNumQuestLogEntries
+GetLogIndexForQuestID               = C_QuestLog.GetLogIndexForQuestID
+GetInfo                             = C_QuestLog.GetInfo
+IsLegendaryQuest                    = C_QuestLog.IsLegendaryQuest
+GetDistanceSqToQuest                = C_QuestLog.GetDistanceSqToQuest
+IsQuestBounty                       = C_QuestLog.IsQuestBounty
+IsQuestTask                         = C_QuestLog.IsQuestTask
+IsQuestComplete                     = C_QuestLog.IsComplete
+SetSelectedQuest                    = C_QuestLog.SetSelectedQuest
+GetQuestTagInfo                     = C_QuestLog.GetQuestTagInfo
 -- ========================================================================= --
 -- Shadowlands Only function
 -- Don't use them in non Shadowlands environments
@@ -64,8 +59,11 @@ GetQuestLogCompletionText     = GetQuestLogCompletionText
 SelectQuestLogEntry           = SelectQuestLogEntry
 GetQuestLogSpecialItemInfo    = GetQuestLogSpecialItemInfo
 -- ========================================================================= --
+_QuestModel                         = RegisterModel(QuestModel, "quests-data")
+-- ========================================================================= --
 -- Register the achievements content type
 -- ========================================================================= --
+
 RegisterContentType({
   ID = "quests",
   DisplayName = "Quests",
@@ -119,39 +117,76 @@ function LoadQuests(self)
   local numEntries, numQuests = GetNumQuestLogEntries()
   local currentHeader = "Misc"
 
-  for i = 1, numEntries do 
-    local title, questLogIndex, questID, campaignID, level, difficultyLevel, 
-      suggestedGroup, frequency, isHeader, isCollapsed, startEvent, isTask,
-      isBounty, isStory, isScaling, isOnMap, hasLocalPOI, isHidden,
-      isAutoComplete, overridesSortOrder, readyForTranslation = GetInfo(i)
+  for i = 1, numEntries do
 
-    if isHeader then 
-      currentHeader = title 
-    elseif IsQuestWatched(IsOnShadowlands() and questID or i) and not isHidden and not isBounty and not isTask then 
+    local questInfo = GetInfo(i)
+
+
+    -- local title, questLogIndex, questID, campaignID, level, difficultyLevel, 
+    --   suggestedGroup, frequency, isHeader, isCollapsed, startEvent, isTask,
+    --   isBounty, isStory, isScaling, isOnMap, hasLocalPOI, isHidden,
+    --   isAutoComplete, overridesSortOrder, readyForTranslation = GetInfo(i)
+    local questID   = questInfo.questID
+    local isHeader  = questInfo.isHeader
+    local isHidden  = questInfo.isHidden
+    local isBounty  = questInfo.isBounty
+    local isTask    = questInfo.isTask
+
+    if questInfo.isHeader then 
+      currentHeader = questInfo.title
+    elseif IsQuestWatched(questID) and not isHidden and not isBounty and not isTask then
+    -- elseif IsQuestWatched(IsOnShadowlands() and questID or i) and not questInfo.isHidden and not isBounty and not isTask then 
       QUESTS_CACHE[questID] = true
       QUEST_HEADERS_CACHE[questID] = currentHeader
 
       local questData = {
-        title = title,
-        name = title,
-        questLogIndex = questLogIndex,
-        questID = questID, 
-        campaignID = campaignID,
-        level = level,
-        suggestedGroup = suggestedGroup,
-        difficultyLevel = difficultyLevel,
-        isBounty = isBounty,
-        isStory = isStory, 
-        isScaling = isScaling, 
-        isOnMap = isOnMap,
-        hasLocalPOI = hasLocalPOI,
-        isHidden = isHidden,
-        isAutoComplete = isAutoComplete,
-        overridesSortOrder = overridesSortOrder,
-        readyForTranslation = readyForTranslation,
-        header = currentHeader,
-        category = currentHeader, 
+        title               = questInfo.title,
+        name                = questInfo.title,
+        questLogIndex       = questInfo.questLogIndex,
+        questID             = questInfo.questID,
+        campaignID          = questInfo.campaignID,
+        level               = questInfo.level,
+        difficultyLevel     = questInfo.difficultyLevel,
+        suggestedGroup      = questInfo.suggestedGroup,
+        frequency           = questInfo.frequency,
+        isHeader            = questInfo.isHeader,
+        isCollapsed         = questInfo.isCollapsed,
+        startEvent          = questInfo.startEvent,
+        isTask              = questInfo.isTask,
+        isBounty            = questInfo.isBounty,
+        isStory             = questInfo.isStory,
+        isScaling           = questInfo.isScaling,
+        isOnMap             = questInfo.isOnMap,
+        hasLocalPOI         = questInfo.hasLocalPOI,
+        isHidden            = questInfo.isHidden,
+        isAutoComplete      = questInfo.isAutoComplete,
+        overridesSortOrder  = questInfo.overridesSortOrder,
+        readyForTranslation = questInfo.readyForTranslation,
+        header              = currentHeader,
+        category            = currentHeader
       }
+
+      -- local questData = {
+      --   title = title,
+      --   name = title,
+      --   questLogIndex = questLogIndex,
+      --   questID = questID, 
+      --   campaignID = campaignID,
+      --   level = level,
+      --   suggestedGroup = suggestedGroup,
+      --   difficultyLevel = difficultyLevel,
+      --   isBounty = isBounty,
+      --   isStory = isStory, 
+      --   isScaling = isScaling, 
+      --   isOnMap = isOnMap,
+      --   hasLocalPOI = hasLocalPOI,
+      --   isHidden = isHidden,
+      --   isAutoComplete = isAutoComplete,
+      --   overridesSortOrder = overridesSortOrder,
+      --   readyForTranslation = readyForTranslation,
+      --   header = currentHeader,
+      --   category = currentHeader, 
+      -- }
 
       _QuestModel:SetQuestData(questID, questData)
 
@@ -164,52 +199,32 @@ end
 
 function UpdateQuest(self, questID)
   -- Cross function & unchanged fonction
-  local title = GetQuestName(questID)
-  local level = GetQuestDifficultyLevel(questID)
-  local header = self:GetQuestHeader(questID)
-  local questLogIndex = GetQuestLogIndexByID(questID)
-  local numObjectives = GetNumQuestObjectives(questID)
-  local isComplete = IsComplete(questID)
-  local isTask = IsQuestTask(questID)
-  local isBounty = IsQuestBounty(questID)
-  local distance = GetDistanceSqToQuest(questID)
-  local isDungeon = IsDungeonQuest(questID)
-  local isRaid = IsRaidQuest(questID)
+  local title             = GetQuestName(questID)
+  local level             = GetQuestDifficultyLevel(questID)
+  local header            = self:GetQuestHeader(questID)
+  local questLogIndex     = GetLogIndexForQuestID(questID)
+  local numObjectives     = GetNumQuestObjectives(questID)
+  local isComplete        = IsQuestComplete(questID)
+  local isTask            = IsQuestTask(questID)
+  local isBounty          = IsQuestBounty(questID)
+  local distance          = GetDistanceSqToQuest(questID) or 99999
+  local isDungeon         = IsDungeonQuest(questID)
+  local isRaid            = IsRaidQuest(questID)
+  local requiredMoney     = GetRequiredMoney(questID)
+  local suggestedGroup    = GetSuggestedGroupSize(questID)
+  local isLegendary       = IsLegendaryQuest(questID)
+  local tag               = GetQuestTagInfo(questID)
+  
   if distance then 
     distance = math.sqrt(distance)
   end
 
-  -- Different Logic but there equivalents for 8.3 & Shadowlands
-  local requiredMoney
-  local failureTime
-  local timeElapsed
-  local isOnMap
-  local hasLocalPOI
-  local isLegendary
+  local failureTime, timeElapsed = GetTimeAllowed(questID)
+  local isOnMap, hasLocalPOI      = IsOnMap(questID)
 
-  -- REVIEW: No Equivalent for Shadowlands ?
-  local questType
-  local isStory
-  local startEvent
-  local isAutoComplete
-
-  -- REVIEW: No Equivalent for 8.3 ?
-  local suggestedGroup
-
-  if IsOnShadowlands() then 
-    requiredMoney             = GetRequiredMoney(questID)
-    failureTime, timeElapsed  = GetTimeAllowed(questID)
-    suggestedGroup            = GetSuggestedGroupSize(questID)
-    isOnMap, hasLocalPOI      = IsOnMap(questID)
-  else
-    local questWatchIndex = GetQuestWatchIndex(questLogIndex)
-    if not questWatchIndex then 
-      return 
-    end
-
-    _, _, _, _, requiredMoney, _, startEvent, isAutoComplete, failureTime, timeElapsed,
-    questType, isTask, isBounty, isStory, isOnMap, hasLocalPOI = GetQuestWatchInfo(questWatchIndex)
-  end
+  -- local isStory        
+  -- local startEvent      
+  -- local isAutoComplete
 
   local questData = {
     questID         = questID,
@@ -236,7 +251,8 @@ function UpdateQuest(self, questID)
     distance        = distance,
     isDungeon       = isDungeon,
     isRaid          = isRaid,
-    isLegendary     = isLegendary
+    isLegendary     = isLegendary,
+    tag             = tag
   }
 
   -- Is the quest has an item quest ?
@@ -293,11 +309,8 @@ function UpdateQuest(self, questID)
 
     questData.objectives = objectivesData
   else
-    if IsOnShadowlands() then 
-      C_QuestLog.SetSelectedQuest(questID)
-    else 
-      SelectQuestLogEntry(questLogIndex)
-    end
+
+    SetSelectedQuest(questID)
     local text = GetQuestLogCompletionText()
     questData.objectives = {
       [1] = {
@@ -355,7 +368,7 @@ end
 
 __SystemEvent__()
 function QUEST_DATA_LOAD_RESULT(questID, success)
-  if success then
+  if success and QUESTS_CACHE[questID] then
     _M:UpdateQuest(questID)
     _QuestModel:Flush()
   end

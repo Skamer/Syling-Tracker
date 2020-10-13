@@ -18,7 +18,7 @@ _AutoQuestModel = RegisterModel(QuestModel, "auto-quests-data")
 -- ========================================================================= --
 GetNumAutoQuestPopUps             = GetNumAutoQuestPopUps
 GetAutoQuestPopUp                 = GetAutoQuestPopUp
-IsQuestBounty                     = IsQuestBounty
+IsQuestBounty                     = C_QuestLog.IsQuestBounty
 RequestLoadQuestByID              = C_QuestLog.RequestLoadQuestByID
 GetQuestName                      = QuestUtils_GetQuestName
 AddAutoQuestPopUp                 = AddAutoQuestPopUp

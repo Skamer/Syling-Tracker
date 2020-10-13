@@ -235,7 +235,7 @@ class "QuestCategoryListView" (function(_ENV)
 
         local bestRange = self.categoriesRange[categoryName]
         if not bestRange or questData.distance < bestRange then 
-          self.categoriesRange[categoryName] = questData.distance
+          self.categoriesRange[categoryName] = questData.distance or 99999
         end
 
         t[questID] = questData

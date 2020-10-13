@@ -69,10 +69,10 @@ class "Utils" (function(_ENV)
     __Arguments__ { Number, Variable.Optional(Number) }
     __Static__() function IsDungeonQuest(questID, questTag)
       if not questTag then
-        questTag = GetQuestTagInfo_CrossSupport(questID)
+        questTag = C_QuestLog.GetQuestTagInfo(questID)
       end
 
-      if questTag == EnumQuestTag.Dungeon then
+      if questTag and questTag.tagID == EnumQuestTag.Dungeon then
         return true
       end
 
@@ -81,12 +81,12 @@ class "Utils" (function(_ENV)
 
     __Arguments__ { Number, Variable.Optional(Number) }
     __Static__() function IsRaidQuest(questID, questTag)
-      if not questTag then
-        questTag = GetQuestTagInfo_CrossSupport(questID)
+      if not questTag then 
+        questTag = C_QuestLog.GetQuestTagInfo(questID)
       end
-
-      if questTag == EnumQuestTag.Raid then
-        return  true
+      
+      if questTag and questTag.tagID == EnumQuestTag.Raid then 
+        return true 
       end
 
       return false

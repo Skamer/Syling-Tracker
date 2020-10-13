@@ -18,14 +18,18 @@ ItemBar_AddItemData                 = API.ItemBar_AddItemData
 ItemBar_RemoveItemData              = API.ItemBar_RemoveItemData
 ItemBar_Update                      = API.ItemBar_Update
 -- ========================================================================= --
+RequestLoadQuestByID                = C_QuestLog.RequestLoadQuestByID
 IsWorldQuest                        = QuestUtils_IsQuestWorldQuest
-IsQuestTask                         = IsQuestTask
-IsQuestComplete                     = IsQuestComplete
+IsQuestTask                         = C_QuestLog.IsQuestTask
+IsQuestComplete                     = C_QuestLog.IsComplete
 GetTaskInfo                         = GetTaskInfo
 GetTasksTable                       = GetTasksTable
-GetQuestLogIndexByID                = GetQuestLogIndexByID
-SelectQuestLogEntry                 = SelectQuestLogEntry 
+GetLogIndexForQuestID               = C_QuestLog.GetLogIndexForQuestID
+SetSelectedQuest                    = C_QuestLog.SetSelectedQuest -- Replace SelectQuestLogEntry
 GetQuestLogCompletionText           = GetQuestLogCompletionText
+GetQuestLogSpecialItemInfo          = GetQuestLogSpecialItemInfo
+GetQuestProgressBarPercent          = GetQuestProgressBarPercent
+GetQuestObjectiveInfo               = GetQuestObjectiveInfo
 -- ========================================================================= --
 _BonusTasksModel                    = RegisterModel(QuestModel, "bonus-tasks-data")
 _TasksModel                         = RegisterModel(QuestModel, "tasks-data")
@@ -84,7 +88,7 @@ function OnInactive(self)
 end
 
 __SystemEvent__()
-function QUEST_ACCEPTED(_, questID)
+function QUEST_ACCEPTED(questID)
 
   if not IsQuestTask(questID) or IsWorldQuest(questID) then 
     return 
@@ -182,7 +186,7 @@ function UpdateTask(self, questID)
   }
 
   -- Is the quest has an item quest ?
-  local itemLink, itemTexture = GetQuestLogSpecialItemInfo(GetQuestLogIndexByID(questID))
+  local itemLink, itemTexture = GetQuestLogSpecialItemInfo(GetLogIndexForQuestID(questID))
 
   if itemLink and itemTexture then
     questData.item = {
@@ -238,7 +242,7 @@ function UpdateTask(self, questID)
     
     questData.objectives = objectivesData
   else 
-    SelectQuestLogEntry(GetQuestLogIndexByID(questID))
+    SetSelectedQuest(questID)
     local text = GetQuestLogCompletionText()
 
     local objectivesData = {}

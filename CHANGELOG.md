@@ -1,4 +1,10 @@
-# 0.2.0
+# 0.3.0
+
+Welcome to Shadowlands prepatch
+
+---
+
+## 0.2.0
 
 **NEW**
 
