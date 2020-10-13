@@ -227,8 +227,8 @@ _ContextMenu = ContextMenu("SylingTracker_ContextMenu", UIParent)
 
 _ContextMenuArrow = Arrow.Acquire()
 _ContextMenuArrow:SetParent(UIParent)
-_ContextMenuArrow.Orientation = "RIGHT"
-_ContextMenu:SetPoint("TOPRIGHT", _ContextMenuArrow, "LEFT", 5, 20)
+-- _ContextMenuArrow.Orientation = "RIGHT"
+-- _ContextMenu:SetPoint("TOPRIGHT", _ContextMenuArrow, "LEFT", 5, 20)
 
 _ContextMenuArrow:Hide()
 _ContextMenu:Hide()
@@ -308,16 +308,23 @@ class "API" (function(_ENV)
 
     _ContextMenu:SetHeight(height)
 
-    _ContextMenuArrow:Show()
     _ContextMenuArrow:ClearAllPoints()
-    _ContextMenuArrow:SetPoint("RIGHT", frameToAnchor, "LEFT")
+    _ContextMenu:ClearAllPoints()
 
+    --  Check the best side 
+    if frameToAnchor:GetRight() < (GetScreenWidth() / 2) then
+      _ContextMenuArrow.Orientation = "LEFT"
+      _ContextMenu:SetPoint("TOPLEFT", _ContextMenuArrow, "RIGHT", -5, 20)
+      _ContextMenuArrow:SetPoint("LEFT", frameToAnchor, "RIGHT")
+    else 
+      _ContextMenuArrow.Orientation = "RIGHT"
+      _ContextMenu:SetPoint("TOPRIGHT", _ContextMenuArrow, "LEFT", 5, 20)
+      _ContextMenuArrow:SetPoint("RIGHT", frameToAnchor, "LEFT")
+    end 
+
+    _ContextMenuArrow:Show()
     _ContextMenu:Show()
-    -- _ContextMenu.OnUpdate = function(f) 
-    --   if not f:IsMouseOver() and not frameToAnchor:IsMouseOver() then 
-    --     CloseContextMenu() 
-    --   end
-    -- end
+
     _ContextMenu.OnLeave = function(f)  
       if not f:IsMouseOver() then
         CloseContextMenu() 

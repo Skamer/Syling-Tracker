@@ -49,7 +49,7 @@ RegisterContentType({
   DefaultModel = _TasksModel,
   DefaultViewClass = TasksContentView,
   Events = { "PLAYER_ENTERING_WORLD", "SLT_TASK_QUEST_ADDED", "SLT_TASK_QUEST_REMOVED"},
-  Status = function(...) print(..., "Return", _M:HasTasks()) return _M:HasTasks() end
+  Status = function(...) return _M:HasTasks() end
 })
 -- ========================================================================= --
 TASKS_CACHE                         = {}
