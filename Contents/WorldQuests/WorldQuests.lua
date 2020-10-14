@@ -97,7 +97,7 @@ function QUEST_REMOVED(questID)
 end
 
 __SystemEvent__()
-function QUEST_ACCEPTED(_, questID)
+function QUEST_ACCEPTED(questID)
   if not IsWorldQuest(questID) then 
     return 
   end

@@ -111,7 +111,6 @@ end
 
 __SystemEvent__()
 function QUEST_REMOVED(questID)
-  print("QUEST_REMOVED", questID)
   -- NOTE: This seems that IsQuestTask returns false even for the task when it has 
   -- been completed.
   -- In this case, this is better to make checks with the cache.
