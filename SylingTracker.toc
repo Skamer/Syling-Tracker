@@ -3,7 +3,7 @@
 ## Version: @project-version@
 ## Author: Skamer
 ## SavedVariables: SylingTrackerDB
-## Dependencies: PLoop, Scorpio, Scorpio.Widget
+## Dependencies: PLoop, Scorpio, Scorpio.Widget, Blizzard_ObjectTracker
 ## OptionalDeps: ViragDevTool
 # Embed libs
 embeds.xml
