@@ -1,4 +1,12 @@
-# 0.3.x
+# 0.3.2
+
+**FIXES**
+
+- Fixed [ticket #6](https://github.com/Skamer/Syling-Tracker/issues/6) : LUA errors when opening the world map.
+
+---
+
+## 0.3.x
 
 Welcome to Shadowlands prepatch
 
