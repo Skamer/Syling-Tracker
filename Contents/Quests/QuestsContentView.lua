@@ -127,7 +127,7 @@ class "QuestsContentView" (function(_ENV)
       categories = QuestCategoryListView.Acquire()
 
       -- We need to keep the old name when we'll release it
-      self.__previousQuestsListName = categories:GetName()
+      self.__PreviousCategoriesName = categories:GetName()
 
       categories:SetParent(content)
       categories:SetName("Categories")
@@ -170,7 +170,7 @@ class "QuestsContentView" (function(_ENV)
 
   function OnRelease(self)
     -- First, release the children 
-    self:ReleaseQuestsList()
+    self:ReleaseQuests()
     self:ReleaseCategories()
 
     -- We call the "Parent" OnRelease (see, ContentView)

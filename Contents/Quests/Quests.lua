@@ -43,6 +43,8 @@ IsQuestTask                         = C_QuestLog.IsQuestTask
 IsQuestComplete                     = C_QuestLog.IsComplete
 SetSelectedQuest                    = C_QuestLog.SetSelectedQuest
 GetQuestTagInfo                     = C_QuestLog.GetQuestTagInfo
+AddQuestWatch                       = C_QuestLog.AddQuestWatch
+EnumQuestWatchType                  = _G.Enum.QuestWatchType
 -- ========================================================================= --
 -- Shadowlands Only function
 -- Don't use them in non Shadowlands environments
@@ -105,7 +107,7 @@ function OnInactive(self)
   wipe(QUESTS_CACHE)
   wipe(QUESTS_WITH_PROGRESS)
 
-  for questID in pairs() do
+  for questID in pairs(QUESTS_WITH_ITEMS) do
     ItemBar_RemoveItemData(questID)
   end
   ItemBar_Update()
@@ -332,12 +334,31 @@ function QUESTS_UPDATE()
   _QuestModel:Flush()
 end
 
+__SystemEvent__()
+function QUEST_POI_UPDATE()
+  QuestSuperTracking_OnPOIUpdate()
+
+  _M:UpdateDistance()
+end
+
 
 __SystemEvent__ "ZONE_CHANGED" "ZONE_CHANGED_NEW_ARED" "AREA_POIS_UPDATED"
 function QUESTS_ON_MAP_UPDATE()
   QUESTS_UPDATE()
 
   _M:UpdateDistance()
+end
+
+__SystemEvent__()
+function QUEST_ACCEPTED(questID)
+  -- Don't continue if the quest is a world quest or a emissary 
+  if IsWorldQuest(questID) or IsQuestTask(questID) or IsQuestBounty(questID) then return end 
+
+  -- Add it in the quest watched 
+  if AUTO_QUEST_WATCH == "1" and GetNumQuestWatches() < Constants.QuestWatchConsts.MAX_QUEST_WATCHES then
+    AddQuestWatch(questID, EnumQuestWatchType.Automatic)
+    QuestSuperTracking_OnQuestTracked(questID)
+  end
 end
 
 __Async__()
@@ -407,14 +428,15 @@ function GetQuestHeader(self, qID)
     local numEntries, numQuests = GetNumQuestLogEntries()
 
     for i = 1, numEntries do
-      local title, _, questID, _, _, _, _, _, isHeader = GetInfo(i)
-      if isHeader then
-        currentHeader = title
-      elseif questID == qID then
+      local data = GetInfo(i)
+      if data.isHeader then
+        currentHeader = data.title
+      elseif data.questID == qID then
         QUEST_HEADERS_CACHE[qID] = currentHeader
         return currentHeader
       end
     end
+
     return currentHeader
 end
 
