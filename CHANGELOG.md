@@ -1,6 +1,7 @@
 # 0.3.3
 
 **FIXES**
+
 Lot of bugs related to quests have been fixed:
 
 - Resolved an issue where the quest wasn't automatically watched when taking it.
