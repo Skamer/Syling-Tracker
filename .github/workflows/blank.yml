@@ -1,0 +1,29 @@
+name: Package the pull requests for Retails
+
+on:
+  pull_request:
+    branches: 
+      - master
+      - dev
+      - release/*
+      - hotfix/*
+      - feature/*
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the addon
+        uses: actions/checkout@v2
+      
+      - name: Create the Retail package
+        uses: BigWigsMods/packager@master
+        with:
+          args: -d -z
+      
+      - name: Upload the package as artifact
+        uses: actions/upload-artifact@v2.2.0
+        with:
+          name: SylingTracker-pr${{ github.event.number }}
+          path: .release/
