@@ -1,0 +1,23 @@
+name: Package and release for Retail
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - "*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
+      CF_API_KEY:  ${{ secrets.CF_API_KEY }}
+
+    steps:
+      - name: Checkout the addon
+        uses: actions/checkout@v2
+
+      - name: Package and release it
+        uses: BigWigsMods/packager@master
