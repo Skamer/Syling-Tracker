@@ -5,6 +5,9 @@
 ## SavedVariables: SylingTrackerDB
 ## Dependencies: PLoop, Scorpio, Scorpio.Widget
 ## OptionalDeps: ViragDevTool
+
+## X-Curse-Project-ID: 398177
+
 # Embed libs
 embeds.xml
 
