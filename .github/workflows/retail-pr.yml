@@ -1,4 +1,4 @@
-name: Package the pull requests for Retails
+name: Package the pull requests for Retail
 
 on:
   pull_request:
