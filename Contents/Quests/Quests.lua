@@ -326,6 +326,7 @@ function UpdateQuest(self, questID)
 end
 
 
+__SystemEvent__ "QUEST_LOG_UPDATE"
 function QUESTS_UPDATE()
   for questID in pairs(QUESTS_CACHE) do
     _M:UpdateQuest(questID)
@@ -366,7 +367,7 @@ __SystemEvent__()
 function QUEST_WATCH_LIST_CHANGED(questID, isAdded)
   if not questID then 
     return 
-  end 
+  end
 
   if isAdded then 
     QUESTS_CACHE[questID] = true 
@@ -395,35 +396,13 @@ function QUEST_DATA_LOAD_RESULT(questID, success)
   end
 end
 
-__SystemEvent__()
-function QUEST_LOG_UPDATE()
-  for questID in pairs(QUESTS_WITH_PROGRESS) do
-    _M:UpdateQuest(questID)
-  end
-
-  _QuestModel:Flush()
-end
-
-
-__SystemEvent__() 
-__Async__()
-function QUEST_WATCH_UPDATE(questID)
-  -- Experiment: We need to wait the next "QUEST_LOG_UPDATE" in order to the 
-  -- objectives are correctly updated.
-  NextEvent("QUEST_LOG_UPDATE")
-  
-  _M:UpdateQuest(questID)
-  _QuestModel:Flush()
-end
-
-
 function GetQuestHeader(self, qID)
     -- Check if the quest header is in the cache
     if QUEST_HEADERS_CACHE[qID] then
       return QUEST_HEADERS_CACHE[qID]
     end
 
-    -- if no, fin the quest header
+    -- if no, find the quest header
     local currentHeader = "Misc"
     local numEntries, numQuests = GetNumQuestLogEntries()
 

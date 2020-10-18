@@ -1,4 +1,11 @@
-# 0.3.3
+# 0.3.4
+
+**FIXES**
+
+- Fixed an issue where the world quests were added in the quests tracker once completed.
+- Fixed a case where the quest wasn't updated correctly.
+
+## 0.3.3
 
 **FIXES**
 
