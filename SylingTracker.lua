@@ -131,6 +131,11 @@ function HideCommand(self)
   _M:FireSystemEvent("SLT_HIDE_COMMAND")
 end
 
+__SlashCmd__ "slt" "toggle" "- toggle the Tracker and the Item Bar"
+function ToggleCommand(self)
+  _M:FireSystemEvent("SLT_TOGGLE_COMMAND")
+end
+
 __SystemEvent__()
 function PLAYER_ENTERING_WORLD(initialLogin, reloadingUI)
   IsInitialLogin  = initialLogin

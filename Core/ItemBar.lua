@@ -329,7 +329,6 @@ function ShowItemBar()
   end
 end
 
-
 __SystemEvent__ "SLT_HIDE_COMMAND"
 __NoCombat__()
 function HideItemBar()
@@ -340,5 +339,15 @@ function HideItemBar()
     if Database.SelectTable(true, "itemBar") then 
       Database.SetValue("hidden", true)
     end
+  end
+end
+
+__SystemEvent__ "SLT_TOGGLE_COMMAND"
+__NoCombat__()
+function ToggleItemBar()
+  if _ItemBar:IsShown() then
+    HideItemBar()
+  else
+    ShowItemBar()
   end
 end

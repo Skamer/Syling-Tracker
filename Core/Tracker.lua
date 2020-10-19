@@ -508,6 +508,15 @@ function HideMainTracker()
   end
 end
 
+__SystemEvent__ "SLT_TOGGLE_COMMAND"
+function ToggleMainTracker()
+  if _Tracker:IsShown() then
+    HideMainTracker()
+  else
+    ShowMainTracker()
+  end
+end
+
 __SystemEvent__()
 __Async__()
 function PLAYER_ENTERING_WORLD(isInitialLogin, isReloadingUi)
