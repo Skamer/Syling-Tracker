@@ -1,4 +1,14 @@
-# 0.3.4
+# 0.3.5
+
+**NEW**
+
+- A slash command "/slt toggle" has been added for showing/hiding the Tracker and the Item Bar ([PR #11](https://github.com/Skamer/Syling-Tracker/pull/11), thanks to @TheSumm)
+
+**FIXES**
+
+- Fixed an issue where the tracker displayed the quests the more furthest in first.
+
+## 0.3.4
 
 **FIXES**
 

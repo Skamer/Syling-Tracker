@@ -12,14 +12,15 @@ import                              "SLT"
 -- ========================================================================= --
 Log                 = Logger("SylingTracker")
 
-Trace               = Log:SetPrefix(1, "|cffa9a9a9[SLT:Trace]|r", true)
-Debug               = Log:SetPrefix(2, "|cff808080[SLT:Debug]|r", true)
-Info                = Log:SetPrefix(3, "|cffffffff[SLT:Info]|r", true)
-Warn                = Log:SetPrefix(4, "|cffffff00[SLT:Warn]|r", true)
-Error               = Log:SetPrefix(5, "|cffff0000[SLT:Error]|r", true)
-Fatal               = Log:SetPrefix(6, "|cff8b0000[SLT:Fatal]|r", true)
+Trace               = Log:SetPrefix(1, "|cffa9a9a9[SLT:Trace]|r")
+Debug               = Log:SetPrefix(2, "|cff808080[SLT:Debug]|r")
+Info                = Log:SetPrefix(3, "|cffffffff[SLT:Info]|r")
+Warn                = Log:SetPrefix(4, "|cffffff00[SLT:Warn]|r")
+Error               = Log:SetPrefix(5, "|cffff0000[SLT:Error]|r")
+Fatal               = Log:SetPrefix(6, "|cff8b0000[SLT:Fatal]|r")
 
 Log.LogLevel        = 3
+Log.UseTimeFormat   = false
 Log:AddHandler(print)
 -- ========================================================================= --
 _SLT_VERSION       = GetAddOnMetadata("SylingTracker", "Version")
@@ -112,28 +113,31 @@ function ToggleBlizzardObjectiveTracker()
 end
 
 __SlashCmd__ "slt" "lock" "- lock the Tracker and the Item Bar, preventing them to be moved or resized"
-function LockCommand(self)
+function LockCommand()
   _M:FireSystemEvent("SLT_LOCK_COMMAND")
 end
 
 __SlashCmd__ "slt" "unlock" "- unlock the Tracker and the Item Bar, allowing you to resize or move them"
-function UnlockCommand(self)
+function UnlockCommand()
   _M:FireSystemEvent("SLT_UNLOCK_COMMAND")
 end
 
 __SlashCmd__ "slt" "show" "- show the Tracker and the Item bar"
-function ShowCommand(self)
+function ShowCommand()
   _M:FireSystemEvent("SLT_SHOW_COMMAND")
 end
 
 __SlashCmd__ "slt" "hide" "- hide the Tracker and the Item Bar"
-function HideCommand(self)
+function HideCommand()
   _M:FireSystemEvent("SLT_HIDE_COMMAND")
 end
 
-__SlashCmd__ "slt" "toggle" "- toggle the Tracker and the Item Bar"
-function ToggleCommand(self)
-  _M:FireSystemEvent("SLT_TOGGLE_COMMAND")
+__SlashCmd__ "slt" "log" "- set the log level"
+function SetLogLevel(info)
+  local val = tonumber(info)
+  
+  Info("Set the Log Level to %i", val)
+  Log.LogLevel = val
 end
 
 __SystemEvent__()

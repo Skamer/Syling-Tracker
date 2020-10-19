@@ -209,7 +209,7 @@ function UpdateQuest(self, questID)
   local isComplete        = IsQuestComplete(questID)
   local isTask            = IsQuestTask(questID)
   local isBounty          = IsQuestBounty(questID)
-  local distance          = GetDistanceSqToQuest(questID) or 99999
+  local distance          = GetDistanceSqToQuest(questID)
   local isDungeon         = IsDungeonQuest(questID)
   local isRaid            = IsRaidQuest(questID)
   local requiredMoney     = GetRequiredMoney(questID)
@@ -217,8 +217,10 @@ function UpdateQuest(self, questID)
   local isLegendary       = IsLegendaryQuest(questID)
   local tag               = GetQuestTagInfo(questID)
   
-  if distance then 
-    distance = math.sqrt(distance)
+  if not distance then
+    distance = 99999
+  else 
+    distance = sqrt(distance)
   end
 
   local failureTime, timeElapsed = GetTimeAllowed(questID)
@@ -353,12 +355,26 @@ end
 __SystemEvent__()
 function QUEST_ACCEPTED(questID)
   -- Don't continue if the quest is a world quest or a emissary 
-  if IsWorldQuest(questID) or IsQuestTask(questID) or IsQuestBounty(questID) then return end 
+  if IsWorldQuest(questID) or IsQuestTask(questID) or IsQuestBounty(questID) then
+    return
+  end 
+
+  Trace("The quest (id:%i) has been accepted", questID)
 
   -- Add it in the quest watched 
   if AUTO_QUEST_WATCH == "1" and GetNumQuestWatches() < Constants.QuestWatchConsts.MAX_QUEST_WATCHES then
-    AddQuestWatch(questID, EnumQuestWatchType.Automatic)
-    QuestSuperTracking_OnQuestTracked(questID)
+    local wasWatched = AddQuestWatch(questID, EnumQuestWatchType.Automatic)
+    if wasWatched then 
+      QuestSuperTracking_OnQuestTracked(questID)
+      Debug("The quest (id:%i) has been watched with success", questID)
+    else 
+      Debug("The quest (id:%i) hasn't been watched for a unknown reason", questID)
+    end
+  else 
+    Debug("The quest (id:%i) doesn't match the requirements for being watched", questID)
+    Trace("AUTO_QUEST_WATCH: %s", AUTO_QUEST_WATCH)
+    Trace("GetNumQuestWatches(): %i", GetNumQuestWatches())
+    Trace("MAX_QUEST_WATCHES: %i", Constants.QuestWatchConsts.MAX_QUEST_WATCHES)
   end
 end
 
@@ -369,12 +385,16 @@ function QUEST_WATCH_LIST_CHANGED(questID, isAdded)
     return 
   end
 
-  if isAdded then 
+  if isAdded then
+    Debug("The quest (id:%i) has been added in the watch list", questID)
+
     QUESTS_CACHE[questID] = true 
     RequestLoadQuestByID(questID)
 
     _M:UpdateQuest(questID)
   else 
+    Debug("The quest (id:%i) has been removed from the watch list", questID)
+
     QUESTS_CACHE[questID] = nil
     
     if QUESTS_WITH_ITEMS[questID] then 
