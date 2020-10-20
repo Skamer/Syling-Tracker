@@ -132,6 +132,11 @@ function HideCommand()
   _M:FireSystemEvent("SLT_HIDE_COMMAND")
 end
 
+__SlashCmd__ "slt" "toggle" "- toggle the Tracker and the Item Bar"
+function ToggleCommand()
+  _M:FireSystemEvent("SLT_TOGGLE_COMMAND")
+end
+
 __SlashCmd__ "slt" "log" "- set the log level"
 function SetLogLevel(info)
   local val = tonumber(info)
