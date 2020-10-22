@@ -65,7 +65,6 @@ _QuestModel                         = RegisterModel(QuestModel, "quests-data")
 -- ========================================================================= --
 -- Register the achievements content type
 -- ========================================================================= --
-
 RegisterContentType({
   ID = "quests",
   DisplayName = "Quests",
@@ -82,9 +81,21 @@ QUEST_HEADERS_CACHE           = {}
 QUESTS_WITH_PROGRESS          = {}
 QUESTS_WITH_ITEMS             = {}
 -- ========================================================================= --
-__ActiveOnEvents__ "PLAYER_ENTERING_WORLD" "QUEST_WATCH_LIST_CHANGED"
-function ActivateOn(self, event, ...)
+__ActiveOnEvents__  "PLAYER_ENTERING_WORLD" "QUEST_WATCH_LIST_CHANGED" "QUEST_ACCEPTED"
+function BecomeActiveOn(self, event, ...)
+  if event == "QUEST_ACCEPTED" then
+    -- Caling QUEST_ACCEPTED will watch the quest if matching the requirements,
+    -- so going to trigger the checking on "QUEST_WATCH_LIST_CHANGED".
+    -- As QUEST_ACCEPTED returns nil, the system skip the event.
+    return QUEST_ACCEPTED(...)
+  end 
+  
   return GetNumQuestWatches() > 0
+end
+
+__InactiveOnEvents__  "PLAYER_ENTERING_WORLD" "QUEST_WATCH_LIST_CHANGED"
+function BecomeInactiveOn(self, event, ...)
+  return GetNumQuestWatches() == 0
 end
 -- ========================================================================= --
 __Async__()

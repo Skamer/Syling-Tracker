@@ -1,4 +1,20 @@
-# 0.3.5
+# 0.3.7
+
+**FIXES**
+
+- Fixed [ticket #10](https://github.com/Skamer/Syling-Tracker/issues/10) : a case where the quests are not automatically watched in some case.
+
+---
+
+## 0.3.6
+
+**FIXES**
+
+- Readded the command "/slt toggle".
+
+---
+
+## 0.3.5
 
 **NEW**
 
@@ -8,12 +24,16 @@
 
 - Fixed an issue where the tracker displayed the quests the more furthest in first.
 
+---
+
 ## 0.3.4
 
 **FIXES**
 
 - Fixed an issue where the world quests were added in the quests tracker once completed.
 - Fixed a case where the quest wasn't updated correctly.
+
+---
 
 ## 0.3.3
 
@@ -26,6 +46,8 @@ Lot of bugs related to quests have been fixed:
 - Fixed an issue where the quest catagories weren't correctly clean up and triggering errors when removing their last quest.
 - Fixed an issue where in some case the quests categories had not the right name.
 - Fixed an error when the player unwatching, abandoning or turning in the last quest.
+
+---
 
 ## 0.3.2
 

@@ -105,12 +105,16 @@ PLoop(function(_ENV)
         local newHandler = function(...)
           if self._Inactive and self:HasActiveEvent(evt) then
             local active = self._ActiveOnHandler(self, evt, ...)
-            if active then
-              self._ActiveByEvent = evt
-              self._ActivatingEventArgs = { ... }
-            end
 
-            self._Active = active
+            -- skip if "nil" has been returned
+            if active ~= nil then 
+              if active then
+                self._ActiveByEvent = evt
+                self._ActivatingEventArgs = { ... }
+              end
+
+              self._Active = active
+            end
           end
 
           -- Call the orig handler only if the module is active
@@ -121,14 +125,20 @@ PLoop(function(_ENV)
           -- NOTE: _eventActiveChanged is here for avoiding to call two cond
           -- handler in same event.
           if self._Active and not self._eventActiveChanged then
-            if self._InactiveOnHandler then
-              if self:HasInactiveEvent(evt) then
-                self._Active = not self._InactiveOnHandler(self, evt, ...)
-              end
+            local active
+            
+            if self._InactiveOnHandler and self:HasInactiveEvent(evt) then
+              active = not self._InactiveOnHandler(self, evt, ...)
             elseif self:HasActiveEvent(evt) then
-              self._Active = self._ActiveOnHandler(self, evt, ...)
+              active = self._ActiveOnHandler(self, evt, ...)
+            end
+
+            -- skip if "nil" has been returned
+            if active ~= nil then 
+              self._Active = active
             end
           end
+
           self._eventActiveChanged = nil
         end
         super.RegisterEvent(self, evt, newHandler)
