@@ -2,7 +2,7 @@
 
 **FIXES**
 
-- Fixed [ticket #10](https://github.com/Skamer/Syling-Tracker/issues/10) : a case where the quests are not automatically watched in some case.
+- Fixed [ticket #10](https://github.com/Skamer/Syling-Tracker/issues/10) : a case where the quests are not automatically watched.
 
 ---
 
