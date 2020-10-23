@@ -143,7 +143,7 @@ Style.UpdateSkin("Default", {
         backdropColor = { r = 0, g = 0, b = 0, a = 0},
         Icon = {
           file = [[Interface\ACHIEVEMENTFRAME\UI-ACHIEVEMENT-SHIELDS]],
-          texCoords = { left = 0, right = 64/128, top = 0, bottom = 64/128 }
+          texCoords = RectType(0, 64/128, 0, 64/128)
         }
       },
 

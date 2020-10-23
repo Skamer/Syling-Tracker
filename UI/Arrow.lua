@@ -23,10 +23,10 @@ class "Arrow" (function(_ENV)
   }
 
   _ARROW_TEX_COORDS = {
-    ["RIGHT"] = { left = 0, right = 32/128, top = 0, bottom = 1 },
-    ["BOTTOM"] = { left = 32/128, right = 64/128, top = 0, bottom = 1 },
-    ["LEFT"] = { left = 64/128, right = 96/128, top = 0, bottom = 1 },
-    ["TOP"] = { left = 96/128, right = 1, top = 0, bottom = 1 }
+    ["RIGHT"] = RectType(0, 32/128, 0, 1),
+    ["BOTTOM"] = RectType(32/128, 64/128, 0, 1),
+    ["LEFT"] = RectType(64/128, 96/128, 0, 1),
+    ["TOP"] = RectType(96/128, 1, 0, 1)
   }
   -----------------------------------------------------------------------------
   --                               Handlers                                  --

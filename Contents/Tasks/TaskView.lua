@@ -461,7 +461,7 @@ Style.UpdateSkin("Default", {
           },
 
           Icon = {
-            texCoords = { top = 0.93, left = 0.07, bottom = 0.07, right = 0.93}
+            texCoords = RectType(0.07, 0.93, 0.07, 0.93)
           }
         },
 
