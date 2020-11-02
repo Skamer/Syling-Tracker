@@ -284,12 +284,12 @@ class "API" (function(_ENV)
 
       if itemInfo.type == ContextMenuItemType.Action then
         if itemInfo.handler then 
-          item.OnClick = item.OnClick + function() 
+          item.OnClick = function() 
             itemInfo.handler(unpack(args))
             CloseContextMenu()
           end
-        end 
-
+        end
+        
         Style[item].Text.text = itemInfo.text
 
         local iconType = type(itemInfo.icon)
