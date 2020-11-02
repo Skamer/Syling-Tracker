@@ -4,4 +4,5 @@
   <Script file="Math.lua"/>
   <Script file="QuestUtils.lua"/>
   <Script file="AchievementUtils.lua"/>
+  <Script file="TorghastUtils.lua"/>
 </Ui>
