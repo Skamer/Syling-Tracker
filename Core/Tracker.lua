@@ -541,5 +541,17 @@ function PLAYER_ENTERING_WORLD(isInitialLogin, isReloadingUi)
     _Tracker:TrackContentType("auto-quests")
     _Tracker:TrackContentType("world-quests")
     _Tracker:TrackContentType("keystone")
+    _Tracker:TrackContentType("torghast")
   end 
 end
+
+__SystemEvent__()
+function SLT_TRACK_CONTENT_TYPE(contentID)
+  _Tracker:TrackContentType(contentID)
+end
+
+__SystemEvent__() 
+function SLT_UNTRACK_CONTENT_TYPE(contentID)
+  _Tracker:UntrackContentType(contentID)
+end
+

@@ -16,6 +16,7 @@ RegisterContentType               = API.RegisterContentType
 RegisterModel                     = API.RegisterModel
 -- ========================================================================= --
 IsInScenario                      = C_Scenario.IsInScenario
+IsInJailersTower                  = IsInJailersTower
 GetInfo                           = C_Scenario.GetInfo
 GetStepInfo                       = C_Scenario.GetStepInfo
 GetCriteriaInfo                   = C_Scenario.GetCriteriaInfo
@@ -36,6 +37,11 @@ RegisterContentType({
   DefaultViewClass = ScenarioContentView,
   Events = { "PLAYER_ENTERING_WORLD", "SCENARIO_POI_UPDATE", "SCENARIO_UPDATE"},
   Status = function()
+    -- Prevent the scenario content to be shown in torghast
+    if IsInJailersTower() then 
+      return false 
+    end
+
     -- Prevent the scenario content to be shown in dungeon
     local inInstance, type = IsInInstance()
     if inInstance and (type == "party") then 
@@ -57,6 +63,11 @@ end
 
 __ActiveOnEvents__ "PLAYER_ENTERING_WORLD" "SCENARIO_POI_UPDATE" "SCENARIO_UPDATE"
 function ActiveOn(self)
+    -- Prevent the scenario content to be shown in torghast
+    if IsInJailersTower() then 
+      return false 
+    end
+
     -- Prevent the scenario content to be shown in dungeon
     local inInstance, type = IsInInstance()
     if inInstance and (type == "party") then 
