@@ -1,4 +1,27 @@
-# 0.3.7
+# 0.4.0
+
+**NEW**
+
+- Torghast is now fully supported
+- Added a new slash command "/slt qcat" to toggle the displaying of categories for quests.
+- Added a new slahs command "/slt minimap" to toggle the minimap icon.
+
+**CHANGES**
+
+- The world quests, tasks and bonus tasks will now display a Context Menu by a Right-Clicking.
+- Changed the "Help" action name to "Help (NYI)" as this is not yet implemented.
+
+**FIXES**
+
+- Fixed [ticket #15](https://github.com/Skamer/Syling-Tracker/issues/15) : an issue where some icons were upside down ([PR #17](https://github.com/Skamer/Syling-Tracker/pull/17), thanks to @TheSumm).
+- Fixed [ticket #12](https://github.com/Skamer/Syling-Tracker/issues/12) : an error lua.
+- Fixed [ticket #21](https://github.com/Skamer/Syling-Tracker/issues/21) : an issue where the Context Menu caused sometimes taint errors.
+- Fixed some actions of Context Menu for the achievements and quests
+- Fixed an issue where sometimes the tasks and bonus tasks were not displayed.
+
+---
+
+## 0.3.7
 
 **FIXES**
 
