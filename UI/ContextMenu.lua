@@ -48,14 +48,14 @@ class "ContextMenuPattern" (function(_ENV)
   end 
 
   __Iterator__()
-  function IterateItems(self)
+  function IterateItems(self, args)
     local yield = coroutine.yield
 
     local count = 0
     for index, itemInfo in self.Items:Sort("a,b=>a.order<b.order"):GetIterator() do
       local isShown
       if type(itemInfo.isShown) == "function" then 
-        isShown = itemInfo.isShown() 
+        isShown = itemInfo.isShown(unpack(args)) 
       else 
         isShown = itemInfo.isShown 
       end
@@ -265,7 +265,7 @@ class "API" (function(_ENV)
     local height = 0 
     
     local previousItem 
-    for index, itemInfo in pattern:IterateItems() do
+    for index, itemInfo in pattern:IterateItems(args) do
       local i = counts[itemInfo.type] + 1
       counts[itemInfo.type] = i 
       local item = _ContextMenu:AcquireItem(itemInfo.type, i)
@@ -289,7 +289,7 @@ class "API" (function(_ENV)
             CloseContextMenu()
           end
         end
-        
+
         Style[item].Text.text = itemInfo.text
 
         local iconType = type(itemInfo.icon)

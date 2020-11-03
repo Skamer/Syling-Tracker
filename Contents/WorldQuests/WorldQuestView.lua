@@ -10,13 +10,15 @@ Syling                "SylingTracker.WorldQuests.WorldQuestView"             ""
 -- ========================================================================= --
 namespace                          "SLT"
 -- ========================================================================= --
--- Iterator helper for ignoring the children are used for backdrop, and avoiding
--- they are taken as account for their parent height
-IterateFrameChildren = Utils.IterateFrameChildren
+export {
+  -- Iterator helper for ignoring the children are used for backdrop, and avoiding
+  -- they are taken as account for their parent height
+  IterateFrameChildren              = Utils.IterateFrameChildren
+}
 -- ========================================================================= --
 __Recyclable__ "SylingTracker_WorldQuestView%d"
 class "WorldQuestView" { TaskView }
-
+-- ========================================================================= --
 __Recyclable__ "SylingTracker_WorldQuestListView%d"
 class "WorldQuestListView" (function(_ENV)
   inherit "Frame" extend "IView"
@@ -51,8 +53,7 @@ class "WorldQuestListView" (function(_ENV)
 
     self:ReleaseUnusedQuests()
   end
-
-
+  
   function AcquireQuest(self, id)
     local quest = self.questsCache[id]
     if not quest then
@@ -152,3 +153,11 @@ class "WorldQuestListView" (function(_ENV)
     self:SetClipsChildren(true)
   end
 end)
+-- ========================================================================= --
+--                                Styles                                     --
+-- ========================================================================= --
+Style.UpdateSkin("Default", {
+  [WorldQuestView] = { 
+    contextMenuID = "world-quest"
+  }
+})

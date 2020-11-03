@@ -41,7 +41,7 @@ RegisterContentType({
   Description = "Display the bonus tasks, also known as bonus objectives",
   DefaultModel = _BonusTasksModel,
   DefaultViewClass = BonusTasksContentView,
-  Events = { "PLAYER_ENTERING_WORLD", "SLT_BONUS_TASK_QUEST_ADDED", "SLT_BONUS_TASK_QUEST_REMOVED"},
+  Events = { "PLAYER_ENTERING_WORLD", "SLT_TASKS_LOADED","SLT_BONUS_TASK_QUEST_ADDED", "SLT_BONUS_TASK_QUEST_REMOVED"},
   Status = function() return _M:HasBonusTasks() end
 })
 
@@ -52,7 +52,7 @@ RegisterContentType({
   DefaultOrder = 20,
   DefaultModel = _TasksModel,
   DefaultViewClass = TasksContentView,
-  Events = { "PLAYER_ENTERING_WORLD", "SLT_TASK_QUEST_ADDED", "SLT_TASK_QUEST_REMOVED"},
+  Events = { "PLAYER_ENTERING_WORLD", "SLT_TASKS_LOADED", "SLT_TASK_QUEST_ADDED", "SLT_TASK_QUEST_REMOVED"},
   Status = function(...) return _M:HasTasks() end
 })
 -- ========================================================================= --
@@ -169,6 +169,10 @@ function LoadTasks(self)
 
   _TasksModel:Flush()
   _BonusTasksModel:Flush()
+
+  -- We trigger an event for the both content have reliable data for checking
+  -- if they should be shown.
+  _M:FireSystemEvent("SLT_TASKS_LOADED")
 end
 
 function UpdateTask(self, questID)

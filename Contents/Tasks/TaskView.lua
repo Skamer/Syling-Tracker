@@ -10,18 +10,21 @@ Syling                   "SylingTracker.Tasks.Task"                         ""
 -- ========================================================================= --
 namespace                          "SLT"
 -- ========================================================================= --
--- Iterator helper for ignoring the children are used for backdrop, and avoiding
--- they are taken as account for their parent height
-IterateFrameChildren = Utils.IterateFrameChildren
--- ========================================================================= --
-ResetStyles           = Utils.ResetStyles
-ShowContextMenu       = API.ShowContextMenu
-ValidateFlags         = System.Toolset.validateflags
-GameTooltip           = GameTooltip
+export {
+  -- Iterator helper for ignoring the children are used for backdrop, and avoiding
+  -- they are taken as account for their parent height
+  IterateFrameChildren              = Utils.IterateFrameChildren,
+
+  ResetStyles                       = Utils.ResetStyles,
+  ShowContextMenu                   = API.ShowContextMenu,
+  ValidateFlags                     = System.Toolset.validateflags,
+
+  GameTooltip                       = GameTooltip
+}
 -- ========================================================================= --
 __Recyclable__ "SylingTracker_TaskView%d"
 class "TaskView" (function(_ENV)
-  inherit "Frame" extend "IView"
+  inherit "Button" extend "IView"
 
   __Flags__()
   enum "Flags" {
@@ -73,6 +76,15 @@ class "TaskView" (function(_ENV)
           Style[self] = styles 
         end 
       end 
+    end
+
+    -- Update the context menu if exists 
+    if self.ContextMenuID and data.questID then 
+      self.OnClick = function(_, mouseButton) 
+         if mouseButton == "RightButton" then 
+            ShowContextMenu(self.ContextMenuID, self, data.questID)
+         end
+      end
     end
 
     -- Update the task name
@@ -254,6 +266,11 @@ class "TaskView" (function(_ENV)
   property "FlagsStyles" {
     type = Table,
   }
+
+  property "ContextMenuID" {
+    type    = String,
+    default = "task"
+  }
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
   -----------------------------------------------------------------------------
@@ -414,15 +431,16 @@ class "TaskListView" (function(_ENV)
     self:SetClipsChildren(true)
   end
 end)
--------------------------------------------------------------------------------
+-- ========================================================================= --
 --                                Styles                                     --
--------------------------------------------------------------------------------
+-- ========================================================================= --
 Style.UpdateSkin("Default", {
   [TaskView] = {
     backdrop = {
       bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]]
     },
     backdropColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
+    registerForClicks = { "RightButtonDown" },
 
     -- Header Child
     Header = {

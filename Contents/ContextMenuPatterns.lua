@@ -6,29 +6,36 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling                 "SylingTracker.ContextMenuPatterns"                  ""
+Syling                 "SylingTracker.ContextMenuPatterns"                   ""
 -- ========================================================================= --
-import                          "SLT"
+import                                 "SLT"
 -- ========================================================================= --
-RegisterContextMenuPattern = API.RegisterContextMenuPattern
+export {
+  RegisterContextMenuPattern            = API.RegisterContextMenuPattern,
 
---- Simple fix registers the pattern of all content type
+  -- Shared 
+  ChatFrame_OpenChat                    = ChatFrame_OpenChat,
+  
+  -- Quest
+  IsWorldQuest                          = QuestUtils_IsQuestWorldQuest,
+  GetSuperTrackedQuestID                = C_SuperTrack.GetSuperTrackedQuestID,
+  SetSuperTrackedQuestID                = C_SuperTrack.SetSuperTrackedQuestID,
+  QuestSuperTracking_ChooseClosestQuest = QuestSuperTracking_ChooseClosestQuest,
+  GetQuestLink                          = GetQuestLink,
+  QuestLogPopupDetailFrame_Show         = QuestLogPopupDetailFrame_Show,
+  ShowQuestComplete                     = ShowQuestComplete,
+  LFGListUtil_FindQuestGroup            = LFGListUtil_FindQuestGroup,
+  RemoveQuestWatch                      = C_QuestLog.RemoveQuestWatch,
+  QuestMapQuestOptions_AbandonQuest     = QuestMapQuestOptions_AbandonQuest,
 
--------------------------------------------------------------------------------
--- Quest Pattern                                                             --
--------------------------------------------------------------------------------
+  -- Achievement
+  GetAchievementLink                    = GetAchievementLink,
+  RemoveTrackedAchievement              = RemoveTrackedAchievement
+}
+-- ========================================================================= --
+-- Quest Pattern
+-- ========================================================================= --
 do
-  local SetSuperTrackedQuestID = C_SuperTrack.SetSuperTrackedQuestID
-  local QuestSuperTracking_ChooseClosestQuest = QuestSuperTracking_ChooseClosestQuest
-  local GetQuestLink = GetQuestLink
-  local ChatFrame_OpenChat = ChatFrame_OpenChat
-  local QuestLogPopupDetailFrame_Show = QuestLogPopupDetailFrame_Show
-  local ShowQuestComplete = ShowQuestComplete
-  local LFGListUtil_FindQuestGroup = LFGListUtil_FindQuestGroup
-  local RemoveQuestWatch = C_QuestLog.RemoveQuestWatch
-  local QuestMapQuestOptions_AbandonQuest = QuestMapQuestOptions_AbandonQuest
-
-
   local questPattern = ContextMenuPattern()
   RegisterContextMenuPattern("quest", questPattern)
 
@@ -38,19 +45,35 @@ do
   supertrack.text = "Supertrack"
   supertrack.order = 10
   supertrack.icon = { atlas = AtlasType("Target-Tracker")}
+  supertrack.isShown = function(questID)
+    local supertrackQuestID = GetSuperTrackedQuestID()
+    if supertrackQuestID and supertrackQuestID == questID then 
+      return false 
+    end 
+
+    return true 
+  end 
   supertrack.handler = function(questID) SetSuperTrackedQuestID(questID) end
   questPattern:AddAction(supertrack)
-  -- TODO: supertrack.isShown = function() end
 
   local stopSupertracking = ContextMenuPatternItemInfo()
   stopSupertracking.id = "stop-supertracking-quest"
   stopSupertracking.text = "Stop supertracking"
   stopSupertracking.order = 10
-  supertrack.icon = { atlas = AtlasType("Target-Tracker")}
+  stopSupertracking.icon = { atlas = AtlasType("Target-Tracker")}
+  stopSupertracking.isShown = function(questID)
+    local supertrackQuestID = GetSuperTrackedQuestID()
+    if supertrackQuestID and supertrackQuestID == questID then 
+      return true 
+    end 
+
+    return false 
+  end
   stopSupertracking.handler = function() 
     SetSuperTrackedQuestID(0)
     QuestSuperTracking_ChooseClosestQuest()
   end
+  questPattern:AddAction(stopSupertracking)
   
   -- Add Separator 
   questPattern:AddSeparator(15)
@@ -120,7 +143,7 @@ do
   --- The help part
   local help = ContextMenuPatternItemInfo()
   help.id = "help-quest"
-  help.text = "Help"
+  help.text = "Help (NYI)"
   help.order = 70
   help.icon = { atlas = AtlasType("QuestTurnin") }
   help.handler = function(questID)  
@@ -128,9 +151,128 @@ do
   end 
   questPattern:AddAction(help)
 end
--------------------------------------------------------------------------------
--- Achievement Pattern                                                       --
--------------------------------------------------------------------------------
+-- ========================================================================= --
+-- World Quest Pattern
+-- ========================================================================= --
+do
+  local worldQuestPattern = ContextMenuPattern()
+  RegisterContextMenuPattern("world-quest", worldQuestPattern)
+
+  -- The link to chat part 
+  local linkToChat = ContextMenuPatternItemInfo()
+  linkToChat.id   = "link-quest-to-chat"
+  linkToChat.text = "Link to chat"
+  linkToChat.order = 10
+  linkToChat.icon = { atlas = AtlasType("communities-icon-chat")}
+  linkToChat.handler = function(questID) ChatFrame_OpenChat(GetQuestLink(questID)) end
+  worldQuestPattern:AddAction(linkToChat)
+
+  -- The show details part
+  local showDetails = ContextMenuPatternItemInfo()
+  showDetails.id = "show-quest-details"
+  showDetails.text = "Show details"
+  showDetails.order = 20
+  showDetails.icon = { atlas = AtlasType("adventureguide-icon-whatsnew")}
+  showDetails.handler = function(questID)
+      local quest = QuestCache:Get(questID)
+      if quest.isAutoComplete and quest:IsComplete() then 
+        ShowQuestComplete(questID)
+      else 
+        QuestLogPopupDetailFrame_Show(quest:GetQuestLogIndex())
+      end
+  end
+  worldQuestPattern:AddAction(showDetails)
+
+  -- Add Separator 
+  worldQuestPattern:AddSeparator(25)
+
+  -- The find a group part
+  local findAGroup = ContextMenuPatternItemInfo()
+  findAGroup.id = "find-a-group"
+  findAGroup.text = "Find a group"
+  findAGroup.order = 30
+  findAGroup.icon = { atlas = AtlasType("socialqueuing-icon-group")}
+  findAGroup.handler = function(questID) LFGListUtil_FindQuestGroup(questID) end
+
+  worldQuestPattern:AddAction(findAGroup)
+
+  -- Add Separator 
+  worldQuestPattern:AddSeparator(35)
+
+  --- The help part
+  local help = ContextMenuPatternItemInfo()
+  help.id = "help-quest"
+  help.text = "Help (NYI)"
+  help.order = 40
+  help.icon = { atlas = AtlasType("QuestTurnin") }
+  help.handler = function(questID)  
+    -- TODO: Implement the help action
+  end 
+  worldQuestPattern:AddAction(help)
+end
+
+-- ========================================================================= --
+-- World Quest Pattern
+-- ========================================================================= --
+do
+  local taskPattern = ContextMenuPattern()
+  RegisterContextMenuPattern("task", taskPattern)
+
+  -- The link to chat part 
+  local linkToChat = ContextMenuPatternItemInfo()
+  linkToChat.id   = "link-quest-to-chat"
+  linkToChat.text = "Link to chat"
+  linkToChat.order = 10
+  linkToChat.icon = { atlas = AtlasType("communities-icon-chat")}
+  linkToChat.handler = function(questID) ChatFrame_OpenChat(GetQuestLink(questID)) end
+  taskPattern:AddAction(linkToChat)
+
+  -- The show details part
+  local showDetails = ContextMenuPatternItemInfo()
+  showDetails.id = "show-quest-details"
+  showDetails.text = "Show details"
+  showDetails.order = 20
+  showDetails.icon = { atlas = AtlasType("adventureguide-icon-whatsnew")}
+  showDetails.handler = function(questID)
+      local quest = QuestCache:Get(questID)
+      if quest.isAutoComplete and quest:IsComplete() then 
+        ShowQuestComplete(questID)
+      else 
+        QuestLogPopupDetailFrame_Show(quest:GetQuestLogIndex())
+      end
+  end
+  taskPattern:AddAction(showDetails)
+
+  -- Add Separator 
+  taskPattern:AddSeparator(25)
+
+  -- The find a group part
+  local findAGroup = ContextMenuPatternItemInfo()
+  findAGroup.id = "find-a-group"
+  findAGroup.text = "Find a group"
+  findAGroup.order = 30
+  findAGroup.icon = { atlas = AtlasType("socialqueuing-icon-group")}
+  findAGroup.handler = function(questID) LFGListUtil_FindQuestGroup(questID) end
+
+  taskPattern:AddAction(findAGroup)
+
+  -- Add Separator 
+  taskPattern:AddSeparator(35)
+
+  --- The help part
+  local help = ContextMenuPatternItemInfo()
+  help.id = "help-quest"
+  help.text = "Help"
+  help.order = 40
+  help.icon = { atlas = AtlasType("QuestTurnin") }
+  help.handler = function(questID)  
+    -- TODO: Implement the help action
+  end 
+  taskPattern:AddAction(help)
+end
+-- ========================================================================= --
+-- Achievement Pattern
+-- ========================================================================= --
 do
   local achievementPattern = ContextMenuPattern()
   RegisterContextMenuPattern("achievement", achievementPattern)
@@ -141,11 +283,15 @@ do
   linkToChat.text = "Link to chat"
   linkToChat.order = 10
   linkToChat.icon = { atlas = AtlasType("communities-icon-chat")}
-  linkToChat.handler = function(achievementID)  end
+  linkToChat.handler = function(achievementID)  
+    local achievementLink = GetAchievementLink(achievementID);
+		if achievementLink then
+			ChatFrame_OpenChat(achievementLink);
+		end
+  end
   achievementPattern:AddAction(linkToChat)
 
-
-    -- The show details part
+  -- The show details part
   local showDetails = ContextMenuPatternItemInfo()
   showDetails.id = "show-achievement-details"
   showDetails.text = "Show details"
@@ -172,6 +318,21 @@ do
   stopWatching.order = 30
   stopWatching.icon = { atlas = AtlasType("transmog-icon-hidden") }
   stopWatching.handler = function(achievementID)
+    RemoveTrackedAchievement(achievementID)
   end
   achievementPattern:AddAction(stopWatching)
+
+  -- Add Separator
+  achievementPattern:AddSeparator(35)
+
+  --- The help part
+  local help = ContextMenuPatternItemInfo()
+  help.id = "help-achievement"
+  help.text = "Help (NYI)"
+  help.order = 40
+  help.icon = { atlas = AtlasType("QuestTurnin") }
+  help.handler = function(questID)  
+    -- TODO: Implement the help action
+  end 
+  achievementPattern:AddAction(help)
 end 
