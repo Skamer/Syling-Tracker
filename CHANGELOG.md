@@ -4,7 +4,7 @@
 
 - Torghast is now fully supported
 - Added a new slash command "/slt qcat" to toggle the displaying of categories for quests.
-- Added a new slahs command "/slt minimap" to toggle the minimap icon.
+- Added a new slash command "/slt minimap" to toggle the minimap icon.
 
 **CHANGES**
 
