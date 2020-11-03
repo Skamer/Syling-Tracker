@@ -40,6 +40,7 @@ function OnLoad(self)
 
   -- Regiser the options 
   Settings.Register("replace-blizzard-objective-tracker", true, "Blizzard/UpdateTrackerVisibility")
+
   -- Register the callbacks
   CallbackManager.Register("Blizzard/UpdateTrackerVisibility", Callback(function(replace) BLIZZARD_TRACKER_VISIBLITY_CHANGED(not replace) end))
 
@@ -143,6 +144,24 @@ function SetLogLevel(info)
   
   Info("Set the Log Level to %i", val)
   Log.LogLevel = val
+end
+
+__SlashCmd__ "slt" "qcat" "- toggle the displaying of categories for quests"
+function ToggleQuestCategories()
+  _M:FireSystemEvent("SLT_TOGGLE_QUEST_CATEGORIES_COMMAND")
+end
+
+__SlashCmd__ "slt" "minimap" "- toggle the minimap button"
+function ToggleMinimapButton()
+  local isHidden = not _DB.minimap.hide
+
+  if isHidden then 
+    _LibDBIcon:Hide("SylingTracker")
+  else 
+    _LibDBIcon:Show("SylingTracker")
+  end
+
+  _DB.minimap.hide = isHidden
 end
 
 __SystemEvent__()

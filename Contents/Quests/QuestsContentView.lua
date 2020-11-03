@@ -17,6 +17,8 @@ IterateFrameChildren = Utils.IterateFrameChildren
 ResetStyles           = Utils.ResetStyles
 ValidateFlags         = System.Toolset.validateflags
 -- ========================================================================= --
+local SHOW_CATEGORIES = true
+-- ========================================================================= --
 __Recyclable__ "SylingTracker_QuestsContentView%d"
 class "QuestsContentView" (function(_ENV)
   inherit "ContentView"
@@ -35,8 +37,12 @@ class "QuestsContentView" (function(_ENV)
 
     -- Determines the flags
     local flags = Flags.NONE 
-    if questsData then 
-      flags = Flags.HAS_CATEGORIES
+    if questsData then
+      if SHOW_CATEGORIES then  
+        flags = Flags.HAS_CATEGORIES
+      else 
+        flags = Flags.HAS_QUESTS
+      end
     end
     
     if flags ~= self.Flags then 
@@ -67,7 +73,7 @@ class "QuestsContentView" (function(_ENV)
 
 
     if questsData then
-      if self.ShowCategories then 
+      if SHOW_CATEGORIES then 
         local categories = self:AcquireCategories()
         categories:UpdateView(questsData)
       else 
@@ -87,7 +93,7 @@ class "QuestsContentView" (function(_ENV)
 
       -- We need to keep the old name when we'll release it
       self.__PreviousQuestsName = quests:GetName()
-
+      
       quests:SetParent(content)
       quests:SetName("Quests")
       quests:InstantApplyStyle()
@@ -190,6 +196,9 @@ class "QuestsContentView" (function(_ENV)
     default = QuestsContentView.Flags.NONE
   }
 
+  -- Currently, this isn't used but will be in the future when the skin system
+  -- is ready.
+  -- The displaying of categories is determined by SHOW_CATEGORIES instead
   property "ShowCategories" {
     type = Boolean,
     default = true
@@ -255,3 +264,23 @@ Style.UpdateSkin("Default", {
     }
   }
 })
+-- ========================================================================= --
+function OnLoad(self)
+  Settings.Register("quests-enable-categories", true)
+end
+
+function OnEnable(self)
+  SHOW_CATEGORIES = Settings.Get("quests-enable-categories")
+end
+
+__SystemEvent__()
+function SLT_TOGGLE_QUEST_CATEGORIES_COMMAND()
+  local showCategories = Settings.Get("quests-enable-categories")
+  Settings.Set("quests-enable-categories", not showCategories)
+
+  SHOW_CATEGORIES = not showCategories
+
+  Warn("The displaying of categories has been set to |cff00ffff%s|r. |cffff6a00The change will take effect on the next data update or after a reload ui.|r", 
+        SHOW_CATEGORIES and "true" or "false"
+  )
+end

@@ -554,6 +554,8 @@ class "QuestListView" (function(_ENV)
     self:CancelAnimatingHeight()
 
     self:SetHeight(1)
+
+    ResetStyles(self)
   end
 
   function OnAcquire(self)
