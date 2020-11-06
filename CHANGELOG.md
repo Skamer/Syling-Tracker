@@ -1,5 +1,9 @@
 # 0.4.1
 
+**NEW**
+
+- Added a new slash command for setting the scroll sensibility : "/slt scrollstep x" where x is a number (by default: 15).
+
 **FIXES**
 
 - Fixed [ticket #24](https://github.com/Skamer/Syling-Tracker/issues/24) : an issue where sometimes the dungeon content had not the right height.

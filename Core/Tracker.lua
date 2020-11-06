@@ -10,6 +10,8 @@ Syling                      "SylingTracker.Core.Tracker"                     ""
 -- ========================================================================= --
 namespace                          "SLT"
 -- ========================================================================= --
+local DEFAULT_SCROLL_STEP = 15
+
 local function OnMinMaxValueSet(self)
     local height    = self:GetHeight()
 
@@ -355,7 +357,7 @@ Style.UpdateSkin("Default", {
     -- [ScrollBar] child properties
     ScrollBar = {
       thumbAutoHeight = true,
-      scrollStep = 15,
+      scrollStep = DEFAULT_SCROLL_STEP,
       autoHide = true,
       backdropColor = ColorType(0, 0, 0, 0.3),
       width = 6,
@@ -393,14 +395,15 @@ function OnEnable(self)
   _TrackerMover.MoveTarget = _Tracker
 
   Profiles.PrepareDatabase()
-  local width, height, xPos, yPos, locked, hidden
+  local width, height, xPos, yPos, locked, hidden, scrollStep
   if Database.SelectTable(false, "trackers", _Tracker.ID) then 
-    xPos    = Database.GetValue("xPos")
-    yPos    = Database.GetValue("yPos")
-    width   = Database.GetValue("width")  or 300
-    height  = Database.GetValue("height") or 325
-    locked  = Database.GetValue("locked")
-    hidden  = Database.GetValue("hidden")
+    xPos        = Database.GetValue("xPos")
+    yPos        = Database.GetValue("yPos")
+    width       = Database.GetValue("width")  or 300
+    height      = Database.GetValue("height") or 325
+    locked      = Database.GetValue("locked")
+    hidden      = Database.GetValue("hidden")
+    scrollStep  = Database.GetValue("scrollStep")
   end
 
   if not xPos and not yPos then 
@@ -412,14 +415,18 @@ function OnEnable(self)
   Style[_Tracker].width   = width
   Style[_Tracker].height  = height
 
+  if scrollStep then 
+    SetScrollStepMainTracker(scrollStep)
+  end 
+
   if locked then 
-    self:LockMainTracker()
+    LockMainTracker()
   else
-    self:UnlockMainTracker()
+    UnlockMainTracker()
   end
 
   if hidden then 
-    self:HideMainTracker()
+    HideMainTracker()
   end
   
   _Tracker.OnSizeChanged = function(tracker, width, height)
@@ -436,7 +443,7 @@ function OnEnable(self)
 
   _TrackerMover.OnStopMoving = function(mover, ...)
     if _DB_READ_ONLY then 
-      return 
+      return
     end
 
     local tracker = mover.MoveTarget
@@ -514,6 +521,22 @@ function ToggleMainTracker()
     HideMainTracker()
   else
     ShowMainTracker()
+  end
+end
+
+__SystemEvent__ "SLT_SCROLL_STEP_COMMAND"
+function SetScrollStepMainTracker(scrollStep)
+  Style[_Tracker].ScrollBar.scrollStep = scrollStep
+
+  if not _DB_READ_ONLY then
+    Profiles.PrepareDatabase()
+    if Database.SelectTable(true, "trackers", _Tracker.ID) then
+      -- remove from db if it's the value by default
+      if scrollStep == DEFAULT_SCROLL_STEP then 
+        scrollStep = nil 
+      end
+      Database.SetValue("scrollStep", scrollStep)
+    end
   end
 end
 

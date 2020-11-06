@@ -138,6 +138,15 @@ function ToggleCommand()
   _M:FireSystemEvent("SLT_TOGGLE_COMMAND")
 end
 
+__SlashCmd__ "slt" "scrollstep" "- set the scroll sensibility (default: 15)"
+function SetScrollStepCommand(info)
+  local val = tonumber(info)
+
+  if val then 
+    _M:FireSystemEvent("SLT_SCROLL_STEP_COMMAND", val)
+  end
+end
+
 __SlashCmd__ "slt" "log" "- set the log level"
 function SetLogLevel(info)
   local val = tonumber(info)
