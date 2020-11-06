@@ -1,4 +1,12 @@
-# 0.4.0
+# 0.4.1
+
+**FIXES**
+
+- Fixed [ticket #24](https://github.com/Skamer/Syling-Tracker/issues/24) : an issue where sometimes the dungeon content had not the right height.
+
+---
+
+## 0.4.0
 
 **NEW**
 
