@@ -2,7 +2,7 @@
 
 **NEW**
 
-- Added a new slash command for setting the scroll sensibility : "/slt scrollstep x" where x is a number (by default: 15).
+- Added a new slash command for setting the scroll sensibility : `/slt scrollstep x` where x is a number (by default: 15).
 
 **FIXES**
 
@@ -15,8 +15,8 @@
 **NEW**
 
 - Torghast is now fully supported
-- Added a new slash command "/slt qcat" to toggle the displaying of categories for quests.
-- Added a new slash command "/slt minimap" to toggle the minimap icon.
+- Added a new slash command `/slt qcat` to toggle the displaying of categories for quests.
+- Added a new slash command `/slt minimap` to toggle the minimap icon.
 
 **CHANGES**
 
@@ -53,7 +53,7 @@
 
 **NEW**
 
-- A slash command "/slt toggle" has been added for showing/hiding the Tracker and the Item Bar ([PR #11](https://github.com/Skamer/Syling-Tracker/pull/11), thanks to @TheSumm)
+- A slash command `/slt toggle` has been added for showing/hiding the Tracker and the Item Bar ([PR #11](https://github.com/Skamer/Syling-Tracker/pull/11), thanks to @TheSumm)
 
 **FIXES**
 
