@@ -28,7 +28,7 @@ RegisterContentType({
   ID = "achievements",
   DisplayName = "Achievements",
   Description = "Display the achievements tracked",
-  DefaultOrder = 10,
+  DefaultOrder = 80,
   DefaultModel = _AchievementModel,
   DefaultViewClass = AchievementsContentView,
   Events = { "TRACKED_ACHIEVEMENT_LIST_CHANGED", "PLAYER_ENTERING_WORLD" },

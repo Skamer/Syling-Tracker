@@ -35,7 +35,7 @@ _KeystoneModel = RegisterModel(Model, "keystone-data")
 RegisterContentType({
   ID = "keystone",
   DisplayName = "Keystone (Mythic +)",
-  DefaultOrder = 15,
+  DefaultOrder = 30,
   DefaultModel = _KeystoneModel,
   DefaultViewClass = KeystoneContentView,
   Events = { "PLAYER_ENTERING_WORLD", "CHALLENGE_MODE_START" },

@@ -32,7 +32,7 @@ RegisterContentType({
   ID = "scenario",
   DisplayName = "Scenario",
   Description = "Display the scenario",
-  DefaultOrder = 5,
+  DefaultOrder = 10,
   DefaultModel = _ScenarioModel,
   DefaultViewClass = ScenarioContentView,
   Events = { "PLAYER_ENTERING_WORLD", "SCENARIO_POI_UPDATE", "SCENARIO_UPDATE"},
@@ -142,7 +142,7 @@ function UpdateObjectives(self)
         progress        = weightedProgress,
         minProgress     = 0,
         maxProgress     = 100,
-        progressText    = PERCENTAGE_STRING:format(progress)
+        progressText    = PERCENTAGE_STRING:format(weightedProgress)
       }
     }
   else
@@ -222,5 +222,5 @@ end
 -- Debug Utils Tools
 -- ========================================================================= --
 if ViragDevTool_AddData then 
-  ViragDevTool_AddData(_ScenarioModel, "ScenarioModel")
+  ViragDevTool_AddData(_ScenarioModel, "SLT Scenario Model")
 end

@@ -1,4 +1,13 @@
-# 0.4.1
+# 0.4.2
+
+**FIXES**
+
+- Fixed [ticket #16](https://github.com/Skamer/Syling-Tracker/issues/16) : an issue where the progress text wasn't updated in the scenerio.
+- Fixed the displaying order for some contents (e.g, the achievements will no longer be shown before the dungeon).
+
+---
+
+## 0.4.1
 
 **NEW**
 

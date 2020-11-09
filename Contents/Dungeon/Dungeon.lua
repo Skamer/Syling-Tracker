@@ -100,5 +100,5 @@ end
 -- Debug Utils Tools
 -- ========================================================================= --
 if ViragDevTool_AddData then 
-  ViragDevTool_AddData(_DungeonModel, "DungeonModel")
+  ViragDevTool_AddData(_DungeonModel, "SLT Dungeon Model")
 end

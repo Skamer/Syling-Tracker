@@ -33,7 +33,7 @@ RegisterContentType({
   ID = "world-quests",
   DisplayName = "World Quests",
   Description = "Display the world quests",
-  DefaultOrder = 5,
+  DefaultOrder = 50,
   DefaultModel = _WorldQuestsModel,
   DefaultViewClass = WorldQuestsContentView,
   Events = { "PLAYER_ENTERING_WORLD", "SLT_WORLD_QUEST_ACCEPTED", "SLT_WORLD_QUEST_REMOVED"},

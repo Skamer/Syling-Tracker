@@ -31,7 +31,7 @@ RegisterContentType({
   ID = "torghast",
   DisplayName = "Torghast",
   Description = "TORGHAST_PH_DESCRIPTION",
-  DefaultOrder = 4,
+  DefaultOrder = 40,
   DefaultModel = _TorghastModel,
   DefaultViewClass = TorghastContentView,
   Events = "PLAYER_ENTERING_WORLD",
