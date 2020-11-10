@@ -161,7 +161,15 @@ function UpdateWorldQuest(self, questID)
   }
 
   -- Is the quest has an item quest ?
-  local itemLink, itemTexture, charges, showItemWhenComplete = GetQuestLogSpecialItemInfo(GetLogIndexForQuestID(questID))
+  local itemLink, itemTexture, charges, showItemWhenComplete
+
+  local questLogIndex = GetLogIndexForQuestID(questID)
+  -- We check if the quest log index is valid before fetching as sometimes 
+  -- for unknown reason this can be nil.
+  if questLogIndex then 
+    itemLink, itemTexture, charges, showItemWhenComplete = GetQuestLogSpecialItemInfo(questLogIndex)
+  end
+
   if itemLink and itemTexture then
     questData.item = {
       link    = itemLink,

@@ -262,7 +262,7 @@ do
   --- The help part
   local help = ContextMenuPatternItemInfo()
   help.id = "help-quest"
-  help.text = "Help"
+  help.text = "Help (NYI)"
   help.order = 40
   help.icon = { atlas = AtlasType("QuestTurnin") }
   help.handler = function(questID)  

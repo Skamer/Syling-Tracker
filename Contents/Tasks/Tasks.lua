@@ -12,35 +12,38 @@ namespace                           "SLT"
 -- ========================================================================= --
 _Active                             = false
 -- ========================================================================= --
-RegisterContentType                 = API.RegisterContentType
-RegisterModel                       = API.RegisterModel
-ItemBar_AddItemData                 = API.ItemBar_AddItemData
-ItemBar_RemoveItemData              = API.ItemBar_RemoveItemData
-ItemBar_Update                      = API.ItemBar_Update
+export {
+  -- Syling API
+  ItemBar_AddItemData               = API.ItemBar_AddItemData,
+  ItemBar_RemoveItemData            = API.ItemBar_RemoveItemData,
+  ItemBar_Update                    = API.ItemBar_Update,
+  NIL_DATA                          = Model.NIL_DATA,
+  RegisterContentType               = API.RegisterContentType,
+  RegisterModel                     = API.RegisterModel,
+  -- WoW API & Utils
+  GetLogIndexForQuestID             = C_QuestLog.GetLogIndexForQuestID,
+  GetQuestLogCompletionText         = GetQuestLogCompletionText,
+  GetQuestLogSpecialItemInfo        = GetQuestLogSpecialItemInfo,
+  GetQuestObjectiveInfo             = GetQuestObjectiveInfo,
+  GetQuestProgressBarPercent        = GetQuestProgressBarPercent,
+  GetTaskInfo                       = GetTaskInfo,
+  GetTasksTable                     = GetTasksTable,
+  IsQuestComplete                   = C_QuestLog.IsComplete,
+  IsQuestTask                       = C_QuestLog.IsQuestTask,
+  IsWorldQuest                      = QuestUtils_IsQuestWorldQuest,
+  RequestLoadQuestByID              = C_QuestLog.RequestLoadQuestByID,
+  SetSelectedQuest                  = C_QuestLog.SetSelectedQuest
+}
 -- ========================================================================= --
-RequestLoadQuestByID                = C_QuestLog.RequestLoadQuestByID
-IsWorldQuest                        = QuestUtils_IsQuestWorldQuest
-IsQuestTask                         = C_QuestLog.IsQuestTask
-IsQuestComplete                     = C_QuestLog.IsComplete
-GetTaskInfo                         = GetTaskInfo
-GetTasksTable                       = GetTasksTable
-GetLogIndexForQuestID               = C_QuestLog.GetLogIndexForQuestID
-SetSelectedQuest                    = C_QuestLog.SetSelectedQuest -- Replace SelectQuestLogEntry
-GetQuestLogCompletionText           = GetQuestLogCompletionText
-GetQuestLogSpecialItemInfo          = GetQuestLogSpecialItemInfo
-GetQuestProgressBarPercent          = GetQuestProgressBarPercent
-GetQuestObjectiveInfo               = GetQuestObjectiveInfo
--- ========================================================================= --
-_BonusTasksModel                    = RegisterModel(QuestModel, "bonus-tasks-data")
-_TasksModel                         = RegisterModel(QuestModel, "tasks-data")
-NIL_DATA                            = Model.NIL_DATA
+local BonusTasksModel              = RegisterModel(QuestModel, "bonus-tasks-data")
+local TasksModel                   = RegisterModel(QuestModel, "tasks-data")
 -- ========================================================================= --
 RegisterContentType({
   ID = "bonus-tasks",
   DisplayName = "Bonus Tasks",
   Description = "Display the bonus tasks, also known as bonus objectives",
   DefaultOrder = 60,
-  DefaultModel = _BonusTasksModel,
+  DefaultModel = BonusTasksModel,
   DefaultViewClass = BonusTasksContentView,
   Events = { "PLAYER_ENTERING_WORLD", "SLT_TASKS_LOADED","SLT_BONUS_TASK_QUEST_ADDED", "SLT_BONUS_TASK_QUEST_REMOVED"},
   Status = function() return _M:HasBonusTasks() end
@@ -51,15 +54,15 @@ RegisterContentType({
   DisplayName = "Tasks",
   Description = "Display the tasks, also known as objectives",
   DefaultOrder = 70,
-  DefaultModel = _TasksModel,
+  DefaultModel = TasksModel,
   DefaultViewClass = TasksContentView,
   Events = { "PLAYER_ENTERING_WORLD", "SLT_TASKS_LOADED", "SLT_TASK_QUEST_ADDED", "SLT_TASK_QUEST_REMOVED"},
   Status = function(...) return _M:HasTasks() end
 })
 -- ========================================================================= --
-TASKS_CACHE                         = {}
-BONUS_TASKS_CACHE                   = {}
-TASKS_WITH_ITEMS                    = {}
+local TASKS_CACHE                   = {}
+local BONUS_TASKS_CACHE             = {}
+local TASKS_WITH_ITEMS              = {}
 -- ========================================================================= --
 __ActiveOnEvents__ "PLAYER_ENTERING_WORLD" "QUEST_ACCEPTED" "QUEST_REMOVED"
 function ActivateOn(self, event)
@@ -72,8 +75,8 @@ end
 
 function OnInactive(self)
   -- Clear the data inside the models
-  _BonusTasksModel:ClearData()
-  _TasksModel:ClearData()
+  BonusTasksModel:ClearData()
+  TasksModel:ClearData()
 
   -- Clear the cache
   wipe(TASKS_CACHE)
@@ -98,12 +101,12 @@ function QUEST_ACCEPTED(questID)
   _M:UpdateTask(questID)
 
   if BONUS_TASKS_CACHE[questID] then
-    _BonusTasksModel:Flush()
+    BonusTasksModel:Flush()
     -- NOTE: We triggered an event, allowing to content type to check correctly
     -- the status.
     _M:FireSystemEvent("SLT_BONUS_TASK_QUEST_ADDED", questID)
   else 
-    _TasksModel:Flush()
+    TasksModel:Flush()
     -- NOTE: We triggered an event, allowing to content type to check correctly
     -- the status.
    _M:FireSystemEvent("SLT_TASK_QUEST_ADDED", questID)
@@ -121,16 +124,16 @@ function QUEST_REMOVED(questID)
 
 
   if BONUS_TASKS_CACHE[questID] then 
-    _BonusTasksModel:RemoveQuestData(questID)
-    _BonusTasksModel:Flush()
+    BonusTasksModel:RemoveQuestData(questID)
+    BonusTasksModel:Flush()
     BONUS_TASKS_CACHE[questID] = nil
 
     -- NOTE: We triggered an event, allowing to content type to check correctly
     -- the status.
     _M:FireSystemEvent("SLT_BONUS_TASK_QUEST_REMOVED", questID)
   else 
-    _TasksModel:RemoveQuestData(questID)
-    _TasksModel:Flush()
+    TasksModel:RemoveQuestData(questID)
+    TasksModel:Flush()
     TASKS_CACHE[questID] = nil
 
     -- NOTE: We triggered an event, allowing to content type to check correctly
@@ -151,25 +154,26 @@ __SystemEvent__()
 function QUEST_LOG_UPDATE()
   for questID in pairs(BONUS_TASKS_CACHE) do 
     _M:UpdateTask(questID)
-    _BonusTasksModel:Flush()
+    BonusTasksModel:Flush()
   end
   
   for questID in pairs(TASKS_CACHE) do 
     _M:UpdateTask(questID)
-    _TasksModel:Flush()
+    TasksModel:Flush()
   end
 end
 
 function LoadTasks(self)
   local tasks = GetTasksTable()
-  for i, questID in pairs(tasks) do 
-    if not IsWorldQuest(questID) then 
+  for i, questID in pairs(tasks) do
+    local isInArea = GetTaskInfo(questID)
+    if not IsWorldQuest(questID) and isInArea then 
       self:UpdateTask(questID)
     end
   end
 
-  _TasksModel:Flush()
-  _BonusTasksModel:Flush()
+  TasksModel:Flush()
+  BonusTasksModel:Flush()
 
   -- We trigger an event for the both content have reliable data for checking
   -- if they should be shown.
@@ -190,7 +194,14 @@ function UpdateTask(self, questID)
   }
 
   -- Is the quest has an item quest ?
-  local itemLink, itemTexture = GetQuestLogSpecialItemInfo(GetLogIndexForQuestID(questID))
+  local itemLink, itemTexture
+
+  local questLogIndex = GetLogIndexForQuestID(questID)
+  -- We check if the quest log index is valid before fetching as sometimes 
+  -- for unknown reason this can be nil.
+  if questLogIndex then 
+    itemLink, itemTexture = GetQuestLogSpecialItemInfo(questLogIndex)
+  end
 
   if itemLink and itemTexture then
     questData.item = {
@@ -275,10 +286,10 @@ function UpdateTask(self, questID)
 
   if displayAsObjective then 
     TASKS_CACHE[questID] = true
-    _TasksModel:AddQuestData(questID, questData)
+    TasksModel:AddQuestData(questID, questData)
   else
     BONUS_TASKS_CACHE[questID] = true
-    _BonusTasksModel:AddQuestData(questID, questData)
+    BonusTasksModel:AddQuestData(questID, questData)
   end
 end
 
@@ -315,6 +326,6 @@ end
 -- Debug Utils Tools
 -- ========================================================================= --
 if ViragDevTool_AddData then 
-  ViragDevTool_AddData(_BonusTasksModel, "SLT Bonus Task Model")
-  ViragDevTool_AddData(_TasksModel, "SLT Task Model")
+  ViragDevTool_AddData(BonusTasksModel, "SLT Bonus Task Model")
+  ViragDevTool_AddData(TasksModel, "SLT Task Model")
 end

@@ -8,7 +8,7 @@
 -- ========================================================================= --
 Syling                   "SylingTracker.Tasks.Task"                         ""
 -- ========================================================================= --
-namespace                          "SLT"
+namespace                           "SLT"
 -- ========================================================================= --
 export {
   -- Iterator helper for ignoring the children are used for backdrop, and avoiding

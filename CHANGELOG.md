@@ -1,4 +1,13 @@
-# 0.4.2
+# 0.4.3
+
+**FIXES**
+
+- Fixed [ticket #26](https://github.com/Skamer/Syling-Tracker/issues/26) : an error lua for tasks and world quests.
+- Fixed an issue where some tasks could be displayed even if the player wasn't in their areas and preventing the content to work correctly.
+
+---
+
+## 0.4.2
 
 **FIXES**
 
