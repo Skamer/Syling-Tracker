@@ -10,12 +10,10 @@ Syling                "SylingTracker.Quests.QuestsContentView"               ""
 -- ========================================================================= --
 namespace                          "SLT"
 -- ========================================================================= --
--- Iterator helper for ignoring the children are used for backdrop, and avoiding
--- they are taken as account for their parent height
-IterateFrameChildren = Utils.IterateFrameChildren
--- ========================================================================= --
-ResetStyles           = Utils.ResetStyles
-ValidateFlags         = System.Toolset.validateflags
+export {
+  ResetStyles                       = Utils.ResetStyles,
+  ValidateFlags                     = System.Toolset.validateflags
+}
 -- ========================================================================= --
 local SHOW_CATEGORIES = true
 -- ========================================================================= --
@@ -32,13 +30,43 @@ class "QuestsContentView" (function(_ENV)
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
+  function HookData(self, data)
+    if data.quests then
+      local newData = {}
+      local hasQuests = false 
+      for questID, questData in pairs(data.quests) do 
+        if not questData.campaignID or questData.campaignID == 0 then 
+          if not newData.quests then
+            newData.quests = {}
+          end
+
+          newData.quests[questID] = questData
+          hasQuests = true
+        end
+      end
+
+      self.ShouldBeDisplayed = hasQuests
+      
+      return newData
+    end
+
+    return data
+  end
+
   function OnViewUpdate(self, data)
     local questsData = data.quests 
+
+    local showCategories
+    if self.IgnoreOptions then 
+      showCategories = self.ShowCategories
+    else
+      showCategories = SHOW_CATEGORIES
+    end
 
     -- Determines the flags
     local flags = Flags.NONE 
     if questsData then
-      if SHOW_CATEGORIES then  
+      if showCategories then  
         flags = Flags.HAS_CATEGORIES
       else 
         flags = Flags.HAS_QUESTS
@@ -73,7 +101,7 @@ class "QuestsContentView" (function(_ENV)
 
 
     if questsData then
-      if SHOW_CATEGORIES then 
+      if showCategories then 
         local categories = self:AcquireCategories()
         categories:UpdateView(questsData)
       else 
@@ -203,6 +231,13 @@ class "QuestsContentView" (function(_ENV)
     type = Boolean,
     default = true
   }
+
+  -- @HACK: Prevent the options to be applied
+  -- e.g, to be sure the categories are not displayed for campaign
+  property "IgnoreOptions" {
+    type = Boolean,
+    default = false
+  }
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
   -----------------------------------------------------------------------------
@@ -211,6 +246,35 @@ class "QuestsContentView" (function(_ENV)
     self.OnChildrenSizeChanged = function() self:AdjustHeight(true) end
   end
 end)
+-- ========================================================================= --
+__Recyclable__ "SylingTracker_CampaignContentView%d"
+class "CampaignContentView" (function(_ENV)
+  inherit "QuestsContentView"
+
+  function HookData(self, data)
+    if data.quests then
+      local newData = {}
+      local hasCampaign = false 
+      for questID, questData in pairs(data.quests) do 
+        if questData.campaignID and questData.campaignID ~= 0 then 
+          if not newData.quests then
+            newData.quests = {}
+          end
+
+          newData.quests[questID] = questData
+          hasCampaign = true 
+        end
+      end
+
+      self.ShouldBeDisplayed = hasCampaign
+      
+      return newData
+    end
+
+    return data
+  end
+end)
+
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
@@ -260,6 +324,20 @@ Style.UpdateSkin("Default", {
             }
           }
         }
+      }
+    }
+  },
+  [CampaignContentView] = {
+    IgnoreOptions = true,
+    ShowCategories = false,
+    Header = {
+      IconBadge = {
+        Icon = {
+          atlas = AtlasType("quest-campaign-available")
+        }
+      },
+      Label = {
+        text = "Campaign"
       }
     }
   }

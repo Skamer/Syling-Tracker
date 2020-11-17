@@ -24,8 +24,7 @@ local function OnMinMaxValueSet(self)
  
     Style[self].thumbTexture.size = Size(width, math.max(24, height - (max - min)))
 end
- 
- 
+-- ========================================================================= --
 UI.Property         {
     name            = "ThumbAutoHeight",
     type            = Boolean,
@@ -43,7 +42,7 @@ UI.Property         {
         end
     end,
 }
-
+-- ========================================================================= --
 class "Tracker"(function(_ENV)
   inherit "Frame"
   -----------------------------------------------------------------------------
@@ -69,14 +68,6 @@ class "Tracker"(function(_ENV)
     self:GetChild("ScrollBar"):OnMouseWheel(value)
   end 
 
-  -- local function OnViewSizeChanged(self)
-  --   self:GetParent():AdjustHeight()
-  -- end
-
-  -- local function OnViewOrderChanged(self)
-  --   self:GetParent():AdjustHeight()
-  -- end 
-
   -- NOTE: Required
   function SetVerticalScroll(self, value)
     self:GetChild("ScrollFrame"):UpdateScrollChildRect()
@@ -99,11 +90,11 @@ class "Tracker"(function(_ENV)
   function AddView(self, view)
     self.Views:Insert(view)
     view:SetParent(self:GetChild("ScrollFrame"):GetChild("Content"))
-    -- view:SetParent(UIParent)
 
     -- Register the events
     view.OnSizeChanged = view.OnSizeChanged + self.OnViewSizeChanged
     view.OnOrderChanged = view.OnOrderChanged + self.OnViewOrderChanged
+    view.OnShouldBeDisplayedChanged = view.OnShouldBeDisplayedChanged + self.OnViewShouldBeDisplayedChanged
 
     self:OnLayout()
     self:OnAdjustHeight()
@@ -116,6 +107,7 @@ class "Tracker"(function(_ENV)
     -- Unregister the events
     view.OnSizeChanged = view.OnSizeChanged - self.OnViewSizeChanged
     view.OnOrderChanged = view.OnOrderChanged - self.OnViewOrderChanged
+    view.OnShouldBeDisplayedChanged = view.OnShouldBeDisplayedChanged - self.OnViewShouldBeDisplayedChanged
 
     -- We call an instant layout and adjust height for avoiding a
     -- flashy behavior when the content has been removed. 
@@ -124,13 +116,44 @@ class "Tracker"(function(_ENV)
 
     -- NOTE: We don't call the "Release" method of view because it will be done by
     -- the content type.
-  end 
+  end
+
+
+  __Arguments__ { IView }
+  function DisplayView(self, view)
+    view:OnAcquire()
+    view:SetParent(self:GetChild("ScrollFrame"):GetChild("Content"))
+    
+    self:OnLayout()
+    self:OnAdjustHeight()
+  end
+
+  __Arguments__ { IView }
+  function HideView(self, view)
+    view:OnRelease()
+
+    self:OnLayout()
+    self:OnAdjustHeight()
+  end
+
+  __Iterator__()
+  function IterateViews(self)
+    local yield = coroutine.yield
+    local index = 0
+
+    for _, view in self.Views:Sort("x,y=>x.Order<y.Order"):GetIterator() do 
+      if view.ShouldBeDisplayed then
+        index = index + 1
+        yield(index, view)
+      end
+    end 
+  end
 
   function OnLayout(self)
     local content = self:GetChild("ScrollFrame"):GetChild("Content")
     local previousView
 
-    for index, view in self.Views:Sort("x,y=>x.Order<y.Order"):GetIterator() do
+    for index, view in self:IterateViews() do
       if index > 1 then 
         view:SetPoint("TOP", previousView, "BOTTOM", 0, -self.Spacing)
         view:SetPoint("LEFT")
@@ -175,7 +198,7 @@ class "Tracker"(function(_ENV)
     local height = 0
     local count = 0
     local content = self:GetChild("ScrollFrame"):GetChild("Content")
-    for _, view in self.Views:GetIterator() do 
+    for _, view in self:IterateViews() do 
       count = count + 1
       height  = height + view:GetHeight()
     end
@@ -214,7 +237,6 @@ class "Tracker"(function(_ENV)
       self._cancelAdjustHeight = true
     end
   end
-
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
@@ -281,6 +303,14 @@ class "Tracker"(function(_ENV)
     
     self.OnViewOrderChanged = function() self:Layout() end 
     self.OnViewSizeChanged = function() self:AdjustHeight() end 
+
+    self.OnViewShouldBeDisplayedChanged = function(view, new)
+      if new then 
+        self:DisplayView(view)
+      else 
+        self:HideView(view)
+      end
+    end 
   end 
 end)
 
@@ -561,6 +591,7 @@ function PLAYER_ENTERING_WORLD(isInitialLogin, isReloadingUi)
     _Tracker:TrackContentType("bonus-tasks")
     _Tracker:TrackContentType("tasks")
     _Tracker:TrackContentType("quests")
+    _Tracker:TrackContentType("campaign")
     _Tracker:TrackContentType("auto-quests")
     _Tracker:TrackContentType("world-quests")
     _Tracker:TrackContentType("keystone")

@@ -30,9 +30,14 @@ interface "IView" (function(_ENV)
   -- This is important to not redefine this method, 
   -- use "OnUpdate" for updating your view.
   function UpdateView(self, data, updater)
-    self:OnViewUpdate(data, updater)
+    if self.HookData then 
+      local modifyData = self:HookData(data, updater)
+      self:OnViewUpdate(modifyData, updater)
+    else 
+      self:OnViewUpdate(data, updater)
+    end
   end
-  
+
   -- You need redefine its function for handling the stuffs for your views
   -- when updated.
   -- REVIEW: Probably add an content id (e.g, quest, scenario) as arguement ?
@@ -198,6 +203,12 @@ interface "IView" (function(_ENV)
     type = Boolean,
     default = true,
     event = "OnActiveChanged"
+  }
+
+  property "ShouldBeDisplayed" {
+    type = Boolean,
+    default = true, 
+    event = "OnShouldBeDisplayedChanged"
   }
 
   property "AnimationInfo" {

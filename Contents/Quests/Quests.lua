@@ -12,54 +12,50 @@ import                              "SLT"
 -- ========================================================================= --
 _Active                             = false
 -- ========================================================================= --
--- Check if the player is on the Shadowlands environment
-IsOnShadowlands                     = Utils.IsOnShadowlands
-RegisterContentType                 = API.RegisterContentType
-RegisterModel                       = API.RegisterModel
-ItemBar_AddItemData                 = API.ItemBar_AddItemData
-ItemBar_RemoveItemData              = API.ItemBar_RemoveItemData
-ItemBar_Update                      = API.ItemBar_Update
--- ========================================================================= --
-RequestLoadQuestByID                = C_QuestLog.RequestLoadQuestByID
-GetQuestName                        = QuestUtils_GetQuestName
-IsWorldQuest                        = QuestUtils_IsQuestWorldQuest
-IsRaidQuest                         = Utils.Quest.IsRaidQuest
-IsDungeonQuest                      = Utils.Quest.IsDungeonQuest
-SelectQuestLogEntry                 = SelectQuestLogEntry
-GetNumQuestObjectives               = C_QuestLog.GetNumQuestObjectives
-IsQuestBounty                       = C_QuestLog.IsQuestBounty
-IsQuestTask                         = C_QuestLog.IsQuestTask
-IsQuestTrivial                      = C_QuestLog.IsQuestTrivial
-GetQuestDifficultyLevel             = C_QuestLog.GetQuestDifficultyLevel
-IsQuestWatched                      = QuestUtils_IsQuestWatched
-GetNumQuestWatches                  = C_QuestLog.GetNumQuestWatches
-GetNumQuestLogEntries               = C_QuestLog.GetNumQuestLogEntries
-GetLogIndexForQuestID               = C_QuestLog.GetLogIndexForQuestID
-GetInfo                             = C_QuestLog.GetInfo
-IsLegendaryQuest                    = C_QuestLog.IsLegendaryQuest
-GetDistanceSqToQuest                = C_QuestLog.GetDistanceSqToQuest
-IsQuestBounty                       = C_QuestLog.IsQuestBounty
-IsQuestTask                         = C_QuestLog.IsQuestTask
-IsQuestComplete                     = C_QuestLog.IsComplete
-SetSelectedQuest                    = C_QuestLog.SetSelectedQuest
-GetQuestTagInfo                     = C_QuestLog.GetQuestTagInfo
-AddQuestWatch                       = C_QuestLog.AddQuestWatch
-EnumQuestWatchType                  = _G.Enum.QuestWatchType
--- ========================================================================= --
--- Shadowlands Only function
--- Don't use them in non Shadowlands environments
--- ========================================================================= --
-GetRequiredMoney              = C_QuestLog.GetRequiredMoney
-GetSuggestedGroupSize         = C_QuestLog.GetSuggestedGroupSize
-GetTimeAllowed                = C_QuestLog.GetTimeAllowed
-IsOnMap                       = C_QuestLog.IsOnMap
--- ========================================================================= --
--- NEED CHECK these below functions 
-GetQuestProgressBarPercent    = GetQuestProgressBarPercent
-GetQuestObjectiveInfo         = GetQuestObjectiveInfo
-GetQuestLogCompletionText     = GetQuestLogCompletionText
-SelectQuestLogEntry           = SelectQuestLogEntry
-GetQuestLogSpecialItemInfo    = GetQuestLogSpecialItemInfo
+export {
+  -- Syling API
+  ItemBar_AddItemData                 = API.ItemBar_AddItemData,
+  ItemBar_RemoveItemData              = API.ItemBar_RemoveItemData,
+  ItemBar_Update                      = API.ItemBar_Update,
+  RegisterContentType                 = API.RegisterContentType,
+  RegisterModel                       = API.RegisterModel,
+
+  -- WoW API & Utils
+  AddQuestWatch                       = C_QuestLog.AddQuestWatch,
+  EnumQuestWatchType                  = _G.Enum.QuestWatchType,
+  GetCampaignID                       = C_CampaignInfo.GetCampaignID,
+  GetDistanceSqToQuest                = C_QuestLog.GetDistanceSqToQuest,
+  GetInfo                             = C_QuestLog.GetInfo,
+  GetLogIndexForQuestID               = C_QuestLog.GetLogIndexForQuestID,
+  GetNumQuestLogEntries               = C_QuestLog.GetNumQuestLogEntries,
+  GetNumQuestObjectives               = C_QuestLog.GetNumQuestObjectives,
+  GetNumQuestWatches                  = C_QuestLog.GetNumQuestWatches,
+  GetQuestDifficultyLevel             = C_QuestLog.GetQuestDifficultyLevel,
+  GetQuestLogCompletionText           = GetQuestLogCompletionText,
+  GetQuestLogSpecialItemInfo          = GetQuestLogSpecialItemInfo,
+  GetQuestName                        = QuestUtils_GetQuestName,
+  GetQuestObjectiveInfo               = GetQuestObjectiveInfo,
+  GetQuestProgressBarPercent          = GetQuestProgressBarPercent,
+  GetQuestTagInfo                     = C_QuestLog.GetQuestTagInfo,
+  GetRequiredMoney                    = C_QuestLog.GetRequiredMoney,
+  GetSuggestedGroupSize               = C_QuestLog.GetSuggestedGroupSize,
+  GetTimeAllowed                      = C_QuestLog.GetTimeAllowed,
+  IsCampaignQuest                     = Utils.Quest.IsCampaignQuest,
+  IsDungeonQuest                      = Utils.Quest.IsDungeonQuest,
+  IsLegendaryQuest                    = C_QuestLog.IsLegendaryQuest,
+  IsOnMap                             = C_QuestLog.IsOnMap,
+  IsQuestBounty                       = C_QuestLog.IsQuestBounty,
+  IsQuestComplete                     = C_QuestLog.IsComplete,
+  IsQuestTask                         = C_QuestLog.IsQuestTask,
+  IsQuestTrivial                      = C_QuestLog.IsQuestTrivial,
+  IsQuestWatched                      = QuestUtils_IsQuestWatched,
+  IsRaidQuest                         = Utils.Quest.IsRaidQuest,
+  IsWorldQuest                        = QuestUtils_IsQuestWorldQuest,
+  RequestLoadQuestByID                = C_QuestLog.RequestLoadQuestByID,
+  SelectQuestLogEntry                 = SelectQuestLogEntry,
+  SelectQuestLogEntry                 = SelectQuestLogEntry,
+  SetSelectedQuest                    = C_QuestLog.SetSelectedQuest
+}
 -- ========================================================================= --
 _QuestModel                         = RegisterModel(QuestModel, "quests-data")
 -- ========================================================================= --
@@ -69,17 +65,32 @@ RegisterContentType({
   ID = "quests",
   DisplayName = "Quests",
   Description = "Track the watched quests",
+  DefaultOrder = 100,
   DefaultModel = _QuestModel,
   DefaultViewClass = QuestsContentView,
   Events = { "PLAYER_ENTERING_WORLD", "QUEST_WATCH_LIST_CHANGED"},
   Status = function() return GetNumQuestWatches() > 0 end
 })
+
+RegisterContentType({
+  ID = "campaign",
+  DisplayName = "Campaign",
+  Description = "Track the camapign quests",
+  DefaultOrder = 90,
+  DefaultModel = _QuestModel,
+  DefaultViewClass = CampaignContentView,
+  Events = { "PLAYER_ENTERING_WORLD", "QUEST_WATCH_LIST_CHANGED"},
+  Status = function() return GetNumQuestWatches() > 0 end
+})
 -- ========================================================================= --
-DISTANCE_UPDATER_ENABLED      = false
-QUESTS_CACHE                  = {}
-QUEST_HEADERS_CACHE           = {}
-QUESTS_WITH_PROGRESS          = {}
-QUESTS_WITH_ITEMS             = {}
+local DISTANCE_UPDATER_ENABLED      = false
+local QUESTS_CACHE                  = {}
+local QUEST_HEADERS_CACHE           = {}
+local QUESTS_WITH_PROGRESS          = {}
+local QUESTS_WITH_ITEMS             = {}
+local QUESTS_REQUESTED              = {}
+
+
 -- ========================================================================= --
 __ActiveOnEvents__  "PLAYER_ENTERING_WORLD" "QUEST_WATCH_LIST_CHANGED" "QUEST_ACCEPTED"
 function BecomeActiveOn(self, event, ...)
@@ -179,30 +190,9 @@ function LoadQuests(self)
         category            = currentHeader
       }
 
-      -- local questData = {
-      --   title = title,
-      --   name = title,
-      --   questLogIndex = questLogIndex,
-      --   questID = questID, 
-      --   campaignID = campaignID,
-      --   level = level,
-      --   suggestedGroup = suggestedGroup,
-      --   difficultyLevel = difficultyLevel,
-      --   isBounty = isBounty,
-      --   isStory = isStory, 
-      --   isScaling = isScaling, 
-      --   isOnMap = isOnMap,
-      --   hasLocalPOI = hasLocalPOI,
-      --   isHidden = isHidden,
-      --   isAutoComplete = isAutoComplete,
-      --   overridesSortOrder = overridesSortOrder,
-      --   readyForTranslation = readyForTranslation,
-      --   header = currentHeader,
-      --   category = currentHeader, 
-      -- }
-
       _QuestModel:SetQuestData(questID, questData)
 
+      QUESTS_REQUESTED[questID] = true
       RequestLoadQuestByID(questID)
     end 
   end
@@ -227,6 +217,7 @@ function UpdateQuest(self, questID)
   local suggestedGroup    = GetSuggestedGroupSize(questID)
   local isLegendary       = IsLegendaryQuest(questID)
   local tag               = GetQuestTagInfo(questID)
+  local campaignID        = GetCampaignID(questID)
   
   if not distance then
     distance = 99999
@@ -248,6 +239,7 @@ function UpdateQuest(self, questID)
     level           = level,
     header          = header,
     category        = header,
+    campaignID      = campaignID,
     questLogIndex   = questLogIndex,
     numObjectives   = numObjectives,
     isComplete      = isComplete,
@@ -395,7 +387,6 @@ function QUEST_ACCEPTED(questID)
   end
 end
 
-__Async__()
 __SystemEvent__()
 function QUEST_WATCH_LIST_CHANGED(questID, isAdded)
   if not questID then 
@@ -406,13 +397,16 @@ function QUEST_WATCH_LIST_CHANGED(questID, isAdded)
     Debug("The quest (id:%i) has been added in the watch list", questID)
 
     QUESTS_CACHE[questID] = true 
+    QUESTS_REQUESTED[questID] = true
+
     RequestLoadQuestByID(questID)
 
-    _M:UpdateQuest(questID)
+    -- _M:UpdateQuest(questID)
   else 
     Debug("The quest (id:%i) has been removed from the watch list", questID)
 
     QUESTS_CACHE[questID] = nil
+    QUESTS_REQUESTED[questID] = nil
     
     if QUESTS_WITH_ITEMS[questID] then 
       ItemBar_RemoveItemData(questID)
@@ -427,7 +421,9 @@ end
 
 __SystemEvent__()
 function QUEST_DATA_LOAD_RESULT(questID, success)
-  if success and QUESTS_CACHE[questID] then
+  if success and QUESTS_REQUESTED[questID] then
+    QUESTS_REQUESTED[questID] = nil 
+
     _M:UpdateQuest(questID)
     _QuestModel:Flush()
   end
