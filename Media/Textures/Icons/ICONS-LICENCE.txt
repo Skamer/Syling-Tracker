@@ -1,0 +1,9 @@
+-------------------------------------------------------------------------------
+File: close.blp 
+License: Apache 2.0
+License URL: https://www.apache.org/licenses/LICENSE-2.0
+Author: Google
+Source: https://materialdesignicons.com/
+SourceName: close 
+Modications: Converted to BLP format
+-------------------------------------------------------------------------------

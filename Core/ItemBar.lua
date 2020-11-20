@@ -10,6 +10,10 @@ Syling                      "SylingTracker.Core.ItemBar"                     ""
 -- ========================================================================= --
 namespace                          "SLT"
 -- ========================================================================= --
+export {
+  GameTooltip                       = GameTooltip
+}
+-- ========================================================================= --
 RegisterModel                       = API.RegisterModel
 -- ========================================================================= --
 _ItemModel                          = RegisterModel(Model, "items-data")
@@ -25,6 +29,14 @@ class "ItemButton" (function(_ENV)
   function SetItemLink(self, itemLink)
     self.__ActionButton:SetAttribute("type", "item")
     self.__ActionButton:SetAttribute("item", itemLink)
+    self.__ActionButton:SetScript("OnLeave", function()
+      GameTooltip:Hide()
+    end)
+    self.__ActionButton:SetScript("OnEnter", function()
+        GameTooltip:SetOwner(self, "ANCHOR_LEFT")
+        GameTooltip:SetHyperlink(itemLink)
+        GameTooltip:Show()
+    end)
   end
 
   function SetItemTexture(self, texture)
@@ -39,6 +51,9 @@ class "ItemButton" (function(_ENV)
     self:Hide()
     self:ClearAllPoints()
     self:SetParent()
+
+    self.__ActionButton:SetScript("OnLeave", nil)
+    self.__ActionButton:SetScript("OnEnter", nil)
   end
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
@@ -202,6 +217,7 @@ class "API" (function(_ENV)
 
   __Static__() function ItemBar_SetItemData(id, data)
     data.id = id 
+
     _ItemModel:SetData(data, "items", id)
   end
 

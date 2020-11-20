@@ -30,8 +30,14 @@ export {
 
   -- Achievement
   GetAchievementLink                    = GetAchievementLink,
-  RemoveTrackedAchievement              = RemoveTrackedAchievement
+  RemoveTrackedAchievement              = RemoveTrackedAchievement,
+
+  -- Helper 
+  ShowHelperWindow                      = API.ShowHelperWindow
 }
+-- ========================================================================= --
+local HELPER_QUEST_TYPE = "quest"
+local HELPER_ACHIEVEMENT_TYPE = "achievement"
 -- ========================================================================= --
 -- Quest Pattern
 -- ========================================================================= --
@@ -143,12 +149,10 @@ do
   --- The help part
   local help = ContextMenuPatternItemInfo()
   help.id = "help-quest"
-  help.text = "Help (NYI)"
+  help.text = "Help"
   help.order = 70
   help.icon = { atlas = AtlasType("QuestTurnin") }
-  help.handler = function(questID)  
-    -- TODO: Implement the help action
-  end 
+  help.handler = function(questID) ShowHelperWindow(HELPER_QUEST_TYPE, questID) end 
   questPattern:AddAction(help)
 end
 -- ========================================================================= --
@@ -202,12 +206,10 @@ do
   --- The help part
   local help = ContextMenuPatternItemInfo()
   help.id = "help-quest"
-  help.text = "Help (NYI)"
+  help.text = "Help"
   help.order = 40
   help.icon = { atlas = AtlasType("QuestTurnin") }
-  help.handler = function(questID)  
-    -- TODO: Implement the help action
-  end 
+  help.handler = function(questID) ShowHelperWindow(HELPER_QUEST_TYPE, questID) end
   worldQuestPattern:AddAction(help)
 end
 
@@ -262,12 +264,10 @@ do
   --- The help part
   local help = ContextMenuPatternItemInfo()
   help.id = "help-quest"
-  help.text = "Help (NYI)"
+  help.text = "Help"
   help.order = 40
   help.icon = { atlas = AtlasType("QuestTurnin") }
-  help.handler = function(questID)  
-    -- TODO: Implement the help action
-  end 
+  help.handler = function(questID) ShowHelperWindow(HELPER_QUEST_TYPE, questID) end
   taskPattern:AddAction(help)
 end
 -- ========================================================================= --
@@ -328,11 +328,9 @@ do
   --- The help part
   local help = ContextMenuPatternItemInfo()
   help.id = "help-achievement"
-  help.text = "Help (NYI)"
+  help.text = "Help"
   help.order = 40
   help.icon = { atlas = AtlasType("QuestTurnin") }
-  help.handler = function(questID)  
-    -- TODO: Implement the help action
-  end 
+  help.handler = function(achievementID) ShowHelperWindow(HELPER_ACHIEVEMENT_TYPE, achievementID) end
   achievementPattern:AddAction(help)
 end 

@@ -7,5 +7,6 @@
   <Script file="ObjectiveView.lua"/>
   <Script file="ContentHeader.lua"/>
   <Script file="ContentView.lua"/>
+  <Script file="HelperWindow.lua"/>
   <Script file="ContextMenu.lua"/>
 </Ui>

@@ -67,10 +67,10 @@ function Update()
 
       if isWeightProgress then 
         data.hasProgressBar = true
-        data.progress = progress
+        data.progress = quantity
         data.minProgress = 0
-        data.maxProgress = 100
-        data.progressText = PERCENTAGE_STRING:format(progress)
+        data.maxProgress = totalQuantity
+        data.progressText = quantityString
       else 
         data.hasProgressBar = nil 
       end
@@ -84,7 +84,6 @@ function Update()
   _DungeonModel:AddData(dungeonData, "dungeon")
   _DungeonModel:Flush()
 end
-
 
 __Async__()
 __SystemEvent__ "UPDATE_INSTANCE_INFO"
