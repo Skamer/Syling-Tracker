@@ -2,7 +2,7 @@
 
 **NEW**
 
-- The helper window is now avalaible throught the "Help" action in the context menu, and will give a Wowhead link for a quest or a achievement.
+- The helper window is now available throught the "Help" action in the context menu, and will give a Wowhead link for a quest or a achievement.
 - The campaign quests are now separated of other quests and displayed in their own header : "Campaign".
 
 **CHANGES**
