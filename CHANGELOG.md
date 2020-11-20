@@ -1,4 +1,21 @@
-# 0.4.3
+# 0.5.0
+
+**NEW**
+
+- The helper window is now avalaible throught the "Help" action in the context menu, and will give a Wowhead link for a quest or a achievement.
+- The campaign quests are now separated of other quests and displayed in their own header : "Campaign".
+
+**CHANGES**
+
+- Added the tooltip for quest items in the item bar.
+
+**FIXES**
+
+- Fixed an issue where the progress bar wasn't updated for an dungeon.
+
+---
+
+## 0.4.3
 
 **FIXES**
 
