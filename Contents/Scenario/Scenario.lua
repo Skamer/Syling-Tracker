@@ -153,6 +153,10 @@ function UpdateObjectives(self)
         flags, assetID, quantityString, criteriaID, duration, elapsed,
         failed, isWeightProgress = GetCriteriaInfo(index)
 
+        if description and not isWeightProgress then 
+          description = string.format("%d/%d %s", quantity, totalQuantity, description);
+        end
+
         local data = {
           text              = description,
           criteriaType      = criteriaType,
@@ -171,7 +175,9 @@ function UpdateObjectives(self)
 
         objectivesData[index] = data 
       end
-      scenarioData.objectives = objectivesData
+      -- NOTE: We use SetData only for objectives to be sure the scenario 
+      -- doesn't keep the objectives data of previous stage.
+      _ScenarioModel:SetData(objectivesData, "scenario", "objectives")
     end
 
     -- Bonus objectives
@@ -205,14 +211,13 @@ function UpdateObjectives(self)
         if duration and duration > 0 and not criteriaFailed and not criteriaCompleted then
           data.hasTimer = true 
           data.startTime = GetTime() - elapsed
-        else
-          data.hasTimer = NIL_DATA
-          data.startTime = NIL_DATA
         end
 
         bonusObjectivesData[index] = data
       end
-      scenarioData.bonusObjectives = bonusObjectivesData
+      -- NOTE: We use SetData only for objectives to be sure the scenario 
+      -- doesn't keep the objectives data of previous stage.
+      _ScenarioModel:SetData(bonusObjectivesData, "scenario", "bonusObjectives")
     end 
   end
 

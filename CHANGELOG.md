@@ -1,4 +1,16 @@
-# 0.5.0
+# 0.5.1
+
+**CHANGES**
+
+- The objectives text for scenario will now prepend the min and max quantity.
+
+**FIXES**
+
+- Fixed a case in scenario where sometimes the objectives of previous stage weren't correctly removed.
+
+---
+
+## 0.5.0
 
 **NEW**
 
