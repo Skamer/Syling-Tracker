@@ -1,3 +1,10 @@
+# 0.5.2
+
+**FIXES**
+
+- Reverted the previous change about dungeon for avoiding an issue where the first boss had a progress bar.
+- Fixed an issue where in some case the world quests could be displayed in the quests header.
+
 # 0.5.1
 
 **CHANGES**

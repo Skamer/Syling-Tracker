@@ -393,6 +393,12 @@ function QUEST_WATCH_LIST_CHANGED(questID, isAdded)
     return 
   end
 
+  -- Manually tracking the world quest trigger this event so we need to check
+  -- this isn't a world quest
+  if IsWorldQuest(questID) then 
+    return 
+  end
+
   if isAdded then
     Debug("The quest (id:%i) has been added in the watch list", questID)
 

@@ -10,6 +10,8 @@ Syling                    "SylingTracker.Dungeon"                            ""
 -- ========================================================================= --
 namespace                          "SLT"
 -- ========================================================================= --
+_Active                           = false 
+-- ========================================================================= --
 RegisterContentType = API.RegisterContentType
 RegisterModel = API.RegisterModel
 -- ========================================================================= --
@@ -36,12 +38,20 @@ RegisterContentType({
     return inInstance and (type == "party") and IsInScenario() and GetActiveKeystoneInfo() == 0
   end 
 })
-
-
-function OnEnable()
+-- ========================================================================= --
+__ActiveOnEvents__ "PLAYER_ENTERING_WORLD" "CHALLENGE_MODE_START" "SCENARIO_UPDATE" "ZONE_CHANGE"
+function BecomeActiveOn(self)
+  local inInstance, type = IsInInstance() 
+  return inInstance and (type == "party") and IsInScenario() and GetActiveKeystoneInfo() == 0
+end
+-- ========================================================================= --
+function OnActive(self)
   Update()
 end
 
+function OnInactive(self)
+  _DungeonModel:ClearData()
+end
 
 __Async__()
 __SystemEvent__ "SCENARIO_CRITERIA_UPDATE" "CRITERIA_COMPLETE" "SCENARIO_UPDATE"
@@ -65,20 +75,24 @@ function Update()
         isCompleted = completed
       }
 
-      if isWeightProgress then 
-        data.hasProgressBar = true
-        data.progress = quantity
-        data.minProgress = 0
-        data.maxProgress = totalQuantity
-        data.progressText = quantityString
-      else 
-        data.hasProgressBar = nil 
-      end
+      -- Revert the changes previously done as this cause all the dungeon to get
+      -- a progress bar
+      -- TODO: Need to find a better fix
+      -- if isWeightProgress then 
+      --   data.hasProgressBar = true
+      --   data.progress = quantity
+      --   data.minProgress = 0
+      --   data.maxProgress = totalQuantity
+      --   data.progressText = quantityString
+      -- else 
+      --   data.hasProgressBar = nil 
+      -- end
 
       objectivesData[index] = data 
     end
-
-    dungeonData.objectives = objectivesData
+    -- NOTE: We use SetData only for objectives to be sure the dungeon 
+    -- doesn't keep the objectives data of previous stage.
+    _DungeonModel:SetData(objectivesData, "dungeon", "objectives")
   end
   
   _DungeonModel:AddData(dungeonData, "dungeon")
