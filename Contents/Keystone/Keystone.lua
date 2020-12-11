@@ -153,6 +153,12 @@ function WORLD_STATE_TIMER_START(timerID)
   _KeystoneModel:Flush()
 end
 
+__SystemEvent__()
+function WORLD_STATE_TIMER_STOP(timerID)
+  _KeystoneModel:AddData({ completed = true }, "keystone")
+  _KeystoneModel:Flush()
+end
+
 function UpdateKeystoneInfo()
   local level, affixes, wasEnergized = GetActiveKeystoneInfo()
   local numAffixes = #affixes

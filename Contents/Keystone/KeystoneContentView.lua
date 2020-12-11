@@ -409,6 +409,7 @@ class "KeystoneContentView" (function(_ENV)
     -- Update Timer
     local timeLimit = keystoneData.timeLimit 
     local startTime = keystoneData.startTime
+    local completed = keystoneData.completed
 
     if timeLimit then 
       timerFrame.TimeLimit = timeLimit
@@ -416,8 +417,14 @@ class "KeystoneContentView" (function(_ENV)
 
     if startTime then
       timerFrame.StartTime = startTime
-      timerFrame:Start()
+
+      if not completed then 
+        timerFrame:Start()
+      else
+        timerFrame:Stop()
+      end
     end
+
 
     -- Update Objectives if exists 
     local objectivesData = keystoneData.objectives

@@ -174,7 +174,17 @@ class "TorghastAnimaPowerView" (function(_ENV)
     elseif rarity == AnimaPowerRarity.EPIC then 
       return self.EpicBorderColor 
     end 
-  end 
+  end
+
+  function OnRelease(self)
+    self:Hide()
+    self:SetParent()
+    self:ClearAllPoints()
+  end
+
+  function OnAcquire(self)
+    self:Show()
+  end
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------

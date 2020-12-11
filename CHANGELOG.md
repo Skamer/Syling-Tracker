@@ -1,4 +1,13 @@
-# 0.5.2
+# 0.5.3
+
+**FIXES**
+
+- Fixed an issue where the Torghast module wasn't correctly reset for the next run.
+- Fixed an issue where the timer bar wasn't stopped when the mythic + was finished.
+
+---
+
+## 0.5.2
 
 **FIXES**
 
