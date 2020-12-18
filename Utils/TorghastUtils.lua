@@ -18,10 +18,11 @@ class "Utils" (function(_ENV)
     _AnimaPowerRarityCache = {}
 
     enum "AnimaPowerRarity" {
-      COMMON    = 0,
-      UNCOMMON  = 1,
-      RARE      = 2,
-      EPIC      = 3
+      UNKNOWN   = 0,
+      COMMON    = 1,
+      UNCOMMON  = 2,
+      RARE      = 3,
+      EPIC      = 4
     }
 
     __Arguments__ { Number }
@@ -43,8 +44,12 @@ class "Utils" (function(_ENV)
         rarity = AnimaPowerRarity.EPIC 
       end
       
-      -- Add in the cache for the next time
-      _AnimaPowerRarityCache[spellID] = rarity 
+      if rarity then 
+      -- Add in the cache for the next time only if the rarity has been found 
+      _AnimaPowerRarityCache[spellID] = rarity
+      else 
+        rarity = AnimaPowerClass.UNKNOWN
+      end
 
       return rarity
     end 

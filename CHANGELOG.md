@@ -1,4 +1,12 @@
-# 0.5.3
+# 0.5.4
+
+**FIXES**
+
+- Fixed an error lua occurred sometime and prevented the Torghast module to work.
+
+---
+
+## 0.5.3
 
 **FIXES**
 
