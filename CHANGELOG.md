@@ -1,5 +1,7 @@
 # 0.5.5
 
+**FIXES**
+
 - Fixed [ticket #40](https://github.com/Skamer/Syling-Tracker/issues/40) : an error lua which appeared sometime when the player selected an anima power.
 
 ---
