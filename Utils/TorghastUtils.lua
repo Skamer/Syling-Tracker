@@ -48,7 +48,7 @@ class "Utils" (function(_ENV)
       -- Add in the cache for the next time only if the rarity has been found 
       _AnimaPowerRarityCache[spellID] = rarity
       else 
-        rarity = AnimaPowerClass.UNKNOWN
+        rarity = AnimaPowerRarity.UNKNOWN
       end
 
       return rarity
