@@ -76,8 +76,8 @@ function BLIZZARD_TRACKER_VISIBLITY_CHANGED(isVisible)
     ObjectiveTrackerFrame:Hide()
     
     ObjectiveTrackerFrame:SetScript("OnEvent", nil)
-    WorldMapFrame:RegisterCallback("SetFocusedQuestID", nil, ObjectiveTrackerFrame)
-    WorldMapFrame:RegisterCallback("ClearFocusedQuestID", nil, ObjectiveTrackerFrame)
+    WorldMapFrame:UnregisterCallback("SetFocusedQuestID", ObjectiveTrackerFrame)
+    WorldMapFrame:UnregisterCallback("ClearFocusedQuestID", ObjectiveTrackerFrame)
   end
 end
 

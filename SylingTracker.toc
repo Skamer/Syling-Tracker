@@ -1,4 +1,4 @@
-## Interface: 90002
+## Interface: 90100
 ## Title: Syling Tracker
 ## Version: @project-version@
 ## Author: Skamer
