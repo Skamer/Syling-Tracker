@@ -1,4 +1,10 @@
-# 0.5.6
+# 0.5.7
+
+- Updated Dependencies (Thanks to @kurapica for its PR)
+
+---
+
+## 0.5.6
 
 - Fixed [ticket #49](https://github.com/Skamer/Syling-Tracker/issues/49) : an error lua which broke completely the addon in the 9.1.
 
