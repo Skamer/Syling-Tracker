@@ -26,7 +26,6 @@ Log:AddHandler(print)
 _SLT_VERSION       = GetAddOnMetadata("SylingTracker", "Version")
 -- ========================================================================= --
 _SCORPIO_VERSION    = tonumber(GetAddOnMetadata("Scorpio", "Version"):match("%d+$"))
-_PLOOP_VERSION      = tonumber(GetAddOnMetadata("PLoop", "Version"):match("%d+$"))
 -- ========================================================================= --
 _LibSharedMedia     = LibStub("LibSharedMedia-3.0")
 _LibDataBroker      = LibStub("LibDataBroker-1.1")

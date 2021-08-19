@@ -3,7 +3,7 @@
 ## Version: @project-version@
 ## Author: Skamer
 ## SavedVariables: SylingTrackerDB
-## Dependencies: PLoop, Scorpio, Scorpio.Widget
+## Dependencies: Scorpio
 ## OptionalDeps: ViragDevTool
 
 ## X-Curse-Project-ID: 398177
