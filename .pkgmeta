@@ -6,7 +6,6 @@ manual-changelog:
     markup-type: markdown
 
 required-dependencies:
-  - ploop
   - scorpio
 
 externals:
