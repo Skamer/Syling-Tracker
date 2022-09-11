@@ -1,4 +1,10 @@
-# 0.5.7
+# 0.5.8
+
+- Bumped the toc version to 9.2.7
+
+---
+
+## 0.5.7
 
 - Updated Dependencies (Thanks to @kurapica for its PR)
 
