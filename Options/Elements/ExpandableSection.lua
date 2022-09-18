@@ -8,9 +8,29 @@
 -- ========================================================================= --
 Syling          "SylingTracker_Options.Elements.ExpandableSection"           ""
 -- ========================================================================= --
+__Widget__()
 class "SUI.ExpandableSection" (function(_ENV)
   inherit "Frame"
-
+  -----------------------------------------------------------------------------
+  --                               Methods                                   --
+  -----------------------------------------------------------------------------
+  function UpdateVisibility(self)
+    for name, frame in self:GetChilds() do
+      if Class.IsObjectType(frame, Frame) and frame:GetID() > 0 then 
+        frame:SetShown(self.Expanded)
+      end
+    end
+  end
+  -----------------------------------------------------------------------------
+  --                               Properties                                --
+  -----------------------------------------------------------------------------  
+  property "Expanded" {
+    type = Boolean,
+    default = false,
+  }
+  -----------------------------------------------------------------------------
+  --                            Constructors                                 --
+  -----------------------------------------------------------------------------
   __Template__ {
     Button = Button,
     {
@@ -19,13 +39,34 @@ class "SUI.ExpandableSection" (function(_ENV)
       }
     }
   }
-  function __ctor(self) end
-end)
+  function __ctor(self)
+    local button = self:GetChild("Button")
+    button.OnClick = button.OnClick + function()
+      local expanded = not self.Expanded
+      if expanded then 
+        Style[button].RightBGTexture.atlas = AtlasType("Options_ListExpand_Right_Expanded", true)
+      else 
+        Style[button].RightBGTexture.atlas = AtlasType("Options_ListExpand_Right", true)
+      end
 
+      self.Expanded = expanded
+      self:UpdateVisibility()
+    end
+
+  end
+end)
+-------------------------------------------------------------------------------
+--                                Styles                                     --
+-------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
   [SUI.ExpandableSection] = {
     height = 25,
     width = 200,
+    layoutManager = Layout.VerticalLayoutManager(),
+    paddingTop = 32,
+    paddingBottom = 10,
+    paddingLeft = 0,
+    paddingRight = 0,
 
     Button = {
       height = 30,
@@ -62,12 +103,10 @@ Style.UpdateSkin("Default", {
         drawLayer = "OVERLAY",
         justifyH = "CENTER",
         maxLines = 1,
-        text = "Advanced",
         location = {
           Anchor("LEFT", 21, 2)
         }
       }
     },
-
   }
 })

@@ -2,7 +2,10 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
   <Script file="Shared.lua"/>
+  <Script file="CheckBox.lua"/>
+  <Script file="EditBox.lua"/>
   <Script file="CategoryList.lua"/>
+  <Script file="DropDown.lua" />
   <Script file="ExpandableSection.lua"/>
   <Script file="Window.lua"/>
   <Script file="Panel.lua"/>
