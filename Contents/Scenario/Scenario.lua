@@ -173,6 +173,18 @@ function UpdateObjectives(self)
           isWeightProgress  = isWeightProgress
         }
 
+        -- NOTE: This seems 'quantityString' returning an incorrect value sometimes
+        -- so we use 'quantity' instead
+        if isWeightProgress and not completed then 
+          data.hasProgressBar = true 
+          data.progress = quantity
+          data.minProgress = 0
+          data.maxProgress = 100
+          data.progressText = PERCENTAGE_STRING:format(quantity)
+        else 
+          data.hasProgressBar = false
+        end
+
         objectivesData[index] = data 
       end
       -- NOTE: We use SetData only for objectives to be sure the scenario 

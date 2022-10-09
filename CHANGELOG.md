@@ -1,4 +1,12 @@
-# 0.5.8
+# 0.5.9
+
+**FIXES**
+
+- Fixed an issue where sometimes the objectives of scenario don't display their progress when it's needed.
+
+---
+
+## 0.5.8
 
 - Bumped the toc version to 9.2.7
 
