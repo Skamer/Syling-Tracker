@@ -68,32 +68,34 @@ class "SUI.EntryButton" (function(_ENV)
     super.SetupFromEntryData(self, data)
 
     Style[self].SelectionDetails.SelectionName.text = data.text or ""
-  end 
+  end
 
   function RefreshState(self)
     local highlightBackground = self:GetChild("HighlightBackground")
     local selectionName = self:GetChild("SelectionDetails"):GetChild("SelectionName")
     local fontColor = nil 
 
-    if self.selected then 
+    if self.Selected then 
       highlightBackground:SetAlpha(0)
       fontColor = NORMAL_FONT_COLOR
     else
-      if self.mouseover then 
+      if self.Mouseover then 
         highlightBackground:SetAlpha(0.15)
       else 
          highlightBackground:SetAlpha(0)
       end
 
-      fontColor = GRAY_FONT_COLOR
+      -- TODO: Implement disabled stuff (GRAY_FONT_COLOR)
+
+      fontColor = HIGHLIGHT_FONT_COLOR
     end
     
     selectionName:SetTextColor(fontColor:GetRGB())
   end
 
   function OnRelease(self)
-    self.selected = nil 
-    self.mouseover = nil
+    self.Selected = nil 
+    self.Mouseover = nil
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
@@ -104,7 +106,7 @@ class "SUI.EntryButton" (function(_ENV)
     handler = function(self, new) self:RefreshState() end 
   }
 
-  property "mouseover" {
+  property "Mouseover" {
     type = Boolean,
     default = false,
     handler = function(self, new) self:RefreshState() end 
@@ -122,17 +124,35 @@ class "SUI.EntryButton" (function(_ENV)
     }
   }
   function __ctor(self)
-    self.OnEnter = self.OnEnter + function() self.mouseover = true end 
-    self.OnLeave = self.OnLeave + function() self.mouseover = false end
-    
+    self.OnEnter = self.OnEnter + function() self.Mouseover = true end 
+    self.OnLeave = self.OnLeave + function() self.Mouseover = false end
+
     self:RefreshState()
   end
 end)
 
-
-
 --- The interface adds the properties for holding the entries data
 interface "SUI.IEntryProvider" (function(_ENV)
+  -----------------------------------------------------------------------------
+  --                               Methods                                   --
+  -----------------------------------------------------------------------------
+  __Arguments__ { SUI.EntryData }
+  function AddEntry(self, entry)
+    self.EntriesData:Insert(entry)
+  end
+
+  function GetEntries(self)
+    return self.EntriesData
+  end
+
+  __Arguments__ { Array[SUI.EntryData] }
+  function SetEntries(self, entries)
+    self.EntriesData:Clear()
+
+    for index, entry in entries:GetIterator() do 
+      self:AddEntry(entry)
+    end
+  end
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
@@ -150,6 +170,17 @@ end)
 --- Similar to EntryProvider excepted it doesn't hold entries data, only keep 
 --- a weak reference to them
 interface "SUI.IProxyEntryProvider" (function(_ENV)
+  -----------------------------------------------------------------------------
+  --                               Methods                                   --
+  -----------------------------------------------------------------------------
+  __Arguments__ { Array[SUI.EntryData]/nil }
+  function LinkEntries(self, entriesData)
+    self.EntriesData = entriesData
+  end
+
+  function GetEntries(self)
+    return self.EntriesData
+  end
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
@@ -237,7 +268,8 @@ class "SUI.GridEntriesFauxScrollBox" (function(_ENV)
     scrollBar:SetScrollStepPercentage(step)
     scrollBar:SetVisibleExtentPercentage(visibleExtentPercent)
 
-    for rowIndex = 1, self.DisplayedRowCount do 
+    local rowTotalHeight = 0
+    for rowIndex = 1, min(self.DisplayedRowCount, self.RowCount) do
       for columnIndex = 1, self.ColumnCount do 
         local entryFrameIndex = self:GetEntryIndex(rowIndex, columnIndex)
         local entryIndex = self:GetEntryIndex(rowIndex + self:GetOffset(), columnIndex)
@@ -260,7 +292,27 @@ class "SUI.GridEntriesFauxScrollBox" (function(_ENV)
           entry:SetPoint("TOPLEFT", (columnIndex - 1) * self.ColumnWidth, -((rowIndex - 1) * self.RowHeight))
         end
       end
+      rowTotalHeight = rowTotalHeight + self.RowHeight
     end
+
+    if self.AutoHeight then
+      -- IMPORTANT: If the height is set in the "Style", this will prevent the AutoHeight to work
+      self:SetHeight(rowTotalHeight + self.AutoHeightOffsetExtent)
+    end
+  end
+
+  function OnSystemEvent(self, event, ...)
+    if not self:IsMouseOver() then 
+      self:Hide()
+    end
+  end
+
+  function OnAcquire(self)
+    self:RegisterSystemEvent("GLOBAL_MOUSE_DOWN")
+  end
+
+  function OnRelease(self)
+    self:UnegisterSystemEvent("GLOBAL_MOUSE_DOWN")
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
@@ -287,16 +339,25 @@ class "SUI.GridEntriesFauxScrollBox" (function(_ENV)
     default = true
   }
 
-  property "TestData" {
+  --- AutoHeight the frame depending on the number of entry displayed
+  property "AutoHeight" {
+    type = Boolean,
+    default = true
+  }
+
+  --- In case where you need to add or remove height when using the AutoHeight 
+  property "AutoHeightOffsetExtent" {
     type = Number,
-    default = 100
+    default = 0
   }
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
   -----------------------------------------------------------------------------
+  --- We put "__InstantApplyStyle__" to be sure the Padding value is set 
+  __InstantApplyStyle__()
   __Template__{}
   function __ctor(self)
-    self.OnEntryClick = function(entry)
+    self.OnEntryClick = function(entry, ...)
       OnEntryClick(self, entry)
     end
 
@@ -373,23 +434,3 @@ Style.UpdateSkin("Default", {
     }
   }
 })
-
---   local entriesData = Array[SUI.EntryData]()
-
--- function OnLoad(self)
---   local widget = SUI.GridEntriesFauxScrollBox.Acquire(true, UIParent)
---   widget:SetPoint("CENTER")
-
---     -- local entriesData = Array[SUI.EntryData]()
-
---   for i = 1, 50 do 
---     if i == 1 then 
---       entriesData:Insert({text = "Entry"..i, properties = { selected = true}})
---     else 
---       entriesData:Insert({text = "Entry"..i})
---     end
---   end
-
---   widget.EntriesData = entriesData
---   widget:Refresh()
--- end
