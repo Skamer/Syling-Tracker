@@ -1,0 +1,10 @@
+## Interface: 100000
+## Title: SylingTracker Options 
+## Version: 0.0.1
+## Author: Skamer
+## Dependencies: SylingTracker
+### LoadOnDemand: 1
+
+Elements\__load.xml
+
+SylingTracker_Options.lua
