@@ -6,7 +6,7 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling              "SylingTracker_Options.Elements.ScrollBar"               ""
+Syling              "SylingTracker.Options.Elements.ScrollBar"               ""
 -- ========================================================================= --
 LEFT_BUTTON_NAME = "LeftButton"
 

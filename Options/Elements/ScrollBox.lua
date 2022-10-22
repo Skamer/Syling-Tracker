@@ -6,7 +6,7 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling              "SylingTracker_Options.Elements.ScrollBox"               ""
+Syling              "SylingTracker.Options.Elements.ScrollBox"               ""
 -- ========================================================================= --
 __Widget__()
 class "SUI.ScrollFrame" (function(_ENV)

@@ -6,7 +6,7 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling          "SylingTracker_Options.Elements.DropDown"                    ""
+Syling          "SylingTracker.Options.Elements.DropDown"                    ""
 -- ========================================================================= --
 __Widget__()
 class "SUI.DropDownPopout" { SUI.GridEntriesFauxScrollBox }
@@ -222,17 +222,3 @@ Style.UpdateSkin("Default", {
     },
   }
 })
-
---- Only for testing
--- function OnLoad(self)
---   local dropDown = SUI.DropDown.Acquire()
---   dropDown:SetPoint("CENTER")
-
---   for i = 1, 12 do 
---     if i == 1 then 
---       dropDown:AddEntry({text = "Entry"..i, properties = { Selected = true}})
---     else 
---       dropDown:AddEntry({text = "Entry"..i})
---     end
---   end
--- end

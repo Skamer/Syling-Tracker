@@ -6,7 +6,7 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling              "SylingTracker_Options.Elements.Button"                  ""
+Syling              "SylingTracker.Options.Elements.Button"                  ""
 -- ========================================================================= --
 PUSHBUTTON_FILE         = [[Interface\AddOns\SylingTracker_Options\Media\button]]
 DANGER_PUSHBUTTON_FILE  = [[Interface\AddOns\SylingTracker_Options\Media\button_danger]]
@@ -290,25 +290,3 @@ Style.UpdateSkin("Default", {
     }
   }
 })
-
-
--- For Testing only
--- function OnLoad(self)
---   local button = SUI.PushButton("PushButton", UIParent)
---   button:SetFrameStrata("TOOLTIP")
---   button:SetPoint("CENTER")
---   button:SetText("Normal")
-
---   local dangerButton = SUI.DangerPushButton("DangerPushButton", UIParent)
---   dangerButton:SetFrameStrata("TOOLTIP")
---   dangerButton:SetPoint("CENTER")
---   dangerButton:SetPoint("LEFT", button, "RIGHT", 40, 0)
---   dangerButton:SetText("Danger")
-  
---   local successButton = SUI.SuccessPushButton("SuccessPushButton", UIParent)
---   successButton:SetFrameStrata("TOOLTIP")
---   successButton:SetPoint("CENTER")
---   successButton:SetPoint("LEFT", dangerButton, "RIGHT", 40, 0)
---   successButton:SetText("Success")
-
--- end

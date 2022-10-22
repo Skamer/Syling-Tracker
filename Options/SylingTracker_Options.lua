@@ -6,36 +6,50 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling                      "SylingTracker_Options"                          ""
+Syling                      "SylingTracker.Options"                          ""
 -- ========================================================================= --
-local ADDON_LOGO = [[Interface\AddOns\SylingTracker_Options\Media\logo_white]]
+SLT_LOGO_WHITE = [[Interface\AddOns\SylingTracker_Options\Media\logo_white]]
 
-function OnLoad(self)
-  local panel = SUI.Panel("Panel", UIParent)
-  panel:SetPoint("CENTER")
-  panel:SetTitle("SylingTracker Options")
-  panel:SetAddonVersion("1.0.2")
-  panel:SetAddonLogo(ADDON_LOGO)
-  panel:CreateCategory("general", "")
-  panel:CreateCategory("trackers", "Trackers")
-  panel:CreateCategory("contents", "Contents")
-  panel:CreateCategory("advanced", "Advanced")
+_SETTINGS_PANEL = nil
 
-  panel:AddCategoryEntry({ text = "General"}, "general")
-  panel:AddCategoryEntry({ text = "Item Bar"}, "general")
-  panel:AddCategoryEntry({ text = "Profiles"}, "general")
+--- Create the text transform  entries
+TEXT_TRANSFORM_ENTRIES = Array[SUI.EntryData]()
+TEXT_TRANSFORM_ENTRIES:Insert({ text = "Normal"})
+TEXT_TRANSFORM_ENTRIES:Insert({ text = "UPPERCASE"})
+TEXT_TRANSFORM_ENTRIES:Insert({ text = "lowercase"})
 
-  panel:AddCategoryEntry({ text = "Main"}, "trackers")
-  panel:AddCategoryEntry({ text = "Mythic +"}, "trackers")
+__SystemEvent__()
+function SLT_OPEN_OPTIONS()
+  if not _SETTINGS_PANEL then 
+      local panel = SUI.SettingsPanel.Acquire()
+      panel:SetParent(UIParent)
+      panel:SetPoint("CENTER")
+      panel:SetTitle("SylingTracker Options")
+      panel:SetAddonVersion(SLT_VERSION)
+      panel:SetAddonLogo(SLT_LOGO_WHITE)
+      panel:InstantApplyStyle()
 
-  panel:AddCategoryEntry({ text = "Quests"}, "contents")
-  panel:AddCategoryEntry({ text = "Campaign"}, "contents")
-  panel:AddCategoryEntry({ text = "World Quests"}, "contents")
-  panel:AddCategoryEntry({ text = "Dungeon"}, "contents")
-  panel:AddCategoryEntry({ text = "Keystone"}, "contents")
-  panel:AddCategoryEntry({ text = "Achievements"}, "contents")
-  panel:AddCategoryEntry({ text = "Torghast"}, "contents")
+      --- Create categories
+      panel:CreateCategory("general", "General")
 
-  panel:AddCategoryEntry({ text = "Skins"}, "advanced")
-  panel:Refresh()
+      --- General category entries
+      panel:AddCategoryEntry({ text = "Settings", value = SLT.SettingDefinitions.General}, "general")
+
+      --- Refresh the panel for creating entries
+      panel:Refresh()
+
+      --- We select the first entry of general category
+      panel:SelectEntry("general", 1)
+
+      _SETTINGS_PANEL = panel
+  end
+
+  _SETTINGS_PANEL:Show()
+end
+
+__SystemEvent__()
+function SLT_CLOSE_OPTIONS()
+  if _SETTINGS_PANEL then 
+    _SETTINGS_PANEL:Hide() 
+  end
 end

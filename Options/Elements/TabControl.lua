@@ -6,7 +6,7 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling              "SylingTracker_Options.Elements.TabControl"              ""
+Syling              "SylingTracker.Options.Elements.TabControl"              ""
 -- ========================================================================= --
 __Widget__()
 class "SUI.TabButton" (function(_ENV)

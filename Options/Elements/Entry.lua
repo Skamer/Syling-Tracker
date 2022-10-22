@@ -6,7 +6,7 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling              "SylingTracker_Options.Elements.Entry"                   ""
+Syling              "SylingTracker.Options.Elements.Entry"                   ""
 -- ========================================================================= --
 struct "SUI.EntryData" {
     { name = "text",          type = String },

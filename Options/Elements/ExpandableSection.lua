@@ -6,7 +6,7 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling          "SylingTracker_Options.Elements.ExpandableSection"           ""
+Syling          "SylingTracker.Options.Elements.ExpandableSection"           ""
 -- ========================================================================= --
 __Widget__()
 class "SUI.ExpandableSection" (function(_ENV)
@@ -20,6 +20,10 @@ class "SUI.ExpandableSection" (function(_ENV)
         frame:SetShown(self.Expanded)
       end
     end
+  end
+
+  function SetTitle(self, title)
+    Style[self].Button.Text.text = title
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
@@ -65,8 +69,9 @@ Style.UpdateSkin("Default", {
     layoutManager = Layout.VerticalLayoutManager(),
     paddingTop = 32,
     paddingBottom = 10,
-    paddingLeft = 0,
+    paddingLeft = 20,
     paddingRight = 0,
+    marginRight = 0,
 
     Button = {
       height = 30,

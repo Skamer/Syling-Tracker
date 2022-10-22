@@ -6,7 +6,7 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling           "SylingTracker_Options.Elements.GridControls"               ""
+Syling           "SylingTracker.Options.Elements.GridControls"               ""
 -- ========================================================================= --
 __Widget__()
 class "SUI.GridControls" (function(_ENV)

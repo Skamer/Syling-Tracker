@@ -6,7 +6,7 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling              "SylingTracker_Options.Elements.CategoryList"            ""
+Syling              "SylingTracker.Options.Elements.CategoryList"            ""
 -- ========================================================================= --
 
 __Widget__()
@@ -17,16 +17,19 @@ class "SUI.CategoryEntryButton" (function(_ENV)
   -----------------------------------------------------------------------------  
   __Arguments__ { SUI.EntryData }
   function SetupFromEntryData(self, data)
+    super.SetupFromEntryData(self, data)
+
     Style[self].Label.text = data.text or ""
   end
 
   function RefreshState(self)
     local label = self:GetChild("Label")
     local texture = self:GetChild("Texture")
-    if self.selected then 
+    if self.Selected then 
       label:SetFontObject("GameFontHighlight")
       texture:SetAtlas("Options_List_Active", true)
       texture:Show()
+
     else
        label:SetFontObject("GameFontNormal")
        if self:IsMouseOver() then 
@@ -38,7 +41,13 @@ class "SUI.CategoryEntryButton" (function(_ENV)
     end
   end
 
-  property "selected" {
+  function OnRelease(self)
+    self.Selected = nil
+  end
+  -----------------------------------------------------------------------------
+  --                               Properties                                --
+  -----------------------------------------------------------------------------
+  property "Selected" {
     type = Boolean,
     default = false,
     handler = RefreshState
@@ -51,7 +60,7 @@ class "SUI.CategoryEntryButton" (function(_ENV)
   function __ctor(self)
     self.OnEnter = self.OnEnter + function() self:RefreshState() end
     self.OnLeave = self.OnLeave + function() self:RefreshState() end 
-    self.OnClick = self.OnClick + function() self.selected = true end
+    self.OnClick = self.OnClick + function() self.Selected = true end
   end
 
 end)
@@ -71,52 +80,50 @@ end)
 
 __Widget__()
 class "SUI.Category" (function(_ENV)
-  inherit "Frame"
+  inherit "Frame" extend "SUI.IEntryProvider"
   -----------------------------------------------------------------------------
   --                               Events                                    --
   -----------------------------------------------------------------------------
   event "OnEntrySelected"
   -----------------------------------------------------------------------------
+  --                               Handlers                                  --
+  -----------------------------------------------------------------------------
+  local function OnEntryClick(self, entry)
+    local index = self:GetEntryIndex(entry)
+    self:SelectEntry(index)
+  end
+  -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
-  __Arguments__ { Number/nil }
-  function SetSelectedByIndex(self, selectedIndex)
-    local previousSelectedIndex = self.__selectedIndex
-    local previousSelectedEntry = nil 
-
-    if previousSelectedIndex then 
-      previousSelectedEntry = self.Entries[previousSelectedIndex]
-
-      if previousSelectedEntry then
-        previousSelectedEntry.selected = false 
-        self.__selectedIndex = nil 
-      end 
+  __Arguments__ { Number/0, Boolean/true }
+  function SelectEntry(self, index, triggerEvent)
+    if index == self.SelectedIndex then 
+      return 
     end
 
-    if selectedIndex then 
-      local selectedEntry = self.Entries[selectedIndex]
-      if selectedEntry then 
-        selectedEntry.selected = true 
-        self.__selectedIndex = selectedIndex
-      end
-    end
-  end
+    local previousSelectedEntry = self.Entries[self.SelectedIndex]
+    local selectedEntry = self.Entries[index]
 
-  __Arguments__ { ( SUI.IEntry)/nil }
-  function SetSelectedByEntry(self, selectedEntry)
-    local selectedIndex = nil
+    if previousSelectedEntry then
+      previousSelectedEntry.Selected = false 
+    end 
 
     if selectedEntry then 
-      for index, entry in pairs(self.Entries) do
-        if entry == selectedEntry then
-          selectedIndex = index
-        end
+      selectedEntry.Selected = true 
+
+      if triggerEvent then 
+        self:OnEntrySelected(selectedEntry)
+      end
+    else 
+      if triggerEvent then 
+        self.__pendingTriggerEvent = true 
       end
     end
 
-    self:SetSelectedByIndex(selectedIndex)
+    self.SelectedIndex = index
   end
 
+  __Arguments__ { SUI.IEntry }
   function GetEntryIndex(self, entry)
     for index, e in pairs(self.Entries) do 
       if e == entry then 
@@ -125,19 +132,15 @@ class "SUI.Category" (function(_ENV)
     end
   end
 
-  __Arguments__ { Number, (-SUI.IEntry)/nil }
+  __Arguments__ { Number, -SUI.IEntry }
   function AcquireEntry(self, index, entryClass)
-    entryClass = entryClass or self.DefaultEntryClass
-
     local entry = entryClass.Acquire()
-
-    
     entry:SetParent(self)
     entry:SetID(index)
     
     --- If the Entry is a button, register onClick
     if Class.IsObjectType(entry, SUI.IButtonEntry) then 
-      entry.OnClick = entry.OnClick + self.OnEntryClickHandler
+      entry.OnClick = entry.OnClick + self.OnEntryClick
     end
 
     self.Entries[index] = entry
@@ -149,7 +152,7 @@ class "SUI.Category" (function(_ENV)
     for index, entry in pairs(self.Entries) do 
       --- If the Entry is a button, remove onClick
       if Class.IsObjectType(entry, SUI.IButtonEntry) then 
-        entry.OnClick = entry.OnClick - self.OnEntryClickHandler
+        entry.OnClick = entry.OnClick - self.OnEntryClick
       end
 
       entry:Release()
@@ -162,31 +165,40 @@ class "SUI.Category" (function(_ENV)
     self:ReleaseEntries()
 
     for index, entryData in self.EntriesData:GetIterator() do 
-      local entry = self:AcquireEntry(index, entryData.widgetClass)
+      local entryClass = entryData.widgetClass or self.DefaultEntryClass
+      local entry = self:AcquireEntry(index, entryClass)
       entry:SetupFromEntryData(entryData)
+
+      --- As sometimes the entry can be selected before its frame is acquired 
+      --- we need to check it 
+      if self.SelectedIndex == index then
+        entry.Selected = true
+        
+        if self.__pendingTriggerEvent then 
+          self:OnEntrySelected(entry)
+          self.__pendingTriggerEvent = nil
+        end
+      end
     end
   end
 
-  __Arguments__ { EntryData }
-  function AddEntry(self, entry)
-    self.EntriesData:Insert(entry)
+  function Release(self)
+    self:ReleaseEntries()
+    self.EntriesData:Clear()
+    self.SelectedIndex = nil
+    self.__pendingTriggerEvent = nil
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
   ----------------------------------------------------------------------------- 
+  property "SelectedIndex" {
+    type = Number,
+    default = 0
+  }
+
   property "Entries" {
     set = false,
     default = function() return Toolset.newtable(false, true) end
-  }
-
-  property "EntriesData" {
-    set = false,
-    default = function() return Array[SUI.EntryData]() end
-  }
-
-  property "DefaultEntryClass" {
-    type = -SUI.IEntry,
-    default = SUI.CategoryEntryButton
   }
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
@@ -195,13 +207,10 @@ class "SUI.Category" (function(_ENV)
     Header = SUI.CategoryHeader
   }
   function __ctor(self)
-    -- Create the event handlers 
-    self.OnEntryClickHandler = function(entry, ...)
-      local index = self:GetEntryIndex(entry)
-      self:SetSelectedByIndex(index) 
+    self.DefaultEntryClass = SUI.CategoryEntryButton
 
-      self:OnEntrySelected(entry, self.EntriesData[index])
-    end
+    -- Create the event handlers 
+    self.OnEntryClick = function(entry) OnEntryClick(self, entry) end
   end
 
 end)
@@ -214,6 +223,17 @@ class "SUI.CategoryList" (function(_ENV)
   --                               Events                                    --
   -----------------------------------------------------------------------------
   event "OnEntrySelected"
+
+  local function OnCategoryEntrySelected(self, category, entry)
+    for id, c in pairs(self.Categories) do 
+      if c ~= category then 
+        -- SelectEntry will unselected the entry if no valid index is given
+        c:SelectEntry()
+      else
+        self:OnEntrySelected(entry)
+      end
+    end
+  end
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
@@ -239,7 +259,7 @@ class "SUI.CategoryList" (function(_ENV)
 
     Style[category].Header.Label.text = text
 
-    category.OnEntrySelected = category.OnEntrySelected + self.OnCategoryEntrySelectedHandler
+    category.OnEntrySelected = category.OnEntrySelected + self.OnCategoryEntrySelected
 
     self.Categories[id] = category
     self.CategoriesCount = index
@@ -252,6 +272,14 @@ class "SUI.CategoryList" (function(_ENV)
     if category then 
       category:AddEntry(entryData)
     end 
+  end
+
+  __Arguments__ { String, Number }
+  function SelectEntry(self, categoryId, index)
+    local category = self.Categories[categoryId]
+    if category then 
+      category:SelectEntry(index)
+    end
   end
 
   function Refresh(self)
@@ -275,15 +303,7 @@ class "SUI.CategoryList" (function(_ENV)
   --                            Constructors                                 --
   -----------------------------------------------------------------------------
   function __ctor(self)
-    self.OnCategoryEntrySelectedHandler = function(category, entry, entryData)
-      for id, c in pairs(self.Categories) do 
-        if c ~= category then 
-          c:SetSelectedByIndex()
-        end
-
-        self:OnEntrySelected(entry, entryData)
-      end
-    end
+    self.OnCategoryEntrySelected = function(category, entry) OnCategoryEntrySelected(self, category, entry) end
   end
 end)
 
@@ -296,8 +316,6 @@ Style.UpdateSkin("Default", {
     height = 20,
 
     Texture = {
-      visible = false,
-      atlas = AtlasType("Options_List_Active", true),
       drawLayer = "BACKGROUND",
       location = {
         Anchor("CENTER")
@@ -309,7 +327,6 @@ Style.UpdateSkin("Default", {
     },
     
     Label = {
-      fontObject = GameFontNormal,
       drawLayer = "ARTWORK",
       justifyH = "LEFT",
       text = "Test",
@@ -351,6 +368,7 @@ Style.UpdateSkin("Default", {
     paddingBottom = 10,
     paddingLeft = 0,
     paddingRight = 0,
+    
   
     Header = {
       location = {

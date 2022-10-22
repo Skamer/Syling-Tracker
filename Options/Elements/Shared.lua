@@ -6,8 +6,37 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling              "SylingTracker_Options.Elements.Shared"                  ""
+Syling              "SylingTracker.Options.Elements.Shared"                  ""
 -- ========================================================================= --
+_Events                           = {}
+
+local function RegisterWidgetForSystemEvent(widget, event)
+  local t = _Events[event]
+  if not t then 
+    t = Toolset.newtable(true, false)
+    _M:RegisterEvent(event, function(...)
+      for obj in pairs(t) do 
+        if obj.OnSystemEvent and not obj.__isReleased then
+          obj:OnSystemEvent(event, ...)
+        end
+      end
+    end)
+
+    _Events[event] = t
+  end
+
+  if not t[widget] then 
+    t[widget] = true 
+  end
+end
+
+local function UnregisterWidgetForSystemEvent(widget, event)
+  local t = _Events[event]
+  if t then 
+    t[widget] = nil 
+  end
+end
+
 --- IMPORTANT: All the Widgets must include this attribute.
 class "__Widget__" (function(_ENV)
   extend "IAttachAttribute"
@@ -22,39 +51,61 @@ class "__Widget__" (function(_ENV)
         function Release(obj)
           if obj.OnRelease then 
             obj:OnRelease()
-
           end
+
+          obj:SetName(obj.__factoryName)
+          obj.__isReleased = true
 
           _Recycler(obj)
         end
 
-        __Static__() function Acquire()
+        __Arguments__ { Boolean/true, Any/nil}
+        __Static__() function Acquire(isShown, parent)
           local obj = _Recycler()
-          if obj.OnAcquire then 
+          obj.__factoryName = obj:GetName()
+          obj.__isReleased = nil
+
+          if obj.OnAcquire then
             obj:OnAcquire()
           end
+
+          if isShown then 
+            obj:Show()
+          else 
+            obj:Hide()
+          end
+
+          if parent then 
+            obj:SetParent(parent)
+          end
+
 
           return obj
         end
 
-        function GainWidgetFocus(self)
-          if _FocusedWidget and _FocusedWidget ~= self then 
-            if _FocusedWidget.OnWidgetLoseFocus then 
-              _FocusedWidget:OnWidgetLoseFocus()
-            end
-          end
-
-          _FocusedWidget = self
+        __Arguments__{ String }
+        function RegisterSystemEvent(self, event)
+          RegisterWidgetForSystemEvent(self, event)
         end
 
+        __Arguments__ { String * 0}
+        function RegisterSystemEvents(self, ...)
+          for i = 1, select("#", ...) do 
+            local event = select(i, ...)
+            self:RegisterEvent(event)
+          end
+        end
 
-        function ClearWidgetFocus(self)
-          if _FocusedWidget then
-            if FocusedWidget.OnWidgetLoseFocus then 
-              _FocusedWidget:OnWidgetLoseFocus()
-            end
+        __Arguments__ { String }
+        function UnregisterSystemEvent(self, event)
+          UnregisterWidgetForSystemEvent(self, event)
+        end
 
-            _FocusedWidget = nil
+        __Arguments__ { String * 0}
+        function UnregisterSystemEvents(self, ...)
+          for i = 1, select("#", ...) do 
+            local event = select(i, ...)
+            self:UnregisterSystemEvent(event)
           end
         end
       end)
@@ -70,23 +121,4 @@ class "__Widget__" (function(_ENV)
     tinsert(self, other)
     return self
   end
-end)
-
-struct "SUI.EntryData" {
-  { name = "text", type = String},
-  { name = "value", type = Any },
-  { name = "widgetClass", type = IEntry },
-  { name = "properties", type = Table },
-}
-
-interface "SUI.IEntry" (function(_ENV)
-  require "Frame"
-  
-  __Abstract__()
-  __Arguments__ { SUI.EntryData}
-  function SetupFromEntryData(self, data) end  
-end)
-
-interface "SUI.IButtonEntry" (function(_ENV)
-  require "Button" extend "SUI.IEntry"
 end)

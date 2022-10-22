@@ -6,7 +6,7 @@
   <Script file="Database.lua"/>
   <Script file="Profiles.lua"/>
   <Script file="Settings.lua"/>
-  <Script file="SLTFontString.lua"/>
+  <Script file="FontString.lua"/>
   <Script file="IView.lua"/>
   <Script file="Model.lua"/>
   <Script file="Tracker.lua"/>

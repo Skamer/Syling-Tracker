@@ -1,9 +1,9 @@
 ## Interface: 100000
-## Title: SylingTracker Options 
-## Version: 0.0.1
+## Title: |cffff6a00Syling Tracker|r [|cff0094ffOptions|r]
+## Version: @project-version@
 ## Author: Skamer
 ## Dependencies: SylingTracker
-### LoadOnDemand: 1
+## LoadOnDemand: 1
 
 Elements\__load.xml
 

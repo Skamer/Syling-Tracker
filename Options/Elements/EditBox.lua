@@ -6,7 +6,7 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling            "SylingTracker_Options.Elements.EditBox"                   ""
+Syling            "SylingTracker.Options.Elements.EditBox"                   ""
 -- ========================================================================= --
 __Widget__()
 class "SUI.EditBox" (function(_ENV)

@@ -48,7 +48,7 @@ class "SLTEditBox" (function(_ENV)
       fontHeight = font.height
     end
 
-    local ft = _LibSharedMedia:Fetch("font", font.font)
+    local ft = LibSharedMedia:Fetch("font", font.font)
 
     return self:SetFontObject(FetchFontObject(ft, fontHeight or 10, flags))
   end

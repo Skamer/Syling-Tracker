@@ -6,7 +6,7 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling            "SylingTracker_Options.Elements.Slider"                    ""
+Syling            "SylingTracker.Options.Elements.Slider"                    ""
 -- ========================================================================= --
 __Widget__()
 class "SUI.MinimalSlider"  { Slider }
@@ -241,12 +241,3 @@ Style.UpdateSkin("Default", {
     }
   }
 })
-
-function OnLoad(self)
-  local widget = SUI.Slider("SUISLider", UIParent)
-  widget:SetPoint("CENTER", 0, -200)
-  widget:SetLabelFormatter(SUI.Slider.Label.Right, FormatTest)
-  widget:SetValue(25)
-  widget:SetValue(50)
-
-end
