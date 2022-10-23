@@ -1,8 +1,8 @@
-name: Package the pull requests for Retail
+name: Package the pull requests
 
 on:
   pull_request:
-    branches: 
+    branches:
       - master
       - dev
       - release/*
@@ -16,12 +16,12 @@ jobs:
     steps:
       - name: Checkout the addon
         uses: actions/checkout@v2
-      
-      - name: Create the Retail package
+
+      - name: Create the package
         uses: BigWigsMods/packager@master
         with:
           args: -d -z
-      
+
       - name: Upload the package as artifact
         uses: actions/upload-artifact@v2.2.0
         with:
