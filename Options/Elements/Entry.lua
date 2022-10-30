@@ -11,8 +11,11 @@ Syling              "SylingTracker.Options.Elements.Entry"                   ""
 struct "SUI.EntryData" {
     { name = "text",          type = String },
     { name = "value",         type = Any },
+    { name = "id",            type = String},
+    { name = "order",         type = Number, default = 0 },
     { name = "widgetClass",   type = IEntry },
     { name = "properties",    type = Table},
+    { name = "styles",        type = Table}
 }
 
 interface "SUI.IEntry" (function(_ENV)
@@ -24,6 +27,7 @@ interface "SUI.IEntry" (function(_ENV)
   function SetupFromEntryData(self, data) 
     self:SetEntryData(data)
     self:InitProperties(data)
+    self:InitStyles(data)
   end
 
   function GetEntryData(self) 
@@ -43,6 +47,12 @@ interface "SUI.IEntry" (function(_ENV)
       end
     end 
   end
+
+  function InitStyles(self, data)
+    if data.styles then 
+      Style[self] = data.styles
+    end
+  end
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
@@ -54,6 +64,11 @@ end)
 
 interface "SUI.IButtonEntry" (function(_ENV)
   require "Button" extend "SUI.IEntry"
+end)
+
+__Widget__()
+class "SUI.SeparatorEntry" (function(_ENV)
+  inherit "Frame" extend "SUI.IEntry"
 end)
 
 
@@ -94,6 +109,11 @@ class "SUI.EntryButton" (function(_ENV)
   end
 
   function OnRelease(self)
+    self:SetID(0)
+    self:SetParent()
+    self:ClearAllPoints()
+    self:Hide()
+
     self.Selected = nil 
     self.Mouseover = nil
   end
@@ -141,6 +161,11 @@ interface "SUI.IEntryProvider" (function(_ENV)
     self.EntriesData:Insert(entry)
   end
 
+  __Arguments__ { SUI.EntryData }
+  function RemoveEntry(self, entry)
+    self.EntriesData:Remove(entry)
+  end
+
   function GetEntries(self)
     return self.EntriesData
   end
@@ -152,6 +177,10 @@ interface "SUI.IEntryProvider" (function(_ENV)
     for index, entry in entries:GetIterator() do 
       self:AddEntry(entry)
     end
+  end
+
+  function ClearEntries(self)
+    self.EntriesData:Clear()
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
@@ -368,6 +397,10 @@ end)
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
+  [SUI.SeparatorEntry] = {
+    size = Size(250, 20)
+  },
+
   [SUI.EntryButton] = {
     size = Size(250, 20),
     SelectionDetails = {

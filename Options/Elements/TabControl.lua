@@ -234,7 +234,7 @@ class "SUI.TabControl" (function(_ENV)
   function OnRelease(self)
     local pageInfo = self.PagesInfo[self.SelectedIndex]
     if pageInfo and pageInfo.onRelease then 
-      pageInfo.OnRelease(self)
+      pageInfo.onRelease(self)
     end
 
     for index, tabButton in pairs(self.TabButtons) do 

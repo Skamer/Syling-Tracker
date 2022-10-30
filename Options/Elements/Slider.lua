@@ -8,6 +8,11 @@
 -- ========================================================================= --
 Syling            "SylingTracker.Options.Elements.Slider"                    ""
 -- ========================================================================= --
+export {
+  GetDecimalCount = SLT.Utils.Math.GetDecimalCount,
+  TruncateDecimal = SLT.Utils.Math.TruncateDecimal
+}
+
 __Widget__()
 class "SUI.MinimalSlider"  { Slider }
 
@@ -15,23 +20,67 @@ class "SUI.MinimalSlider"  { Slider }
 __Widget__()
 class "SUI.Slider" (function(_ENV)
   inherit "Frame"
+  -----------------------------------------------------------------------------
+  --                               Events                                    --
+  -----------------------------------------------------------------------------
+  --- NOTE: This is not the original "OnValueChanged" of slider, but an event build
+  --- around of it. The reason is the original may give the value 0.199999 if the 
+  --- user sets to 0.2 for example. This may also cause the event to be triggered 
+  --- multiple time.
 
+  --- The build event will fix these issues where the real value is given, and triggered 
+  --- only when it has changed.
   event "OnValueChanged"
   -----------------------------------------------------------------------------
   --                              Enumerations                               --
   -----------------------------------------------------------------------------
   enum "Label" {
-    Left = "LeftText",
-    Right = "RightText",
-    Top = "TopText",
-    Min = "MinText",
-    Max = "MaxText"
+    Left    = "LeftText",
+    Right   = "RightText",
+    Top     = "TopText",
+    Min     = "MinText",
+    Max     = "MaxText"
   }
   -----------------------------------------------------------------------------
   --                          Helper functions                               --
   -----------------------------------------------------------------------------
   local function NoModification(value)
-	  return value;
+	  return value
+  end
+  -----------------------------------------------------------------------------
+  --                               Handlers                                  --
+  -----------------------------------------------------------------------------
+
+  local function OnSliderValueChanged(self, new)
+    --- (e.g, if the user sets the value to "0.2", the value given may be "0.1999999")
+    --- so we need to truncate the decimals, and round it. 
+    --- the amount of decimal truncated is based on the value step. 
+    --- For example:
+    --- value step    number of decimal keeped
+    ---   0.2                 1
+    ---   0.25                2
+    ---   0.002               3
+    ---   0.200               1 
+    local valueRounded = SLT.Utils.Math.TruncateDecimal(new, self.DecimalCount, true)
+
+    self.Value = valueRounded
+  end
+  
+  local function OnValueChangedHandler(self, new)
+    self:GetChild("Slider"):SetValue(new, false)
+    self:FormatValue(new)
+    self:OnValueChanged(new)
+  end
+
+
+  local function OnMinMaxValuesChangedHandler(self, new)
+    Style[self].Slider.minMaxValues = new
+  end
+
+
+  local function OnValueStepChangedHandler(self, new)
+    self.DecimalCount = SLT.Utils.Math.GetDecimalCount(new)
+    Style[self].Slider.valueStep = new
   end
   -----------------------------------------------------------------------------
   --                               Methods                                   --
@@ -69,20 +118,66 @@ class "SUI.Slider" (function(_ENV)
     end 
   end
 
+  __Arguments__ { Number }
   function SetValue(self, value)
-    self:GetChild("Slider"):SetValue(value)
+    self.Value = value
+  end
+
+  function GetValue(self)
+    return self.Value
+  end
+
+  __Arguments__ {  MinMax }
+  function SetMinMaxValues(self, minMaxValues)
+    self.MinMaxValues = minMaxValues
+  end
+
+  __Arguments__ { Number  }
+  function SetValueStep(self, valueStep)
+    self.ValueStep = valueStep
+  end
+
+  function OnAcquire(self)
+    self:InstantApplyStyle()
+  end
+
+  function OnRelease(self)
+    self:SetID(0)
+    self:Hide()
+    self:ClearAllPoints()
+    self:SetParent(nil)
+
+    -- Reset the properties 
+    self.Value = nil
+    self.MinMaxValues = nil
+    self.ValueStep = nil
+    self.DecimalCount = nil
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
+  property "Value" {
+    type = Number,
+    default = 0,
+    handler = OnValueChangedHandler
+  }
+
+
   property "MinMaxValues" {
     type = MinMax,
-    handler = function(self, val) Style[self].Slider.minMaxValues = val end 
+    default = MinMax(0, 100),
+    handler = OnMinMaxValuesChangedHandler
   }
 
   property "ValueStep" {
-    type = Number,
-    handler = function(self, val) Style[self].Slider.valueStep = val end
+    type    = Number,
+    default = 1,
+    handler = OnValueStepChangedHandler
+  }
+
+  property "DecimalCount" {
+    type    = Number,
+    default = 0
   }
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
@@ -113,16 +208,13 @@ class "SUI.Slider" (function(_ENV)
     end
 
     back.OnClick = back.OnClick + function() OnStepperClicked(false) end 
-    forward.OnClick = forward.OnClick + function() OnStepperClicked(true) end 
+    forward.OnClick = forward.OnClick + function() OnStepperClicked(true) end
 
-
-    slider.OnValueChanged = slider.OnValueChanged + function(_, value)
-      self:FormatValue(value)
-
-      self:OnValueChanged(value)
+    self.OnSliderValueChanged = function(slider, value) 
+      OnSliderValueChanged(self, value)
     end
 
-    self:InstantApplyStyle()
+    slider.OnValueChanged = slider.OnValueChanged + self.OnSliderValueChanged
   end 
 end)
 -------------------------------------------------------------------------------
@@ -130,7 +222,8 @@ end)
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
   [SUI.MinimalSlider] = {
-    size = Size(200, 10),
+    width = 200,
+    height = 10,
     orientation = "HORIZONTAL",
     enableMouse = true,
     obeyStepOnDrag = true,
@@ -162,9 +255,8 @@ Style.UpdateSkin("Default", {
   },
 
   [SUI.Slider] = {
-    size = Size(250, 40),
-    minMaxValues = MinMax(10, 250),
-    valueStep = 10,
+    width   = 250,
+    height  = 40,
 
     Slider = {
       location = {

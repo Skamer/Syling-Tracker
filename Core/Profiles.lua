@@ -135,6 +135,41 @@ class "Profiles" (function(_ENV)
     end
   end
 
+
+  __Arguments__ { String, Variable.Rest(String) }
+  __Static__() function RemoveValueForAllProfiles(index, ...)
+    local count = select("#", ...)
+
+    --- Remove for root
+    Database.SelectRoot()
+    if Database.SelectTable(false, ...) then 
+      Database.SetValue(index, nil)
+    end
+
+    --- Remove for spec 
+    Database.SelectRootSpec()
+    if Database.SelectTable(false, ...) then 
+      Database.SetValue(index, nil)
+    end
+
+    --- Remove for char
+    Database.SelectRootChar()
+    if Database.SelectTable(false, ...) then 
+      Database.SetValue(index, nil)
+    end
+
+    --- Remove for all profiles
+    local profiles = Profiles.GetUserProfilesList()
+    if profiles then 
+      for profileName in pairs(profiles) do 
+        Database.SelectRoot()
+        if Database.SelectTable(false, "profiles", profileName, ...) then 
+          Database.SetValue(index, nil)
+        end
+      end
+    end
+  end
+
   __Static__() function GetUserProfilesList()
     Database.SelectRoot()
     local list = {}
@@ -189,7 +224,7 @@ function TryToLoadProfiles()
   NextEvent("PLAYER_LOGIN")
 
   Profiles:CheckProfileChange()
-  Scorpio.FireSystemEvent("EKT_PROFILES_LOADED")
+  Scorpio.FireSystemEvent("SLT_PROFILES_LOADED")
 end
 
 __SystemEvent__()

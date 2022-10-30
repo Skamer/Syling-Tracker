@@ -31,15 +31,30 @@ LibDBIcon          = LibStub("LibDBIcon-1.0")
 -- ========================================================================= --
 SLT_LOGO           = [[Interface\AddOns\SylingTracker\Media\logo]]
 
+
+
+local function ShowMinimapIconCallback(show)
+  if show then 
+    LibDBIcon:Show("SylingTracker")
+  else
+    LibDBIcon:Hide("SylingTracker")
+  end
+  
+  _DB.minimap.hide = not show
+end
+
+
 function OnLoad(self)
   -- Create and init the DB 
   _DB = SVManager("SylingTrackerDB")
 
-  -- Regiser the options 
+  -- Register the options 
   SLT.Settings.Register("replace-blizzard-objective-tracker", true, "Blizzard/UpdateTrackerVisibility")
+  SLT.Settings.Register("show-minimap-icon", true, "ShowMinimapIcon")
 
   -- Register the callbacks
   SLT.CallbackManager.Register("Blizzard/UpdateTrackerVisibility", SLT.Callback(function(replace) BLIZZARD_TRACKER_VISIBLITY_CHANGED(not replace) end))
+  SLT.CallbackManager.Register("ShowMinimapIcon", SLT.Callback(ShowMinimapIconCallback))
 
   --
   _DB:SetDefault{ dbVersion = 1 }
@@ -88,22 +103,28 @@ function SetupMinimapButton(self)
     type = "launcher",
     icon = SLT_LOGO,
     OnClick = function(_, button, down)
-
+      if button == "LeftButton" then
+        if IsShiftKeyDown() then
+          _M:FireSystemEvent("SLT_TOGGLE_ANCHORS")
+        else 
+          _M:ToggleCommand()
+        end
+      elseif button == "RightButton" then 
+        if not IsShiftKeyDown() then 
+          _M:OpenOptions()
+        end
+      end 
     end,
 
     OnTooltipShow = function(tooltip)
       tooltip:AddDoubleLine("Syling Tracker", SLT_VERSION, 1, 106/255, 0, 1, 1, 1)
+      tooltip:AddLine(" ")
+      tooltip:AddLine("|cff00ffffRight Click|r to open the options")
     end
   })
 
   LibDBIcon:Register("SylingTracker", LDBObject, _DB.minimap)
 end
-
-
--- __SlashCmd__ "slt" "config"
--- function OpenOptions()
---   local loaded, reason = LoadAddOn("SylingTracker_Options")
--- end
 
 __SlashCmd__ "slt" "bot" "- enable/disable the blizzard objective tracker"
 function ToggleBlizzardObjectiveTracker()

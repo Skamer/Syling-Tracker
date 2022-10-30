@@ -13,6 +13,11 @@ class "SUI.EditBox" (function(_ENV)
   -- As we are in the SUI namespace, we need to use the full path of Scorpio
   -- EditBox for avoiding a overflow.
   inherit "Scorpio.UI.EditBox"
+
+  __Arguments__ { String }
+  function SetInstructions(self, instructions)
+    Style[self].Instructions.text = instructions
+  end
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
   -----------------------------------------------------------------------------

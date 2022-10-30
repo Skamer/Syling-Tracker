@@ -15,6 +15,13 @@ class "SUI.ExpandableSection" (function(_ENV)
   --                               Methods                                   --
   -----------------------------------------------------------------------------
   function UpdateVisibility(self)
+    local button = self:GetChild("Button")
+    if self.Expanded then 
+      Style[button].RightBGTexture.atlas = AtlasType("Options_ListExpand_Right_Expanded", true)
+    else 
+      Style[button].RightBGTexture.atlas = AtlasType("Options_ListExpand_Right", true)
+    end
+
     for name, frame in self:GetChilds() do
       if Class.IsObjectType(frame, Frame) and frame:GetID() > 0 then 
         frame:SetShown(self.Expanded)
@@ -25,12 +32,33 @@ class "SUI.ExpandableSection" (function(_ENV)
   function SetTitle(self, title)
     Style[self].Button.Text.text = title
   end
+
+  __Arguments__ { Boolean/nil }
+  function SetExpanded(self, expanded)
+    self.Expanded = expanded
+  end
+
+  function IsExpanded(self)
+    return self.Expanded
+  end
+
+  function OnAcquire(self)
+    self:InstantApplyStyle()
+  end
+
+  function OnRelease(self)
+    self:SetID(0)
+    self:Hide()
+    self:ClearAllPoints()
+    self:SetParent(nil)
+  end
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------  
   property "Expanded" {
     type = Boolean,
     default = false,
+    handler = UpdateVisibility
   }
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
@@ -46,15 +74,16 @@ class "SUI.ExpandableSection" (function(_ENV)
   function __ctor(self)
     local button = self:GetChild("Button")
     button.OnClick = button.OnClick + function()
-      local expanded = not self.Expanded
-      if expanded then 
-        Style[button].RightBGTexture.atlas = AtlasType("Options_ListExpand_Right_Expanded", true)
-      else 
-        Style[button].RightBGTexture.atlas = AtlasType("Options_ListExpand_Right", true)
-      end
+      --local expanded = not self:IsExpanded()
+      self:SetExpanded(not self:IsExpanded())
+      -- if expanded then 
+      --   Style[button].RightBGTexture.atlas = AtlasType("Options_ListExpand_Right_Expanded", true)
+      -- else 
+      --   Style[button].RightBGTexture.atlas = AtlasType("Options_ListExpand_Right", true)
+      -- end
 
-      self.Expanded = expanded
-      self:UpdateVisibility()
+      --self.Expanded = expanded
+      --self:UpdateVisibility()
     end
 
   end

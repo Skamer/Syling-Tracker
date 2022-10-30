@@ -78,12 +78,31 @@ class "Utils" (function(_ENV)
     end
 
   
-    __Arguments__ { Number, Variable.Optional(Number, 0) }
-    __Static__() function TruncateDecimal(number, decimal)
+    __Arguments__ { Number, Variable.Optional(Number, 0), Boolean/false }
+    __Static__() function TruncateDecimal(number, decimal, round)
       local tenPower = math.pow(10, decimal)
 
-      return math.floor(number * tenPower)/ tenPower
+      if round then 
+        return math.floor(number * tenPower + 0.5)/ tenPower
+      else
+        return math.floor(number * tenPower)/ tenPower
+      end
     end
-    
+
+    __Arguments__ { Number }
+    __Static__() function GetDecimalCount(number)
+      local strNumber = tostring(number)
+      local decimalCount = 0
+      local foundDecimal = false 
+      for i = 1, string.len(strNumber) do 
+        if foundDecimal then 
+          decimalCount = decimalCount + 1
+        elseif string.sub(strNumber, i, i) == "." then 
+          foundDecimal = true 
+        end
+      end
+
+      return decimalCount
+    end
   end)
 end)

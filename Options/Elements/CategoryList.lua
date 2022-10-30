@@ -8,6 +8,9 @@
 -- ========================================================================= --
 Syling              "SylingTracker.Options.Elements.CategoryList"            ""
 -- ========================================================================= --
+export {
+  ResetStyles = SLT.Utils.ResetStyles
+}
 
 __Widget__()
 class "SUI.CategoryEntryButton" (function(_ENV)
@@ -41,7 +44,18 @@ class "SUI.CategoryEntryButton" (function(_ENV)
     end
   end
 
+  function OnAcquire(self)
+    self:InstantApplyStyle()
+  end
+
   function OnRelease(self)
+    self:SetID(0)
+    self:SetParent()
+    self:ClearAllPoints()
+    self:Hide()
+
+    ResetStyles(self, true)
+
     self.Selected = nil
   end
   -----------------------------------------------------------------------------
@@ -123,6 +137,16 @@ class "SUI.Category" (function(_ENV)
     self.SelectedIndex = index
   end
 
+  __Arguments__ { String, Boolean/nil}
+  function SelectEntryById(self, id, triggerEvent)
+    for index, entryData in self:GetEntries():GetIterator() do 
+      if entryData.id == id then 
+        self:SelectEntry(index, triggerEvent)
+        return
+      end
+    end
+  end
+
   __Arguments__ { SUI.IEntry }
   function GetEntryIndex(self, entry)
     for index, e in pairs(self.Entries) do 
@@ -182,11 +206,18 @@ class "SUI.Category" (function(_ENV)
     end
   end
 
+
   function Release(self)
     self:ReleaseEntries()
     self.EntriesData:Clear()
     self.SelectedIndex = nil
     self.__pendingTriggerEvent = nil
+  end
+
+  function ClearEntries(self)
+    super.ClearEntries(self)
+
+    self.SelectedIndex = nil
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
@@ -281,10 +312,40 @@ class "SUI.CategoryList" (function(_ENV)
       category:SelectEntry(index)
     end
   end
+  
 
-  function Refresh(self)
-    for _, category in pairs(self.Categories) do 
-      category:Refresh()
+  __Arguments__ { String, SUI.EntryData }
+  function RemoveEntry(self, categoryId, entryData)
+    local category = self.Categories[categoryId]
+    if category then 
+      category:RemoveEntry(entryData)
+    end
+  end
+
+  __Arguments__ { String/nil}
+  function Refresh(self, categoryId)
+    for cId, category in pairs(self.Categories) do
+      if categoryId == nil or (categoryId and categoryId == cId) then 
+        category:Refresh()
+      end
+    end 
+  end
+
+  __Arguments__ { String/nil}
+  function ClearEntries(self, categoryId)
+    for cId, category in pairs(self.Categories) do
+      if categoryId == nil or (categoryId and categoryId == cId) then 
+        category:ClearEntries()
+      end
+    end 
+  end
+
+  __Arguments__ { String, String}
+  function SelectEntryById(self, categoryId, entryId)
+    for cId, category in pairs(self.Categories) do
+      if categoryId == nil or (categoryId and categoryId == cId) then 
+        category:SelectEntryById(entryId)
+      end
     end 
   end
   -----------------------------------------------------------------------------

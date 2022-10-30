@@ -106,6 +106,13 @@ class "SUI.PushButton" (function(_ENV)
 
     return leftTexture, middleTexture, rightTexture
   end
+
+  function OnRelease(self)
+    self:SetID(0)
+    self:Hide()
+    self:ClearAllPoints()
+    self:SetParent(nil)
+  end
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------

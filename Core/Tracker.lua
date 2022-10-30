@@ -8,90 +8,186 @@
 -- ========================================================================= --
 Syling                      "SylingTracker.Core.Tracker"                     ""
 -- ========================================================================= --
-namespace                          "SLT"
--- ========================================================================= --
-local DEFAULT_SCROLL_STEP = 15
-
-local function OnMinMaxValueSet(self)
-    local height    = self:GetHeight()
-
-    if not height then return end
- 
-    local min, max  = self:GetMinMaxValues()
-    local value     = self:GetValue()
- 
-    local width     = self:GetPropertyChild("ThumbTexture"):GetWidth()
- 
-    Style[self].thumbTexture.size = Size(width, math.max(24, height - (max - min)))
-end
--- ========================================================================= --
-UI.Property         {
-    name            = "ThumbAutoHeight",
-    type            = Boolean,
-    require         = { Slider },
-    default         = false,
-    set             = function(self, auto)
-        if auto then
-            if not _M:GetSecureHookHandler(self, "SetMinMaxValues") then
-                _M:SecureHook(self, "SetMinMaxValues", OnMinMaxValueSet)
-            end
-        else
-            if _M:GetSecureHookHandler(self, "SetMinMaxValues") then
-                _M:SecureUnHook(self, "SetMinMaxValues")
-            end
-        end
-    end,
+export {
+  __UIElement__ = SLT.__UIElement__,
+  Profiles      = SLT.Profiles,
+  Database      = SLT.Database
 }
--- ========================================================================= --
-class "Tracker"(function(_ENV)
+
+_Trackers       = System.Toolset.newtable(false, true)
+
+__UIElement__()
+class "SLT.TrackerMover" (function(_ENV)
+  inherit "Mover"
+
+  __Template__{
+    Text = SLT.FontString
+  }
+  function __ctor() end 
+end)
+
+__UIElement__()
+class "SLT.Tracker" (function(_ENV)
   inherit "Frame"
   -----------------------------------------------------------------------------
   --                               Handlers                                  --
   -----------------------------------------------------------------------------
-  local function OnScrollRangeChanged(self, xrange, yrange)
-    --if self.NoAutoAdjustScrollRange then return end
-    local scrollFrame = self:GetChild("ScrollFrame")
-    local scrollBar   = self:GetChild("ScrollBar")
-
-    yrange                  = math.floor(yrange or scrollFrame:GetVerticalScrollRange())
-
-    scrollBar:InstantApplyStyle()
-    scrollBar:SetMinMaxValues(0, yrange)
-    scrollBar:SetValue(math.min(scrollBar:GetValue(), yrange))
+  local function OnMouseWheel(self, direction)
+    local scrollBar = self:GetScrollBar()
+    scrollBar:OnMouseWheel(direction)
   end
 
-  local function OnVerticalScroll(self, offset)
-    self:GetChild("ScrollBar"):SetValue(offset)
-  end
-  
-  local function OnMouseWheel(self, value)
-    self:GetChild("ScrollBar"):OnMouseWheel(value)
-  end 
+  local function OnScrollRangeChanged(self, xRange, yRange)
+    local scrollBar = self:GetScrollBar()
+    local scrollFrame = self:GetScrollFrame()
+    
+    local visibleHeight = scrollFrame:GetHeight()
+    local contentHeight = visibleHeight + yRange
+    scrollBar:SetVisibleExtentPercentage(visibleHeight / contentHeight)
 
-  -- NOTE: Required
-  function SetVerticalScroll(self, value)
-    self:GetChild("ScrollFrame"):UpdateScrollChildRect()
-    self:GetChild("ScrollFrame"):SetVerticalScroll(value)
+    -- REVIEW: Should translate this feature directly in the ScrollBar class ?
+    if scrollBar:HasScrollableExtent() then 
+      scrollBar:Show()
+    else 
+      scrollBar:Hide()
+    end
+  end
+
+  local function OnScroll(self, value)
+    local scrollFrame = self:GetScrollFrame()
+
+    scrollFrame:SetVerticalScroll(scrollFrame:GetVerticalScrollRange() * value)
+  end
+
+  local function OnLockedChanged(self, value)
+    if value then 
+      self:ReleaseMover() 
+    else 
+      self:ShowMover()
+    end
+  end
+
+  local function OnSizeChanged(self, width, height)
+    --- We save the changed to the DB only if the tracker is marked as persistent
+    --- at this time.
+    if self:IsPersistent() then 
+      Profiles.PrepareDatabase()
+
+      if Database.SelectTable(true, "trackers", self.ID) then 
+        Database.SetValue("width", Round(width))
+        Database.SetValue("height", Round(height))
+      end
+    end
+  end
+
+  local function OnTrackerStopMoving(self, mover)
+    --- We save the changed to the DB only if the tracker is marked as persistent
+    --- at this time.
+    if self:IsPersistent() then
+      local top   = self:GetTop()
+      local left  = self:GetLeft()
+
+      Profiles.PrepareDatabase()
+
+      if Database.SelectTable(true, "trackers", self.ID) then 
+        Database.SetValue("xPos", left)
+        Database.SetValue("yPos", top)
+      end
+    end
   end
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
+  function GetScrollBar(self)
+    return self:GetChild("ScrollBar")
+  end
+
+  function GetScrollFrame(self)
+    return self:GetChild("ScrollFrame")
+  end
+
+  function GetScrollContent(self)
+    return self:GetScrollFrame():GetChild("Content")
+  end
+
+  function AcquireMover(self)
+    local mover = self:GetChild("Mover")
+    if not mover then 
+      mover = SLT.TrackerMover.Acquire()
+      mover:SetParent(self)
+      mover.MoveTarget = self 
+      mover.OnStopMoving = mover.OnStopMoving + self.OnTrackerStopMoving
+    end 
+
+    return mover
+  end
+
+  function ShowMover(self)
+    local mover = self:AcquireMover()
+    mover:Show() 
+  end
+
+  function ReleaseMover(self)
+    local mover = self:GetChild("Mover")
+    if mover then 
+      mover.OnStopMoving = mover.OnStopMoving - self.OnTrackerStopMoving
+      mover:Release()
+    end
+  end
+
   __Arguments__ { String + Number }
   function TrackContentType(self, contentID)
     Scorpio.FireSystemEvent("SLT_TRACKER_TRACK_CONTENT_TYPE", self, contentID)
+
+    self.Contents[contentID] = true
+
+    if self:IsPersistent() then 
+      Profiles.PrepareDatabase()
+      if self.ID == "main" then 
+        if Database.SelectTable(false, "trackers", self.ID, "contents", contentID) then 
+          Database.SetValue("tracked", nil)
+        end
+      else 
+        if Database.SelectTable(true, "trackers", self.ID, "contents", contentID) then 
+          Database.SetValue("tracked", true)
+        end
+      end
+    end
   end
   
   __Arguments__ { String + Number }
   function UntrackContentType(self, contentID)
     Scorpio.FireSystemEvent("SLT_TRACKER_UNTRACK_CONTENT_TYPE", self, contentID)
+    self.Contents[contentID] = false
+
+    if self:IsPersistent() then 
+      Profiles.PrepareDatabase()
+      if self.ID == "main" then 
+        if Database.SelectTable(true, "trackers", self.ID, "contents", contentID) then 
+          Database.SetValue("tracked", false)
+        end
+      else
+        if Database.SelectTable(false, "trackers", self.ID, "contents", contentID) then
+          Database.SetValue("tracked", nil)
+        end
+      end
+    end
   end
 
-  __Arguments__ { IView }
+  __Arguments__ { String }
+  function IsContentTracked(self, contentID)
+    if self.Contents[contentID] then 
+      return true 
+    end
+    return false
+  end
+
+  __Arguments__ { SLT.IView }
   function AddView(self, view)
     self.Views:Insert(view)
-    view:SetParent(self:GetChild("ScrollFrame"):GetChild("Content"))
+    view:SetParent(self:GetScrollContent())
 
-    -- Register the events
+    --- Register the events 
     view.OnSizeChanged = view.OnSizeChanged + self.OnViewSizeChanged
     view.OnOrderChanged = view.OnOrderChanged + self.OnViewOrderChanged
     view.OnShouldBeDisplayedChanged = view.OnShouldBeDisplayedChanged + self.OnViewShouldBeDisplayedChanged
@@ -100,35 +196,34 @@ class "Tracker"(function(_ENV)
     self:OnAdjustHeight()
   end
 
-  __Arguments__ { IView }
+  __Arguments__ { SLT.IView }
   function RemoveView(self, view)
     self.Views:Remove(view)
 
-    -- Unregister the events
+    --- Unregister the events 
     view.OnSizeChanged = view.OnSizeChanged - self.OnViewSizeChanged
     view.OnOrderChanged = view.OnOrderChanged - self.OnViewOrderChanged
     view.OnShouldBeDisplayedChanged = view.OnShouldBeDisplayedChanged - self.OnViewShouldBeDisplayedChanged
 
-    -- We call an instant layout and adjust height for avoiding a
-    -- flashy behavior when the content has been removed. 
+    --- We call an instant layout and adjust height for avoiding a
+    --- flashy behavior when the content has been removed.
     self:OnLayout()
     self:OnAdjustHeight()
 
-    -- NOTE: We don't call the "Release" method of view because it will be done by
-    -- the content type.
+    --- NOTE: We don't call the "Release" method of view because it will be done
+    --- by the content type.
   end
 
-
-  __Arguments__ { IView }
+  __Arguments__ { SLT.IView }
   function DisplayView(self, view)
     view:OnAcquire()
-    view:SetParent(self:GetChild("ScrollFrame"):GetChild("Content"))
+    view:SetParent(self:GetScrollContent())
     
     self:OnLayout()
     self:OnAdjustHeight()
   end
 
-  __Arguments__ { IView }
+  __Arguments__ { SLT.IView }
   function HideView(self, view)
     view:OnRelease()
 
@@ -150,7 +245,7 @@ class "Tracker"(function(_ENV)
   end
 
   function OnLayout(self)
-    local content = self:GetChild("ScrollFrame"):GetChild("Content")
+    local content = self:GetScrollContent()
     local previousView
 
     for index, view in self:IterateViews() do
@@ -197,7 +292,7 @@ class "Tracker"(function(_ENV)
   function OnAdjustHeight(self)
     local height = 0
     local count = 0
-    local content = self:GetChild("ScrollFrame"):GetChild("Content")
+    local content = self:GetScrollContent()
     for _, view in self:IterateViews() do 
       count = count + 1
       height  = height + view:GetHeight()
@@ -206,7 +301,7 @@ class "Tracker"(function(_ENV)
     height = height + 0 * math.max(0, count-1)
 
     content:SetHeight(height)
-  end 
+  end
 
   --- This is helper function will call "OnAdjustHeight".
   --- This is safe to call it multiple time in short time, resulting only a one 
@@ -229,7 +324,7 @@ class "Tracker"(function(_ENV)
       end)
     end 
   end
-
+  
   --- Cancel the "OnAdjustHeight" call if there is one in queue.
   --- You probably do when the obj is releasing.
   function CancelAdjustHeight(self)
@@ -237,15 +332,79 @@ class "Tracker"(function(_ENV)
       self._cancelAdjustHeight = true
     end
   end
+
+
+  function LoadContentSettings(self, settings)
+    self:SetPersistent(false)
+
+    --- The settings can be given as argument to gain time
+    if not settings then 
+      Profiles.PrepareDatabase()
+      if Database.SelectTable(false, "trackers", self.ID) then 
+        settings = Database.GetValue("contents")
+      end
+    end
+    
+    
+    --- The "main" tracker always try to track all contents type unless it's 
+    --- explicitely says not to do it. 
+    --- In contrary of "custom" tracker which needs to explicitely set to true 
+    --- for tracking the contents.
+    for  _, content in SLT.API.IterateContentTypes() do 
+      local isTracked = false 
+      local contentSettings = settings and settings[content.ID]
+      local contentTrackedSetting = contentSettings and contentSettings.tracked
+
+      if self.ID == "main" then 
+        if contentTrackedSetting == nil or contentTrackedSetting == true then 
+          isTracked = true 
+        end 
+      else
+        if contentTrackedSetting then 
+          isTracked = true 
+        end 
+      end
+
+      if isTracked then 
+        self:TrackContentType(content.ID)
+      end
+    end
+
+    self:SetPersistent(true)
+  end
+
+  function OnRelease(self)
+
+    self:ClearAllPoints()
+    self:SetParent()
+    self:Hide()
+
+    self:CancelAdjustHeight()
+
+    --- Untrack all contents tracked 
+    for contentID in pairs(self.Contents) do 
+      self:UntrackContentType(contentID)
+    end
+
+    self.ID = nil
+    self.Spacing = nil 
+    self.Locked = nil
+  end
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
   property "Views" {
-    default = function() return Array[IView]() end
+    set     = false,
+    default = function() return Array[SLT.IView]() end 
+  }
+
+  property "Contents" {
+    set     = false,
+    default = {}
   }
 
   property "Spacing" {
-    type = Number,
+    type    = Number,
     default = 10
   }
 
@@ -255,52 +414,55 @@ class "Tracker"(function(_ENV)
 
   property "ContentHeight" {
     type = Number,
-    default = 1,
+    default = 1
+  }
+
+  property "Locked" {
+    type = Boolean,
+    default = true,
+    handler = OnLockedChanged
   }
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
   -----------------------------------------------------------------------------
   __Template__{
     ScrollFrame = ScrollFrame,
-    ScrollBar = UIPanelScrollBar,
-    Resizer = Resizer,
+    ScrollBar   = SLT.ScrollBar,
+    Resizer     = Resizer,
     {
       ScrollFrame = {
-        Content = Frame,
-        FixBottom = Frame
+        Content = Frame
       }
     }
   }
   function __ctor(self)
-
-    local scrollFrame = self:GetChild("ScrollFrame")
+    local scrollFrame = self:GetScrollFrame()
     scrollFrame:SetClipsChildren(true)
-    
+
     scrollFrame.OnScrollRangeChanged = scrollFrame.OnScrollRangeChanged + function(_, xrange, yrange)
       OnScrollRangeChanged(self, xrange, yrange)
     end
 
-    scrollFrame.OnVerticalScroll = scrollFrame.OnVerticalScroll + function(_, offset)
-      OnVerticalScroll(self, offset)
-    end
-    
     scrollFrame.OnMouseWheel = scrollFrame.OnMouseWheel + function(_, value)
       OnMouseWheel(self, value)
     end
 
-    scrollFrame:InstantApplyStyle()
+    local scrollBar = self:GetScrollBar()
+    scrollBar:Hide()
+    scrollBar.OnScroll = scrollBar.OnScroll + function(_, value)
+      OnScroll(self, value)
+    end
 
-    local content = scrollFrame:GetChild("Content")
+
+    local content = self:GetScrollContent()
     content:SetHeight(1)
     content:SetWidth(scrollFrame:GetWidth())
-
     scrollFrame:SetScrollChild(content)
 
-    scrollFrame.OnSizeChanged = scrollFrame.OnSizeChanged + function(_, width) 
+    scrollFrame.OnSizeChanged = scrollFrame.OnSizeChanged + function(_, width)
       content:SetWidth(width)
     end
 
-    
     self.OnViewOrderChanged = function() self:Layout() end 
     self.OnViewSizeChanged = function() self:AdjustHeight() end 
 
@@ -310,23 +472,162 @@ class "Tracker"(function(_ENV)
       else 
         self:HideView(view)
       end
-    end 
-  end 
+    end
+
+    self.OnTrackerStopMoving = function(mover, ...) OnTrackerStopMoving(self, mover, ...) end
+    self.OnSizeChanged = self.OnSizeChanged + OnSizeChanged
+
+  end
 end)
 
-class "TrackerMover" (function(_ENV)
-  inherit "Mover"
 
-  __Template__{
-    Text = SLTFontString
-  }
-  function __ctor() end
+--- Private function for create a tracker
+local function __NewTracker(id)
+  local tracker = SLT.Tracker.Acquire()
+  tracker.ID = id 
+
+  --- We mark temporaly the tracker as non persistent as we load the settings 
+  --- from the db 
+  tracker:SetPersistent(false)
+
+  Profiles.PrepareDatabase()
+  local width, height, xPos, yPos, locked, hidden 
+  if Database.SelectTable(false, "trackers", id) then 
+    xPos = Database.GetValue("xPos")
+    yPos = Database.GetValue("yPos")
+    width = Database.GetValue("width") or 300
+    height = Database.GetValue("height") or 325
+    hidden = Database.GetValue("hidden")
+  end
+
+  if not xPos and not yPos then 
+    tracker:SetPoint("RIGHT", -40, 0)
+  else
+    tracker:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", xPos or 0, yPos or 0)
+  end
+
+  --- The "main" tracker always try to track all contents type unless it's 
+  --- explicitely says not to do it. 
+  --- In contrary of "custom" tracker which needs to explicitely set to true 
+  --- for tracking the contents.
+
+  --- As the "main" tracked is created before all others trackers, we want to 
+  --- delay the content tracking, so we manually call it for later.
+  if id ~= "main" then 
+    local contentsTracked = Database.GetValue("contents")
+    tracker:LoadContentSettings(contentsTracked)
+  end
+
+  Style[tracker].width = width
+  Style[tracker].height = height
+  Style[tracker].locked = locked
+
+  if hidden then 
+    tracker:Hide()
+  end
+
+  _Trackers[id] = tracker
+
+  --- Reset the tracker as persistent
+  tracker:SetPersistent(true)
+
+  return tracker
+
+end
+
+--- Private function for deleting a tracker
+local function __DeleteTracker(tracker)
+  local trackerId = tracker.ID
+  
+  Scorpio.FireSystemEvent("SLT_TRACKER_DELETED", tracker) 
+
+  Database.SelectRoot()
+  if Database.SelectTable(false, "list", "tracker") then 
+    Database.SetValue(trackerId, nil)
+  end
+
+  Profiles.RemoveValueForAllProfiles(trackerId, "trackers")
+
+  _Trackers[trackerId] = nil
+
+  tracker:Release()
+end
+
+-------------------------------------------------------------------------------
+-- Enhancing the API                                                         --
+-------------------------------------------------------------------------------
+class "SLT.API" (function(_ENV)
+
+  --- This is the public API for creating a tracker, it will prevent a tracker 
+  --- to be created if the id is "main"
+  __Arguments__ { String }
+  __Static__() function NewTracker(id)
+    if id == "main" then 
+      return 
+    end
+
+    local tracker = __NewTracker(id)
+
+    Database.SelectRoot()
+    if Database.SelectTable(true, "list", "tracker") then 
+      Database.SetValue(id, true)
+    end
+
+    Scorpio.FireSystemEvent("SLT_TRACKER_CREATED", tracker)
+
+    return tracker
+  end
+
+  --- This is the public API for deleting a tracker, the main tracker cannot be 
+  --- deleted
+  __Arguments__ { SLT.Tracker + String}
+  __Static__() function DeleteTracker(trackerOrId)
+    local tracker
+    if type(trackerOrId) == "string" then 
+      if trackerOrId == "main" then 
+        return 
+      end
+      tracker = _Trackers[trackerOrId]
+    else
+      tracker = trackerOrId
+    end
+
+    if tracker == _MainTracker then 
+      return 
+    end
+
+    __DeleteTracker(tracker)
+  end
+
+
+  __Arguments__ { String }
+  __Static__() function GetTracker(id)
+    return _Trackers[id]
+  end
+
+  __Iterator__()
+  __Arguments__ { Boolean/true}
+  function IterateTrackers(includeMainTracker)
+    local yield = coroutine.yield
+    for trackerId, tracker in pairs(_Trackers) do
+      local isIgnored = false
+
+      if trackerId == "main" and includeMainTracker == false then 
+        isIgnored = true
+      end
+      
+      if not isIgnored then 
+        yield(trackerId, tracker)
+      end
+    end
+  end
 end)
+
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
-  [TrackerMover] = {
+  [SLT.TrackerMover] = {
     backdrop = {
       bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]]
     },
@@ -335,7 +636,6 @@ Style.UpdateSkin("Default", {
       Anchor("BOTTOMLEFT", 0, 0, nil, "TOPLEFT"),
       Anchor("BOTTOMRIGHT", 0, 0, nil, "TOPRIGHT")
     },
-
     Text = {
       text = "Click here to move the tracker",
       setAllPoints = true,
@@ -343,269 +643,63 @@ Style.UpdateSkin("Default", {
     }
   },
 
-  [Tracker] = {
-    size = Size(300, 325), -- 300 325
+  [SLT.Tracker] = {
+    size = Size(300, 325),
     resizable = true,
     movable = true,
 
-    -- [ScrollFrame] child properties 
     ScrollFrame = {
-      -- SetAllPoints = true,
       location = {
-        Anchor("TOP"),
-        Anchor("LEFT"),
-        Anchor("RIGHT"),
-        Anchor("BOTTOM")
-      },
-
-      backdrop = {
-            bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
-            -- edgeFile = [[Interface\Buttons\WHITE8X8]],
-            -- edgeSize = 1
-        },
-        backdropColor = { r = 0, g = 0, b = 1, a = 0},
-
-      Content = {
-        backdrop = {
-            bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
-            -- edgeFile = [[Interface\Buttons\WHITE8X8]],
-            -- edgeSize = 1
-        },
-        backdropColor = { r = 1, g = 0, b = 0, a = 0}
-      },
-
-      FixBottom = {
-        height = 1,
-        location = {
-          Anchor("BOTTOM"),
-          Anchor("BOTTOMLEFT"),
-          Anchor("BOTTOMRIGHT")
-        }
+        Anchor("TOPLEFT"),
+        Anchor("BOTTOMRIGHT")
       }
     },
 
-    -- [ScrollBar] child properties
     ScrollBar = {
-      thumbAutoHeight = true,
-      scrollStep = DEFAULT_SCROLL_STEP,
-      autoHide = true,
-      backdropColor = ColorType(0, 0, 0, 0.3),
-      width = 6,
-      height = 244,
-      backdrop = { bgFile = [[Interface\Buttons\WHITE8X8]] },
-      location = { Anchor("LEFT", 15, 0, nil, "RIGHT") },
-      thumbTexture = {
-        file = [[Interface\Buttons\WHITE8X8]],
-        vertexColor = ColorType(1, 199/255, 0, 0.75),
-        size = Size(4, 198)
-        --size = Size(4, 214),
-      },
-
-      -- ScrollBar.ScrollUpButton
-      ScrollUpButton = {
-        visible = false 
-      },
-
-      -- ScrollBar.ScrollDownButton
-      ScrollDownButton = {
-        visible = false
+      size = Size(6, 244),
+      location = {
+        Anchor("LEFT", 15, 0, nil, "RIGHT")
       }
     }
   }
 })
 
-
 function OnEnable(self)
-  _DB_READ_ONLY = true
-
-  _Tracker = Tracker("SylingTracker_MainTracker", UIParent)
-  _Tracker.ID = "main"
-
-  _TrackerMover = TrackerMover("MainTracker_Mover", _Tracker)
-  _TrackerMover.MoveTarget = _Tracker
-
-  Profiles.PrepareDatabase()
-  local width, height, xPos, yPos, locked, hidden, scrollStep
-  if Database.SelectTable(false, "trackers", _Tracker.ID) then 
-    xPos        = Database.GetValue("xPos")
-    yPos        = Database.GetValue("yPos")
-    width       = Database.GetValue("width")  or 300
-    height      = Database.GetValue("height") or 325
-    locked      = Database.GetValue("locked")
-    hidden      = Database.GetValue("hidden")
-    scrollStep  = Database.GetValue("scrollStep")
-  end
-
-  if not xPos and not yPos then 
-    _Tracker:SetPoint("RIGHT", -40, 0)
-  else 
-    _Tracker:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", xPos or 0, yPos or 0)
-  end
-  
-  Style[_Tracker].width   = width
-  Style[_Tracker].height  = height
-
-  if scrollStep then 
-    SetScrollStepMainTracker(scrollStep)
-  end 
-
-  if locked then 
-    LockMainTracker()
-  else
-    UnlockMainTracker()
-  end
-
-  if hidden then 
-    HideMainTracker()
-  end
-  
-  _Tracker.OnSizeChanged = function(tracker, width, height)
-    if _DB_READ_ONLY then 
-      return 
-    end
-
-    Profiles.PrepareDatabase()
-    if Database.SelectTable(true, "trackers", tracker.ID) then 
-      Database.SetValue("width", Round(width))
-      Database.SetValue("height", Round(height))
-    end 
-  end
-
-  _TrackerMover.OnStopMoving = function(mover, ...)
-    if _DB_READ_ONLY then 
-      return
-    end
-
-    local tracker = mover.MoveTarget
-    local top     = tracker:GetTop()
-    local left    = tracker:GetLeft()
-
-    Profiles.PrepareDatabase()
-    if Database.SelectTable(true, "trackers", tracker.ID) then 
-      Database.SetValue("xPos", left)
-      Database.SetValue("yPos", top)
-    end
-  end
-
-
-  _DB_READ_ONLY = false
+  --- Create the main tracker 
+  _MainTracker = __NewTracker("main")
 end
 
-__SystemEvent__ "SLT_LOCK_COMMAND"
-function LockMainTracker()
-  _TrackerMover:Hide()
-
-  Style[_Tracker].resizable = false
-  Style[_Tracker].movable = false 
-
-  if not _DB_READ_ONLY then 
-    Profiles.PrepareDatabase()
-    if Database.SelectTable(true, "trackers", _Tracker.ID) then 
-      Database.SetValue("locked", true)
-    end
-  end 
-end
-
-__SystemEvent__ "SLT_UNLOCK_COMMAND"
-function UnlockMainTracker()
-  _TrackerMover:Show()
-
-  Style[_Tracker].resizable = true 
-  Style[_Tracker].movable = true
-
-  if not _DB_READ_ONLY then 
-    Profiles.PrepareDatabase()
-    if Database.SelectTable(true, "trackers", _Tracker.ID) then 
-      Database.SetValue("locked", false)
-    end
-  end
-end
-
-__SystemEvent__ "SLT_SHOW_COMMAND"
-function ShowMainTracker()
-  _Tracker:Show()
-
-  if not _DB_READ_ONLY then 
-    Profiles.PrepareDatabase()
-    if Database.SelectTable(true, "trackers", _Tracker.ID) then 
-      Database.SetValue("hidden", false)
-    end
-  end
-end
-
-__SystemEvent__ "SLT_HIDE_COMMAND"
-function HideMainTracker()
-  _Tracker:Hide()
-
-  if not _DB_READ_ONLY then 
-    Profiles.PrepareDatabase()
-    if Database.SelectTable(true, "trackers", _Tracker.ID) then 
-      Database.SetValue("hidden", true)
-    end
-  end
-end
-
-__SystemEvent__ "SLT_TOGGLE_COMMAND"
-function ToggleMainTracker()
-  if _Tracker:IsShown() then
-    HideMainTracker()
-  else
-    ShowMainTracker()
-  end
-end
-
-__SystemEvent__ "SLT_SCROLL_STEP_COMMAND"
-function SetScrollStepMainTracker(scrollStep)
-  Style[_Tracker].ScrollBar.scrollStep = scrollStep
-
-  if not _DB_READ_ONLY then
-    Profiles.PrepareDatabase()
-    if Database.SelectTable(true, "trackers", _Tracker.ID) then
-      -- remove from db if it's the value by default
-      if scrollStep == DEFAULT_SCROLL_STEP then 
-        scrollStep = nil 
-      end
-      Database.SetValue("scrollStep", scrollStep)
-    end
-  end
-end
 
 __SystemEvent__()
 __Async__()
 function PLAYER_ENTERING_WORLD(isInitialLogin, isReloadingUi)
   if isInitialLogin or isReloadingUi then
-    local trackerBottom = _Tracker:GetBottom()
-    -- Important ! We have to delay the tracking of content type after an 
-    -- initial and a reloading ui for they getting a valid "GetBottom" is important
-    -- to compute the height of their frame. 
-    -- So we delay until the tracker "GetBottom" returns a no nil value, saying GetBottom
-    -- now return valid value. 
+    local trackerBottom = _MainTracker:GetBottom()
+    --- Important ! We have to delay the tracking of content type after an 
+    --- initial and a reloading ui for they getting a valid "GetBottom" is important
+    --- to compute the height of their frame. 
+    --- So we delay until the tracker "GetBottom" returns a no nil value, saying GetBottom
+    --- now return valid value. 
     while not trackerBottom do 
-      trackerBottom = _Tracker:GetBottom()
+      trackerBottom = _MainTracker:GetBottom()
       Next()
-    end 
+    end
 
-    _Tracker:TrackContentType("scenario")
-    _Tracker:TrackContentType("dungeon")
-    _Tracker:TrackContentType("achievements")
-    _Tracker:TrackContentType("bonus-tasks")
-    _Tracker:TrackContentType("tasks")
-    _Tracker:TrackContentType("quests")
-    _Tracker:TrackContentType("campaign")
-    _Tracker:TrackContentType("auto-quests")
-    _Tracker:TrackContentType("world-quests")
-    _Tracker:TrackContentType("keystone")
-    _Tracker:TrackContentType("torghast")
-  end 
+    --- Load the contents tracked for the main tracker
+    _MainTracker:LoadContentSettings()
+
+
+    --- Create the custom tracker, and load the contents tracked by them
+    Database.SelectRoot()
+    if Database.SelectTable(false, "list") then 
+      local trackers = Database.GetValue("tracker")
+      if trackers then 
+        for trackerId, _ in pairs(trackers) do
+          __NewTracker(trackerId)
+        end
+      end
+    end
+
+    _MainTracker.Locked = false
+  end
 end
-
-__SystemEvent__()
-function SLT_TRACK_CONTENT_TYPE(contentID)
-  _Tracker:TrackContentType(contentID)
-end
-
-__SystemEvent__() 
-function SLT_UNTRACK_CONTENT_TYPE(contentID)
-  _Tracker:UntrackContentType(contentID)
-end
-

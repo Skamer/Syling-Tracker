@@ -10,7 +10,7 @@ Syling              "SylingTracker.Options.Elements.Panel"                   ""
 -- ========================================================================= --
 __Widget__()
 class "SUI.Panel" (function(_ENV)
-    inherit "SUI.Window"
+  inherit "SUI.Window"
   -----------------------------------------------------------------------------
   --                               Events                                    --
   -----------------------------------------------------------------------------
@@ -19,56 +19,97 @@ class "SUI.Panel" (function(_ENV)
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
-    function SetAddonVersion(self, version)
-      Style[self].Footer.AddonVersion.text = version
+  function SetAddonVersion(self, version)
+    Style[self].Footer.AddonVersion.text = version
+  end
+
+  function SetAddonLogo(self, logoFile)
+    Style[self].Footer.AddonLogo.file = logoFile
+  end
+
+  __Arguments__ { String, String/"" }
+  function CreateCategory(self, id, text)
+    self:GetChild("Categories"):CreateCategory(id, text)
+  end 
+
+  __Arguments__ { SUI.EntryData, String }
+  function AddCategoryEntry(self, entryData, categoryId)
+    self:GetChild("Categories"):AddCategoryEntry(entryData, categoryId)
+
+    if entryData.id then 
+      self.EntriesId[entryData.id] = entryData
     end
 
-    function SetAddonLogo(self, logoFile)
-      Style[self].Footer.AddonLogo.file = logoFile
+    self.EntriesCategory[entryData] = categoryId
+  end
+
+  __Arguments__ { String, Number}
+  function SelectEntry(self, categoryId, index)
+    self:GetChild("Categories"):SelectEntry(categoryId, index)
+  end
+
+  __Arguments__ { String, String}
+  function SelectEntryById(self, categoryId, entryId)
+    self:GetChild("Categories"):SelectEntryById(categoryId, entryId)
+  end
+
+  __Arguments__ { String }
+  function RemoveEntryById(self, entryId)
+    local entry = self.EntriesId[entryId]
+    if not entry then 
+      return 
     end
 
-    __Arguments__ { String, String/"" }
-    function CreateCategory(self, id, text)
-      self:GetChild("Categories"):CreateCategory(id, text)
-    end 
+    local categoryId = self.EntriesCategory[entry]
 
-    __Arguments__ { SUI.EntryData, String }
-    function AddCategoryEntry(self, entryData, categoryId)
-      self:GetChild("Categories"):AddCategoryEntry(entryData, categoryId)
-    end
+    self:GetChild("Categories"):RemoveEntry(categoryId, entry)
 
-    __Arguments__ { String, Number}
-    function SelectEntry(self, categoryId, index)
-      self:GetChild("Categories"):SelectEntry(categoryId, index)
-    end
+    self.EntriesId[entryId] = nil
+    self.EntriesCategory[entry] = nil
+  end
 
-    function Refresh(self)
-      self:GetChild("Categories"):Refresh()
-    end
+  __Arguments__ { String/nil }
+  function Refresh(self, categoryId)
+    self:GetChild("Categories"):Refresh(categoryId)
+  end
+  __Arguments__ { String/nil}
+  function ClearEntries(self, categoryId)
+    self:GetChild("Categories"):ClearEntries(categoryId)
+  end
+
+  property "EntriesId" {
+    set = false,
+    default = function() return System.Toolset.newtable(true, false) end
+  }
+
+  property "EntriesCategory" {
+    set = false,
+    default = function() return System.Toolset.newtable(true, false) end
+  }
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
   -----------------------------------------------------------------------------
-    --- This is important to instant apply style for the scrollbox have a valid
-    --- size
-    __InstantApplyStyle__()
-    __Template__ {
-      Categories = SUI.CategoryList,
-      Footer = Frame,
-      InnerTexture = Texture,
-      Header = Frame,
-      Container = SUI.ScrollBox,
-      {
-        Footer = {
-          AddonLogo = Texture,
-          AddonVersion = FontString
-        },
-        Header = {
-          Title = FontString,
-          Separator = Texture
-        }
+  --- This is important to instant apply style for the scrollbox have a valid
+  --- size
+  __InstantApplyStyle__()
+  __Template__ {
+    Categories = SUI.CategoryList,
+    Footer = Frame,
+    InnerTexture = Texture,
+    Header = Frame,
+    Container = SUI.ScrollBox,
+    {
+      Footer = {
+        AddonLogo = Texture,
+        AddonVersion = FontString
+      },
+      Header = {
+        Title = FontString,
+        Separator = Texture
       }
     }
-    function __ctor(self) end
+  }
+  function __ctor(self) end
 end)
 
 
@@ -87,7 +128,19 @@ class "SUI.SettingsPanel" (function(_ENV)
     end
 
     if settingsDefinitionsClass then
-      local settings = settingsDefinitionsClass.Acquire()
+      local settings 
+      if type(settingsDefinitionsClass) == "function" then
+        settings = settingsDefinitionsClass(self, entry)
+      else 
+        settings = settingsDefinitionsClass.Acquire()
+      end
+
+      --- The settings should be created from this method, and not in the OnAcquire
+      --- where this one will miss properties.
+      if settings.OnBuildSettings then 
+        settings:OnBuildSettings()
+      end
+
       local scrollBox = self:GetChild("Container")
       self.CurrentSettings = settings
 
@@ -118,10 +171,22 @@ Style.UpdateSkin("Default", {
     width = 1051,
     height = 775,
 
+    Text = {
+      location = {
+        Anchor("TOP", 0, -15),
+        Anchor("LEFT", 60, 0),
+        Anchor("RIGHT", -60, 0)
+      } 
+    },
+
     Categories = {
       visible = true,
       location = {
         Anchor("TOPLEFT", 20, -15)
+      },
+
+      [SUI.Category] = {
+        paddingTop = 40 
       }
     },
 
