@@ -1,4 +1,12 @@
-# 0.5.9
+# 0.5.10
+
+**FIXES**
+
+- Fixed an issue where the quests weren't auto watched.
+
+---
+
+## 0.5.9
 
 **FIXES**
 

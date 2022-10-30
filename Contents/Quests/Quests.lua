@@ -371,7 +371,7 @@ function QUEST_ACCEPTED(questID)
   Trace("The quest (id:%i) has been accepted", questID)
 
   -- Add it in the quest watched 
-  if AUTO_QUEST_WATCH == "1" and GetNumQuestWatches() < Constants.QuestWatchConsts.MAX_QUEST_WATCHES then
+  if GetCVarBool("autoQuestWatch") and GetNumQuestWatches() < Constants.QuestWatchConsts.MAX_QUEST_WATCHES then
     local wasWatched = AddQuestWatch(questID, EnumQuestWatchType.Automatic)
     if wasWatched then 
       QuestSuperTracking_OnQuestTracked(questID)
