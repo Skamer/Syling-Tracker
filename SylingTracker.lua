@@ -8,8 +8,6 @@
 -- ========================================================================= --
 Syling                          "SylingTracker"                              ""
 -- ========================================================================= --
-import                              "SLT"
--- ========================================================================= --
 Log                 = Logger("SylingTracker")
 
 Trace               = Log:SetPrefix(1, "|cffa9a9a9[SLT:Trace]|r")
@@ -23,25 +21,40 @@ Log.LogLevel        = 3
 Log.UseTimeFormat   = false
 Log:AddHandler(print)
 -- ========================================================================= --
-_SLT_VERSION       = GetAddOnMetadata("SylingTracker", "Version")
+SLT_VERSION       = GetAddOnMetadata("SylingTracker", "Version")
 -- ========================================================================= --
-_SCORPIO_VERSION    = tonumber(GetAddOnMetadata("Scorpio", "Version"):match("%d+$"))
+SCORPIO_VERSION    = tonumber(GetAddOnMetadata("Scorpio", "Version"):match("%d+$"))
 -- ========================================================================= --
-_LibSharedMedia     = LibStub("LibSharedMedia-3.0")
-_LibDataBroker      = LibStub("LibDataBroker-1.1")
-_LibDBIcon          = LibStub("LibDBIcon-1.0")
+LibSharedMedia     = LibStub("LibSharedMedia-3.0")
+LibDataBroker      = LibStub("LibDataBroker-1.1")
+LibDBIcon          = LibStub("LibDBIcon-1.0")
 -- ========================================================================= --
-_SLT_LOGO           = [[Interface\AddOns\SylingTracker\Media\logo]]
+SLT_LOGO           = [[Interface\AddOns\SylingTracker\Media\logo]]
+
+
+
+local function ShowMinimapIconCallback(show)
+  if show then 
+    LibDBIcon:Show("SylingTracker")
+  else
+    LibDBIcon:Hide("SylingTracker")
+  end
+  
+  _DB.minimap.hide = not show
+end
+
 
 function OnLoad(self)
   -- Create and init the DB 
   _DB = SVManager("SylingTrackerDB")
 
-  -- Regiser the options 
-  Settings.Register("replace-blizzard-objective-tracker", true, "Blizzard/UpdateTrackerVisibility")
+  -- Register the options 
+  SLT.Settings.Register("replace-blizzard-objective-tracker", true, "Blizzard/UpdateTrackerVisibility")
+  SLT.Settings.Register("show-minimap-icon", true, "ShowMinimapIcon")
 
   -- Register the callbacks
-  CallbackManager.Register("Blizzard/UpdateTrackerVisibility", Callback(function(replace) BLIZZARD_TRACKER_VISIBLITY_CHANGED(not replace) end))
+  SLT.CallbackManager.Register("Blizzard/UpdateTrackerVisibility", SLT.Callback(function(replace) BLIZZARD_TRACKER_VISIBLITY_CHANGED(not replace) end))
+  SLT.CallbackManager.Register("ShowMinimapIcon", SLT.Callback(ShowMinimapIconCallback))
 
   --
   _DB:SetDefault{ dbVersion = 1 }
@@ -52,7 +65,7 @@ function OnLoad(self)
 end
 
 function OnEnable(self)
-  BLIZZARD_TRACKER_VISIBLITY_CHANGED(not Settings.Get("replace-blizzard-objective-tracker"))
+  BLIZZARD_TRACKER_VISIBLITY_CHANGED(not SLT.Settings.Get("replace-blizzard-objective-tracker"))
 end
 
 
@@ -82,34 +95,40 @@ end
 
 function OnQuit(self)
   -- Do a clean in the database (remove empty table) when the player log out
-  Database.Clean()
+  SLT.Database.Clean()
 end 
 
 function SetupMinimapButton(self)
-  local LDBObject = _LibDataBroker:NewDataObject("SylingTracker", {
+  local LDBObject = LibDataBroker:NewDataObject("SylingTracker", {
     type = "launcher",
-    icon = _SLT_LOGO,
+    icon = SLT_LOGO,
     OnClick = function(_, button, down)
-
+      if button == "LeftButton" then
+        if IsShiftKeyDown() then
+          _M:FireSystemEvent("SLT_TOGGLE_ANCHORS")
+        else 
+          _M:ToggleCommand()
+        end
+      elseif button == "RightButton" then 
+        if not IsShiftKeyDown() then 
+          _M:OpenOptions()
+        end
+      end 
     end,
 
     OnTooltipShow = function(tooltip)
-      tooltip:AddDoubleLine("Syling Tracker", _SLT_VERSION, 1, 106/255, 0, 1, 1, 1)
+      tooltip:AddDoubleLine("Syling Tracker", SLT_VERSION, 1, 106/255, 0, 1, 1, 1)
+      tooltip:AddLine(" ")
+      tooltip:AddLine("|cff00ffffRight Click|r to open the options")
     end
   })
 
-  _LibDBIcon:Register("SylingTracker", LDBObject, _DB.minimap)
+  LibDBIcon:Register("SylingTracker", LDBObject, _DB.minimap)
 end
-
-
--- __SlashCmd__ "slt" "config"
--- function OpenOptions()
---   local loaded, reason = LoadAddOn("SylingTracker_Options")
--- end
 
 __SlashCmd__ "slt" "bot" "- enable/disable the blizzard objective tracker"
 function ToggleBlizzardObjectiveTracker()
-  Settings.Set("replace-blizzard-objective-tracker", ObjectiveTrackerFrame:IsShown())
+  SLT.Settings.Set("replace-blizzard-objective-tracker", ObjectiveTrackerFrame:IsShown())
 end
 
 __SlashCmd__ "slt" "lock" "- lock the Tracker and the Item Bar, preventing them to be moved or resized"
@@ -164,9 +183,9 @@ function ToggleMinimapButton()
   local isHidden = not _DB.minimap.hide
 
   if isHidden then 
-    _LibDBIcon:Hide("SylingTracker")
+    LibDBIcon:Hide("SylingTracker")
   else 
-    _LibDBIcon:Show("SylingTracker")
+    LibDBIcon:Show("SylingTracker")
   end
 
   _DB.minimap.hide = isHidden
@@ -176,6 +195,23 @@ __SystemEvent__()
 function PLAYER_ENTERING_WORLD(initialLogin, reloadingUI)
   IsInitialLogin  = initialLogin
   IsReloadingUI   = reloadingUI
+end
+
+__SlashCmd__ "slt" "config" "- open the options"
+function OpenOptions()
+  local addonName = "SylingTracker_Options"
+  local loaded, reason = LoadAddOn(addonName)
+  if not loaded then 
+    if reason == "DISABLED" then 
+      EnableAddOn(addonName, true)
+      LoadAddOn(addonName)
+    else
+      -- TODO: Put an error message here
+      return 
+    end
+  end
+
+  _M:FireSystemEvent("SLT_OPEN_OPTIONS")
 end
 
 -------------------------------------------------------------------------------
@@ -202,11 +238,11 @@ _Fonts = {
 }
 
 for fontName, fontFile in pairs(_Fonts) do
-  _LibSharedMedia:Register("font", fontName, fontFile)
+  LibSharedMedia:Register("font", fontName, fontFile)
 end
 -- -------------------------------------------------------------------------------
 -- LibSharedMedia: register the backgounds
 -------------------------------------------------------------------------------
-_LibSharedMedia:Register("background", "SylingTracker Background", [[Interface\AddOns\SylingTracker\Media\Textures\Frame-Background]])
+LibSharedMedia:Register("background", "SylingTracker Background", [[Interface\AddOns\SylingTracker\Media\Textures\Frame-Background]])
 
 
