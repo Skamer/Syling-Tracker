@@ -12,6 +12,14 @@ __Widget__()
 class "SUI.ExpandableSection" (function(_ENV)
   inherit "Frame"
   -----------------------------------------------------------------------------
+  --                               Handlers                                  --
+  -----------------------------------------------------------------------------
+  local function OnChildChangedHandler(self, child, isAdded)
+    if isAdded and child:GetID() > 0 then 
+      child:SetShown(self.Expanded)
+    end
+  end
+  -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
   function UpdateVisibility(self)
@@ -74,17 +82,10 @@ class "SUI.ExpandableSection" (function(_ENV)
   function __ctor(self)
     local button = self:GetChild("Button")
     button.OnClick = button.OnClick + function()
-      --local expanded = not self:IsExpanded()
       self:SetExpanded(not self:IsExpanded())
-      -- if expanded then 
-      --   Style[button].RightBGTexture.atlas = AtlasType("Options_ListExpand_Right_Expanded", true)
-      -- else 
-      --   Style[button].RightBGTexture.atlas = AtlasType("Options_ListExpand_Right", true)
-      -- end
-
-      --self.Expanded = expanded
-      --self:UpdateVisibility()
     end
+
+    self.OnChildChanged = self.OnChildChanged + OnChildChangedHandler
 
   end
 end)

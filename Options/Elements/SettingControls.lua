@@ -221,11 +221,27 @@ __Widget__()
 class "SUI.SettingsDropDown" (function(_ENV)
   inherit "Frame"
   -----------------------------------------------------------------------------
+  --                               Events                                    --
+  -----------------------------------------------------------------------------
+  __Bubbling__{ DropDown = "OnEntrySelected"}
+  event "OnEntrySelected"
+  -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
   __Arguments__ { String/"" }
   function SetLabel(self, label)
     Style[self].Label.text = label 
+  end
+
+
+  __Arguments__ { Any }
+  function SelectByValue(self, value)
+    self:GetChild("DropDown"):SelectByValue(value)
+  end
+
+  __Arguments__ { String + Number}
+  function SelectById(self, id)
+    self:GetChild("DropDown"):SelectById(value)
   end
 
   function OnAcquire(self)
@@ -356,7 +372,7 @@ Style.UpdateSkin("Default", {
   },
 
   [SUI.SettingsCheckBox] = {
-    height = 30,
+    height = 35,
     marginRight = 0,
 
     Label = {
@@ -378,7 +394,7 @@ Style.UpdateSkin("Default", {
   },
 
   [SUI.SettingsEditBox] = {
-    height  = 30,
+    height  = 35,
     marginRight = 0,
 
     Label = {
@@ -398,9 +414,32 @@ Style.UpdateSkin("Default", {
       } 
     }
   },
+
+  [SUI.SettingsDropDown] = {
+    height = 35,
+    marginRight = 0,
+
+    Label = {
+      fontObject = GameFontNormal,
+      textColor = NORMAL_FONT_COLOR,
+      justifyH = "LEFT",
+      wordWrap = false,
+      location = {
+        Anchor("LEFT"),
+        Anchor("RIGHT", 0, 0, nil, "CENTER"),  
+      }
+    },
+
+    DropDown = {
+      location = {
+        Anchor("LEFT", 0, 0, "Label", "RIGHT")
+      }
+    }
+
+  },
   
   [SUI.SettingsSlider] = {
-    height  = 30,
+    height  = 35,
     marginRight = 0,
 
     Label = {

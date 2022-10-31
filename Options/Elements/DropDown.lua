@@ -39,6 +39,13 @@ class "SUI.DropDown" (function(_ENV)
   --                               Events                                    --
   -----------------------------------------------------------------------------
   event "OnEntrySelected"
+
+  local function OnPopoutEntrySelected(self, popout, entry)
+    self:SelectEntry(entry:GetEntryData())
+
+    self:OnEntrySelected(entry)
+    self:ClosePopout()
+  end
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
@@ -55,6 +62,8 @@ class "SUI.DropDown" (function(_ENV)
       popout:SetFrameStrata("FULLSCREEN_DIALOG")
       popout:SetToplevel(true)
 
+      popout.OnEntrySelected = popout.OnEntrySelected + self.OnPopoutEntrySelected
+
       self.popout = popout
     end
 
@@ -64,6 +73,7 @@ class "SUI.DropDown" (function(_ENV)
   function ShowPopout(self)
     local popout = self:AcquirePopout()
     popout:LinkEntries(self:GetEntries())
+    popout:SelectEntry(self.SelectedEntry)
     popout:Refresh()
     popout:Show()
   end
@@ -87,8 +97,41 @@ class "SUI.DropDown" (function(_ENV)
       self:ShowPopout()
     end
   end
+
+  __Arguments__ { Any }
+  function SelectByValue(self, value)
+    for i, e in self:GetEntries():GetIterator() do 
+      if e.value and e.value == value then 
+        self:SelectEntry(e)
+        return 
+      end
+    end
+  end
+
+  __Arguments__ { String + Number}
+  function SelectById(self, id)
+    for i, e in self:GetEntries():GetIterator() do 
+      if e.id and e.id == id then 
+        self:SelectEntry(e)
+        return 
+      end 
+    end
+  end
+
+  __Arguments__ { SUI.EntryData/nil }
+  function SelectEntry(self, entry)
+    Style[self].TogglePopoutButton.SelectedName.text = entry.text
+
+    self.SelectedEntry = entry
+  end
   -----------------------------------------------------------------------------
   --                               Properties                                --
+  -----------------------------------------------------------------------------
+  property "SelectedEntry" {
+    type = SUI.EntryData
+  }
+  -----------------------------------------------------------------------------
+  --                            Constructors                                 --
   -----------------------------------------------------------------------------
   __Template__{
     TogglePopoutButton = SUI.DropDownPopoutButton
@@ -98,6 +141,8 @@ class "SUI.DropDown" (function(_ENV)
     toggleButton.OnMouseDown = toggleButton.OnClick + function()
       self:TogglePopout()
     end
+
+    self.OnPopoutEntrySelected = function(popout, entry) OnPopoutEntrySelected(self, popout, entry) end
   end
 
 end)

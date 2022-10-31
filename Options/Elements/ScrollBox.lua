@@ -120,7 +120,9 @@ class "SUI.FauxScrollBox" (function(_ENV)
 
   local function OnScroll(self, value)
     local offset = max(0, (self.RowCount - self.DisplayedRowCount) * value)
-    self.Offset = offset
+
+    --- IMPORTANT: For avoiding issues, we need to be certain the offset is not decimal
+    self.Offset = ceil(offset)
   end
   -----------------------------------------------------------------------------
   --                               Methods                                   --

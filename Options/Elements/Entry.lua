@@ -170,6 +170,7 @@ interface "SUI.IEntryProvider" (function(_ENV)
     return self.EntriesData
   end
 
+
   __Arguments__ { Array[SUI.EntryData] }
   function SetEntries(self, entries)
     self.EntriesData:Clear()
@@ -238,6 +239,10 @@ class "SUI.GridEntriesFauxScrollBox" (function(_ENV)
   --                               Handlers                                  --
   -----------------------------------------------------------------------------
   local function OnEntryClick(self, entry)
+    if self.SelectedEntry and self.SelectedEntry == entry:GetEntryData() then
+      return 
+    end
+
     self:OnEntrySelected(entry)
   end
 
@@ -255,7 +260,6 @@ class "SUI.GridEntriesFauxScrollBox" (function(_ENV)
     -- If the Entry is a button, register onClick
     if Class.IsObjectType(entry, SUI.IButtonEntry) then 
       entry.OnClick = entry.OnClick + self.OnEntryClick
-
     end
 
     self.EntryFrames[index] = entry
@@ -277,6 +281,10 @@ class "SUI.GridEntriesFauxScrollBox" (function(_ENV)
 
   function GetEntryIndex(self, row, column)
     return (row - 1) * self.ColumnCount + column
+  end
+
+  function SelectEntry(self, entry)
+    self.SelectedEntry = entry
   end
 
   function Refresh(self)
@@ -309,6 +317,12 @@ class "SUI.GridEntriesFauxScrollBox" (function(_ENV)
           local entry = self:AcquireEntry(entryFrameIndex, entryClass)
           entry:SetupFromEntryData(entryData)
 
+          if self.SelectedEntry and self.SelectedEntry == entryData then
+            entry.Selected = true 
+          else
+            entry.Selected = false 
+          end
+
           Style[entry].height = self.RowHeight
 
 
@@ -331,7 +345,7 @@ class "SUI.GridEntriesFauxScrollBox" (function(_ENV)
   end
 
   function OnSystemEvent(self, event, ...)
-    if not self:IsMouseOver() then 
+    if not self:IsMouseOver() then
       self:Hide()
     end
   end
@@ -346,6 +360,11 @@ class "SUI.GridEntriesFauxScrollBox" (function(_ENV)
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
+  property "SelectedEntry" {
+    type = SUI.EntryData,
+    default = nil
+  }
+
   property "EntryFrames" {
     set = false,
     default = function() return Toolset.newtable(false, true) end

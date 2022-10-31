@@ -332,6 +332,27 @@ function UnlockItemBar()
   end
 end
 
+__SystemEvent__"SLT_TOGGLE_ANCHORS"
+function ToogleLocking()
+  if _ItemBarMover:IsShown() then 
+    _M:LockItemBar()
+  else 
+    _M:UnlockItemBar()
+  end
+end
+
+__SystemEvent__()
+function SLT_SHOW_ANCHORS()
+  _M:UnlockItemBar()
+end
+
+__SystemEvent__()
+function SLT_HIDE_ANCHORS()
+  if _ItemBarMover:IsShown() then 
+    _M:LockItemBar()
+  end
+end
+
 __SystemEvent__ "SLT_SHOW_COMMAND"
 __NoCombat__()
 function ShowItemBar()
