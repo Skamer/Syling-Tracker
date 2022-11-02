@@ -233,6 +233,15 @@ class "SUI.SettingsDropDown" (function(_ENV)
     Style[self].Label.text = label 
   end
 
+  __Arguments__ { SUI.EntryData}
+  function AddEntry(self, entry)
+    self:GetChild("DropDown"):AddEntry(entry)
+  end
+
+  __Arguments__ { Array[SUI.EntryData] }
+  function SetEntries(self, entries)
+    self:GetChild("DropDown"):SetEntries(entries)
+  end
 
   __Arguments__ { Any }
   function SelectByValue(self, value)
@@ -253,6 +262,8 @@ class "SUI.SettingsDropDown" (function(_ENV)
     self:Hide()
     self:ClearAllPoints()
     self:SetParent(nil)
+
+    self:GetChild("DropDown"):ClearEntries()
 
     ResetStyles(self, true)
   end
@@ -335,6 +346,11 @@ class "SUI.SettingsSlider" (function(_ENV)
     ResetStyles(self, true)
 
     self.Setting = nil
+    --- It's important these functions are called after Setting has been set 
+    --- to nil for avoiding the setting vlaue is updated by an incorrect value
+    self:SetValue(0)
+    self:SetValueStep(1)
+    self:SetMinMaxValues(0, 100)
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --

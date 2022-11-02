@@ -19,7 +19,18 @@ _Trackers       = System.Toolset.newtable(false, true)
 __UIElement__()
 class "SLT.TrackerMover" (function(_ENV)
   inherit "Mover"
-
+  -----------------------------------------------------------------------------
+  --                               Methods                                   --
+  -----------------------------------------------------------------------------
+  function OnRelease(self)
+    self:SetID(0)
+    self:Hide()
+    self:ClearAllPoints()
+    self:SetParent(nil)
+  end
+  -----------------------------------------------------------------------------
+  --                            Constructors                                 --
+  -----------------------------------------------------------------------------
   __Template__{
     Text = SLT.FontString
   }
@@ -61,9 +72,21 @@ class "SLT.Tracker" (function(_ENV)
 
   local function OnLockedChanged(self, value)
     if value then 
-      self:ReleaseMover() 
+      self:ReleaseMover()
+      Style[self].resizable = false
     else 
       self:ShowMover()
+      Style[self].resizable = true
+    end
+
+    --- We save the changed to the DB only if the tracker is marked as persistent
+    --- at this time.
+    if self:IsPersistent() then 
+      Profiles.PrepareDatabase()
+
+      if Database.SelectTable(true, "trackers", self.ID) then
+        Database.SetValue("locked", value)
+      end
     end
   end
 
@@ -95,6 +118,42 @@ class "SLT.Tracker" (function(_ENV)
       end
     end
   end
+
+  local function OnShowScrollBarChanged(self, value)
+    Style[self].ScrollBar.visible = value
+
+    --- We save the changed to the DB only if the tracker is marked as persistent
+    --- at this time.
+    if self:IsPersistent() then 
+      Profiles.PrepareDatabase()
+
+      if Database.SelectTable(true, "trackers", self.ID, "scrollBar") then
+        Database.SetValue("show", value)
+      end
+    end
+  end
+
+  local function OnScrollBarPositionChanged(self, value, old)
+    if value == "LEFT" then
+      Style[self].ScrollBar.location = {
+        Anchor("RIGHT", -15, 0, nil, "LEFT")
+      }
+    elseif value == "RIGHT" then 
+      Style[self].ScrollBar.location = {
+        Anchor("LEFT", 15, 0, nil, "RIGHT")
+      }
+    end
+
+    --- We save the changed to the DB only if the tracker is marked as persistent
+    --- at this time.
+    if self:IsPersistent() then 
+      Profiles.PrepareDatabase()
+
+      if Database.SelectTable(true, "trackers", self.ID, "scrollBar") then
+        Database.SetValue("position", value)
+      end
+    end
+  end
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
@@ -115,6 +174,8 @@ class "SLT.Tracker" (function(_ENV)
     if not mover then 
       mover = SLT.TrackerMover.Acquire()
       mover:SetParent(self)
+      mover:SetName("Mover")
+      mover:InstantApplyStyle()
       mover.MoveTarget = self 
       mover.OnStopMoving = mover.OnStopMoving + self.OnTrackerStopMoving
     end 
@@ -176,6 +237,7 @@ class "SLT.Tracker" (function(_ENV)
 
   __Arguments__ { String }
   function IsContentTracked(self, contentID)
+
     if self.Contents[contentID] then 
       return true 
     end
@@ -373,7 +435,12 @@ class "SLT.Tracker" (function(_ENV)
     self:SetPersistent(true)
   end
 
+  function OnAcquire(self)
+    self:SetPersistent(true)
+  end
+
   function OnRelease(self)
+    self:SetPersistent(false)
 
     self:ClearAllPoints()
     self:SetParent()
@@ -384,6 +451,7 @@ class "SLT.Tracker" (function(_ENV)
     --- Untrack all contents tracked 
     for contentID in pairs(self.Contents) do 
       self:UntrackContentType(contentID)
+      self.Contents[contentID] = nil
     end
 
     self.ID = nil
@@ -400,7 +468,7 @@ class "SLT.Tracker" (function(_ENV)
 
   property "Contents" {
     set     = false,
-    default = {}
+    default = function() return {} end
   }
 
   property "Spacing" {
@@ -421,6 +489,18 @@ class "SLT.Tracker" (function(_ENV)
     type = Boolean,
     default = true,
     handler = OnLockedChanged
+  }
+
+  property "ShowScrollBar" {
+    type = Boolean,
+    default = true,
+    handler = OnShowScrollBarChanged
+  }
+
+  property "ScrollBarPosition" {
+    type = String,
+    default = "RIGHT",
+    handler = OnScrollBarPositionChanged
   }
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
@@ -476,9 +556,32 @@ class "SLT.Tracker" (function(_ENV)
 
     self.OnTrackerStopMoving = function(mover, ...) OnTrackerStopMoving(self, mover, ...) end
     self.OnSizeChanged = self.OnSizeChanged + OnSizeChanged
-
   end
 end)
+
+local function OnTrackerHideHandler(self)
+  --- We save the changed to the DB only if the tracker is marked as persistent
+   --- at this time.
+  if self:IsPersistent() then
+    Profiles.PrepareDatabase()
+      
+    if Database.SelectTable(true, "trackers", self.ID) then 
+      Database.SetValue("hidden", true)
+    end
+  end
+end
+
+local function OnTrackerShowHandler(self)
+  --- We save the changed to the DB only if the tracker is marked as persistent
+   --- at this time.
+  if self:IsPersistent() then
+    Profiles.PrepareDatabase()
+      
+    if Database.SelectTable(true, "trackers", self.ID) then 
+      Database.SetValue("hidden", nil)
+    end
+  end
+end
 
 
 --- Private function for create a tracker
@@ -491,13 +594,14 @@ local function __NewTracker(id)
   tracker:SetPersistent(false)
 
   Profiles.PrepareDatabase()
-  local width, height, xPos, yPos, locked, hidden 
+  local width, height, xPos, yPos, locked, hidden, scrollBar 
   if Database.SelectTable(false, "trackers", id) then 
     xPos = Database.GetValue("xPos")
     yPos = Database.GetValue("yPos")
     width = Database.GetValue("width") or 300
     height = Database.GetValue("height") or 325
     hidden = Database.GetValue("hidden")
+    scrollBar = Database.GetValue("scrollBar")
   end
 
   if not xPos and not yPos then 
@@ -526,7 +630,20 @@ local function __NewTracker(id)
     tracker:Hide()
   end
 
+  if scrollBar then 
+    if scrollBar.show then 
+      Style[tracker].showScrollBar = scrollBar.show
+    end
+
+    if scrollBar.position then 
+      Style[tracker].scrollBarPosition = scrollBar.position
+    end
+  end
+
   _Trackers[id] = tracker
+
+  tracker.OnShow = tracker.OnShow + OnTrackerShowHandler
+  tracker.OnHide = tracker.OnHide + OnTrackerHideHandler
 
   --- Reset the tracker as persistent
   tracker:SetPersistent(true)
@@ -539,7 +656,10 @@ end
 local function __DeleteTracker(tracker)
   local trackerId = tracker.ID
   
-  Scorpio.FireSystemEvent("SLT_TRACKER_DELETED", tracker) 
+  Scorpio.FireSystemEvent("SLT_TRACKER_DELETED", tracker)
+  
+  tracker.OnShow = tracker.OnShow - OnTrackerShowHandler
+  tracker.OnHide = tracker.OnHide - OnTrackerHideHandler
 
   Database.SelectRoot()
   if Database.SelectTable(false, "list", "tracker") then 
@@ -702,4 +822,32 @@ function PLAYER_ENTERING_WORLD(isInitialLogin, isReloadingUi)
 
     _MainTracker.Locked = false
   end
+end
+
+__SystemEvent__()
+function SLT_SHOW_ANCHORS()
+  for _, tracker in SLT.API.IterateTrackers() do 
+    tracker.Locked = false 
+  end
+end
+
+__SystemEvent__()
+function SLT_HIDE_ANCHORS()
+  for _, tracker in SLT.API.IterateTrackers() do 
+    tracker.Locked = true 
+  end
+end
+
+__SystemEvent__()
+function SLT_HIDE_TRACKERS()
+  for _, tracker in SLT.API.IterateTrackers() do 
+    tracker:Hide()
+  end  
+end
+
+__SystemEvent__()
+function SLT_SHOW_TRACKERS()
+  for _, tracker in SLT.API.IterateTrackers() do 
+    tracker:Show()
+  end  
 end

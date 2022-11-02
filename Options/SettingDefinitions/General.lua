@@ -16,35 +16,44 @@ class "SLT.SettingDefinitions.General" (function(_ENV)
   -----------------------------------------------------------------------------
   function BuildSettingControls(self)
     local showMinimapIconCheckBox = SUI.SettingsCheckBox.Acquire(false, self)
-    showMinimapIconCheckBox:SetID(1)
+    showMinimapIconCheckBox:SetID(10)
     showMinimapIconCheckBox:SetLabel("Show Minimap Icon")
-    showMinimapIconCheckBox:BindSetting("show-minimap-icon")
+    showMinimapIconCheckBox:BindSetting("showMinimapIcon")
     self.SettingControls.showMinimapIconCheckBox = showMinimapIconCheckBox
 
     local showBlizzardObjectiveTrackerCheckBox = SUI.SettingsCheckBox.Acquire(false, self)
-    showBlizzardObjectiveTrackerCheckBox:SetID(2)
+    showBlizzardObjectiveTrackerCheckBox:SetID(20)
     showBlizzardObjectiveTrackerCheckBox:SetLabel("Show Blizzard Objective Tracker")
-    showBlizzardObjectiveTrackerCheckBox:BindSetting("replace-blizzard-objective-tracker", true)
+    showBlizzardObjectiveTrackerCheckBox:BindSetting("showBlizzardObjectiveTracker")
     self.SettingControls.showBlizzardObjectiveTrackerCheckBox = showBlizzardObjectiveTrackerCheckBox
 
     local mouseWheelScrollStepSlider = SUI.SettingsSlider.Acquire(false, self)
-    mouseWheelScrollStepSlider:SetID(3)
+    mouseWheelScrollStepSlider:SetID(30)
     mouseWheelScrollStepSlider:SetLabel("Mouse Wheel Scroll Step")
     mouseWheelScrollStepSlider:SetSliderLabelFormatter(SUI.Slider.Label.Right)
     mouseWheelScrollStepSlider:SetMinMaxValues(0.01, 0.25)
     mouseWheelScrollStepSlider:SetValueStep(0.01)
-    mouseWheelScrollStepSlider:BindSetting("mouse-wheel-scroll-step")
+    mouseWheelScrollStepSlider:BindSetting("mouseWheelScrollStep")
     self.SettingControls.mouseWheelScrollStepSlider = mouseWheelScrollStepSlider
+
+
+    local showQuestCategories = SUI.SettingsCheckBox.Acquire(false, self)
+    showQuestCategories:SetID(40)
+    showQuestCategories:SetLabel("Display the categories for quests")
+    showQuestCategories:BindSetting("questsEnableCategories")
+    self.SettingControls.showQuestCategories = showQuestCategories
   end
 
   function ReleaseSettingControls(self)
     self.SettingControls.showMinimapIconCheckBox:Release()
     self.SettingControls.showBlizzardObjectiveTrackerCheckBox:Release()
     self.SettingControls.mouseWheelScrollStepSlider:Release()
+    self.SettingControls.showQuestCategories:Release()
 
     self.SettingControls.showMinimapIconCheckBox = nil 
     self.SettingControls.showBlizzardObjectiveTrackerCheckBox = nil
     self.SettingControls.mouseWheelScrollStepSlider = nil
+    self.SettingControls.showQuestCategories = nil
   end
 
   function OnAcquire(self)

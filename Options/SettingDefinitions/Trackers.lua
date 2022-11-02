@@ -111,9 +111,6 @@ class "SLT.SettingDefinitions.CreateTracker" (function(_ENV)
     end
   end
 
-
-
-
   function OnAcquire(self)
     self:BuildSettingControls()
   end
@@ -154,14 +151,13 @@ class "SLT.SettingDefinitions.Tracker" (function(_ENV)
   --                               Handlers                                  --
   -----------------------------------------------------------------------------
   local function OnContentCheckBoxClick(self, contentCheckBox)
-    local tracker = GetTracker(self.TrackerID)
     local contentID = self.ContentControls[contentCheckBox]
     local isTracked = contentCheckBox:IsChecked()
 
     if isTracked then 
-      tracker:TrackContentType(contentID)
+      self.Tracker:TrackContentType(contentID)
     else
-      tracker:UntrackContentType(contentID)
+      self.Tracker:UntrackContentType(contentID)
     end
   end
 
@@ -169,62 +165,116 @@ class "SLT.SettingDefinitions.Tracker" (function(_ENV)
     DeleteTracker(self.TrackerID)
   end
 
-  local function OnBuildGeneralTab(self, tabControl)
-    local enable = SUI.SettingsCheckBox.Acquire(false, self)
-    enable:SetID(2)
-    enable:SetLabel("Enable")
-    self.GeneralTabControls.enableTrackerButton = enable
+  local function OnLockTrackerCheckBoxClick(self, checkBox)
+    local isLocked = checkBox:IsChecked()
+    self.Tracker.Locked = isLocked
+  end
 
+  local function OnShowTrackerCheckBoxClick(self, checkBox)
+    local isShow = checkBox:IsChecked()
+    if isShow then 
+      self.Tracker:Show()
+    else
+      self.Tracker:Hide()
+    end
+  end
+
+  local function OnShowScrolBarTrackerCheckBoxClick(self, checkBox)
+    local tracker = GetTracker(self.TrackerID)
+    local isShow = checkBox:IsChecked()
+    Style[tracker].ShowScrollBar = isShow
+  end
+
+  local function OnScrollBarPositionEntrySelected(self, dropdown, entry)
+    local data = entry:GetEntryData()
+    self.Tracker.ScrollBarPosition = data.value
+  end
+
+  local function OnBuildGeneralTab(self, tabControl)
+    --- Lock the tracker
     local lock = SUI.SettingsCheckBox.Acquire(false, self)
-    lock:SetID(3)
+    lock:SetID(10)
     lock:SetLabel("Lock")
+    lock:SetChecked(self.Tracker.Locked)
+    lock.OnCheckBoxClick = lock.OnCheckBoxClick + self.OnLockTrackerCheckBoxClick
     self.GeneralTabControls.lockTrackerButton = lock
 
+    --- Show the tracker
     local show = SUI.SettingsCheckBox.Acquire(false, self)
-    show:SetID(4)
+    show:SetID(20)
     show:SetLabel("Show")
+    show:SetChecked(self.Tracker:IsShown())
+    show.OnCheckBoxClick = show.OnCheckBoxClick + self.OnShowTrackerCheckBoxClick
     self.GeneralTabControls.showTrackerButton = show
 
+    --- Scroll Bar Section
     local scrollBarSection = SUI.ExpandableSection.Acquire(false, self)
     scrollBarSection:SetExpanded(true)
-    scrollBarSection:SetID(5)
+    scrollBarSection:SetID(30)
     scrollBarSection:SetTitle("Scroll Bar")
     Style[scrollBarSection].marginTop = 15
     self.GeneralTabControls.scrollBarSection = scrollBarSection
 
+    --- Scroll Bar -> Show 
     local showScrollBar = SUI.SettingsCheckBox.Acquire(true, scrollBarSection)
-    showScrollBar:SetID(1)
+    showScrollBar:SetID(10)
     showScrollBar:SetLabel("Show ScrollBar")
+    showScrollBar:SetChecked(self.Tracker.ShowScrollBar)
+    showScrollBar.OnCheckBoxClick = showScrollBar.OnCheckBoxClick + self.OnShowScrolBarTrackerCheckBoxClick
     self.GeneralTabControls.showScrollBarCheckBox = showScrollBar
 
+    --- Scroll Bar -> Position
+    local scrollBarPosition = SUI.SettingsDropDown.Acquire(true, scrollBarSection)
+    scrollBarPosition:SetID(20)
+    scrollBarPosition:SetLabel("Position")
+    scrollBarPosition:AddEntry({ text = "Left", value = "LEFT"})
+    scrollBarPosition:AddEntry({ text = "Right", value = "RIGHT"})
+    scrollBarPosition:SelectByValue(self.Tracker.ScrollBarPosition)
+    scrollBarPosition.OnEntrySelected = scrollBarPosition.OnEntrySelected + self.OnScrollBarPositionEntrySelected
+    self.GeneralTabControls.scrollBarPositionDropDown = scrollBarPosition
 
-    local contentsExpandableSection = SUI.ExpandableSection.Acquire(false, self)
-    contentsExpandableSection:SetExpanded(false)
-    contentsExpandableSection:SetID(6)
-    contentsExpandableSection:SetTitle("|cffff0000Danger Zone|r")
-    Style[contentsExpandableSection].marginTop = 15
-    self.GeneralTabControls.contentsExpandableSection = contentsExpandableSection
+    --- The "Danger zone" won't appear for main tracker as it's not intended to be deleted.
+    if self.Tracker.ID ~= "main" then 
+      --- Danger zone section
+      local dangerZoneSection = SUI.ExpandableSection.Acquire(false, self)
+      dangerZoneSection:SetExpanded(false)
+      dangerZoneSection:SetID(40)
+      dangerZoneSection:SetTitle("|cffff0000Danger Zone|r")
+      Style[dangerZoneSection].marginTop = 15
+      self.GeneralTabControls.dangerZoneSection = dangerZoneSection
 
-    local deleteButton = SUI.DangerPushButton.Acquire(true, contentsExpandableSection)
-    deleteButton:SetText("Delete the tracker")
-    deleteButton:SetID(1)
-    deleteButton.OnClick = deleteButton.OnClick + self.OnDeleteButtonClick
-    Style[deleteButton].marginLeft = 250
-    self.GeneralTabControls.deleteButton = deleteButton
+      --- Danger zone -> delete button
+      local deleteButton = SUI.DangerPushButton.Acquire(true, contentsExpandableSection)
+      deleteButton:SetText("Delete the tracker")
+      deleteButton:SetID(10)
+      deleteButton.OnClick = deleteButton.OnClick + self.OnDeleteButtonClick
+      Style[deleteButton].marginLeft = 250
+      self.GeneralTabControls.deleteButton = deleteButton
+    end
   end
 
   local function OnReleaseGeneralTab(self, tabControl)
-    self.GeneralTabControls.deleteButton = self.GeneralTabControls.deleteButton - self.OnDeleteButtonClick
-
-
     for index, control in pairs(self.GeneralTabControls) do
+      --- Remove the specific event handlers
+      if index == "lockTrackerButton" then 
+        control.OnCheckBoxClick = control.OnCheckBoxClick - self.OnLockTrackerCheckBoxClick
+      elseif index == "showTrackerButton" then 
+        control.OnCheckBoxClick = control.OnCheckBoxClick - self.OnShowTrackerCheckBoxClick
+      elseif index == "showScrollBar" then 
+        control.OnCheckBoxClick = control.OnCheckBoxClick - self.OnShowScrolBarTrackerCheckBoxClick
+      elseif index == "scrollBarPositionDropDown" then 
+        control.OnEntrySelected = control.OnEntrySelected - self.OnScrollBarPositionEntrySelected
+      elseif index == "deleteButton" then 
+        control.OnClick = control.OnClick - self.OnDeleteButtonClick
+      end
+
+      --- Release the control
       control:Release()
       self.GeneralTabControls[index] = nil
     end
   end 
 
   local function OnBuildContentsTrackedTab(self, tabControl)
-
     local contentsTrackedSection = SUI.SettingsSectionHeader.Acquire(false, self)
     contentsTrackedSection:SetID(2)
     contentsTrackedSection:SetTitle("Contents Tracked")
@@ -234,7 +284,7 @@ class "SLT.SettingDefinitions.Tracker" (function(_ENV)
       local content = SUI.SettingsCheckBox.Acquire(true, self)
       content:SetID(3+index)
       content:SetLabel(contentType.DisplayName)
-      content:SetChecked(false)
+      content:SetChecked(self.Tracker:IsContentTracked(contentType.ID))
       Style[content].MarginLeft = 20
 
       content.OnCheckBoxClick = content.OnCheckBoxClick + self.OnContentCheckBoxClick
@@ -274,6 +324,8 @@ class "SLT.SettingDefinitions.Tracker" (function(_ENV)
       onRelease = function(...) return OnReleaseContentsTrackedTab(self, ...) end
     })
     tabControl:Refresh()
+    tabControl:SelectTab(1)
+
     self.SettingControls.tabControl = tabControl
   end
 
@@ -294,6 +346,9 @@ class "SLT.SettingDefinitions.Tracker" (function(_ENV)
     self:Hide()
 
     self:ReleaseSettingControls()
+
+    self.TrackerID = nil
+
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
@@ -318,12 +373,29 @@ class "SLT.SettingDefinitions.Tracker" (function(_ENV)
 
   property "TrackerID" {
     type = String,
-    --default = ""
+    handler = function(self, new)
+      if new ~= nil then 
+        self.Tracker = GetTracker(new)
+      else
+        self.Tracker = nil 
+      end
+    end
+  }
+
+  property "Tracker" {
+    type = SLT.Tracker
   }
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
   -----------------------------------------------------------------------------
   function __ctor(self)
+    --- General tab handlers
+    self.OnLockTrackerCheckBoxClick = function(checkBox) OnLockTrackerCheckBoxClick(self, checkBox) end
+    self.OnShowTrackerCheckBoxClick = function(checkBox) OnShowTrackerCheckBoxClick(self, checkBox) end
+    self.OnShowScrolBarTrackerCheckBoxClick = function(checkBox) OnShowScrolBarTrackerCheckBoxClick(self, checkBox) end
+    self.OnScrollBarPositionEntrySelected = function(...) OnScrollBarPositionEntrySelected(self, ...) end
+
+    --- Contents Tracked tab handlers 
     self.OnContentCheckBoxClick = function(checkBox) OnContentCheckBoxClick(self, checkBox) end
     self.OnDeleteButtonClick = function(button) OnDeleteButtonClick(self, button) end
   end

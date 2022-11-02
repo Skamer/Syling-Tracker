@@ -70,10 +70,10 @@ function SLT_OPEN_OPTIONS()
       --- Create categories
       panel:CreateCategory("general", "General")
       panel:CreateCategory("trackers", "My Trackers")
-      panel:CreateCategory("contents", "Contents")
 
       --- General category entries
       panel:AddCategoryEntry({ text = "Settings", value = SLT.SettingDefinitions.General}, "general")
+      panel:AddCategoryEntry({ text = "Item Bar", value = SLT.SettingDefinitions.ItemBar}, "general")
 
       --- My Trackers entries 
       AddTrackerEntries(panel)

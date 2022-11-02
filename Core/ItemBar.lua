@@ -388,3 +388,33 @@ function ToggleItemBar()
     ShowItemBar()
   end
 end
+-------------------------------------------------------------------------------
+-- Enhancing the API                                                         --
+-------------------------------------------------------------------------------
+_Module = _M
+class "SLT.API" (function(_ENV)
+
+  __Static__() function ItemBarIsLocked()
+    return not _ItemBarMover:IsShown()
+  end
+
+  __Static__() function LockItemBar()
+    _Module:LockItemBar()
+  end
+
+  __Static__() function UnlockItemBar()
+    _Module:UnlockItemBar()
+  end
+
+  __Static__() function ItemBarIsShown()
+    return _ItemBar:IsShown()
+  end
+
+  __Static__() function ShowItemBar()
+    _Module:ShowItemBar()
+  end
+
+  __Static__() function HideItemBar()
+    _Module:HideItemBar()
+  end
+end)

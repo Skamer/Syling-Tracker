@@ -344,21 +344,17 @@ Style.UpdateSkin("Default", {
 })
 -- ========================================================================= --
 function OnLoad(self)
-  Settings.Register("quests-enable-categories", true)
+  Settings.Register("questsEnableCategories", true, "Quests/EnableCategories")
+
+  CallbackManager.Register("Quests/EnableCategories", Callback(
+    function(enable) 
+      SHOW_CATEGORIES = enable 
+      Warn("The displaying of categories has been set to |cff00ffff%s|r. |cffff6a00The change will take effect on the next data update or after a reload ui.|r", 
+        SHOW_CATEGORIES and "true" or "false"
+      )
+    end))
 end
 
 function OnEnable(self)
-  SHOW_CATEGORIES = Settings.Get("quests-enable-categories")
-end
-
-__SystemEvent__()
-function SLT_TOGGLE_QUEST_CATEGORIES_COMMAND()
-  local showCategories = Settings.Get("quests-enable-categories")
-  Settings.Set("quests-enable-categories", not showCategories)
-
-  SHOW_CATEGORIES = not showCategories
-
-  Warn("The displaying of categories has been set to |cff00ffff%s|r. |cffff6a00The change will take effect on the next data update or after a reload ui.|r", 
-        SHOW_CATEGORIES and "true" or "false"
-  )
+  SHOW_CATEGORIES = Settings.Get("questsEnableCategories")
 end

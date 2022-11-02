@@ -418,7 +418,7 @@ class "SLT.ScrollBar" (function(_ENV)
 
   property "WheelExtentPercentage" {
     type = Number,
-    get = function() return SLT.Settings.Get("mouse-wheel-scroll-step") or 0.1 end,
+    get = function() return SLT.Settings.Get("mouseWheelScrollStep") or 0.1 end,
     set = false
   }
 
@@ -556,5 +556,5 @@ Style.UpdateSkin("Default", {
 })
 
 function OnLoad(self)
-  SLT.Settings.Register("mouse-wheel-scroll-step", 0.1)
+  SLT.Settings.Register("mouseWheelScrollStep", 0.1)
 end
