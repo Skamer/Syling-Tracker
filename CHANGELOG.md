@@ -1,4 +1,12 @@
-### 1.0.0
+### 1.0.1
+
+**FIXES**
+
+- OPTIONS: Fixed an issue where the settings controls no longer works after leaving the "Create a tracker" category.
+
+---
+
+## 1.0.0
 
 You can look my [post](https://github.com/Skamer/Syling-Tracker/discussions/60) about this update.
 

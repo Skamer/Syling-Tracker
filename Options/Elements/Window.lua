@@ -180,7 +180,7 @@ Style.UpdateSkin("Default", {
     },
 
     Mover = {
-      height = 20,
+      height = 30,
       enableMouse = true,
       location = {
         Anchor("TOP"),

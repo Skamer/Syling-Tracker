@@ -44,40 +44,40 @@ class "SLT.SettingDefinitions.CreateTracker" (function(_ENV)
   end
 
   local function OnContentCheckBoxClick(self, contentCheckBox)
-    local contentID = self.SettingControls.contentsTrackedControls[contentCheckBox]
+    local contentID = self.ContentControls[contentCheckBox]
     self.ContentsTracked[contentID] = true
   end
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------  
   function BuildSettingControls(self)
+    --- We wipe the content tracked in case the user has already create a tracker.
+    --- The reason this is done here instead in the "OnRelease" method, 
+    --- this is because there an issue where the data would be wiped too early 
+    --- before the tracker tracks the content chosen if it's done in "OnRelease"
+    wipe(self.ContentsTracked)
+
     local trackerNameEditBox = SUI.SettingsEditBox.Acquire(false, self)
-    trackerNameEditBox:SetID(1)
+    trackerNameEditBox:SetID(10)
     trackerNameEditBox:SetLabel("Tracker Name")
     trackerNameEditBox:SetInstructions("Enter the tracker name")
     self.SettingControls.trackerNameEditBox = trackerNameEditBox
 
     local contentsTrackedSection = SUI.SettingsSectionHeader.Acquire(false, self)
-    contentsTrackedSection:SetID(2)
+    contentsTrackedSection:SetID(20)
     contentsTrackedSection:SetTitle("Contents Tracked")
     self.SettingControls.contentsTrackedSection = contentsTrackedSection
 
-    for index, contentType in IterateContentTypes() do
-      local contentsTrackedControls = self.SettingControls.contentsTrackedControls
-      if not contentsTrackedControls then
-        contentsTrackedControls = System.Toolset.newtable(true, false)
-        self.SettingControls.contentsTrackedControls = contentsTrackedControls
-      end 
-
+    for index, contentType in IterateContentTypes() do 
       local content = SUI.SettingsCheckBox.Acquire(true, self)
-      content:SetID(3+index)
+      content:SetID(30+index)
       content:SetLabel(contentType.DisplayName)
       content:SetChecked(false)
       Style[content].MarginLeft = 20
 
       content.OnCheckBoxClick = content.OnCheckBoxClick + self.OnContentCheckBoxClick
-
-      contentsTrackedControls[content] = contentType.ID
+      
+      self.ContentControls[content] = contentType.ID
     end
 
     local createButton = SUI.SuccessPushButton.Acquire(true, self)
@@ -101,15 +101,15 @@ class "SLT.SettingDefinitions.CreateTracker" (function(_ENV)
     self.SettingControls.createButton = nil
 
     --- Release the contents tracked controls
-    local contentsTrackedControls = self.SettingControls.contentsTrackedControls
-    if contentsTrackedControls then 
-      for control, contentID in pairs(contentsTrackedControls) do 
-        control:Release()
-        contentsTrackedControls[control] = nil
-      end
+    for control, contentID in pairs(self.ContentControls) do 
+      control.OnCheckBoxClick = control.OnCheckBoxClick - self.OnContentCheckBoxClick
 
-      self.SettingControls.contentsTrackedControls = nil
+      control:Release()
+
+      self.ContentControls[control] = nil
     end
+
+    --- NOTE: The ContentsTracked table will be wiped in the next build if needed
   end
 
   function OnAcquire(self)
@@ -130,6 +130,12 @@ class "SLT.SettingDefinitions.CreateTracker" (function(_ENV)
   property "SettingControls" {
     set = false,
     default = function() return Toolset.newtable(false, true) end
+  }
+
+  --- Contains the content controls of "content tracked"
+  property "ContentControls" {
+    set = false,
+    default = function() return Toolset.newtable(true, false) end
   }
 
   property "ContentsTracked" {
