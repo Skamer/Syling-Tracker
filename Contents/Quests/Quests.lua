@@ -21,6 +21,7 @@ export {
   RegisterModel                       = API.RegisterModel,
 
   -- WoW API & Utils
+  CreateAtlasMarkup                   = CreateAtlasMarkup,
   AddQuestWatch                       = C_QuestLog.AddQuestWatch,
   EnumQuestWatchType                  = _G.Enum.QuestWatchType,
   GetCampaignID                       = C_CampaignInfo.GetCampaignID,
@@ -61,9 +62,13 @@ _QuestModel                         = RegisterModel(QuestModel, "quests-data")
 -- ========================================================================= --
 -- Register the achievements content type
 -- ========================================================================= --
+_QuestsIconMarkupAtlas = CreateAtlasMarkup("QuestNormal", 16, 16)
+_CampaignIconMarkupAtlas = CreateAtlasMarkup("quest-campaign-available", 16, 16)
+
 RegisterContentType({
   ID = "quests",
-  DisplayName = "Quests",
+  Name = "Quests",
+  DisplayName = _QuestsIconMarkupAtlas.." Quests",
   Description = "Track the watched quests",
   DefaultOrder = 100,
   DefaultModel = _QuestModel,
@@ -74,7 +79,8 @@ RegisterContentType({
 
 RegisterContentType({
   ID = "campaign",
-  DisplayName = "Campaign",
+  Name = "Campaign",
+  DisplayName = _CampaignIconMarkupAtlas.." Campaign",
   Description = "Track the camapign quests",
   DefaultOrder = 90,
   DefaultModel = _QuestModel,

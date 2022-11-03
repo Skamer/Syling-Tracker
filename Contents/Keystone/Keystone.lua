@@ -16,6 +16,7 @@ RegisterContentType               = API.RegisterContentType
 RegisterModel                     = API.RegisterModel
 TruncateDecimal                   = Utils.Math.TruncateDecimal
 -- ========================================================================= --
+CreateAtlasMarkup                 = CreateAtlasMarkup
 GetPowerLevelDamageHealthMod      = C_ChallengeMode.GetPowerLevelDamageHealthMod
 GetActiveKeystoneInfo             = C_ChallengeMode.GetActiveKeystoneInfo
 GetAffixInfo                      = C_ChallengeMode.GetAffixInfo
@@ -32,9 +33,12 @@ GetCriteriaInfo                   = C_Scenario.GetCriteriaInfo
 -- ========================================================================= --
 _KeystoneModel = RegisterModel(Model, "keystone-data")
 -- ========================================================================= --
+_KeystoneIconMarkupAtlas = CreateAtlasMarkup("Dungeon", 16, 16)
+
 RegisterContentType({
   ID = "keystone",
-  DisplayName = "Keystone (Mythic +)",
+  Name = "Keystone (Mythic +)",
+  DisplayName = _KeystoneIconMarkupAtlas.." Keystone (Mythic +)",
   DefaultOrder = 30,
   DefaultModel = _KeystoneModel,
   DefaultViewClass = KeystoneContentView,

@@ -15,6 +15,7 @@ _Active                           = false
 RegisterContentType               = API.RegisterContentType
 RegisterModel                     = API.RegisterModel
 -- ========================================================================= --
+CreateAtlasMarkup                 = CreateAtlasMarkup
 IsInScenario                      = C_Scenario.IsInScenario
 IsInJailersTower                  = IsInJailersTower
 GetInfo                           = C_Scenario.GetInfo
@@ -28,9 +29,11 @@ IsInInstance                      = IsInInstance
 _ScenarioModel = RegisterModel(Model, "scenario-data")
 NIL_DATA       = Model.NIL_DATA
 -- ========================================================================= --
+_ScenarioIconMarkupAtlas = CreateAtlasMarkup("ScenariosIcon", 16, 16)
 RegisterContentType({
   ID = "scenario",
-  DisplayName = "Scenario",
+  Name = "Scenario",
+  DisplayName = _ScenarioIconMarkupAtlas.." Scenario",
   Description = "Display the scenario",
   DefaultOrder = 10,
   DefaultModel = _ScenarioModel,
@@ -172,18 +175,6 @@ function UpdateObjectives(self)
           failed            = failed,
           isWeightProgress  = isWeightProgress
         }
-
-        -- NOTE: This seems 'quantityString' returning an incorrect value sometimes
-        -- so we use 'quantity' instead
-        if isWeightProgress and not completed then 
-          data.hasProgressBar = true 
-          data.progress = quantity
-          data.minProgress = 0
-          data.maxProgress = 100
-          data.progressText = PERCENTAGE_STRING:format(quantity)
-        else 
-          data.hasProgressBar = false
-        end
 
         objectivesData[index] = data 
       end

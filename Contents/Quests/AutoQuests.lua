@@ -16,6 +16,7 @@ RegisterModel                     = API.RegisterModel
 -- ========================================================================= --
 _AutoQuestModel = RegisterModel(QuestModel, "auto-quests-data")
 -- ========================================================================= --
+CreateAtlasMarkup                 = CreateAtlasMarkup
 GetNumAutoQuestPopUps             = GetNumAutoQuestPopUps
 GetAutoQuestPopUp                 = GetAutoQuestPopUp
 IsQuestBounty                     = C_QuestLog.IsQuestBounty
@@ -23,9 +24,11 @@ RequestLoadQuestByID              = C_QuestLog.RequestLoadQuestByID
 GetQuestName                      = QuestUtils_GetQuestName
 AddAutoQuestPopUp                 = AddAutoQuestPopUp
 -- ========================================================================= --
+_AutoQuestsIconMarkupAtlas = CreateAtlasMarkup("QuestNormal", 16, 16)
 RegisterContentType({
   ID = "auto-quests",
-  DisplayName = "Auto Quests PopUp",
+  Name = "Auto Quests PopUp",
+  DisplayName = _AutoQuestsIconMarkupAtlas.." Auto Quests PopUp",
   Description = "The auto quests are quests which are automatically accepeted or completed from notication PopUp",
   DefaultOrder = 1,
   DefaultModel = _AutoQuestModel,

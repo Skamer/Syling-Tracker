@@ -17,6 +17,7 @@ RegisterModel       = API.RegisterModel
 -- ========================================================================= --
 _AchievementModel = RegisterModel(AchievementModel, "achievements-data")
 -- ========================================================================= --
+CreateTextureMarkup                 = CreateTextureMarkup
 HasAchievements                     = Utils.Achievement.HasAchievements
 GetAchievementInfo                  = GetAchievementInfo
 GetAchievementNumCriteria           = GetAchievementNumCriteria
@@ -24,9 +25,11 @@ IsAchievementEligible               = IsAchievementEligible
 -- ========================================================================= --
 -- Register the achievements content type
 -- ========================================================================= --
+_AchievementsIconTextureMarkup = CreateTextureMarkup([[Interface\ACHIEVEMENTFRAME\UI-ACHIEVEMENT-SHIELDS]], 128, 128, 16, 16, 0, 64/128, 0, 64/128)
 RegisterContentType({
   ID = "achievements",
-  DisplayName = "Achievements",
+  Name = "Achievements",
+  DisplayName = _AchievementsIconTextureMarkup.." Achievements",
   Description = "Display the achievements tracked",
   DefaultOrder = 80,
   DefaultModel = _AchievementModel,

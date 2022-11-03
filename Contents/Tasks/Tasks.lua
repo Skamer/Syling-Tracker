@@ -21,6 +21,7 @@ export {
   RegisterContentType               = API.RegisterContentType,
   RegisterModel                     = API.RegisterModel,
   -- WoW API & Utils
+  CreateAtlasMarkup                 = CreateAtlasMarkup,
   GetLogIndexForQuestID             = C_QuestLog.GetLogIndexForQuestID,
   GetQuestLogCompletionText         = GetQuestLogCompletionText,
   GetQuestLogSpecialItemInfo        = GetQuestLogSpecialItemInfo,
@@ -38,9 +39,11 @@ export {
 local BonusTasksModel              = RegisterModel(QuestModel, "bonus-tasks-data")
 local TasksModel                   = RegisterModel(QuestModel, "tasks-data")
 -- ========================================================================= --
+_TaskIconMarkupAtlas = CreateAtlasMarkup("QuestBonusObjective", 16, 16)
 RegisterContentType({
   ID = "bonus-tasks",
-  DisplayName = "Bonus Tasks",
+  Name = "Bonus Tasks",
+  DisplayName = _TaskIconMarkupAtlas.." Bonus Tasks",
   Description = "Display the bonus tasks, also known as bonus objectives",
   DefaultOrder = 60,
   DefaultModel = BonusTasksModel,
@@ -51,7 +54,8 @@ RegisterContentType({
 
 RegisterContentType({
   ID = "tasks",
-  DisplayName = "Tasks",
+  Name = "Tasks",
+  DisplayName = _TaskIconMarkupAtlas.." Tasks",
   Description = "Display the tasks, also known as objectives",
   DefaultOrder = 70,
   DefaultModel = TasksModel,

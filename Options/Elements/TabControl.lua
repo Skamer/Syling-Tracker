@@ -54,6 +54,10 @@ class "SUI.TabButton" (function(_ENV)
     local text = self:GetChild("Text")
     Style[self].width = text:GetStringWidth() + 40
   end
+
+  function OnRelease(self)
+    self.Selected = nil
+  end
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
@@ -201,27 +205,29 @@ class "SUI.TabControl" (function(_ENV)
   function Refresh(self)
     self:BuildHeader()
   end
-
-  __Arguments__ { Number/0 }
+  
+  __Arguments__ { Number/0}
   function SelectTab(self, index)
     if self.SelectedIndex == index then 
-      return 
+      return
+    end 
+
+    local tabButton = self.TabButtons[index]
+    local previousTabButton = self.TabButtons[self.SelectedIndex]
+
+    if tabButton then 
+      tabButton.Selected = true 
+    end
+
+    if previousTabButton then 
+      previousTabButton.Selected = false 
     end 
 
     local pageInfo = self.PagesInfo[index]
-
-    if not pageInfo then 
-      return 
-    end
-
     local previousPageInfo = self.PagesInfo[self.SelectedIndex]
+
     if previousPageInfo and previousPageInfo.onRelease then 
       previousPageInfo.onRelease(self)
-    end
-
-    local previousTabButton = self.TabButtons[self.SelectedIndex]
-    if previousTabButton then 
-      previousTabButton.Selected = false
     end
 
     if pageInfo.onAcquire then 
@@ -230,6 +236,7 @@ class "SUI.TabControl" (function(_ENV)
 
     self.SelectedIndex = index
   end
+
 
   function OnRelease(self)
     local pageInfo = self.PagesInfo[self.SelectedIndex]

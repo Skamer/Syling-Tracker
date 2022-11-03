@@ -18,6 +18,7 @@ ItemBar_AddItemData                 = API.ItemBar_AddItemData
 ItemBar_RemoveItemData              = API.ItemBar_RemoveItemData
 ItemBar_Update                      = API.ItemBar_Update
 -- ========================================================================= --
+CreateAtlasMarkup                   = CreateAtlasMarkup
 RequestLoadQuestByID                =  C_QuestLog.RequestLoadQuestByID
 IsWorldQuest                        = QuestUtils_IsQuestWorldQuest
 GetTaskInfo                         = GetTaskInfo
@@ -29,9 +30,11 @@ GetQuestProgressBarPercent          = GetQuestProgressBarPercent
 -- ========================================================================= --
 _WorldQuestsModel                   = RegisterModel(QuestModel, "world-quests-data")
 -- ========================================================================= --
+_WorldQuestsIconMarkupAtlas = CreateAtlasMarkup("QuestDaily", 16, 16)
 RegisterContentType({
   ID = "world-quests",
-  DisplayName = "World Quests",
+  Name = "World Quests",
+  DisplayName = _WorldQuestsIconMarkupAtlas.." World Quests",
   Description = "Display the world quests",
   DefaultOrder = 50,
   DefaultModel = _WorldQuestsModel,

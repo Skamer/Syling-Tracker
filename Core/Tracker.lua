@@ -120,7 +120,11 @@ class "SLT.Tracker" (function(_ENV)
   end
 
   local function OnShowScrollBarChanged(self, value)
-    Style[self].ScrollBar.visible = value
+    --- We show the scroll bar only if there is a scrollable content
+    local scrollBar = self:GetScrollBar()
+    if scrollBar:HasScrollableExtent() then
+      Style[scrollBar].visible = value
+    end
 
     --- We save the changed to the DB only if the tracker is marked as persistent
     --- at this time.

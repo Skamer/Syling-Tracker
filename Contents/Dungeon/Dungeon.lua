@@ -12,9 +12,10 @@ namespace                          "SLT"
 -- ========================================================================= --
 _Active                           = false 
 -- ========================================================================= --
-RegisterContentType = API.RegisterContentType
-RegisterModel = API.RegisterModel
+RegisterContentType               = API.RegisterContentType
+RegisterModel                     = API.RegisterModel
 -- ========================================================================= --
+CreateAtlasMarkup                   = CreateAtlasMarkup
 IsInInstance                        = IsInInstance
 IsInScenario                        = C_Scenario.IsInScenario
 GetInfo                             = C_Scenario.GetInfo
@@ -25,9 +26,12 @@ GetCurrentInstance                  = Utils.Instance.GetCurrentInstance
 -- ========================================================================= --
 _DungeonModel = RegisterModel(Model, "dungeon-data")
 -- ========================================================================= --
+_DungeonIconMarkupAtlas = CreateAtlasMarkup("Dungeon", 16, 16)
+
 RegisterContentType({
   ID = "dungeon",
-  DisplayName = "Dungeon",
+  Name = "Dungeon",
+  DisplayName = _DungeonIconMarkupAtlas.." Dungeon",
   Description = "Display the dungeon and its objectives",
   DefaultOrder = 20,
   DefaultModel = _DungeonModel,

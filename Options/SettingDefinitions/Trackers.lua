@@ -19,7 +19,8 @@ __Iterator__()
 function IterateContentTypes()
   local yield = coroutine.yield
 
-  for k,v in GetContentTypes():Sort("x,y=>x.DisplayName<y.DisplayName"):GetIterator() do 
+  --- Name is used for sorting as there is no markup inside
+  for k,v in GetContentTypes():Sort("x,y=>x.Name<y.Name"):GetIterator() do 
     yield(k,v)
   end
 end
@@ -218,7 +219,7 @@ class "SLT.SettingDefinitions.Tracker" (function(_ENV)
     --- Scroll Bar -> Show 
     local showScrollBar = SUI.SettingsCheckBox.Acquire(true, scrollBarSection)
     showScrollBar:SetID(10)
-    showScrollBar:SetLabel("Show ScrollBar")
+    showScrollBar:SetLabel("Show")
     showScrollBar:SetChecked(self.Tracker.ShowScrollBar)
     showScrollBar.OnCheckBoxClick = showScrollBar.OnCheckBoxClick + self.OnShowScrolBarTrackerCheckBoxClick
     self.GeneralTabControls.showScrollBarCheckBox = showScrollBar
@@ -244,7 +245,7 @@ class "SLT.SettingDefinitions.Tracker" (function(_ENV)
       self.GeneralTabControls.dangerZoneSection = dangerZoneSection
 
       --- Danger zone -> delete button
-      local deleteButton = SUI.DangerPushButton.Acquire(true, contentsExpandableSection)
+      local deleteButton = SUI.DangerPushButton.Acquire(true, dangerZoneSection)
       deleteButton:SetText("Delete the tracker")
       deleteButton:SetID(10)
       deleteButton.OnClick = deleteButton.OnClick + self.OnDeleteButtonClick
@@ -353,7 +354,6 @@ class "SLT.SettingDefinitions.Tracker" (function(_ENV)
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
-
   --- Contains all controls except the content controls
   property "SettingControls" {
     set = false,

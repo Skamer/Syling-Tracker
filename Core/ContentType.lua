@@ -95,7 +95,15 @@ class "SLT.ContentType" (function(_ENV)
     type = String + Number
   }
 
+  --- The name (e.g "Quests")
+  --- A simple name without markups 
+  --- This is intented to be used by the options.
+  property "Name" {
+    type = String
+  }
+
   --- The display name (e.g, "Quests")
+  --- May include atlas, texture, or color markup
   --- This is intended to be used by the options. 
   property "DisplayName" {
     type = String
@@ -159,6 +167,7 @@ end)
 
 struct "SLT.ContentTypeConfig" {
   { name = "ID", type = String + Number, require = true },
+  { name = "Name", type = String, require = true},
   { name = "DisplayName", type = String, require = true},
   { name = "Description", type = String},
   { name = "DefaultModel", type = SLT.Model},
@@ -197,6 +206,7 @@ class "SLT.API" (function(_ENV)
   __Static__() function RegisterContentType(config)
     local contentType = SLT.ContentType() 
     contentType.ID = config.ID
+    contentType.Name = config.Name
     contentType.DisplayName = config.DisplayName
     contentType.Description = config.Description
     contentType.DefaultModel  = config.DefaultModel

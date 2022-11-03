@@ -16,6 +16,7 @@ export {
   RegisterContentType               = API.RegisterContentType,
   RegisterModel                     = API.RegisterModel,
 
+  CreateAtlasMarkup                 = CreateAtlasMarkup,
   IsInJailersTower                  = IsInJailersTower,
   GetJailersTowerLevel              = GetJailersTowerLevel,
   GetAnimaPowerRarity               = Utils.Torghast.GetAnimaPowerRarity,
@@ -27,9 +28,11 @@ export {
 -- ========================================================================= --
 local _TorghastModel                = RegisterModel(Model, "torghast-data")
 -- ========================================================================= --
+_TorghastIconMarkupAtlas = CreateAtlasMarkup("poi-torghast", 16, 16)
 RegisterContentType({
   ID = "torghast",
-  DisplayName = "Torghast",
+  Name = "Torghast",
+  DisplayName = _TorghastIconMarkupAtlas.." Torghast",
   Description = "TORGHAST_PH_DESCRIPTION",
   DefaultOrder = 40,
   DefaultModel = _TorghastModel,
