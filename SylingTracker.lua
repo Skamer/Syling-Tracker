@@ -31,8 +31,6 @@ LibDBIcon          = LibStub("LibDBIcon-1.0")
 -- ========================================================================= --
 SLT_LOGO           = [[Interface\AddOns\SylingTracker\Media\logo]]
 
-
-
 local function ShowMinimapIconCallback(show)
   if show then 
     LibDBIcon:Show("SylingTracker")
@@ -43,29 +41,31 @@ local function ShowMinimapIconCallback(show)
   _DB.minimap.hide = not show
 end
 
-
 function OnLoad(self)
-  -- Create and init the DB 
+  --- Create and init the DB 
   _DB = SVManager("SylingTrackerDB")
 
-  -- Register the options 
-  SLT.Settings.Register("replace-blizzard-objective-tracker", true, "Blizzard/UpdateTrackerVisibility")
-  SLT.Settings.Register("show-minimap-icon", true, "ShowMinimapIcon")
+  --- Register the options 
+  SLT.Settings.Register("showBlizzardObjectiveTracker", false, "Blizzard/UpdateTrackerVisibility")
+  SLT.Settings.Register("showMinimapIcon", true, "ShowMinimapIcon")
 
-  -- Register the callbacks
-  SLT.CallbackManager.Register("Blizzard/UpdateTrackerVisibility", SLT.Callback(function(replace) BLIZZARD_TRACKER_VISIBLITY_CHANGED(not replace) end))
+  --- Register the callbacks
+  SLT.CallbackManager.Register("Blizzard/UpdateTrackerVisibility", SLT.Callback(function(show) BLIZZARD_TRACKER_VISIBLITY_CHANGED(show) end))
   SLT.CallbackManager.Register("ShowMinimapIcon", SLT.Callback(ShowMinimapIconCallback))
 
   --
-  _DB:SetDefault{ dbVersion = 1 }
+  _DB:SetDefault{ dbVersion = 2 }
   _DB:SetDefault{ minimap = { hide = false }}
 
   -- Setup the minimap button
   self:SetupMinimapButton()
+
+  --- Apply the migrations
+  self:ApplyMigrationsToDB()
 end
 
 function OnEnable(self)
-  BLIZZARD_TRACKER_VISIBLITY_CHANGED(not SLT.Settings.Get("replace-blizzard-objective-tracker"))
+  BLIZZARD_TRACKER_VISIBLITY_CHANGED(SLT.Settings.Get("showBlizzardObjectiveTracker"))
 end
 
 
@@ -103,66 +103,17 @@ function SetupMinimapButton(self)
     type = "launcher",
     icon = SLT_LOGO,
     OnClick = function(_, button, down)
-      if button == "LeftButton" then
-        if IsShiftKeyDown() then
-          _M:FireSystemEvent("SLT_TOGGLE_ANCHORS")
-        else 
-          _M:ToggleCommand()
-        end
-      elseif button == "RightButton" then 
-        if not IsShiftKeyDown() then 
-          _M:OpenOptions()
-        end
-      end 
+      _M:OpenOptions()
     end,
 
     OnTooltipShow = function(tooltip)
       tooltip:AddDoubleLine("Syling Tracker", SLT_VERSION, 1, 106/255, 0, 1, 1, 1)
       tooltip:AddLine(" ")
-      tooltip:AddLine("|cff00ffffRight Click|r to open the options")
+      tooltip:AddLine("|cff00ffffClick|r to open the options")
     end
   })
 
   LibDBIcon:Register("SylingTracker", LDBObject, _DB.minimap)
-end
-
-__SlashCmd__ "slt" "bot" "- enable/disable the blizzard objective tracker"
-function ToggleBlizzardObjectiveTracker()
-  SLT.Settings.Set("replace-blizzard-objective-tracker", ObjectiveTrackerFrame:IsShown())
-end
-
-__SlashCmd__ "slt" "lock" "- lock the Tracker and the Item Bar, preventing them to be moved or resized"
-function LockCommand()
-  _M:FireSystemEvent("SLT_LOCK_COMMAND")
-end
-
-__SlashCmd__ "slt" "unlock" "- unlock the Tracker and the Item Bar, allowing you to resize or move them"
-function UnlockCommand()
-  _M:FireSystemEvent("SLT_UNLOCK_COMMAND")
-end
-
-__SlashCmd__ "slt" "show" "- show the Tracker and the Item bar"
-function ShowCommand()
-  _M:FireSystemEvent("SLT_SHOW_COMMAND")
-end
-
-__SlashCmd__ "slt" "hide" "- hide the Tracker and the Item Bar"
-function HideCommand()
-  _M:FireSystemEvent("SLT_HIDE_COMMAND")
-end
-
-__SlashCmd__ "slt" "toggle" "- toggle the Tracker and the Item Bar"
-function ToggleCommand()
-  _M:FireSystemEvent("SLT_TOGGLE_COMMAND")
-end
-
-__SlashCmd__ "slt" "scrollstep" "- set the scroll sensibility (default: 15)"
-function SetScrollStepCommand(info)
-  local val = tonumber(info)
-
-  if val then 
-    _M:FireSystemEvent("SLT_SCROLL_STEP_COMMAND", val)
-  end
 end
 
 __SlashCmd__ "slt" "log" "- set the log level"
@@ -173,31 +124,13 @@ function SetLogLevel(info)
   Log.LogLevel = val
 end
 
-__SlashCmd__ "slt" "qcat" "- toggle the displaying of categories for quests"
-function ToggleQuestCategories()
-  _M:FireSystemEvent("SLT_TOGGLE_QUEST_CATEGORIES_COMMAND")
-end
-
-__SlashCmd__ "slt" "minimap" "- toggle the minimap button"
-function ToggleMinimapButton()
-  local isHidden = not _DB.minimap.hide
-
-  if isHidden then 
-    LibDBIcon:Hide("SylingTracker")
-  else 
-    LibDBIcon:Show("SylingTracker")
-  end
-
-  _DB.minimap.hide = isHidden
-end
-
 __SystemEvent__()
 function PLAYER_ENTERING_WORLD(initialLogin, reloadingUI)
   IsInitialLogin  = initialLogin
   IsReloadingUI   = reloadingUI
 end
 
-__SlashCmd__ "slt" "config" "- open the options"
+__SlashCmd__ "slt"
 function OpenOptions()
   local addonName = "SylingTracker_Options"
   local loaded, reason = LoadAddOn(addonName)
@@ -213,7 +146,6 @@ function OpenOptions()
 
   _M:FireSystemEvent("SLT_OPEN_OPTIONS")
 end
-
 -------------------------------------------------------------------------------
 -- LibSharedMedia: register the fonts
 -------------------------------------------------------------------------------
@@ -240,9 +172,44 @@ _Fonts = {
 for fontName, fontFile in pairs(_Fonts) do
   LibSharedMedia:Register("font", fontName, fontFile)
 end
--- -------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 -- LibSharedMedia: register the backgounds
 -------------------------------------------------------------------------------
 LibSharedMedia:Register("background", "SylingTracker Background", [[Interface\AddOns\SylingTracker\Media\Textures\Frame-Background]])
+
+-------------------------------------------------------------------------------
+-- Migrations DB
+-------------------------------------------------------------------------------
+function ApplyMigrationsToDB()
+  --- The migration changes the settings name of:
+  --  "replace-blizzard-objective-tracker" -> "showBlizzardObjectiveTracker"
+  --  "quests-enable-categories" -> "questsEnableCategories"
+  if SLT.Database.GetVersion() == 1 then
+    SLT.Database.SelectRoot()
+    local settings = SLT.Database.GetValue("settings")
+    local oldValue = settings and settings["replace-blizzard-objective-tracker"]
+
+    --- rename "replace-blizzard-objective-tracker"
+    if oldValue ~= nil then
+      --- We invert the value because if "replace-blizzard-objective-tracker" was true 
+      --- it will say we hidee the Blizzard Objective Tracker
+      SLT.Settings.Set("showBlizzardObjectiveTracker", not oldValue)
+      
+      settings["replace-blizzard-objective-tracker"] = nil
+    end
+
+    --- rename "quests-enable-categories"
+    oldValue = settings and settings["quests-enable-categories"]
+    if oldValue ~= nil then
+      SLT.Settings.Set("questsEnableCategories", oldValue)
+
+      settings["quests-enable-categories"] = nil 
+    end
+
+    --- We changed the database version for the next time, the migration
+    --- won't be applied again
+    SLT.Database.SetVersion(2)
+  end
+end
 
 
