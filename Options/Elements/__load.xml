@@ -14,6 +14,7 @@
   <Script file="DropDown.lua" />
   <Script file="ExpandableSection.lua"/>
   <Script file="TabControl.lua" />
+  <Script file="ColorPicker.lua"/>
   <Script file="Window.lua"/>
   <Script file="Panel.lua"/>
   <Script file="SettingControls.lua"/>

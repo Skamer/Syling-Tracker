@@ -369,6 +369,57 @@ class "SUI.SettingsSlider" (function(_ENV)
     self.OnValueChanged = self.OnValueChanged + OnValueChangedHandler 
   end
 end)
+
+
+__Widget__()
+class "SUI.SettingsColorPicker" (function(_ENV)
+  inherit "Frame"
+  -----------------------------------------------------------------------------
+  --                               Events                                    --
+  -----------------------------------------------------------------------------
+  __Bubbling__ { ColorPicker = "OnColorChanged"}
+  event "OnColorChanged"
+
+  __Bubbling__ { ColorPicker = "OnColorConfirmed"}
+  event "OnColorConfirmed"
+  -----------------------------------------------------------------------------
+  --                               Events                                    --
+  -----------------------------------------------------------------------------
+  __Arguments__ { String/"" }
+  function SetLabel(self, label)
+    Style[self].Label.text = label 
+  end
+
+  __Arguments__ { ColorFloat/nil, ColorFloat/nil, ColorFloat/nil, ColorFloat/nil}
+  function SetColor(self, r, g, b, a)
+    self:GetChild("ColorPicker"):SetColor(r, g, b, a)
+  end
+
+  function OnAcquire(self)
+    self:InstantApplyStyle()
+  end
+
+  function OnRelease(self)
+    self:SetID(0)
+    self:Hide()
+    self:ClearAllPoints()
+    self:SetParent(nil)
+
+    ResetStyles(self, true)
+
+
+    self:SetColor()
+  end
+  -----------------------------------------------------------------------------
+  --                            Constructors                                 --
+  -----------------------------------------------------------------------------
+  __Template__ {
+    Label = FontString,
+    ColorPicker = SUI.ColorPicker
+  }
+  function __ctor(self) end
+
+end)
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
@@ -474,5 +525,27 @@ Style.UpdateSkin("Default", {
         Anchor("LEFT", 0, 0, "Label", "RIGHT")
       } 
     }
-  }
+  },
+
+  [SUI.SettingsColorPicker] = {
+    height = 35,
+    marginRight = 0,
+
+    Label = {
+      fontObject = GameFontNormal,
+      textColor = NORMAL_FONT_COLOR,
+      justifyH = "LEFT",
+      wordWrap = false,
+      location = {
+        Anchor("LEFT"),
+        Anchor("RIGHT", 0, 0, nil, "CENTER"),  
+      }
+    },
+
+    ColorPicker = {
+      location = {
+        Anchor("LEFT", -6, 0, nil, "CENTER")
+      }
+    }
+  },
 })
