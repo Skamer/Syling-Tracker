@@ -36,10 +36,15 @@ class "SLT.SettingDefinitions.CreateTracker" (function(_ENV)
 
     if trackerName and trackerName ~= "" then 
       local tracker = NewTracker(trackerName)
-      tracker.Locked = false
-      for contentID in pairs(self.ContentsTracked) do 
-        tracker:TrackContentType(contentID)
-      end
+      --- We put TrackContentType in a thread for avoiding small freeze for low end 
+      --- computer users if there many content tracked, and these ones need to 
+      --- create lof of frame.
+      Scorpio.Continue(function()
+        for contentID in pairs(self.ContentsTracked) do 
+          tracker:TrackContentType(contentID)
+          Scorpio.Next()
+        end
+      end)
     end
   end
 
@@ -267,7 +272,7 @@ class "SLT.SettingDefinitions.Tracker" (function(_ENV)
         control.OnCheckBoxClick = control.OnCheckBoxClick - self.OnLockTrackerCheckBoxClick
       elseif index == "showTrackerButton" then 
         control.OnCheckBoxClick = control.OnCheckBoxClick - self.OnShowTrackerCheckBoxClick
-      elseif index == "showScrollBar" then 
+      elseif index == "showScrollBarCheckBox" then 
         control.OnCheckBoxClick = control.OnCheckBoxClick - self.OnShowScrolBarTrackerCheckBoxClick
       elseif index == "scrollBarPositionDropDown" then 
         control.OnEntrySelected = control.OnEntrySelected - self.OnScrollBarPositionEntrySelected

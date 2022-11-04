@@ -1,4 +1,18 @@
-# 1.0.1
+# 1.0.2
+
+**FIXES**
+
+- Fixed an issue where the locked setting of trackers wasn't persisted.
+- Fixed an case where there an issue with the tracker scaling after creating a tracker.
+- OPTIONS: Fixed an issue where the behavior of "show scroll bar" checkbox may be retrieved on others checkbox.
+
+**CHANGES**
+
+- The trackers created will now be positioned on the center of the screen (instead to be to the right) and will be unlocked by default.
+
+---
+
+## 1.0.1
 
 **FIXES**
 

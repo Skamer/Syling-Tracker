@@ -591,6 +591,8 @@ end
 --- Private function for create a tracker
 local function __NewTracker(id)
   local tracker = SLT.Tracker.Acquire()
+  tracker:SetParent(UIParent)
+
   tracker.ID = id 
 
   --- We mark temporaly the tracker as non persistent as we load the settings 
@@ -606,10 +608,21 @@ local function __NewTracker(id)
     height = Database.GetValue("height") or 325
     hidden = Database.GetValue("hidden")
     scrollBar = Database.GetValue("scrollBar")
+    locked = Database.GetValue("locked")
   end
 
-  if not xPos and not yPos then 
-    tracker:SetPoint("RIGHT", -40, 0)
+  --- By default, The custom tracker created are unlocked
+  if locked == nil and id ~= "main" then 
+    locked = false
+  end
+
+  if not xPos and not yPos then
+    --- By default, the custom tracker are positioned to center
+    if id ~= "main" then  
+      tracker:SetPoint("CENTER")
+    else
+      tracker:SetPoint("RIGHT", -40, 0)
+    end
   else
     tracker:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", xPos or 0, yPos or 0)
   end
@@ -628,10 +641,13 @@ local function __NewTracker(id)
 
   Style[tracker].width = width
   Style[tracker].height = height
-  Style[tracker].locked = locked
+  
+  tracker.Locked = locked
 
   if hidden then 
     tracker:Hide()
+  else
+    tracker:Show()
   end
 
   if scrollBar then 
@@ -823,8 +839,6 @@ function PLAYER_ENTERING_WORLD(isInitialLogin, isReloadingUi)
         end
       end
     end
-
-    _MainTracker.Locked = false
   end
 end
 
