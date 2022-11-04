@@ -3,7 +3,7 @@
 **FIXES**
 
 - Fixed an issue where the locked setting of trackers wasn't persisted.
-- Fixed an case where there an issue with the tracker scaling after creating a tracker.
+- Fixed a case where the tracker scaling is incorrect after creating one.
 - OPTIONS: Fixed an issue where the behavior of "show scroll bar" checkbox may be retrieved on others checkbox.
 
 **CHANGES**
