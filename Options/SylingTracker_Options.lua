@@ -84,6 +84,10 @@ function SLT_OPEN_OPTIONS()
       --- We select the first entry of general category
       panel:SelectEntry("general", 1)
 
+      --- We makes the panel is closable with the Escape key
+      _G["SLT_OptionsPanel"] = panel
+      tinsert(UISpecialFrames, "SLT_OptionsPanel")
+
       _SETTINGS_PANEL = panel
   end
 
