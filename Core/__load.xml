@@ -4,6 +4,7 @@
   <Script file="Fonts.lua"/>
   <Script file="Recyclable.lua"/>
   <Script file="CallbackManager.lua"/>
+  <Script file="SavedVariables.lua"/>
   <Script file="Database.lua"/>
   <Script file="Profiles.lua"/>
   <Script file="Settings.lua"/>
