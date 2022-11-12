@@ -146,6 +146,116 @@ function OpenOptions()
 
   _M:FireSystemEvent("SLT_OPEN_OPTIONS")
 end
+
+--- `/slt show` show all the trackers and the item bar 
+--- `/slt show all` the same as above 
+--- `/slt show itembar` show only the item bar 
+--- `/slt show trackers` show only all the trackers 
+--- `/slt show tracker main` show only the main tracker 
+--- `/slt show tracker second` show only the tracker with for id: second 
+__SlashCmd__ "slt" "show"
+function ShowElementCommand(args)
+  local arg1, arg2 = strsplit(" ", args)
+  if arg1 == "" or arg1 == "all" then 
+    _M:FireSystemEvent("SLT_SHOW_TRACKERS")
+    _M:FireSystemEvent("SLT_SHOW_ITEMBAR")
+  elseif arg1 == "itembar" then 
+    _M:FireSystemEvent("SLT_SHOW_ITEMBAR")
+  elseif arg1 == "trackers" then 
+    _M:FireSystemEvent("SLT_SHOW_TRACKERS")
+  elseif arg1 == "tracker" then 
+    _M:FireSystemEvent("SLT_SHOW_TRACKER", arg2)
+  end
+end
+
+--- `/slt hide` show all the trackers and the item bar 
+--- `/slt hide all` the same as above 
+--- `/slt hide itembar` hide only the item bar 
+--- `/slt hide trackers` hide only all the trackers 
+--- `/slt hide tracker main` hide only the main tracker 
+--- `/slt hide tracker second` hide only the tracker with for id: second 
+__SlashCmd__ "slt" "hide"
+function HideElementCommand(args)
+  local arg1, arg2 = strsplit(" ", args)
+  if arg1 == "" or arg1 == "all" then 
+    _M:FireSystemEvent("SLT_HIDE_TRACKERS")
+    _M:FireSystemEvent("SLT_HIDE_ITEMBAR")
+  elseif arg1 == "itembar" then 
+    _M:FireSystemEvent("SLT_HIDE_ITEMBAR")
+  elseif arg1 == "trackers" then 
+    _M:FireSystemEvent("SLT_HIDE_TRACKERS")
+  elseif arg1 == "tracker" then 
+    _M:FireSystemEvent("SLT_HIDE_TRACKER", arg2)
+  end
+end
+
+--- `/slt toggle itembar` toggle the visibility of item bar 
+--- `/slt toggle tracker main` toggle the visibility of main tracker 
+--- `/slt toggle tracker third` toggle the visibility of tracker with for id: third
+__SlashCmd__ "slt" "toggle"
+function ToggleElementVisibilityCommand(args, info)
+  local arg1, arg2 = strsplit(" ", args)
+  if arg1 == "itembar" then 
+    _M:FireSystemEvent("SLT_TOGGLE_ITEMBAR")
+  elseif arg1 == "tracker" then
+    _M:FireSystemEvent("SLT_TOGGLE_TRACKER", arg2)
+  end
+end
+
+--- `/slt lock` lock all the trackers and the item bar 
+--- `/slt lock all` the same as above 
+--- `/slt lock itembar` lock only the item bar 
+--- `/slt lock trackers` lock only all the trackers 
+--- `/slt lock tracker main` lock only the main tracker 
+--- `/slt lock tracker second` lock only the tracker with for id: second 
+__SlashCmd__ "slt" "lock"
+function LockElementCommand(args)
+  local arg1, arg2 = strsplit(" ", args)
+  if arg1 == "" or arg1 == "all" then 
+    _M:FireSystemEvent("SLT_LOCK_TRACKERS")
+    _M:FireSystemEvent("SLT_LOCK_ITEMBAR")
+  elseif arg1 == "itembar" then 
+    _M:FireSystemEvent("SLT_LOCK_ITEMBAR")
+  elseif arg1 == "trackers" then 
+    _M:FireSystemEvent("SLT_LOCK_TRACKERS")
+  elseif arg1 == "tracker" then 
+    _M:FireSystemEvent("SLT_LOCK_TRACKER", arg2)
+  end
+end
+
+--- `/slt unlock` unlock all the trackers and the item bar 
+--- `/slt unlock all` the same as above 
+--- `/slt unlock itembar` unlock only the item bar 
+--- `/slt unlock trackers` unlock only all the trackers 
+--- `/slt unlock tracker main` unlock only the main tracker 
+--- `/slt unlock tracker second` unlock only the tracker with for id: second 
+__SlashCmd__ "slt" "unlock"
+function UnlockElementCommand(args)
+  local arg1, arg2 = strsplit(" ", args)
+  if arg1 == "" or arg1 == "all" then 
+    _M:FireSystemEvent("SLT_UNLOCK_TRACKERS")
+    _M:FireSystemEvent("SLT_UNLOCK_ITEMBAR")
+  elseif arg1 == "itembar" then 
+    _M:FireSystemEvent("SLT_UNLOCK_ITEMBAR")
+  elseif arg1 == "trackers" then 
+    _M:FireSystemEvent("SLT_UNLOCK_TRACKERS")
+  elseif arg1 == "tracker" then 
+    _M:FireSystemEvent("SLT_UNLOCK_TRACKER", arg2)
+  end
+end
+
+--- `/slt tlock itembar` toggle the lock setting of item bar 
+--- `/slt tlock tracker main` toggle the lock setting of main tracker 
+--- `/slt tlock tracker third` toggle the lock setting of tracker with for id: third
+__SlashCmd__ "slt" "tlock"
+function ToggleLockElementCommand(args)
+  local arg1, arg2 = strsplit(" ", args)
+  if arg1 == "itembar" then 
+    _M:FireSystemEvent("SLT_TOGGLE_LOCK_ITEMBAR")
+  elseif arg1 == "tracker" then
+    _M:FireSystemEvent("SLT_TOGGLE_LOCK_TRACKER", arg2)
+  end
+end
 -------------------------------------------------------------------------------
 -- LibSharedMedia: register the fonts
 -------------------------------------------------------------------------------

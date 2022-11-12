@@ -15,6 +15,16 @@ export {
   UnitName                          = UnitName
 }
 
+--- Helper for combinining the paths
+local combinePaths = setmetatable({ [0] = function(...) return ... end }, { __index = function(self, cnt)
+    local args = List(cnt, "i=>'a['.. i .. ']'"):Join(",")
+    local def  = [[ return function(a, ...) return ]] .. args .. [[, ... end]]
+    local func = Toolset.loadsnippet(def)()
+    rawset(self, cnt, func)
+    return func
+  end 
+})
+
 class "SLT.SavedVariables" (function(_ENV)
   _PATH_ID = ""
   _BASE_DB_ID = ""
@@ -29,6 +39,7 @@ class "SLT.SavedVariables" (function(_ENV)
   _BASE_DB = "global"
   _PROFILE = nil 
   _PROFILE_SELECTED = nil
+  _ALL = false
 
   --- Caching 
   _CACHE_TABLES = System.Toolset.newtable(false, true)
@@ -43,8 +54,8 @@ class "SLT.SavedVariables" (function(_ENV)
     _EXPLICIT_PATH = false
     _RELATIVE_DB = "global"
     _PROFILE = nil
+    _ALL = false
   end
-
 
   __Static__() function private__GetRawDB() 
     return SylingTrackerDB
@@ -93,7 +104,6 @@ class "SLT.SavedVariables" (function(_ENV)
     _CACHE_TABLES[id] = t
   end
 
-
   __Arguments__ { String + Number, String + Number }
   __Static__() function private__CreateCacheId(prefix, path) 
     if path == "" then 
@@ -125,15 +135,12 @@ class "SLT.SavedVariables" (function(_ENV)
 
   __Arguments__ { (String + Number) * 0}
   __Static__() function private__Path(...)
-    if #_BASE_PATH > 0 then 
-      return private_AbsPath(unpack(_BASE_PATH), ...)
+    if #_BASE_PATH > 0 then
+      return private__AbsPath(combinePaths[#_BASE_PATH](_BASE_PATH, ...))
     end
 
     return private__AbsPath(...)
   end
-
-
-
 
   __Static__() function private__ImplicitPath()
     if _EXPLICIT_PATH then 
@@ -143,7 +150,10 @@ class "SLT.SavedVariables" (function(_ENV)
     local defaultPathCount = #_DEFAULT_PATH
     if defaultPathCount > 0 then
       private__Path(unpack(_DEFAULT_PATH))
+      return 
     end
+
+    private__Path()
   end
 
   __Arguments__ { String + Number }
@@ -192,7 +202,6 @@ class "SLT.SavedVariables" (function(_ENV)
     return currentTable[index]
   end
 
-
   __Arguments__ { String + Number, Any/nil }
   __Static__() function private__SetValue(index, value)
     if _PATH_ID == "" then 
@@ -240,9 +249,9 @@ class "SLT.SavedVariables" (function(_ENV)
     currentTable[index] = value
   end 
 
-
   __Arguments__ { String + Number, Any/nil }
-  __Static__() function private__SaveValue(index, value) 
+  __Static__() function private__SaveValue(index, value)
+
     if _PATH_ID == "" then 
       private__GetBaseTable()[index] = value
     end
@@ -308,7 +317,6 @@ class "SLT.SavedVariables" (function(_ENV)
         profile = _PROFILE_SELECTED
       end
 
-
       if profile and profile ~= "__global" then
         local profilesDB = private__GetDB().__profiles
         --- We need to check the profile has a DB, all profiles created have a 
@@ -330,14 +338,19 @@ class "SLT.SavedVariables" (function(_ENV)
     return SavedVariables
   end 
 
-
-  __Arguments__ { String/nil }
   __Static__() function Global() 
     _BASE_DB = "global"
+    _BASE_DB_ID = ""
+    _PROFILE = nil
 
     return SavedVariables
-  end 
+  end
 
+  __Static__() function All()
+    _ALL = true
+
+    return SavedVariables
+  end
 
   __Arguments__ { (String + Number) * 0 }
   __Static__() function Path(...)
@@ -371,7 +384,6 @@ class "SLT.SavedVariables" (function(_ENV)
     end
   end  
 
-
   --- Get the value for an index in the current path. 
   --- @See also Path, SetDefaultPath, and SetBasePath for changing the path.
   __Arguments__ { String + Number }
@@ -399,11 +411,31 @@ class "SLT.SavedVariables" (function(_ENV)
     --- It does nothing if "Path" or "AbsPath" has been used for this current operation.
     private__ImplicitPath()
 
-    private__SetValue(index, value)
+    --- Check if the All() modifier has been used 
+    if _ALL then
+      --- We start with global
+      Global()
+      private__SetValue(index, value)
+
+      --- We save the value for all existing profiles 
+      local profilesDB = private__GetDB().__profiles 
+      if profilesDB then 
+        for profile in pairs(profilesDB) do 
+          --- We need to manually change the base db and its id before calling 
+          --- private__SaveValue
+          _BASE_DB = "profile"
+          _BASE_DB_ID = "profiles" .. _ID_SEPERATOR_CHAR .. profile
+          _PROFILE = profile
+          
+          private__SetValue(index, value)
+        end
+      end
+    else 
+      private__SetValue(index, value)
+    end
 
     private__PostEndProcess()
   end 
-
 
   --- Save the value for an index in the current path. In case where the path 
   --- not exists, this will create it.
@@ -416,7 +448,29 @@ class "SLT.SavedVariables" (function(_ENV)
     --- It does nothing if "Path" or "AbsPath" has been used for this current operation.
     private__ImplicitPath()
 
-    private__SaveValue(index, value)
+    --- Check if the All() modifier has been used 
+    if _ALL then
+      --- We start with global
+      Global()
+      private__SaveValue(index, value)
+
+      --- We save the value for all existing profiles 
+      local profilesDB = private__GetDB().__profiles 
+      if profilesDB then 
+        for profile in pairs(profilesDB) do 
+          --- We need to manually change the base db and its id before calling 
+          --- private__SaveValue
+          _BASE_DB = "profile"
+          _BASE_DB_ID = "profiles" .. _ID_SEPERATOR_CHAR .. profile
+          _PROFILE = profile
+          
+          private__SaveValue(index, value)
+        end
+      end
+    else 
+      private__SaveValue(index, value)
+    end
+
     private__PostEndProcess()
   end
 
@@ -429,43 +483,49 @@ class "SLT.SavedVariables" (function(_ENV)
     --- It does nothing if "Path" or "AbsPath" has been used for this current operation.
     private__ImplicitPath()
 
-    local fromValue = private__GetValue(fromIndex)
-    if fromValue ~= nil then 
-      private__SaveValue(toIndex, fromValue)
-      private__SaveValue(fromIndex, nil)
-    end
+    if _ALL then 
+      --- We start by global
+      Global()
 
-    private__PostEndProcess()
-  end
+      local fromValue = private__GetValue(fromIndex)
+      if fromValue ~= nil then 
+        private__SaveValue(toIndex, fromValue)
+        private__SaveValue(fromIndex, nil)
+      end
 
-  --- Rename an index in the current path for the global and all profiles.
-  --- @See also Path, SetDefaultPath and SetBasePath for changing the path
-  __Arguments__ { String, String }
-  __Static__() function RenameAll(fromIndex, toIndex)
-    private__ImplicitPath()
-
-    local path = { unpack(_PATH) }
-
-    AbsPath(unpack(path)).Rename(fromIndex, toIndex)
-
-    local profiles = GetValue("__profiles")
-
-    if profiles then 
-      for profile, value in pairs(profiles) do 
-        Profile(profile).AbsPath(unpack(path)).Rename(fromIndex, toIndex)
+        --- We rename for all profiles
+      local profilesDB = private__GetDB().__profiles
+      if profilesDB then
+        for profile in pairs(profilesDB) do 
+            --- We need to manually change the base db and its id before calling 
+            --- private__SaveValue
+            _BASE_DB = "profile"
+            _BASE_DB_ID = "profiles" .. _ID_SEPERATOR_CHAR .. profile
+            _PROFILE = profile
+            
+            fromValue = private__GetValue(fromIndex)
+            if fromValue ~= nil then 
+              private__SaveValue(toIndex, fromValue)
+              private__SaveValue(fromIndex, nil)
+            end
+        end
+      end
+    else 
+      local fromValue = private__GetValue(fromIndex)
+      if fromValue ~= nil then 
+        private__SaveValue(toIndex, fromValue)
+        private__SaveValue(fromIndex, nil)
       end
     end
 
     private__PostEndProcess()
   end
 
-
   --- This will disable the profile system so Profile() will always return 
   --- the global
   __Static__() function DisableProfiles() 
     _PROFILES_DISABLED = true 
   end 
-
 
   --- This will enable the profile system so Profile() will return the profile 
   --- or global as fallback
@@ -538,7 +598,6 @@ class "SLT.SavedVariables" (function(_ENV)
     end
   end
 
-
   --- Clean will remove all empty tables
   __Static__() function Clean()
     -- NOTE: Important using the RawDB else it doesn't work
@@ -554,7 +613,6 @@ class "SLT.SavedVariables" (function(_ENV)
     return private__GetDB().dbVersion
   end
 end)
-
 
 __SystemEvent__()
 function PLAYER_SPECIALIZATION_CHANGED()

@@ -299,7 +299,7 @@ if ViragDevTool_AddData then
 end
 
 
-__SystemEvent__ "SLT_LOCK_COMMAND"
+__SystemEvent__ "SLT_LOCK_ITEMBAR"
 __NoCombat__()
 function LockItemBar()
   _ItemBarMover:Hide()
@@ -316,7 +316,7 @@ function LockItemBar()
   end
 end
 
-__SystemEvent__ "SLT_UNLOCK_COMMAND"
+__SystemEvent__ "SLT_UNLOCK_ITEMBAR"
 __NoCombat__()
 function UnlockItemBar()
   _ItemBarMover:Show()
@@ -333,6 +333,7 @@ function UnlockItemBar()
 end
 
 __SystemEvent__"SLT_TOGGLE_ANCHORS"
+__SystemEvent__ "SLT_TOGGLE_LOCK_ITEMBAR"
 function ToogleLocking()
   if _ItemBarMover:IsShown() then 
     _M:LockItemBar()
@@ -353,7 +354,7 @@ function SLT_HIDE_ANCHORS()
   end
 end
 
-__SystemEvent__ "SLT_SHOW_COMMAND"
+__SystemEvent__ "SLT_SHOW_ITEMBAR"
 __NoCombat__()
 function ShowItemBar()
   _ItemBar:Show()
@@ -366,7 +367,7 @@ function ShowItemBar()
   end
 end
 
-__SystemEvent__ "SLT_HIDE_COMMAND"
+__SystemEvent__ "SLT_HIDE_ITEMBAR"
 __NoCombat__()
 function HideItemBar()
   _ItemBar:Hide()
@@ -379,7 +380,7 @@ function HideItemBar()
   end
 end
 
-__SystemEvent__ "SLT_TOGGLE_COMMAND"
+__SystemEvent__ "SLT_TOGGLE_ITEMBAR"
 __NoCombat__()
 function ToggleItemBar()
   if _ItemBar:IsShown() then
