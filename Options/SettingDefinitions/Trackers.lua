@@ -25,6 +25,12 @@ function IterateContentTypes()
   end
 end
 
+local function NoPersistUIElementHandler(tracker, handler, ...)
+  tracker:SetPersistent(false)
+  handler(...)
+  tracker:SetPersistent(true)
+end
+
 __Widget__()
 class "SLT.SettingDefinitions.CreateTracker" (function(_ENV)
   inherit "Frame"
@@ -165,12 +171,7 @@ class "SLT.SettingDefinitions.Tracker" (function(_ENV)
   local function OnContentCheckBoxClick(self, contentCheckBox)
     local contentID = self.ContentControls[contentCheckBox]
     local isTracked = contentCheckBox:IsChecked()
-
-    if isTracked then 
-      self.Tracker:TrackContentType(contentID)
-    else
-      self.Tracker:UntrackContentType(contentID)
-    end
+    self.Tracker:ApplyAndSaveSetting("contentTracked", contentID, isTracked)
   end
 
   local function OnDeleteButtonClick(self, deleteButton)
@@ -179,27 +180,39 @@ class "SLT.SettingDefinitions.Tracker" (function(_ENV)
 
   local function OnLockTrackerCheckBoxClick(self, checkBox)
     local isLocked = checkBox:IsChecked()
-    self.Tracker.Locked = isLocked
+    self.Tracker:ApplyAndSaveSetting("locked", isLocked)
   end
 
   local function OnShowTrackerCheckBoxClick(self, checkBox)
     local isShow = checkBox:IsChecked()
-    if isShow then 
-      self.Tracker:Show()
-    else
-      self.Tracker:Hide()
-    end
+    self.Tracker:ApplyAndSaveSetting("hidden", not isShow)
+  end
+
+  local function OnBackgroundColorChangedHandler(self, colorPicker, r, g, b, a)
+    self.Tracker:ApplySetting("backgroundColor", r, g, b, a)
+  end
+
+  local function OnBackgroundColorConfirmedHandler(self, colorPicker, r, g, b, a)
+    self.Tracker:ApplyAndSaveSetting("backgroundColor", r, g, b, a)
   end
 
   local function OnShowScrolBarTrackerCheckBoxClick(self, checkBox)
-    local tracker = GetTracker(self.TrackerID)
     local isShow = checkBox:IsChecked()
-    Style[tracker].ShowScrollBar = isShow
+    self.Tracker:ApplyAndSaveSetting("showScrollBar", isShow)
   end
 
   local function OnScrollBarPositionEntrySelected(self, dropdown, entry)
     local data = entry:GetEntryData()
-    self.Tracker.ScrollBarPosition = data.value
+    self.Tracker:ApplyAndSaveSetting("scrollBarPosition", data.value)
+  end
+
+  local function OnThumbColorChangedHandler(self, colorPicker, r, g, b, a)
+    self.Tracker:ApplySetting("scrollBarThumbColor", r, g, b, a)
+    -- self.Tracker:GetScrollBar():GetThumb():SetNormalColor(ColorType(r, g, b, a))
+  end
+
+  local function OnThumbColorConfirmedHandler(self, colorPicker, r, g, b, a)
+    self.Tracker:ApplyAndSaveSetting("scrollBarThumbColor", r, g, b, a)
   end
 
   local function OnBuildGeneralTab(self, tabControl)
@@ -219,10 +232,37 @@ class "SLT.SettingDefinitions.Tracker" (function(_ENV)
     show.OnCheckBoxClick = show.OnCheckBoxClick + self.OnShowTrackerCheckBoxClick
     self.GeneralTabControls.showTrackerButton = show
 
+    --- Tracker Scale 
+    local scaleSlider = SUI.SettingsSlider.Acquire(false, self)
+    scaleSlider:SetID(30)
+    scaleSlider:SetLabel("Scale")
+    scaleSlider:SetSliderLabelFormatter(SUI.Slider.Label.Right)
+    scaleSlider:SetMinMaxValues(0.1, 5)
+    scaleSlider:SetValueStep(0.01)
+    scaleSlider:SetValue(Style[self.Tracker].Scale)
+    -- scaleSlider.OnValueChanged = function(_, value)
+    --   -- TODO THe handler
+    --   self.Tracker:ApplySetting("scale", value)
+    -- end
+    self.SettingControls.trackerScaleSlider = scaleSlider
+
+    --- Background Color
+    local backgroundColor = Style[self.Tracker].backdropColor
+    local backgroundColorPicker = SUI.SettingsColorPicker.Acquire(false, self)
+    backgroundColorPicker:SetID(40)
+    backgroundColorPicker:SetLabel("Background color")
+
+    if backgroundColor then 
+      backgroundColorPicker:SetColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a)
+    end
+    backgroundColorPicker.OnColorChanged = backgroundColorPicker.OnColorChanged + self.OnBackgroundColorChangedHandler
+    backgroundColorPicker.OnColorConfirmed = backgroundColorPicker.OnColorConfirmed + self.OnBackgroundColorConfirmedHandler
+    self.GeneralTabControls.backgroundColorPicker = backgroundColorPicker
+
     --- Scroll Bar Section
     local scrollBarSection = SUI.ExpandableSection.Acquire(false, self)
     scrollBarSection:SetExpanded(true)
-    scrollBarSection:SetID(30)
+    scrollBarSection:SetID(50)
     scrollBarSection:SetTitle("Scroll Bar")
     Style[scrollBarSection].marginTop = 15
     self.GeneralTabControls.scrollBarSection = scrollBarSection
@@ -245,12 +285,22 @@ class "SLT.SettingDefinitions.Tracker" (function(_ENV)
     scrollBarPosition.OnEntrySelected = scrollBarPosition.OnEntrySelected + self.OnScrollBarPositionEntrySelected
     self.GeneralTabControls.scrollBarPositionDropDown = scrollBarPosition
 
+    -- local thumbColor = Style[self.Tracker].ScrollBar.Track.Thumb.BottomBGTexture.vertexColor
+    local thumbColor = self.Tracker:GetScrollBar():GetThumb():GetNormalColor()
+    local thumbColorPicker = SUI.SettingsColorPicker.Acquire(true, scrollBarSection)
+    thumbColorPicker:SetID(30)
+    thumbColorPicker:SetLabel("Thumb color")
+    thumbColorPicker:SetColor(thumbColor.r, thumbColor.g, thumbColor.b, thumbColor.a)
+    thumbColorPicker.OnColorChanged = thumbColorPicker.OnColorChanged + self.OnThumbColorChanged
+    thumbColorPicker.OnColorConfirmed = thumbColorPicker.OnColorConfirmed + self.OnThumbColorConfirmed
+    self.GeneralTabControls.thumbColorPicker = thumbColorPicker
+
     --- The "Danger zone" won't appear for main tracker as it's not intended to be deleted.
     if self.Tracker.ID ~= "main" then 
       --- Danger zone section
       local dangerZoneSection = SUI.ExpandableSection.Acquire(false, self)
       dangerZoneSection:SetExpanded(false)
-      dangerZoneSection:SetID(40)
+      dangerZoneSection:SetID(999)
       dangerZoneSection:SetTitle("|cffff0000Danger Zone|r")
       Style[dangerZoneSection].marginTop = 15
       self.GeneralTabControls.dangerZoneSection = dangerZoneSection
@@ -403,8 +453,12 @@ class "SLT.SettingDefinitions.Tracker" (function(_ENV)
     --- General tab handlers
     self.OnLockTrackerCheckBoxClick = function(checkBox) OnLockTrackerCheckBoxClick(self, checkBox) end
     self.OnShowTrackerCheckBoxClick = function(checkBox) OnShowTrackerCheckBoxClick(self, checkBox) end
+    self.OnBackgroundColorChangedHandler = function(...) OnBackgroundColorChangedHandler(self, ...) end 
+    self.OnBackgroundColorConfirmedHandler = function(...) OnBackgroundColorConfirmedHandler(self, ...) end
     self.OnShowScrolBarTrackerCheckBoxClick = function(checkBox) OnShowScrolBarTrackerCheckBoxClick(self, checkBox) end
     self.OnScrollBarPositionEntrySelected = function(...) OnScrollBarPositionEntrySelected(self, ...) end
+    self.OnThumbColorChanged = function(...) OnThumbColorChangedHandler(self, ...) end
+    self.OnThumbColorConfirmed = function(...) OnThumbColorConfirmedHandler(self, ...) end 
 
     --- Contents Tracked tab handlers 
     self.OnContentCheckBoxClick = function(checkBox) OnContentCheckBoxClick(self, checkBox) end
