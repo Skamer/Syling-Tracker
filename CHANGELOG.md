@@ -1,4 +1,17 @@
-# 1.0.2
+# 1.1.0
+
+- Bumped the toc version for 10.0.2
+
+**NEW**
+
+- Added new slash commands: `/slt show` `/slt hide` `/slt toggle` `/slt lock` `/slt unlock` and `/slt tlock` ([more details here](https://github.com/Skamer/Syling-Tracker/issues/62#issuecomment-1312482626))
+- OPTIONS: Added options for changing the tracker scaling, its background and its borders.
+- OPTIONS: Added an option for changing the thumb color of the tracker scroll bar.
+- OPTIONS: The escape key will now close the options panel.
+
+---
+
+## 1.0.2
 
 **FIXES**
 

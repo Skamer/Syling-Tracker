@@ -41,6 +41,16 @@ class "SLT.ScrollBarThumb" (function(_ENV)
     -- Style[self].MiddleBGTexture.atlas = middleAtlas
     -- Style[self].BottomBGTexture.atlas = bottomAtlas
   end
+
+  function GetNormalColor(self)
+    return Style[self].MiddleBGTexture.vertexColor
+  end
+
+  function SetNormalColor(self, color)
+    Style[self].TopBGTexture.vertexColor = color
+    Style[self].MiddleBGTexture.vertexColor = color
+    Style[self].BottomBGTexture.vertexColor = color
+  end
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
