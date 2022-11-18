@@ -114,6 +114,66 @@ class "SLT.Tracker" (function(_ENV)
       }
     end
   end
+
+  local function OnShowBorderChanged(self, new, old, prop)
+    if prop == "ShowTopBorder" then 
+      Style[self].TopBGTexture.visible = new 
+    elseif prop == "ShowBottomBorder" then 
+      Style[self].BottomBGTexture.visible = new 
+    elseif prop == "ShowLeftBorder" then 
+      Style[self].LeftBGTexture.visible = new 
+    elseif prop == "ShowRightBorder" then 
+      Style[self].RightBGTexture.visible = new 
+    elseif prop == "ShowTopLeftBorder" then 
+      Style[self].TopLeftBGTexture.visible = new 
+    elseif prop == "ShowTopRightBorder" then 
+      Style[self].TopRightBGTexture.visible = new 
+    elseif prop == "ShowBottomLeftBorder" then 
+      Style[self].BottomLeftBGTexture.visible = new 
+    elseif prop == "ShowBottomRightBorder" then 
+      Style[self].BottomRightBGTexture.visible = new 
+    end
+  end
+
+  local function OnBorderColorChanged(self, new, old, prop)
+    if prop == "TopBorderColor" then 
+      Style[self].TopBGTexture.vertexColor = new 
+    elseif prop == "BottomBorderColor" then 
+      Style[self].BottomBGTexture.vertexColor = new 
+    elseif prop == "LeftBorderColor" then 
+      Style[self].LeftBGTexture.vertexColor = new 
+    elseif prop == "RightBorderColor" then 
+      Style[self].RightBGTexture.vertexColor = new 
+    elseif prop == "TopLeftBorderColor" then 
+      Style[self].TopLeftBGTexture.vertexColor = new 
+    elseif prop == "TopRightBorderColor" then 
+      Style[self].TopRightBGTexture.vertexColor = new 
+    elseif prop == "BottomLeftBorderColor" then 
+      Style[self].BottomLeftBGTexture.vertexColor = new 
+    elseif prop == "BottomRightBorderColor" then 
+      Style[self].BottomRightBGTexture.vertexColor = new 
+    end
+  end
+
+  local function OnBorderSizeChanged(self, new, old, prop)
+    if prop == "TopBorderSize" then 
+      Style[self].TopBGTexture.height = new
+      Style[self].TopLeftBGTexture.height = new
+      Style[self].TopRightBGTexture.height = new
+    elseif prop == "BottomBorderSize" then 
+      Style[self].BottomBGTexture.height = new
+      Style[self].BottomLeftBGTexture.height = new
+      Style[self].BottomRightBGTexture.height = new
+    elseif prop == "LeftBorderSize" then 
+      Style[self].LeftBGTexture.width = new
+      Style[self].TopLeftBGTexture.width = new
+      Style[self].BottomLeftBGTexture.width = new 
+    elseif prop == "RightBorderSize" then 
+      Style[self].RightBGTexture.width = new 
+      Style[self].TopRightBGTexture.width = new
+      Style[self].BottomRightBGTexture.width = new
+    end
+  end
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
@@ -396,6 +456,126 @@ class "SLT.Tracker" (function(_ENV)
     default = "RIGHT",
     handler = OnScrollBarPositionChanged
   }
+
+  property "ShowTopBorder" {
+    type = Boolean,
+    default = false,
+    handler = OnShowBorderChanged
+  }
+
+  property "ShowBottomBorder"{
+    type = Boolean,
+    default = false,
+    handler = OnShowBorderChanged
+  }
+
+  property "ShowLeftBorder" {
+    type = Boolean,
+    default = false,
+    handler = OnShowBorderChanged
+  }
+
+  property "ShowRightBorder" {
+    type = Boolean,
+    default = false,
+    handler = OnShowBorderChanged 
+  }
+
+  property "ShowTopLeftBorder" {
+    type = Boolean,
+    default = false,
+    handler = OnShowBorderChanged 
+  }
+
+  property "ShowTopRightBorder" {
+    type = Boolean,
+    default = false,
+    handler = OnShowBorderChanged
+  }
+
+  property "ShowBottomLeftBorder" {
+    type = Boolean,
+    default = false,
+    handler = OnShowBorderChanged 
+  }
+
+  property "ShowBottomRightBorder" {
+    type = Boolean,
+    default = false,
+    handler = OnShowBorderChanged
+  }
+
+  property "TopBorderColor" {
+    type = ColorType,
+    default = Color.BLACK,
+    handler = OnBorderColorChanged
+  }
+
+  property "BottomBorderColor" {
+    type = ColorType,
+    default = Color.BLACK,
+    handler = OnBorderColorChanged
+  }
+
+  property "LeftBorderColor" {
+    type = ColorType,
+    default = Color.BLACK,
+    handler = OnBorderColorChanged
+  }
+
+  property "RightBorderColor" {
+    type = ColorType,
+    default = Color.BLACK,
+    handler = OnBorderColorChanged
+  }
+
+  property "TopLeftBorderColor" {
+    type = ColorType,
+    default = Color.BLACK,
+    handler = OnBorderColorChanged
+  }
+
+  property "TopRightBorderColor" {
+    type = ColorType,
+    default = Color.BLACK,
+    handler = OnBorderColorChanged
+  }
+
+  property "BottomLeftBorderColor" {
+    type = ColorType,
+    default = Color.BLACK,
+    handler = OnBorderColorChanged
+  }
+
+  property "BottomRightBorderColor" {
+    type = ColorType,
+    default = Color.BLACK,
+    handler = OnBorderColorChanged
+  }
+
+  property "TopBorderSize" {
+    type = Number,
+    default = 1,
+    handler = OnBorderSizeChanged
+  }
+
+  property "BottomBorderSize" {
+    type = Number,
+    default = 1,
+    handler = OnBorderSizeChanged
+  }
+
+  property "LeftBorderSize" {
+    type = Number,
+    default = 1,
+    handler = OnBorderSizeChanged
+  }
+
+  property "RightBorderSize" {
+    type = Number,
+    default = 1,
+    handler = OnBorderSizeChanged
+  }
   -----------------------------------------------------------------------------
   --                        Configuration Methods                            --
   -----------------------------------------------------------------------------
@@ -405,11 +585,34 @@ class "SLT.Tracker" (function(_ENV)
     "height",
     "hidden",
     "locked",
+    "scale",
+    "showBackground",
+    "backgroundColor",
     "showScrollBar",
     "scrollBarPosition",
     "scrollBarThumbColor",
     "contentTracked",
     "contentOrder",
+    "showTopBorder",
+    "showBottomBorder",
+    "showLeftBorder",
+    "showRightBorder",
+    "showTopLeftBorder",
+    "showTopRightBorder",
+    "showBottomLeftBorder",
+    "showBottomRightBorder",
+    "topBorderColor",
+    "bottomBorderColor",
+    "leftBorderColor",
+    "rightBorderColor",
+    "topLeftBorderColor",
+    "topRightBorderColor",
+    "bottomLeftBorderColor",
+    "bottomRightBorderColor",
+    "topBorderSize",
+    "bottomBorderSize",
+    "leftBorderSize",
+    "rightBorderSize"
   }
 
   __Arguments__ { Tracker, TrackerSettingType, Any * 0}
@@ -449,14 +652,24 @@ class "SLT.Tracker" (function(_ENV)
       else
         tracker.Locked = locked
       end
+    elseif setting == "scale" then
+      local scale = ...
+      Style[tracker].scale = scale
+    elseif setting == "showBackground" then
+      local show = ... 
+      Style[tracker].BackgroundTexture.visible = show
+    elseif setting == "backgroundColor" then 
+      local r, g, b, a = ...
+      Style[tracker].BackgroundTexture.vertexColor = ColorType(r, g, b, a)
     elseif setting == "showScrollBar" then
       local show = ...
       Style[tracker].showScrollBar = show
     elseif setting == "scrollBarPosition" then 
       local position = ...
       Style[tracker].scrollBarPosition = position
-    elseif setting == "scrollBarThumbColor" then 
-    
+    elseif setting == "scrollBarThumbColor" then
+      local r, g, b, a = ...
+      tracker:GetScrollBar():GetThumb():SetNormalColor(ColorType(r, g, b, a))
     elseif setting == "contentTracked" then 
       local contentId, tracked = ...
       if tracked == nil then 
@@ -476,6 +689,15 @@ class "SLT.Tracker" (function(_ENV)
       end
     elseif setting == "contentOrder" then 
       --- TODO
+    elseif setting:match("show[%a]+Border") then 
+      local show = ...
+      Style[tracker][setting] = show
+    elseif setting:match("[%a]+BorderColor") then 
+      local r, g, b, a = ...
+      Style[tracker][setting] = ColorType(r, g, b, a)
+    elseif setting:match("[%a]+BorderSize") then 
+      local size = ...
+      Style[tracker][setting] = size
     end
   end
 
@@ -520,6 +742,14 @@ class "SLT.Tracker" (function(_ENV)
     elseif setting == "locked" then
       local locked = ...
       SavedVariables.Profile().SaveValue("locked", locked)
+    --- Tracker -> Background -> Show
+    elseif setting == "showBackground" then
+      local show = ...
+      SavedVariables.Profile().SaveValue("showBackground", show)
+    --- Tracker -> Background -> Color
+    elseif setting == "backgroundColor" then 
+      local r, g, b, a = ...
+      SavedVariables.Profile().SaveValue("backgroundColor", { r = r, g = g, b = b, a = a })
     --- Tracker -> Show ScrollBar
     elseif setting == "showScrollBar" then 
       local showScrollBar = ...
@@ -530,8 +760,8 @@ class "SLT.Tracker" (function(_ENV)
       SavedVariables.Profile().Path("scrollBar").SaveValue("position", scrollBarPosition)
     --- ScrollBar -> Thumb ColorType
     elseif setting == "scrollBarThumbColor" then
-      local scrollBarThumbColor = ...
-      SavedVariables.Profile().Path("scrollBar").SaveValue("thumbColor", scrollBarThumbColor)
+      local r, g, b, a = ...
+      SavedVariables.Profile().Path("scrollBar").SaveValue("thumbColor", { r = r, g = g, b = b, a = a})
     --- Tracker -> Content Tracked
     elseif setting == "contentTracked" then 
       local contentId, tracked = ...
@@ -555,6 +785,15 @@ class "SLT.Tracker" (function(_ENV)
       end
     elseif setting == "contentOrder" then 
       -- TODO
+    elseif setting:match("show[%a]+Border") then 
+      local show = ...
+      SavedVariables.Profile().Path("borders").SaveValue(setting, show)
+    elseif setting:match("[%a]+BorderColor") then 
+      local r, g, b, a = ...
+      SavedVariables.Profile().Path("borders").SaveValue(setting, { r = r, g = g, b = b, a = a })
+    elseif setting:match("[%a]+BorderSize") then 
+      local size = ...
+      SavedVariables.Profile().Path("borders").SaveValue(setting, size)
     end
 
     --- We reset the base path
@@ -690,10 +929,14 @@ local function private__NewTracker(id)
   local height  = SavedVariables.Profile().GetValue("height") or 325
   local hidden  = SavedVariables.Profile().GetValue("hidden") 
   local locked  = SavedVariables.Profile().GetValue("locked")
+  local showBg  = SavedVariables.Profile().GetValue("showBackground") or false
+  local bgColor = SavedVariables.Profile().GetValue("backgroundColor")
 
   --- Trackers scrollbar saved variables
   local showScrollBar     = SavedVariables.Profile().Path("scrollBar").GetValue("show")
   local scrollBarPosition = SavedVariables.Profile().Path("scrollBar").GetValue("position")
+  local thumbColor        = SavedVariables.Profile().Path("scrollBar").GetValue("thumbColor")
+  local borderSettings    = SavedVariables.Profile().GetValue("borders")
 
   --- Apply Settings 
   tracker:ApplySetting("position", xPos, yPos)
@@ -703,6 +946,27 @@ local function private__NewTracker(id)
   tracker:ApplySetting("locked", locked)
   tracker:ApplySetting("showScrollBar", showScrollBar)
   tracker:ApplySetting("scrollBarPosition", scrollBarPosition)
+  tracker:ApplySetting("showBackground", showBg)
+  
+  if bgColor then 
+    tracker:ApplySetting("backgroundColor", bgColor.r, bgColor.g, bgColor.b, bgColor.a)
+  end
+
+  if borderSettings then 
+    for setting, value in pairs(borderSettings) do
+      if setting:match("[%a]+BorderColor") then 
+        tracker:ApplySetting(setting, value.r, value.g, value.b, value.a)
+      else 
+        tracker:ApplySetting(setting, value)
+      end
+    end
+  end
+
+
+
+  if thumbColor then 
+    tracker:ApplySetting("scrollBarThumbColor", thumbColor.r, thumbColor.g, thumbColor.b, thumbColor.a)
+  end
 
   --- NOTE: THe contents tracked will be handled later
 
@@ -726,7 +990,7 @@ local function private__DeleteTracker(tracker)
 
   --- Remove handlers
   tracker.OnSizeChanged = tracker.OnSizeChanged - OnTrackerSizeChanged
-  tracker.OnPositionChanged = tracker.OnPositionChanged - OnPositionChanged
+  tracker.OnPositionChanged = tracker.OnPositionChanged - OnTrackerPositionChanged
 
   --- Remove the tracker from the list
   SavedVariables.Path("list", "tracker").SetValue(trackerId, nil)
@@ -734,7 +998,7 @@ local function private__DeleteTracker(tracker)
   --- Remove the tracker settings for global and all profiles 
   SavedVariables.Path("trackers").All().SetValue(trackerId, nil)
 
-  __Trackers[trackerId] = nil 
+  _Trackers[trackerId] = nil 
 
   tracker:Release()
 end
@@ -809,6 +1073,13 @@ class "SLT.API" (function(_ENV)
     end
   end
 end)
+
+        -- file = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
+        -- setAllPoints = true,
+        -- drawLayer = "BACKGROUND",
+        -- snapToPixelGrid = false,
+        -- texelSnappingBias = 0,   
+
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
@@ -845,6 +1116,105 @@ Style.UpdateSkin("Default", {
       size = Size(6, 244),
       location = {
         Anchor("LEFT", 15, 0, nil, "RIGHT")
+      }
+    },
+
+    BackgroundTexture = {
+      visible = false,
+      file = "Interface\\Buttons\\WHITE8X8",
+      drawLayer = "BACKGROUND",
+      vertexColor = Color.BLACK,
+      setAllPoints = true,
+    },
+
+    --- Corner Border 
+    TopLeftBGTexture = {
+      visible = false,
+      width = 1,
+      height = 1,
+      file = "Interface\\Buttons\\WHITE8X8",
+      drawLayer = "BORDER",
+      vertexColor = Color.BLACK,
+      location = {
+        Anchor("BOTTOMRIGHT", 0, 0, nil, "TOPLEFT")
+      }
+    },
+
+    TopRightBGTexture = {
+      visible = false,
+      width = 1,
+      height = 1,
+      file = "Interface\\Buttons\\WHITE8X8",
+      drawLayer = "BORDER",
+      vertexColor = Color.BLACK,
+      location = {
+        Anchor("BOTTOMLEFT", 0, 0, nil , "TOPRIGHT")
+      }
+    },
+
+    BottomLeftBGTexture = {
+      visible = false,
+      width = 1,
+      height = 1,
+      file = "Interface\\Buttons\\WHITE8X8",
+      drawLayer = "BORDER",
+      vertexColor = Color.BLACK,
+      location = {
+        Anchor("TOPRIGHT", 0, 0, nil, "BOTTOMLEFT")
+      }
+    },
+
+    BottomRightBGTexture = {
+      visible = false,
+      width = 1,
+      height = 1,
+      file = "Interface\\Buttons\\WHITE8X8",
+      drawLayer = "BORDER",
+      vertexColor = Color.BLACK,
+      location = {
+        Anchor("TOPLEFT", 0, 0, nil, "BOTTOMRIGHT")
+      }
+    },
+
+    --- Edge Borders 
+    TopBGTexture =  {
+      visible = false,
+      file = "Interface\\Buttons\\WHITE8X8",
+      drawLayer = "BORDER",
+      vertexColor = Color.BLACK,
+      location = {
+        Anchor("TOPLEFT", 0, 0, "TopLeftBGTexture", "TOPRIGHT"),
+        Anchor("BOTTOMRIGHT", 0, 0, "TopRightBGTexture", "BOTTOMLEFT")
+      }
+    },
+    BottomBGTexture =  {
+      visible = false,
+      file = "Interface\\Buttons\\WHITE8X8",
+      drawLayer = "BORDER",
+      vertexColor = Color.BLACK,
+      location = {
+        Anchor("TOPLEFT", 0, 0, "BottomLeftBGTexture", "TOPRIGHT"),
+        Anchor("BOTTOMRIGHT", 0, 0, "BottomRightBGTexture", "BOTTOMLEFT")
+      }
+    },
+    LeftBGTexture =  {
+      visible = false,
+      file = "Interface\\Buttons\\WHITE8X8",
+      drawLayer = "BORDER",
+      vertexColor = Color.BLACK,
+      location = {
+        Anchor("TOPLEFT", 0, 0, "TopLeftBGTexture", "BOTTOMLEFT"),
+        Anchor("BOTTOMRIGHT", 0, 0, "BottomLeftBGTexture", "TOPRIGHT")
+      }
+    },
+    RightBGTexture =  {
+      visible = false,
+      file = "Interface\\Buttons\\WHITE8X8",
+      drawLayer = "BORDER",
+      vertexColor = Color.BLACK,
+      location = {
+        Anchor("TOPLEFT", 0, 0, "TopRightBGTexture", "BOTTOMLEFT"),
+        Anchor("BOTTOMRIGHT", 0, 0, "BottomRightBGTexture", "TOPRIGHT")
       }
     }
   }

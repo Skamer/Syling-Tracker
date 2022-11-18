@@ -197,7 +197,7 @@ class "SUI.Slider" (function(_ENV)
     local back = self:GetChild("Back")
     local forward = self:GetChild("Forward")
 
-    local function OnStepperClicked(forward) 
+    local function OnStepperClicked(forward)
       local value = slider:GetValue()
       local step = slider:GetValueStep()
       if forward then
@@ -215,6 +215,12 @@ class "SUI.Slider" (function(_ENV)
     end
 
     slider.OnValueChanged = slider.OnValueChanged + self.OnSliderValueChanged
+
+    --- HACK: We call these handlers manually to avoid issues if the min & max 
+    --- values and value step are not correctly init . there is probably a better
+    --- solution to do it.
+    OnMinMaxValuesChangedHandler(self, self.MinMaxValues, self.MinMaxValues, "MinMaxValues")
+    OnValueStepChangedHandler(self, self.ValueStep, self.ValueStep, "ValueStep")
   end 
 end)
 -------------------------------------------------------------------------------

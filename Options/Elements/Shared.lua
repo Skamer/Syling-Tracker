@@ -47,8 +47,28 @@ class "__Widget__" (function(_ENV)
         local recycleName = Namespace.GetNamespaceName(target):gsub("%.", "_") .. "%d"
         _Recycler = Recycle(target, recycleName)
         _FocusedWidget = nil
+        _UserData = {}
+        _UserHandlers = {}
 
         function Release(obj)
+
+          --- Clear user data 
+          local userData = _UserData[obj]
+          if userData then 
+            for k,v in pairs(userData) do 
+              userData[k] = nil 
+            end
+          end
+
+          --- Remove and clear the user handlers 
+          local userHandlers = _UserHandlers[obj]
+          if userHandlers then 
+            for event, handler in pairs(userHandlers) do
+              obj[event] = obj[event] - handler
+              userHandlers[event] = nil
+            end
+          end
+          
           if obj.OnRelease then 
             obj:OnRelease()
           end
@@ -81,6 +101,60 @@ class "__Widget__" (function(_ENV)
 
 
           return obj
+        end
+
+        __Arguments__ { String + Number, Any/nil}
+        function SetUserData(self, id, value)
+          local userData = _UserData[self]
+          if not userData then 
+            userData = {}
+            _UserData[self] = userData
+          end
+
+          userData[id] = value 
+        end
+
+        __Arguments__ { String + Number }
+        function GetUserData(self, id)
+          return _UserData[self] and _UserData[self][id]
+        end
+
+        function SetUserHandler(self, event, handler)
+          local userHandlers = _UserHandlers[self]
+          if not userHandlers then 
+            userHandlers = {}
+            _UserHandlers[self] = userHandlers
+          end
+
+          local oldHandler = userHandlers[event]
+          if oldHandler then 
+            self[event] = self[event] - oldHandler
+          end
+
+          self[event] = self[event] + handler
+
+          userHandlers[event] = handler
+        end
+
+        function GetUserHandler(self, event)
+          local userHandlers = _UserHandlers[self]
+          if not userHandlers then 
+            return 
+          end 
+
+          return userHandlers[event]
+        end
+
+        __Iterator__()
+        function IterateUserHandlers()
+          local userHandlers = _UserHandlers[self]
+          if userHandlers then 
+            local yield = coroutine.yield
+
+            for event, handler in pairs(userHandlers) do 
+              yield(event, handler)
+            end
+          end
         end
 
         __Arguments__{ String }

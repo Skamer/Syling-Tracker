@@ -8,6 +8,10 @@
 -- ========================================================================= --
 Syling          "SylingTracker.Options.Elements.ExpandableSection"           ""
 -- ========================================================================= --
+export {
+  ResetStyles = SLT.Utils.ResetStyles,
+}
+
 __Widget__()
 class "SUI.ExpandableSection" (function(_ENV)
   inherit "Frame"
@@ -59,6 +63,8 @@ class "SUI.ExpandableSection" (function(_ENV)
     self:Hide()
     self:ClearAllPoints()
     self:SetParent(nil)
+
+    ResetStyles(self, true)
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --

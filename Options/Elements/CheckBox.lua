@@ -15,7 +15,7 @@ class "SUI.CheckBox" (function(_ENV)
   --                               Methods                                   --
   -----------------------------------------------------------------------------
   function OnAcquire(self)
-    Style[self].checked = nil
+    self:InstantApplyStyle()
   end
 
   function OnRelease(self)

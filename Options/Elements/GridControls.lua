@@ -14,15 +14,20 @@ class "SUI.GridControls" (function(_ENV)
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
-  __Arguments__ { Number, Number, (Number + Frame)/0 }
-  function SetCellControl(self, rowIndex, columnIndex, control)
+  __Arguments__ { Number, Number, (Number + Frame)/0, Number/nil, Number/nil, Number/0, Number/0 }
+  function SetCellControl(self, rowIndex, columnIndex, control, controlWidth, controlHeight, offsetX, offsetY)
     local row = self.CellControls[rowIndex]
     if not row then 
-      row = Toolset.newtable(false, true)
+      row = {}
       self.CellControls[rowIndex] = row
     end
-
-    row[columnIndex] = control
+    row[columnIndex] = {
+      control = control,
+      width = controlWidth,
+      height = controlHeight,
+      offsetX = offsetX,
+      offsetY = offsetY
+    }
   end
 
   __Arguments__ { Number, Number/nil}
@@ -87,15 +92,36 @@ class "SUI.GridControls" (function(_ENV)
       local rowMargin = self.RowMargins[rowIndex] or self.DefaultRowMargin
       local currentWidth = 0
       for columnIndex = 1, self.ColumnCount do 
-        local control = rowControls and rowControls[columnIndex]
+        local controlInfo = rowControls and rowControls[columnIndex]
         local columnMargin = self.ColumnMargins[columnIndex] or self.DefaultColumnMargin
         local columnWidth = self.ColumnWidths[columnIndex]
-        if control and type(control) ~= "number" then
-          control:ClearAllPoints()
-          Style[control].height = rowHeight
-          Style[control].width = columnWidth
+        if controlInfo then 
+          local control = controlInfo.control
+          local controlHeight = controlInfo.height
+          local controlWidth = controlInfo.width
+          local controlOffsetX = controlInfo.offsetX
+          local controlOffsetY = controlInfo.offsetY
+          if control and type(control) ~= "number" then
+            control:ClearAllPoints()
 
-          control:SetPoint("TOPLEFT", currentWidth + columnMargin, -currentHeight + rowMargin)
+            if controlHeight then 
+              if controlHeight > 0 and controlHeight <= 1 then 
+                Style[control].height = rowHeight * controlHeight
+              else
+                Style[control].height = controlHeight
+              end
+            end
+            
+            if controlWidth then 
+              if controlWidth > 0 and controlWidth <= 1 then 
+                Style[control].width = columnWidth * controlWidth
+              else
+                Style[control].width = controlWidth
+              end
+            end
+            
+            control:SetPoint("TOPLEFT", currentWidth + columnMargin + controlOffsetX, -currentHeight + rowMargin + controlOffsetY)
+          end
         end
         currentWidth = currentWidth + columnWidth + columnMargin
 
@@ -109,6 +135,10 @@ class "SUI.GridControls" (function(_ENV)
 
     self:SetWidth(totalWidth)
     self:SetHeight(currentHeight)
+  end
+
+  function OnAcquire(self)
+    self:SetHeight(1)
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
