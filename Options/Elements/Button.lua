@@ -26,7 +26,7 @@ class "SUI.PushButton" (function(_ENV)
     if self.Mouseover then 
       leftTexture, middleTexture, rightTexture = self:GetHoverTexture() 
     else 
-      leftTexture, middleTexture, rightTexture = self:GetNormalTexture() 
+      leftTexture, middleTexture, rightTexture = self:GetNormalTexture()
     end 
 
     Style[self].LeftBGTexture = leftTexture
@@ -112,6 +112,12 @@ class "SUI.PushButton" (function(_ENV)
     self:Hide()
     self:ClearAllPoints()
     self:SetParent(nil)
+
+    self.Mouseover = nil
+  end
+
+  function OnAcquire(self)
+    self:InstantApplyStyle()
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
@@ -292,8 +298,98 @@ Style.UpdateSkin("Default", {
       fontObject = GameFontNormal,
       justifyH = "CENTER",
       maxLines = 1,
-      text = "Button",
       textColor = ColorType(1, 1, 1)
+    },
+
+    LeftBGTexture = {
+      width = 16, 
+      file = PUSHBUTTON_FILE,
+      texCoords = { left = 0.03125, right = 0.53125, top = 0.470703125, bottom = 0.560546875 },
+      location = {
+        Anchor("TOPLEFT"),
+        Anchor("BOTTOMLEFT")
+      }
+    },
+
+    RightBGTexture = {
+      width = 16,
+      file = PUSHBUTTON_FILE,
+      texCoords = { left = 0.03125, right = 0.53125, top = 0.751953125, bottom = 0.841796875 },
+      location = {
+        Anchor("TOPRIGHT"),
+        Anchor("BOTTOMRIGHT")
+      }
+    },
+
+    MiddleBGTexture = {
+      file = PUSHBUTTON_FILE,
+      texCoords = { left = 0, right = 0.5, top = 0.095703125, bottom = 0.185546875 },
+      location = {
+        Anchor("TOPLEFT", 0, 0, "LeftBGTexture", "TOPRIGHT"),
+        Anchor("BOTTOMRIGHT", 0, 0, "RightBGTexture", "BOTTOMLEFT")
+      }      
+    }
+  },
+
+  [SUI.DangerPushButton] = {
+    LeftBGTexture = {
+      width = 16,
+      file = DANGER_PUSHBUTTON_FILE,
+      texCoords = { left = 0.03125, right = 0.53125, top = 0.470703125, bottom = 0.560546875 },
+      location = {
+        Anchor("TOPLEFT"),
+        Anchor("BOTTOMLEFT")
+      }
+    },
+
+    RightBGTexture = {
+      width = 16,
+      file = DANGER_PUSHBUTTON_FILE,
+      texCoords = { left = 0.03125, right = 0.53125, top = 0.751953125, bottom = 0.841796875 },
+      location = {
+        Anchor("TOPRIGHT"),
+        Anchor("BOTTOMRIGHT")
+      }
+    },
+
+    MiddleBGTexture = {
+      file = DANGER_PUSHBUTTON_FILE,
+      texCoords = { left = 0, right = 0.5, top = 0.095703125, bottom = 0.185546875 },
+      location = {
+        Anchor("TOPLEFT", 0, 0, "LeftBGTexture", "TOPRIGHT"),
+        Anchor("BOTTOMRIGHT", 0, 0, "RightBGTexture", "BOTTOMLEFT")
+      }
+    }
+  },
+
+  [SUI.SuccessPushButton] = {
+    LeftBGTexture = {
+      width = 16,
+      file = SUCCESS_PUSHBUTTON_FILE,
+      texCoords = { left = 0.03125, right = 0.53125, top = 0.470703125, bottom = 0.560546875 },
+      location = {
+        Anchor("TOPLEFT"),
+        Anchor("BOTTOMLEFT")
+      }
+    },
+
+    RightBGTexture = {
+      width = 16,
+      file = SUCCESS_PUSHBUTTON_FILE,
+      texCoords = { left = 0.03125, right = 0.53125, top = 0.751953125, bottom = 0.841796875 },
+      location = {
+        Anchor("TOPRIGHT"),
+        Anchor("BOTTOMRIGHT")
+      }
+    },
+
+    MiddleBGTexture = {
+      file = SUCCESS_PUSHBUTTON_FILE,
+      texCoords = { left = 0, right = 0.5, top = 0.095703125, bottom = 0.185546875 },
+      location = {
+        Anchor("TOPLEFT", 0, 0, "LeftBGTexture", "TOPRIGHT"),
+        Anchor("BOTTOMRIGHT", 0, 0, "RightBGTexture", "BOTTOMLEFT")
+      }
     }
   }
 })

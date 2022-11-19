@@ -69,19 +69,6 @@ class "SUI.ColorPicker" (function(_ENV)
 
     ColorPickerFrame:Show()
   end
-
-  function OnRelease(self)
-    self:SetID(0)
-    self:Hide()
-    self:ClearAllPoints()
-    self:SetParent(nil)
-
-    self.r = nil
-    self.g = nil 
-    self.b = nil 
-    self.a = nil 
-    self.HasAlpha = nil
-  end
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
@@ -98,6 +85,16 @@ class "SUI.ColorPicker" (function(_ENV)
   __Arguments__ { Boolean/nil }
   function SetHasAlpha(self, hasAlpha)
     self.HasAlpha = hasAlpha
+  end
+
+  function OnRelease(self)
+    super.OnRelease(self)
+
+    self.r = nil
+    self.g = nil 
+    self.b = nil 
+    self.a = nil 
+    self.HasAlpha = nil
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
@@ -126,14 +123,13 @@ class "SUI.ColorPicker" (function(_ENV)
     type = ColorFloat,
     default = 1
   }
-
+  -----------------------------------------------------------------------------
+  --                            Constructors                                 --
+  -----------------------------------------------------------------------------
   __Template__{
     ColorTexture = Texture,
     ColorCheckers = Texture
   }
-  -----------------------------------------------------------------------------
-  --                            Constructors                                 --
-  -----------------------------------------------------------------------------
   function __ctor(self)
     self.OnClick = self.OnClick + OnClickHandler
   end

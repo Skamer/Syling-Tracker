@@ -424,6 +424,17 @@ end)
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
+  [SUI.SettingsText] = {
+    height = 35,
+    marginRight = 0,
+
+    Text = {
+      fontObject = GameFontNormal,
+      textColor = NORMAL_FONT_COLOR,
+      setAllPoints = true,
+    }
+  },
+
   [SUI.SettingsSectionHeader] = {
     height = 45,
     marginRight = 0,
