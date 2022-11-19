@@ -742,6 +742,10 @@ class "SLT.Tracker" (function(_ENV)
     elseif setting == "locked" then
       local locked = ...
       SavedVariables.Profile().SaveValue("locked", locked)
+    --- Tracker scale
+    elseif setting == "scale" then 
+      local scale = ...
+      SavedVariables.Profile().SaveValue("scale", scale)
     --- Tracker -> Background -> Show
     elseif setting == "showBackground" then
       local show = ...
@@ -929,6 +933,7 @@ local function private__NewTracker(id)
   local height  = SavedVariables.Profile().GetValue("height") or 325
   local hidden  = SavedVariables.Profile().GetValue("hidden") 
   local locked  = SavedVariables.Profile().GetValue("locked")
+  local scale   = SavedVariables.Profile().GetValue("scale")
   local showBg  = SavedVariables.Profile().GetValue("showBackground") or false
   local bgColor = SavedVariables.Profile().GetValue("backgroundColor")
 
@@ -944,6 +949,7 @@ local function private__NewTracker(id)
   tracker:ApplySetting("height", height)
   tracker:ApplySetting("hidden", hidden)
   tracker:ApplySetting("locked", locked)
+  tracker:ApplySetting("scale", scale)
   tracker:ApplySetting("showScrollBar", showScrollBar)
   tracker:ApplySetting("scrollBarPosition", scrollBarPosition)
   tracker:ApplySetting("showBackground", showBg)
@@ -1073,13 +1079,6 @@ class "SLT.API" (function(_ENV)
     end
   end
 end)
-
-        -- file = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
-        -- setAllPoints = true,
-        -- drawLayer = "BACKGROUND",
-        -- snapToPixelGrid = false,
-        -- texelSnappingBias = 0,   
-
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------

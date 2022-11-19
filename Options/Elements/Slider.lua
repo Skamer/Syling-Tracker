@@ -120,7 +120,18 @@ class "SUI.Slider" (function(_ENV)
 
   __Arguments__ { Number }
   function SetValue(self, value)
-    self.Value = value
+    --- (e.g, if the user sets the value to "0.2", the value given may be "0.1999999")
+    --- so we need to truncate the decimals, and round it. 
+    --- the amount of decimal truncated is based on the value step. 
+    --- For example:
+    --- value step    number of decimal keeped
+    ---   0.2                 1
+    ---   0.25                2
+    ---   0.002               3
+    ---   0.200               1 
+    local valueRounded = SLT.Utils.Math.TruncateDecimal(value, self.DecimalCount, true)
+
+    self.Value = valueRounded
   end
 
   function GetValue(self)

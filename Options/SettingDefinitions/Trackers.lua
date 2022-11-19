@@ -179,10 +179,10 @@ class "SLT.SettingDefinitions.Tracker" (function(_ENV)
     local scaleSlider = SUI.SettingsSlider.Acquire(false, self)
     scaleSlider:SetID(30)
     scaleSlider:SetLabel("Scale")
-    scaleSlider:SetSliderLabelFormatter(SUI.Slider.Label.Right)
     scaleSlider:SetMinMaxValues(0.1, 5)
     scaleSlider:SetValueStep(0.01)
     scaleSlider:SetValue(Style[self.Tracker].Scale)
+    scaleSlider:SetSliderLabelFormatter(SUI.Slider.Label.Right)
     scaleSlider:SetUserHandler("OnValueChanged", OnTrackerScaleChanged)
     self.GeneralTabControls.trackerScaleSlider = scaleSlider
     ---------------------------------------------------------------------------
