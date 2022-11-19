@@ -140,6 +140,13 @@ class "SUI.GridControls" (function(_ENV)
   function OnAcquire(self)
     self:SetHeight(1)
   end
+
+  function OnRelease(self)
+    self:SetID(0)
+    self:Hide()
+    self:ClearAllPoints()
+    self:SetParent(nil)
+  end
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
