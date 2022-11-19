@@ -65,6 +65,8 @@ class "SUI.ExpandableSection" (function(_ENV)
     self:SetParent(nil)
 
     ResetStyles(self, true)
+
+    self.Expanded = nil
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --

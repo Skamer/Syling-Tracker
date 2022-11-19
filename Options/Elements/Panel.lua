@@ -145,6 +145,10 @@ class "SUI.SettingsPanel" (function(_ENV)
       self.CurrentSettings = settings
 
       scrollBox:SetScrollTarget(settings)
+
+      -- We move the scroll to begin
+      scrollBox:SetVerticalScroll(0)
+
       settings:Show()
     else 
       self.CurrentSettings = nil 
@@ -182,7 +186,7 @@ Style.UpdateSkin("Default", {
     Categories = {
       visible = true,
       location = {
-        Anchor("TOPLEFT", 20, -15)
+        Anchor("TOPLEFT", 20, -15),
       },
 
       [SUI.Category] = {

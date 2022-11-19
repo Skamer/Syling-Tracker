@@ -46,6 +46,9 @@ class "SUI.ScrollBox" (function(_ENV)
     local contentHeight = visibleHeight + yRange
     scrollBar:SetVisibleExtentPercentage(visibleHeight / contentHeight)
 
+    --- We ajusted the percentage with the new range
+    scrollBar:SetScrollPercentage(self:GetVerticalScroll() / yRange)
+
     -- REVIEW: Should translate this feature directly in the ScrollBar class ?
     if scrollBar:HasScrollableExtent() then 
       scrollBar:Show()
