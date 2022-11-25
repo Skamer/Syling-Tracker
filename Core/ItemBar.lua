@@ -20,7 +20,7 @@ _ItemModel                          = RegisterModel(Model, "items-data")
 -- ========================================================================= --
 DB_READ_ONLY                        = true
 -- ========================================================================= --
-__Recyclable__ "SylingTracker_ItemButton%d"
+__UIElement__()
 class "ItemButton" (function(_ENV)
   inherit "Frame"
   -----------------------------------------------------------------------------
@@ -42,19 +42,56 @@ class "ItemButton" (function(_ENV)
   function SetItemTexture(self, texture)
     self.__Texture:SetTexture(texture)
   end
+
+  function SetQuestID(self, id)
+    self.questID = id
+  end
+
+  function GetQuestID(self, id)
+    return self.questID
+  end
+
+  function OnSystemEvent(self, event)
+    if event == "BAG_UPDATE_COOLDOWN" then 
+      local questID = self:GetQuestID()
+      if questID > 0 then 
+        local questLogIndex = GetQuestLogIndexByID(questID)
+        if questLogIndex then 
+          local start, duration, enable = GetQuestLogSpecialItemCooldown(questLogIndex)
+
+          CooldownFrame_Set(self.__Cooldown, start, duration, enable)
+          if duration and duration > 0 and enable and enable == 0 then
+            self.__Texture:SetVertexColor(0.4, 0.4, 0.4)
+          else
+            self.__Texture:SetVertexColor(1, 1, 1)
+          end
+        end
+      end
+    end
+  end
   
   function OnAcquire(self)
     self:Show()
+
+    self:RegisterSystemEvent("BAG_UPDATE_COOLDOWN")
   end
 
   function OnRelease(self)
     self:Hide()
     self:ClearAllPoints()
     self:SetParent()
+    self:SetQuestID(0)
 
     self.__ActionButton:SetScript("OnLeave", nil)
     self.__ActionButton:SetScript("OnEnter", nil)
+    self.__Texture:SetVertexColor(1, 1, 1)
+    self:UnregisterSystemEvent("BAG_UPDATE_COOLDOWN")
   end
+
+  property "questID" {
+    type = Number,
+    default = 0
+  }
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
   -----------------------------------------------------------------------------
@@ -74,7 +111,9 @@ class "ItemButton" (function(_ENV)
     texture:SetTexCoord(0.07, 0.93, 0.07, 0.93)
     self.__Texture = texture
 
-    local cooldown = Cooldown(name.."Cooldown", self)
+    --- Important: We use directly the WoW API for creating the cooldown because there is an issue where using Scorpio.Cooldown 
+    --- don't display the cooldown text
+    local cooldown = CreateFrame("Cooldown", name.."Cooldown", self, "CooldownFrameTemplate")
     cooldown:SetAllPoints()
     self.__Cooldown = cooldown
   end
@@ -127,6 +166,7 @@ class "ItemBar" (function(_ENV)
 
         itemButton:SetItemLink(itemButtonData.link)
         itemButton:SetItemTexture(itemButtonData.texture)
+        itemButton:SetQuestID(id)
 
         previousItemButton = itemButton
 
@@ -389,6 +429,8 @@ function ToggleItemBar()
     ShowItemBar()
   end
 end
+
+
 -------------------------------------------------------------------------------
 -- Enhancing the API                                                         --
 -------------------------------------------------------------------------------

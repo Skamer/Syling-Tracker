@@ -13,6 +13,8 @@ export {
   TruncateDecimal = SLT.Utils.Math.TruncateDecimal
 }
 
+local BLZ_MINIMAL_SLIDER_FILE = [[Interface\AddOns\SylingTracker_Options\Media\BLZ_MinimalSliderBar]]
+
 __Widget__()
 class "SUI.MinimalSlider"  { Slider }
 
@@ -247,19 +249,31 @@ Style.UpdateSkin("Default", {
 
 
     LeftBGTexture = {
-      atlas = AtlasType("Minimal_SliderBar_Left", true),
+      --- Minimal_SliderBar_Left, true
+      file = BLZ_MINIMAL_SLIDER_FILE,
+      width = 11,
+      height = 17,
+      texCoords = { left = 0.4375, right = 0.78125, top = 0.3203125, bottom = 0.453125},
       location = {
         Anchor("LEFT")
       }
     },
     RightBGTexture = {
-      atlas = AtlasType("Minimal_SliderBar_Right", true),
+      --- Minimal_SliderBar_Right, true
+      file = BLZ_MINIMAL_SLIDER_FILE,
+      width = 11,
+      height = 17,
+      texCoords = { left = 0.03125, right = 0.375, top = 0.484375, bottom = 0.6171875},
       location = {
         Anchor("RIGHT")
       }
     },
     MiddleBGTexture = {
-      atlas = AtlasType("_Minimal_SliderBar_Middle", true),
+      ---_Minimal_SliderBar_Middle, true
+      file = BLZ_MINIMAL_SLIDER_FILE,
+      height = 17,
+      texCoords = { left = 0, right = 0.03125, top = 0.0078125, bottom = 0.140625},
+      horizTile = true,
       location = {
         Anchor("LEFT", 0, 0, "LeftBGTexture", "RIGHT"),
         Anchor("RIGHT", 0, 0, "RightBGTexture", "LEFT")
@@ -267,7 +281,11 @@ Style.UpdateSkin("Default", {
     },
 
     ThumbTexture = {
-      atlas = AtlasType("Minimal_SliderBar_Button", true)
+      --- Minimal_SliderBar_Button, true
+      file = BLZ_MINIMAL_SLIDER_FILE,
+      width = 20,
+      height = 19,
+      texCoords = { left = 0.03125, right = 0.65625, top = 0.15625, bottom = 0.3046875},      
     }
   },
 
@@ -289,7 +307,11 @@ Style.UpdateSkin("Default", {
       },
 
       BackgroundTexture = {
-        atlas = AtlasType("Minimal_SliderBar_Button_Left", true),
+        --- Minimal_SliderBar_Button_Left, true
+        file = BLZ_MINIMAL_SLIDER_FILE,
+        width = 11,
+        height = 19,
+        texCoords = { left = 0.03125, right = 0.375, top = 0.3203125, bottom = 0.46875},   
         drawLayer = "BACKGROUND",
         setAllPoints = true
       }
@@ -302,7 +324,11 @@ Style.UpdateSkin("Default", {
       },
 
       BackgroundTexture = {
-        atlas = AtlasType("Minimal_SliderBar_Button_Right", true),
+        --- Minimal_SliderBar_Button_Right, true
+        file = BLZ_MINIMAL_SLIDER_FILE,
+        width = 9,
+        height = 18,
+        texCoords = { left = 0.03125, right = 0.3125, top = 0.6328125, bottom = 0.7734375},   
         drawLayer = "BACKGROUND",
         setAllPoints = true
       }

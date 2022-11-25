@@ -8,13 +8,15 @@
 -- ========================================================================= --
 Syling              "SylingTracker.Options.Elements.TabControl"              ""
 -- ========================================================================= --
+local BLZ_OPTIONS_FILE = [[Interface\AddOns\SylingTracker_Options\Media\BLZ_Options]]
+
 __Widget__()
 class "SUI.TabButton" (function(_ENV)
   inherit "Button"
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
-  function GetAtlas(self)
+  function GetAdaptedTextures(self)
     if self.Selected then
       return self.SelectedLeftTexture, self.SelectedRightTexture, self.SelectedMiddleTexture
     end
@@ -26,15 +28,15 @@ class "SUI.TabButton" (function(_ENV)
     return self.UpLeftTexture, self.UpRightTexture, self.UpMiddleTexture
   end
 
-  function UpdateAtlas(self)
-    local leftAtlas, rightAtlas, middleAtlas = self:GetAtlas()
-    Style[self].LeftBGTexture.atlas = leftAtlas
-    Style[self].RightBGTexture.atlas = rightAtlas
-    Style[self].MiddleBGTexture.atlas = middleAtlas
+  function UpdateTextures(self)
+    local leftTexture, rightTexture, middleTexture = self:GetAdaptedTextures()
+    Style[self].LeftBGTexture = leftTexture
+    Style[self].RightBGTexture = rightTexture
+    Style[self].MiddleBGTexture = middleTexture
   end
 
   function UpdateState(self)
-    self:UpdateAtlas()
+    self:UpdateTextures()
 
     local text = self:GetChild("Text")
     if self.Selected then
@@ -68,48 +70,90 @@ class "SUI.TabButton" (function(_ENV)
   }
 
   property "UpLeftTexture" {
-    type    = AtlasType,
-    default = AtlasType("Options_Tab_Left", true)
+    type = Table,
+    default = {
+      file = BLZ_OPTIONS_FILE,
+      width = 7,
+      height = 23,
+      texCoords = { left = 0.58984375, right = 0.5966796875, top = 0.0234375, bottom = 0.0458984375},
+    }
   }
 
   property "UpMiddleTexture" {
-    type    = AtlasType,
-    default = AtlasType("Options_Tab_Middle", true)
+    type = Table,
+    default = {
+      file = BLZ_OPTIONS_FILE,
+      height = 23,
+      texCoords = { left = 0.58984375, right = 0.5908203125, top = 0.099609375, bottom = 0.1220703125},
+    }
   }
 
   property "UpRightTexture" {
-    type    = AtlasType,
-    default = AtlasType("Options_Tab_Right", true)
+    type = Table,
+    default = {
+      file = BLZ_OPTIONS_FILE,
+      width = 7,
+      height = 23,
+      texCoords = { left = 0.58984375, right = 0.5966796875, top = 0.0751953125, bottom = 0.09765625},
+    }
   }
 
   property "OverLeftTexture" { 
-    type    = AtlasType,
-    default = AtlasType("Options_Tab_Left", true)
+    type = Table,
+    default = {
+      file = BLZ_OPTIONS_FILE,
+      width = 7,
+      height = 23,
+      texCoords = { left = 0.58984375, right = 0.5966796875, top = 0.0234375, bottom = 0.0458984375},
+    }
   }
 
   property "OverMiddleTexture" {
-    type    = AtlasType,
-    default = AtlasType("Options_Tab_Middle", true)
+    type = Table,
+    default = {
+      file = BLZ_OPTIONS_FILE,
+      height = 23,
+      texCoords = { left = 0.58984375, right = 0.5908203125, top = 0.099609375, bottom = 0.1220703125},
+    }
   }
 
   property "OverRightTexture" {
-    type    = AtlasType,
-    default = AtlasType("Options_Tab_Right", true)
+    type = Table,
+    default = {
+      file = BLZ_OPTIONS_FILE,
+      width = 7,
+      height = 23,
+      texCoords = { left = 0.58984375, right = 0.5966796875, top = 0.0751953125, bottom = 0.09765625},
+    }
   }
 
   property "SelectedLeftTexture" {
-    type    = AtlasType,
-    default = AtlasType("Options_Tab_Active_Left", true)
+    type = Table,
+    default = {
+      file = BLZ_OPTIONS_FILE,
+      width = 7,
+      height = 26,
+      texCoords = { left = 0.58984375, right = 0.5966796875, top = 0.0478515625, bottom = 0.0732421875},
+    }
   }
-
+  
   property "SelectedMiddleTexture" {
-    type    = AtlasType,
-    default = AtlasType("Options_Tab_Active_Middle", true)
+    type = Table,
+    default = {
+      file = BLZ_OPTIONS_FILE,
+      height = 26,
+      texCoords = { left = 0.5927734375, right = 0.59375, top = 0.099609375, bottom = 0.125},
+    }
   }
 
   property "SelectedRightTexture" {
-    type    = AtlasType,
-    default = AtlasType("Options_Tab_Active_Right", true)
+    type = Table,
+    default = {
+      file = BLZ_OPTIONS_FILE,
+      width = 7,
+      height = 26,
+      texCoords = { left = 0.5986328125, right = 0.60546875, top = 0.0234375, bottom = 0.048828125},
+    }
   }
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
@@ -127,10 +171,10 @@ class "SUI.TabButton" (function(_ENV)
     self:UpdateState()
 
     -- Bind handlers
-    self.OnEnter = self.OnEnter + function() self:UpdateAtlas() end 
-    self.OnLeave = self.OnLeave + function() self:UpdateAtlas() end
-    self.OnEnable = self.OnEnable + function() self:UpdateAtlas() end 
-    self.OnDisable = self.OnDisable + function() self:UpdateAtlas() end
+    self.OnEnter = self.OnEnter + function() self:UpdateTextures() end 
+    self.OnLeave = self.OnLeave + function() self:UpdateTextures() end
+    self.OnEnable = self.OnEnable + function() self:UpdateTextures() end 
+    self.OnDisable = self.OnDisable + function() self:UpdateTextures() end
     self.OnClick = self.OnClick + function() self.Selected = true end
   end
 end)

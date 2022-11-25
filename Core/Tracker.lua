@@ -847,6 +847,7 @@ class "SLT.Tracker" (function(_ENV)
       OnScroll(self, value)
     end
 
+    scrollFrame:InstantApplyStyle()
 
     local content = self:GetScrollContent()
     content:SetHeight(1)
@@ -869,6 +870,7 @@ class "SLT.Tracker" (function(_ENV)
     end
 
     self.OnTrackerStopMoving = function(mover, ...) OnTrackerStopMoving(self, mover, ...) end
+
   end
 end)
 
@@ -1234,7 +1236,7 @@ function PLAYER_ENTERING_WORLD(isInitialLogin, isReloadingUi)
     --- initial and a reloading ui for they getting a valid "GetBottom" is important
     --- to compute the height of their frame. 
     --- So we delay until the tracker "GetBottom" returns a no nil value, saying GetBottom
-    --- now return valid value. 
+    --- now return valid value.
     while not trackerBottom do 
       trackerBottom = _MainTracker:GetBottom()
       Next()

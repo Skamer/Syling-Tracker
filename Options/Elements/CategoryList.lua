@@ -12,6 +12,8 @@ export {
   ResetStyles = SLT.Utils.ResetStyles
 }
 
+local BLZ_OPTIONS_FILE = [[Interface\AddOns\SylingTracker_Options\Media\BLZ_Options]]
+
 __Widget__()
 class "SUI.CategoryEntryButton" (function(_ENV)
   inherit "Button" extend "SUI.IButtonEntry"
@@ -30,13 +32,21 @@ class "SUI.CategoryEntryButton" (function(_ENV)
     local texture = self:GetChild("Texture")
     if self.Selected then 
       label:SetFontObject("GameFontHighlight")
-      texture:SetAtlas("Options_List_Active", true)
+      --- Options_List_Active, true
+      texture:SetTexture(BLZ_OPTIONS_FILE)
+      texture:SetTexCoord(0.58984375, 0.7724609375, 0.0009765625, 0.021484375)
+      texture:SetWidth(187)
+      texture:SetHeight(21)
       texture:Show()
 
     else
        label:SetFontObject("GameFontNormal")
        if self:IsMouseOver() then 
-          texture:SetAtlas("Options_List_Hover", true)
+          --- Options_List_Hover, true 
+          texture:SetTexture(BLZ_OPTIONS_FILE)
+          texture:SetTexCoord(0.7744140625, 0.95703125, 0.0009765625, 0.021484375)
+          texture:SetWidth(187)
+          texture:SetHeight(21)
           texture:Show()
        else 
           texture:Hide()
@@ -383,7 +393,11 @@ Style.UpdateSkin("Default", {
       }
     },
     HighlightTexture = {
-      atlas = AtlasType("Options_List_Hover", true),
+      --- Options_List_Hover, true
+      file = BLZ_OPTIONS_FILE,
+      width = 187,
+      height = 21,
+      texCoords = { left = 0.7744140625, right = 0.95703125, top = 0.0009765625, bottom = 0.021484375},
       alphaMode = "ADD",
     },
     
@@ -403,7 +417,11 @@ Style.UpdateSkin("Default", {
     height = 30,
     
     BackgroundTexture = {
-      atlas = AtlasType("Options_CategoryHeader_1", true),
+      --- Options_CategoryHeader_1, true
+      file = BLZ_OPTIONS_FILE,
+      width = 199,
+      height = 144,
+      texCoords = { left = 0.0009765625, right = 0.1953125, top = 0.0009765625, bottom = 0.1416015625},
       drawLayer = "ARTWORK",
       location = {
         Anchor("TOPLEFT")

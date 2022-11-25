@@ -10,6 +10,8 @@ Syling                   "SylingTracker.Core.ScrollBar"                      ""
 -- ========================================================================= --
 LEFT_BUTTON_NAME = "LeftButton"
 
+SCROLLBAR_TRACK_FILE = [[Interface\AddOns\SylingTracker\Media\Textures\BLZ_MinimalScrollbarProportional]]
+SCROLLBAR_MIDDLE_TRACK_FILE = [[Interface\AddOns\SylingTracker\Media\Textures\BLZ_MinimalScrollbarVertical]]
 SCROLLBAR_THUMB_EDGES_FILE = [[Interface\AddOns\SylingTracker\Media\Textures\MinimalScrollbarProportional]]
 SCROLLBAR_THUMB_MIDDLE_FILE = [[Interface\AddOns\SylingTracker\Media\Textures\MinimalScrollbarVertical]]
 
@@ -475,7 +477,6 @@ Style.UpdateSkin("Default", {
         },
 
         TopBGTexture = {
-          --atlas = AtlasType("minimal-scrollbar-thumb-top", true),
           width = 6,
           height = 8,
           file = SCROLLBAR_THUMB_EDGES_FILE,
@@ -489,7 +490,6 @@ Style.UpdateSkin("Default", {
         },
         
         BottomBGTexture = {
-          --atlas = AtlasType("minimal-scrollbar-thumb-bottom", true),
           width = 6,
           height = 36,
           file = SCROLLBAR_THUMB_EDGES_FILE,
@@ -503,7 +503,6 @@ Style.UpdateSkin("Default", {
         },
                 
         MiddleBGTexture = {
-          --atlas = AtlasType("minimal-scrollbar-thumb-middle", true),
           width = 6,
           file = SCROLLBAR_THUMB_MIDDLE_FILE,
           texCoords = SCROLLBAR_THUMB_MIDDLE_HOVER_COORDS,
@@ -529,8 +528,10 @@ Style.UpdateSkin("Default", {
       },
 
       TopBGTexture = {
-        atlas = AtlasType("minimal-scrollbar-track-top", true),
         width = 6,
+        height = 8,
+        file = SCROLLBAR_TRACK_FILE,
+        texCoords = { left = 0.609375, right = 0.734375, top = 0.21875, bottom = 0.34375},
         drawLayer = "ARTWORK",
         location = {
           Anchor("TOPLEFT")
@@ -538,8 +539,10 @@ Style.UpdateSkin("Default", {
       },
       
       BottomBGTexture = {
-        atlas = AtlasType("minimal-scrollbar-track-bottom", true),
-         width = 6,
+        width = 6,
+        height = 8,
+        file = SCROLLBAR_TRACK_FILE,
+        texCoords = { left = 0.765625, right = 0.890625, top = 0.015625, bottom = 0.140625},
         drawLayer = "ARTWORK",
         location = {
           Anchor("BOTTOMLEFT")
@@ -547,8 +550,10 @@ Style.UpdateSkin("Default", {
       },
               
       MiddleBGTexture = {
-        atlas = AtlasType("!minimal-scrollbar-track-middle", true),
         width = 6,
+        file = SCROLLBAR_MIDDLE_TRACK_FILE,
+        texCoords = { left = 0.015625, right = 0.140625, top = 0, bottom = 0.0009765625},
+        vertTile = true,
         drawLayer = "ARTWORK",
         location = {
           Anchor("TOPLEFT", 0, 0, "TopBGTexture", "BOTTOMLEFT"),

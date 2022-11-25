@@ -15,7 +15,7 @@ local function RegisterFrameForSystemEvent(frame, event)
   if not t then 
     t = Toolset.newtable(true, false)
     _M:RegisterEvent(event, function(...)
-      for obj in pairs(t) do 
+      for obj in pairs(t) do
         if obj.OnSystemEvent and not obj:IsReleased() then
           obj:OnSystemEvent(event, ...)
         end
@@ -91,7 +91,11 @@ class "SLT.__UIElement__" (function(_ENV)
         end
 
         function IsReleased(self)
-          return _ACQUIRED_ELEMENTS[self] and true or false
+          if _ACQUIRED_ELEMENTS[self] then 
+            return false 
+          end
+
+          return true
         end
 
         --- The persistent is here to say to object if it will persist change 

@@ -17,7 +17,7 @@ export {
 local DESCRIPTION_TEXT_FORMAT = "Wowhead may help you to find your way for completing this %s"
 local ACHIEVEMENT_TEXT = "achievement"
 local QUEST_TEXT = "quest"
-local WOWHEAD_LINK_FORMAT = "https://www.wowhead.com/%s=%i"
+local WOWHEAD_LINK_FORMAT = "https://www.wowhead.com/wotlk/%s=%i"
 -- ========================================================================= --
 -- @TODO: Move "SLTEditBox" in a its own file or a better place.
 -- ========================================================================= --

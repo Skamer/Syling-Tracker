@@ -72,16 +72,8 @@ class "QuestView" (function(_ENV)
         if mouseButton == "RightButton" then 
           ShowContextMenu("quest", self, data.questID)
         else
-          if data.isAutoComplete and data.isComplete then
-            AutoQuestPopupTracker_RemovePopUp(data.questID)
-            if IsOnShadowlands() then 
-              ShowQuestComplete(data.questID)
-            else 
-              ShowQuestComplete(data.questLogIndex)
-            end
-          else 
-            QuestMapFrame_OpenToQuestDetails(data.questID)
-          end
+          QuestLog_OpenToQuest(data.questLogIndex)
+          QuestLogControlPanel_UpdateState()
         end
       end
     end

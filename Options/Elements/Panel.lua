@@ -8,6 +8,8 @@
 -- ========================================================================= --
 Syling              "SylingTracker.Options.Elements.Panel"                   ""
 -- ========================================================================= --
+local BLZ_OPTIONS_FILE = [[Interface\AddOns\SylingTracker_Options\Media\BLZ_Options]]
+
 __Widget__()
 class "SUI.Panel" (function(_ENV)
   inherit "SUI.Window"
@@ -195,8 +197,9 @@ Style.UpdateSkin("Default", {
     },
 
     InnerTexture = {
-      atlas = AtlasType("Options_InnerFrame", false),
       visible = true,
+      file = BLZ_OPTIONS_FILE,
+      texCoords = { left = 0.0009765625, right = 0.8662109375, top = 0.1435546875, bottom = 0.7470703125},
       drawLayer = "OVERLAY",
       subLevel = 0,
       location = {
@@ -206,7 +209,6 @@ Style.UpdateSkin("Default", {
     },
 
     Header = {
-
       height = 50,
       location = {
         Anchor("TOP", 0, -45),
@@ -225,7 +227,10 @@ Style.UpdateSkin("Default", {
       },
 
       Separator = {
-        atlas = AtlasType("Options_HorizontalDivider", true),
+        file = BLZ_OPTIONS_FILE,
+        height = 1,
+        width = 630,
+        texCoords = { left = 0.0009765625, right = 0.6162109375, top = 0.7490234375, bottom = 0.75},
         snapToPixelGrid = false,
         texelSnappingBias = 0,  
         location = {

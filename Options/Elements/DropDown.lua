@@ -8,6 +8,9 @@
 -- ========================================================================= --
 Syling          "SylingTracker.Options.Elements.DropDown"                    ""
 -- ========================================================================= --
+local DROPDOWN_NICE_SLICES_FILE = [[Interface\AddOns\SylingTracker_Options\Media\BLZ_CharacterCreateDropdown]]
+local DROPDOWN_FILE = [[Interface\AddOns\SylingTracker_Options\Media\BLZ_CharacterCreate]]
+
 __Widget__()
 class "SUI.DropDownPopout" { SUI.GridEntriesFauxScrollBox }
 
@@ -22,13 +25,17 @@ class "SUI.DropDownPopoutButton" (function(_ENV)
   }
   function __ctor(self)
     self.OnEnter = self.OnEnter + function()
-      Style[self].NormalTexture.atlas = AtlasType("charactercreate-customize-dropdownbox-hover")
+      --- charactercreate-customize-dropdownbox-hover
+      Style[self].NormalTexture.file = DROPDOWN_FILE
+      Style[self].NormalTexture.texCoords = { left = 0.36181640625, right = 0.50830078125, top = 0.24267578125, bottom = 0.27978515625}
     end
 
 
     self.OnLeave = self.OnLeave + function()
-        Style[self].NormalTexture.atlas = AtlasType("charactercreate-customize-dropdownbox")
-    end  
+      ---charactercreate-customize-dropdownbox
+      Style[self].NormalTexture.file = DROPDOWN_FILE
+      Style[self].NormalTexture.texCoords = { left = 0.21435546875, right = 0.36083984375, top = 0.24267578125, bottom = 0.27978515625}
+    end
   end
 end)
 
@@ -169,60 +176,96 @@ Style.UpdateSkin("Default", {
     AutoHeightOffsetExtent = 40,
     
     TopLeftBGTexture = {
-      atlas = AtlasType("CharacterCreateDropdown-NineSlice-CornerTopLeft", true),
+      --- CharacterCreateDropdown-NineSlice-CornerTopLeft, true
+      file = DROPDOWN_NICE_SLICES_FILE,
+      width = 62,
+      height = 52,
+      texCoords = { left = 0.0009765625, right = 0.1220703125, top = 0.287109375, bottom = 0.490234375},      
       location = {
         Anchor("TOPLEFT", -30, 20)
       }
     },
 
     TopRightBGTexture = {
-      atlas = AtlasType("CharacterCreateDropdown-NineSlice-CornerTopRight", true),
+      --- CharacterCreateDropdown-NineSlice-CornerTopRight, true
+      file = DROPDOWN_NICE_SLICES_FILE,
+      width = 62,
+      height = 52,
+      texCoords = { left = 0.7939453125, right = 0.9150390625, top = 0.001953125, bottom = 0.205078125}, 
       location = {
         Anchor("TOPRIGHT", 30, 20)
       }
     },
     BottomLeftBGTexture = {
-      atlas = AtlasType("CharacterCreateDropdown-NineSlice-CornerBottomLeft", true),
+      --- CharacterCreateDropdown-NineSlice-CornerBottomLeft, true
+      file = DROPDOWN_NICE_SLICES_FILE,
+      width = 62,
+      height = 72,
+      texCoords = { left = 0.0009765625, right = 0.1220703125, top = 0.001953125, bottom = 0.283203125}, 
       location = {
         Anchor("BOTTOMLEFT", -30, -20)
       }
     },
     BottomRightBGTexture = {
-      atlas = AtlasType("CharacterCreateDropdown-NineSlice-CornerBottomRight", true),
+      --- CharacterCreateDropdown-NineSlice-CornerBottomRight, true
+      file = DROPDOWN_NICE_SLICES_FILE,
+      width = 62,
+      height = 72,
+      texCoords = { left = 0.0009765625, right = 0.1220703125, top = 0.494140625, bottom = 0.775390625},
       location = {
         Anchor("BOTTOMRIGHT", 30, -20)
       }
     },
     TopBGTexture = {
-      atlas = AtlasType("_CharacterCreateDropdown-NineSlice-EdgeTop", true),
+      --- _CharacterCreateDropdown-NineSlice-EdgeTop, true
+      file = DROPDOWN_NICE_SLICES_FILE,
+      width = 216,
+      height = 52,
+      texCoords = { left = 0.3701171875, right = 0.7919921875, top = 0.287109375, bottom = 0.490234375},
       location = {
         Anchor("TOPLEFT", 0, 0, "TopLeftBGTexture", "TOPRIGHT"),
         Anchor("TOPRIGHT", 0, 0, "TopRightBGTexture", "TOPLEFT")
       }
     },
     BottomBGTexture = {
-      atlas = AtlasType("_CharacterCreateDropdown-NineSlice-EdgeBottom", true),
+      --- _CharacterCreateDropdown-NineSlice-EdgeBottom, true
+      file = DROPDOWN_NICE_SLICES_FILE,
+      width = 216,
+      height = 72,
+      texCoords = { left = 0.3701171875, right = 0.7919921875, top = 0.001953125, bottom = 0.283203125},
       location = {
         Anchor("BOTTOMLEFT", 0, 0, "BottomLeftBGTexture", "BOTTOMRIGHT"),
         Anchor("BOTTOMRIGHT", 0, 0, "BottomRightBGTexture", "BOTTOMLEFT")
       }
     },
     LeftBGTexture = {
-      atlas = AtlasType("!CharacterCreateDropdown-NineSlice-EdgeLeft", true),
+      --- !CharacterCreateDropdown-NineSlice-EdgeLeft, true
+      file = DROPDOWN_NICE_SLICES_FILE,
+      width = 62,
+      height = 204,
+      texCoords = { left = 0.2470703125, right = 0.3681640625, top = 0.001953125, bottom = 0.798828125},
       location = {
         Anchor("TOPLEFT", 0, 0, "TopLeftBGTexture", "BOTTOMLEFT"),
         Anchor("BOTTOMLEFT", 0, 0, "BottomLeftBGTexture", "TOPLEFT")
       }
     },
     RightBGTexture = {
-      atlas = AtlasType("!CharacterCreateDropdown-NineSlice-EdgeRight", true),
+      --- !CharacterCreateDropdown-NineSlice-EdgeRight, true
+      file = DROPDOWN_NICE_SLICES_FILE,
+      width = 62,
+      height = 204,
+      texCoords = { left = 0.1240234375, right = 0.2451171875, top = 0.001953125, bottom = 0.798828125},
       location = {
         Anchor("TOPRIGHT", 0, 0, "TopRightBGTexture", "BOTTOMRIGHT"),
         Anchor("BOTTOMRIGHT", 0, 0, "BottomRightBGTexture", "TOPRIGHT")
       }
     },
     BackgroundTexture = {
-      atlas = AtlasType("CharacterCreateDropdown-NineSlice-Center", true),
+      --- CharacterCreateDropdown-NineSlice-Center", true
+      file = DROPDOWN_NICE_SLICES_FILE,
+      width = 1,
+      height = 1,
+      texCoords = { left = 0.0009765625, right = 0.001953125, top = 0.7792968, bottom = 0.78125},
       location = {
         Anchor("TOPLEFT", 0, 0, "TopLeftBGTexture", "BOTTOMRIGHT"),
         Anchor("BOTTOMRIGHT", 0, 0, "BottomRightBGTexture", "TOPLEFT")
@@ -230,15 +273,24 @@ Style.UpdateSkin("Default", {
     },    
   },
 
+      --   file = BLZ_MINIMAL_CHECKBOX_FILE,
+      -- width = 30,
+      -- height = 29,
+      -- texCoords = { left = 0.015625, right = 0.484375, top = 0.015625, bottom = 0.46875},
+
   [SUI.DropDownPopoutButton] = {
     height = 38,
 
     NormalTexture = {
-      atlas = AtlasType("charactercreate-customize-dropdownbox")
+      -- atlas = AtlasType("charactercreate-customize-dropdownbox")
+      file = DROPDOWN_FILE,
+      texCoords = { left = 0.21435546875, right = 0.36083984375, top = 0.24267578125, bottom = 0.27978515625},
     },
 
     HighlightTexture = {
-      atlas = AtlasType("charactercreate-customize-dropdownbox-open"),
+      -- atlas = AtlasType("charactercreate-customize-dropdownbox-open"),
+      file = DROPDOWN_FILE,
+      texCoords = { left = 0.50927734375, right = 0.65576171875, top = 0.24267578125, bottom = 0.27978515625},
       alphaMode = "ADD",
       alpha = 0
     },

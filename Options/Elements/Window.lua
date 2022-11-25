@@ -9,6 +9,7 @@
 Syling                "SylingTracker.Options.Elements.Window"                ""
 -- ========================================================================= --
 local WINDOW_SLICES = [[Interface\AlliedRaces\AlliedRacesUnlockingFramePart2]]
+local RED_BUTTON_FILE = [[Interface\AddOns\SylingTracker_Options\Media\BLZ_redbutton2x]]
 
 __Widget__()
 class "SUI.Window" (function(_ENV)
@@ -134,7 +135,7 @@ Style.UpdateSkin("Default", {
       }
     },
     BackgroundTexture = {
-      color = PANEL_BACKGROUND_COLOR,
+      color = { r = 0.12156, g = 0.11764, b = 0.12941, a = 0.8},
       visible = true,
       location = {
         Anchor("TOPLEFT", 10, -10),
@@ -150,20 +151,28 @@ Style.UpdateSkin("Default", {
       },
 
       NormalTexture = {
-        atlas = AtlasType("RedButton-Exit"),
+        --- RedButton-Exit
+        file = RED_BUTTON_FILE,
+        texCoords = { left =  0.15234375, right = 0.29296875, top = 0.0078125, bottom = 0.3046875},
         setAllPoints = true
       },
       PushedTexture = {
-        atlas = AtlasType("RedButton-exit-pressed"),
+        ---  RedButton-exit-pressed
+        file = RED_BUTTON_FILE,
+        texCoords = { left =  0.15234375, right = 0.29296875, top = 0.6328125, bottom = 0.9296875},
         setAllPoints = true
       },
       HighlightTexture = {
-        atlas = AtlasType("RedButton-Highlight"),
+        --- RedButton-Highlight
+        file = RED_BUTTON_FILE,
+        texCoords = { left =  0.59765625, right = 0.73828125, top = 0.0078125, bottom = 0.3046875},
         alphaMode = "ADD",
         setAllPoints = true
       },
       DisabledTexture = {
-        atlas = AtlasType("RedButton-Exit-Disabled"),
+        --- RedButton-Exit-Disabled
+        file = RED_BUTTON_FILE,
+        texCoords = { left =  0.15234375, right = 0.29296875, top = 0.3203125, bottom = 0.6171875},
         setAllPoints = true
       }
     },

@@ -8,6 +8,8 @@
 -- ========================================================================= --
 Syling              "SylingTracker.Options.Elements.Entry"                   ""
 -- ========================================================================= --
+local BLZ_CHARACTERCREATE_FILE = [[Interface\AddOns\SylingTracker_Options\Media\BLZ_CharacterCreate]]
+
 struct "SUI.EntryData" {
     { name = "text",          type = String },
     { name = "value",         type = Any },
@@ -446,22 +448,32 @@ Style.UpdateSkin("Default", {
       alpha = 0,
       
       LeftBGTexture = {
-        atlas = AtlasType("charactercreate-customize-dropdown-linemouseover-side", true),
+        --- charactercreate-customize-dropdown-linemouseover-side, true
+        file = BLZ_CHARACTERCREATE_FILE,
+        width = 6,
+        height = 20,
+        texCoords = { left = 0.99072265625, right = 0.99658203125, top = 0.00048828125, bottom = 0.02001953125},
         drawLayer = "BACKGROUND",
         location = {
           Anchor("TOPLEFT")
         }
       },
       RightBGTexture = {
-        atlas = AtlasType("charactercreate-customize-dropdown-linemouseover-side", true),
+         --- charactercreate-customize-dropdown-linemouseover-side, true
+        file = BLZ_CHARACTERCREATE_FILE,
+        width = 6,
+        height = 20,
+        --- left and right reversed
+        texCoords = { left = 0.99658203125, right = 0.99072265625, top = 0.00048828125, bottom = 0.02001953125},
         drawLayer = "BACKGROUND",
-        texCoords = { left = 1, right = 0, top = 0, bottom = 1},
         location = {
           Anchor("TOPRIGHT")
         }
       },
       MiddleBGTexture = {
-        atlas = AtlasType("charactercreate-customize-dropdown-linemouseover-middle", true),
+        --- charactercreate-customize-dropdown-linemouseover-middle, true
+        file = BLZ_CHARACTERCREATE_FILE,
+        texCoords = { left = 0.99755859375, right = 0.998046875, top = 0.00048828125, bottom = 0.02001953125},
         drawLayer = "BACKGROUND",
         location = {
           Anchor("TOPLEFT", 0, 0, "LeftBGTexture", "TOPRIGHT"),
