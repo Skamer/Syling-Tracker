@@ -210,7 +210,7 @@ class "Profiles" (function(_ENV)
 end)
 
 function OnLoad(self)
-  local spec = GetSpecialization()
+  local spec = GetActiveTalentGroup() or 1
   if not spec then
     TryToLoadProfiles()
   else
