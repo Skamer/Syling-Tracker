@@ -78,9 +78,11 @@ class "SLT.Tracker" (function(_ENV)
   local function OnLockedChanged(self, value)
     if value then 
       self:ReleaseMover()
+      Style[self].movable = false
       Style[self].resizable = false
     else 
       self:ShowMover()
+      Style[self].movable = true
       Style[self].resizable = true
     end
   end
@@ -1101,8 +1103,8 @@ Style.UpdateSkin("Default", {
 
   [SLT.Tracker] = {
     size = Size(300, 325),
-    resizable = true,
-    movable = true,
+    resizable = false,
+    movable = false,
 
     ScrollFrame = {
       location = {
