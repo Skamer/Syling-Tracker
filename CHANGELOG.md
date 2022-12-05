@@ -1,4 +1,13 @@
-# 1.1.0
+# 1.1.1
+
+**FIXES**
+
+- The item bar is now fixed, and will now display the item cooldown.
+- The resizer should now be correctly hidden if the tracker is locked after a reload or the first login.
+
+---
+
+## 1.1.0
 
 - Bumped the toc version for 10.0.2
 
