@@ -1,4 +1,22 @@
-# 1.1.1
+# 1.2.0
+
+- bumped the toc version for 10.0.5
+
+**NEW**
+
+- Added the visibility rules for trackers in the options, allowing to say if the tracker must be hidden or shown depending of instance, group size and macro conditional.
+
+**CHANGES**
+
+- Changed the way on how the Blizzard objective tracker is replaced for avoiding propagating taints issues.
+
+**FIXES**
+
+- Fixed an error lua when a player died in mythic + .
+
+---
+
+## 1.1.1
 
 **FIXES**
 

@@ -166,7 +166,7 @@ class "SLT.SettingDefinitions.Tracker" (function(_ENV)
     local show = SUI.SettingsCheckBox.Acquire(false, self)
     show:SetID(20)
     show:SetLabel("Show")
-    show:SetChecked(self.Tracker:IsShown())
+    show:SetChecked(self.Tracker.Enabled)
     show:SetUserHandler("OnCheckBoxClick", OnShowTrackerCheckBoxClick)
     self.GeneralTabControls.showTrackerButton = show
     ---------------------------------------------------------------------------
@@ -694,7 +694,7 @@ class "SLT.SettingDefinitions.Tracker" (function(_ENV)
     --- Macro -> Evaluate Macro At First
     ---------------------------------------------------------------------------
     local function OnEvaluateMacroAtFirstCheckBoxClick(checkBox)
-      local checked = checkBox:GetChecked()
+      local checked = checkBox:IsChecked()
       self.Tracker:ApplyAndSaveSetting("evaluateMacroVisibilityAtFirst", checked)
     end
 

@@ -184,6 +184,14 @@ class "SLT.Tracker" (function(_ENV)
   local function OnVisibilityRulesChanged(self)
     UPDATE_VISIBILITY_ON_EVENTS()
   end
+
+  local function OnEnabledChanged(self, new)
+    if new then 
+      UPDATE_VISIBILITY_ON_EVENTS()
+    else
+      self:Hide()
+    end
+  end
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
@@ -425,9 +433,10 @@ class "SLT.Tracker" (function(_ENV)
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
-  property "Enable" {
+  property "Enabled" {
     type = Boolean,
-    default = true
+    default = true,
+    handler = OnEnabledChanged
   }
 
   property "Views" {
@@ -613,7 +622,7 @@ class "SLT.Tracker" (function(_ENV)
   
   property "InDungeonVisibility" {
     type = TrackerVisibilityType,
-    default = "hide",
+    default = "show",
     handler = OnVisibilityRulesChanged
   }
   
@@ -661,6 +670,7 @@ class "SLT.Tracker" (function(_ENV)
 
   property "MacroVisibility" {
     type = String,
+    default = "",
     handler = OnVisibilityRulesChanged
   }
 
@@ -743,10 +753,12 @@ class "SLT.Tracker" (function(_ENV)
       Style[tracker].height = height
     elseif setting == "hidden" then 
       local hidden = ...
-      if hidden then 
-        tracker:Hide()
-      else 
-        tracker:Show()
+      if hidden then
+        tracker.Enabled = not hidden
+        -- tracker:Hide()
+      else
+        tracker.Enabled = true
+        -- tracker:Show()
       end
     elseif setting == "locked" then 
       local locked = ...
@@ -1065,7 +1077,7 @@ local function private__NewTracker(id)
   --- Set if the tracker is enabled 
   --- Currently the hidden property means if the tracker is enabled or not. 
   --- With the visibility rules is coming, we probably need to rename hidden to enable in DB.
-  tracker.Enable = not hidden 
+  tracker.Enabled = not hidden 
 
   --- Apply Settings 
   tracker:ApplySetting("position", xPos, yPos)
@@ -1191,14 +1203,18 @@ class "SLT.API" (function(_ENV)
   end
 
   __Iterator__()
-  __Arguments__ { Boolean/true}
-  function IterateTrackers(includeMainTracker)
+  __Arguments__ { Boolean/true, Boolean/true}
+  function IterateTrackers(includeMainTracker, includeDisabledTrackers)
     local yield = coroutine.yield
     for trackerId, tracker in pairs(_Trackers) do
       local isIgnored = false
 
       if trackerId == "main" and includeMainTracker == false then 
         isIgnored = true
+      end
+
+      if tracker.Enabled == false and includeDisabledTrackers == false then 
+        isIgnored = true 
       end
       
       if not isIgnored then 
@@ -1431,9 +1447,10 @@ end
 
 __SystemEvent__ "MODIFIER_STATE_CHANGED" "ACTIONBAR_PAGE_CHANGED" "UPDATE_BONUS_ACTIONBAR"
 "PLAYER_ENTERING_WORLD" "UPDATE_SHAPESHIFT_FORM" "UPDATE_STEALTH" "PLAYER_TARGET_CHANGED"
-"PLAYER_FOCUS_CHANGED" "PLAYER_REGEN_DISABLED" "PLAYER_REGEN_ENABLED" "UNIT_PET" "GROUP_ROSTER_UPDATE"
+"PLAYER_FOCUS_CHANGED" "PLAYER_REGEN_DISABLED" "PLAYER_REGEN_ENABLED" "UNIT_PET" 
+"GROUP_ROSTER_UPDATE" "CHALLENGE_MODE_START"
 function UPDATE_VISIBILITY_ON_EVENTS()
-  for _, tracker in SLT.API.IterateTrackers() do
+  for _, tracker in SLT.API.IterateTrackers(true, false) do
     local visibility = _M:EvaluateTrackerVisibility(tracker)
 
     if not visibility or (visibility ~= "hide" and visibility ~= "show") then 

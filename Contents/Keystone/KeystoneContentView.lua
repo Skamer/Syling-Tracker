@@ -377,7 +377,7 @@ class "KeystoneContentView" (function(_ENV)
       deathCountFrame.OnEnter = function()
         GameTooltip:SetOwner(deathCountFrame, "ANCHOR_TOPRIGHT")
         GameTooltip:SetText(CHALLENGE_MODE_DEATH_COUNT_TITLE:format(death), 1, 1, 1)
-        GameTooltip:AddLine(CHALLENGE_MODE_DEATH_COUNT_DESCRIPTION:format(GetTimeStringFromSeconds(timeLost, false, true)))
+        GameTooltip:AddLine(CHALLENGE_MODE_DEATH_COUNT_DESCRIPTION:format(SecondsToClock(timeLost)))
         GameTooltip:Show()
       end
 
