@@ -9,10 +9,14 @@
 Syling                      "SylingTracker.Core.Tracker"                     ""
 -- ========================================================================= --
 export {
-  __UIElement__   = SLT.__UIElement__,
-  Profiles        = SLT.Profiles,
-  Database        = SLT.Database,
-  SavedVariables  = SLT.SavedVariables
+  __UIElement__         = SLT.__UIElement__,
+  Profiles              = SLT.Profiles,
+  Database              = SLT.Database,
+  SavedVariables        = SLT.SavedVariables,
+
+  IsInInstance          = IsInInstance,
+  GetActiveKeystoneInfo = C_ChallengeMode.GetActiveKeystoneInfo,
+  SecureCmdOptionParse  = SecureCmdOptionParse
 }
 
 _Trackers       = System.Toolset.newtable(false, true)
@@ -175,6 +179,10 @@ class "SLT.Tracker" (function(_ENV)
       Style[self].TopRightBGTexture.width = new
       Style[self].BottomRightBGTexture.width = new
     end
+  end
+
+  local function OnVisibilityRulesChanged(self)
+    UPDATE_VISIBILITY_ON_EVENTS()
   end
   -----------------------------------------------------------------------------
   --                               Methods                                   --
@@ -417,6 +425,11 @@ class "SLT.Tracker" (function(_ENV)
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
+  property "Enable" {
+    type = Boolean,
+    default = true
+  }
+
   property "Views" {
     set     = false,
     default = function() return Array[SLT.IView]() end 
@@ -578,6 +591,84 @@ class "SLT.Tracker" (function(_ENV)
     default = 1,
     handler = OnBorderSizeChanged
   }
+
+  --- Display Rules properties
+  enum "TrackerDefaultVisibilityType" {
+    "show",
+    "hide"
+  }
+
+  property "DefaultVisibility" {
+    type = TrackerDefaultVisibilityType, 
+    default = "show",
+    handler = OnVisibilityRulesChanged
+  }
+
+  enum "TrackerVisibilityType" {
+    "show",
+    "hide",
+    "default",
+    "ignore"
+  }
+  
+  property "InDungeonVisibility" {
+    type = TrackerVisibilityType,
+    default = "hide",
+    handler = OnVisibilityRulesChanged
+  }
+  
+  property "InKeystoneVisibility" {
+    type = TrackerVisibilityType,
+    default = "show",
+    handler = OnVisibilityRulesChanged
+  }
+
+  property "InRaidVisibility" {
+    type = TrackerVisibilityType,
+    default = "show",
+    handler = OnVisibilityRulesChanged
+  }
+
+  property "InScenarioVisibility" {
+    type = TrackerVisibilityType,
+    default = "show",
+    handler = OnVisibilityRulesChanged
+  }
+
+  property "InArenaVisibility" {
+    type = TrackerVisibilityType,
+    default = "show",
+    handler = OnVisibilityRulesChanged
+  }
+
+  property "InBattlegroundVisibility" {
+    type = TrackerVisibilityType,
+    default = "show",
+    handler = OnVisibilityRulesChanged
+  }
+
+  property "InPartyVisibility" {
+    type = TrackerVisibilityType,
+    default = "show",
+    handler = OnVisibilityRulesChanged
+  }
+
+  property "InRaidGroupVisibility" {
+    type = TrackerVisibilityType,
+    default = "show",
+    handler = OnVisibilityRulesChanged
+  }
+
+  property "MacroVisibility" {
+    type = String,
+    handler = OnVisibilityRulesChanged
+  }
+
+  property "EvaluateMacroVisibilityAtFirst" {
+    type = Boolean,
+    default = false,
+    handler = OnVisibilityRulesChanged
+  }
   -----------------------------------------------------------------------------
   --                        Configuration Methods                            --
   -----------------------------------------------------------------------------
@@ -614,7 +705,18 @@ class "SLT.Tracker" (function(_ENV)
     "topBorderSize",
     "bottomBorderSize",
     "leftBorderSize",
-    "rightBorderSize"
+    "rightBorderSize",
+    "defaultVisibility",
+    "inDungeonVisibility",
+    "inKeystoneVisibility",
+    "inRaidVisibility",
+    "inScenarioVisibility",
+    "inArenaVisibility",
+    "inBattlegroundVisibility",
+    "inPartyVisibility",
+    "inRaidGroupVisibility",
+    "macroVisibility",
+    "evaluateMacroVisibilityAtFirst"
   }
 
   __Arguments__ { Tracker, TrackerSettingType, Any * 0}
@@ -700,6 +802,12 @@ class "SLT.Tracker" (function(_ENV)
     elseif setting:match("[%a]+BorderSize") then 
       local size = ...
       Style[tracker][setting] = size
+    elseif setting:match("[%a]+Visibility") then
+      local visibility = ...
+      Style[tracker][setting] = visibility
+    elseif setting == "evaluateMacroVisibilityAtFirst" then 
+      local isFirst = ...
+      Style[tracker][setting] = isFirst
     end
   end
 
@@ -800,8 +908,14 @@ class "SLT.Tracker" (function(_ENV)
     elseif setting:match("[%a]+BorderSize") then 
       local size = ...
       SavedVariables.Profile().Path("borders").SaveValue(setting, size)
+    elseif setting:match("[%a]+Visibility") then 
+      local visibility = ...
+      SavedVariables.Profile().Path("visibilityRules").SaveValue(setting, visibility)
+    elseif setting == evaluateMacroVisibilityAtFirst then 
+      local isFirst = ...
+      SavedVariables.Profile().Path("visibilityRules").SaveValue(setting, isFirst)
     end
-
+    
     --- We reset the base path
     SavedVariables.SetBasePath()
   end
@@ -945,6 +1059,14 @@ local function private__NewTracker(id)
   local thumbColor        = SavedVariables.Profile().Path("scrollBar").GetValue("thumbColor")
   local borderSettings    = SavedVariables.Profile().GetValue("borders")
 
+  --- Trackers visibility rules variables 
+  local visibilityRules = SavedVariables.Profile().GetValue("visibilityRules")
+
+  --- Set if the tracker is enabled 
+  --- Currently the hidden property means if the tracker is enabled or not. 
+  --- With the visibility rules is coming, we probably need to rename hidden to enable in DB.
+  tracker.Enable = not hidden 
+
   --- Apply Settings 
   tracker:ApplySetting("position", xPos, yPos)
   tracker:ApplySetting("width", width)
@@ -970,10 +1092,14 @@ local function private__NewTracker(id)
     end
   end
 
-
-
   if thumbColor then 
     tracker:ApplySetting("scrollBarThumbColor", thumbColor.r, thumbColor.g, thumbColor.b, thumbColor.a)
+  end
+
+  if visibilityRules then 
+    for visibilitySetting, value in pairs(visibilityRules) do 
+      tracker:ApplySetting(visibilitySetting, value)
+    end
   end
 
   --- NOTE: THe contents tracked will be handled later
@@ -982,7 +1108,7 @@ local function private__NewTracker(id)
   tracker.OnSizeChanged = tracker.OnSizeChanged + OnTrackerSizeChanged
   tracker.OnPositionChanged = tracker.OnPositionChanged + OnTrackerPositionChanged
 
-  --- Important: Don't forget to reset the bath path for avoiding unexpected issued 
+  --- Important: Don't forget to reset the bath path for avoiding unexpected issues
   --- for next operations
   SavedVariables.SetBasePath()
 
@@ -1221,11 +1347,106 @@ Style.UpdateSkin("Default", {
   }
 })
 
+
+function EvaluateTrackerVisibility(self, tracker)
+  local macroText         = tracker.MacroVisibility
+  local defaultVisibility = tracker.DefaultVisibility
+  local trackerVisibility
+
+  if tracker.EvaluateMacroVisibilityAtFirst and macroText and macroText ~= "" then
+    trackerVisibility = SecureCmdOptionParse(macroText)
+  end
+
+  if trackerVisibility and trackerVisibility ~= "ignore" then
+    return trackerVisibility
+  end
+
+  local inInstance, instanceType = IsInInstance() 
+  local isInKeystone = GetActiveKeystoneInfo() > 0
+
+  if isInKeystone then 
+    trackerVisibility = tracker.InKeystoneVisibility
+  elseif instanceType == "party" then
+    trackerVisibility = tracker.InDungeonVisibility
+  elseif instanceType == "raid" then 
+    trackerVisibility = tracker.InRaidVisibility
+  elseif instanceType == "scenario" then 
+    trackerVisibility = tracker.InScenarioVisibility  
+  elseif instanceType == "arena" then 
+    trackerVisibility = tracker.InArenaVisibility
+  elseif instanceType == "pvp" then 
+    trackerVisibility = tracker.inBattlegroundVisibility
+  else
+    trackerVisibility = "ignore"
+  end
+
+  if trackerVisibility and trackerVisibility ~= "ignore" then
+    return trackerVisibility
+  end
+
+  if IsInRaid()  then 
+    trackerVisibility = tracker.inRaidGroupVisibility
+  elseif IsInGroup() then 
+    trackerVisibility = tracker.InPartyVisibility
+  else 
+    trackerVisibility = "ignore"
+  end
+
+  if not trackerVisibility or trackerVisibility ~= "ignore" then 
+    return trackerVisibility
+  end
+
+  if not tracker.EvaluateMacroVisibilityAtFirst and macroText and macroText ~= "" then 
+    trackerVisibility = SecureCmdOptionParse(macroText)
+  end
+
+  return trackerVisibility
+end
+
+
+
+VISIBILITY_MACRO_TICKER_STARTED = false 
+__Async__()
+function StartVisibilityMacroTicker()
+  if VISIBILITY_MACRO_TICKER_STARTED then 
+    return 
+  end
+
+  VISIBILITY_MACRO_TICKER_STARTED = true 
+
+  while true do
+    UPDATE_VISIBILITY_ON_EVENTS()
+    Delay(0.2)
+  end
+end
+
 function OnEnable(self)
   --- Create the main tracker 
   _MainTracker = private__NewTracker("main")
 end
 
+function OnLoad(self)
+  StartVisibilityMacroTicker()
+end
+
+__SystemEvent__ "MODIFIER_STATE_CHANGED" "ACTIONBAR_PAGE_CHANGED" "UPDATE_BONUS_ACTIONBAR"
+"PLAYER_ENTERING_WORLD" "UPDATE_SHAPESHIFT_FORM" "UPDATE_STEALTH" "PLAYER_TARGET_CHANGED"
+"PLAYER_FOCUS_CHANGED" "PLAYER_REGEN_DISABLED" "PLAYER_REGEN_ENABLED" "UNIT_PET" "GROUP_ROSTER_UPDATE"
+function UPDATE_VISIBILITY_ON_EVENTS()
+  for _, tracker in SLT.API.IterateTrackers() do
+    local visibility = _M:EvaluateTrackerVisibility(tracker)
+
+    if not visibility or (visibility ~= "hide" and visibility ~= "show") then 
+      visibility = tracker.DefaultVisibility
+    end
+
+    if visibility == "show" then 
+      tracker:Show()
+    elseif visibility == "hide" then 
+      tracker:Hide()
+    end
+  end
+end
 
 __SystemEvent__()
 __Async__()

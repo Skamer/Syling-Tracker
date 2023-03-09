@@ -31,6 +31,9 @@ LibDBIcon          = LibStub("LibDBIcon-1.0")
 -- ========================================================================= --
 SLT_LOGO           = [[Interface\AddOns\SylingTracker\Media\logo]]
 
+SLT_SECURE_HANDLER_FRAME = CreateFrame("Frame", "SLT_SecureHandlerFrame", UIParent, "SecureHandlerBaseTemplate")
+SLT_SECURE_HANDLER_FRAME:SetFrameRef("ObjectiveTrackerFrame", ObjectiveTrackerFrame)
+
 local function ShowMinimapIconCallback(show)
   if show then 
     LibDBIcon:Show("SylingTracker")
@@ -62,34 +65,35 @@ function OnLoad(self)
 
   --- Apply the migrations
   self:ApplyMigrationsToDB()
+
+  FireSystemEvent("SLT_DATABASE_LOADED")
 end
 
 function OnEnable(self)
   BLIZZARD_TRACKER_VISIBLITY_CHANGED(SLT.Settings.Get("showBlizzardObjectiveTracker"))
 end
 
-
 __SystemEvent__()
+__AsyncSingle__ (true)
 function BLIZZARD_TRACKER_VISIBLITY_CHANGED(isVisible)
-  local wasInitialized = false
-  if not ObjectiveTrackerFrame.initialized then 
-    ObjectiveTracker_Initialize(ObjectiveTrackerFrame)
-    wasInitilized = true
-  end
+  --- With __AsyncSingle__ only the last call will be handled.
+  --- We are waiting the player leaves the combat as we are not allowed to update the visibility of the objective tracker 
+  --- in combat. 
+  --- NOTE: In case where the player reload the ui in combat, Blizzard gives a short time before lockdown the protected
+  --- frames, so we could show or hide the blizzard tracker directly.
+  NoCombat()
 
-  if isVisible and not wasInitialized then
-    ObjectiveTrackerFrame:SetScript("OnEvent", ObjectiveTracker_OnEvent)
-    WorldMapFrame:RegisterCallback("SetFocusedQuestID", ObjectiveTracker_OnFocusedQuestChanged, ObjectiveTrackerFrame)
-    WorldMapFrame:RegisterCallback("ClearFocusedQuestID", ObjectiveTracker_OnFocusedQuestChanged, ObjectiveTrackerFrame)
-    
-    ObjectiveTrackerFrame:Show()
-    ObjectiveTracker_Update()
-  else
-    ObjectiveTrackerFrame:Hide()
-    
-    ObjectiveTrackerFrame:SetScript("OnEvent", nil)
-    WorldMapFrame:UnregisterCallback("SetFocusedQuestID", ObjectiveTrackerFrame)
-    WorldMapFrame:UnregisterCallback("ClearFocusedQuestID", ObjectiveTrackerFrame)
+  --- We use the secure snippet for avoiding to taint the entire objective tracker.
+  if isVisible then 
+    SLT_SECURE_HANDLER_FRAME:Execute([[
+      ObjectiveTrackerFrame = self:GetFrameRef("ObjectiveTrackerFrame")
+      ObjectiveTrackerFrame:Show()
+    ]])      
+  else 
+    SLT_SECURE_HANDLER_FRAME:Execute([[
+      ObjectiveTrackerFrame = self:GetFrameRef("ObjectiveTrackerFrame")
+      ObjectiveTrackerFrame:Hide()
+    ]])
   end
 end
 

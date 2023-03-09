@@ -594,6 +594,152 @@ class "SLT.SettingDefinitions.Tracker" (function(_ENV)
     end
   end
   -----------------------------------------------------------------------------
+  --                 [Visibility Rules] Tab Builder                          --
+  -----------------------------------------------------------------------------
+  _ENTRIES_CONDTIONS = Array[SUI.EntryData]() 
+  _ENTRIES_CONDTIONS:Insert({ text = "|cffff0000Hidden|r", value = "hidden"})
+  _ENTRIES_CONDTIONS:Insert({ text = "|cff00ff00Show|r", value = "show"})
+
+  --- hidden  -> say explicitely the tracker must be hidden 
+  --- show    -> say explicitely the tracker must be shown 
+  --- default -> say to take the default value.
+  --- ignore  -> say to ignore the condition, and check the next one.
+  _ENTRIES_CONDITIONS_DROPDOWN = Array[SUI.EntryData]()
+  _ENTRIES_CONDITIONS_DROPDOWN:Insert({ text = "|cffff0000Hide|r", value = "hide"})
+  _ENTRIES_CONDITIONS_DROPDOWN:Insert({ text = "|cff00ff00Show|r", value = "show"})
+  _ENTRIES_CONDITIONS_DROPDOWN:Insert({ text = "Default", value = "default"})
+  _ENTRIES_CONDITIONS_DROPDOWN:Insert({ text = "Ignore", value = "ignore"})
+
+  --- Contains below the info for every instance or group size condition option to build
+  _INSTANCE_VISIBILITY_ROWS_INFO = {
+    [1] = { label = "Dungeon", setting = "inDungeonVisibility" },
+    [2] = { label = "Mythic +", setting = "inKeystoneVisibility"},
+    [3] = { label = "Raid", setting = "inRaidVisibility"}, 
+    [4] = { label = "Scenario", setting = "inScenarioVisibility"},
+    [5] = { label = "Arena", setting = "inArenaVisibility"},
+    [6] = { label = "Battleground", setting = "inBattlegroundVisibility"}
+  }
+
+  _GROUP_SIZE_VISIBILITY_ROWS_INFO = {
+    [1] = { label = "Party", setting = "inPartyVisibility"},
+    [2] = { label = "Raid Group", setting = "inRaidGroupVisibility" }
+  }
+
+  function BuildVisibilityRulesTab(self)
+    local function OnVisibilityEntrySelected(dropdown, entry)
+      local data    = entry:GetEntryData()
+      local setting = dropdown:GetUserData("setting")
+
+      self.Tracker:ApplyAndSaveSetting(setting, data.value)
+    end
+    ---------------------------------------------------------------------------
+    ---  Default Visibility
+    ---------------------------------------------------------------------------
+    local defaultVisibility = SUI.SettingsDropDown.Acquire(false, self)
+    defaultVisibility:SetID(10)
+    defaultVisibility:SetLabel("Default Visibility")
+    defaultVisibility:AddEntry({ text = "|cffff0000Hidden|r", value = "hide"})
+    defaultVisibility:AddEntry({ text = "|cff00ff00Show|r", value = "show"})
+    defaultVisibility:SetUserData("setting", "defaultVisibility")
+    defaultVisibility:SetUserHandler("OnEntrySelected", OnVisibilityEntrySelected)
+    defaultVisibility:SelectByValue(Style[self.Tracker].defaultVisibility)
+    self.VisibilityRulesControls.defaultVisibility = defaultVisibility
+    ---------------------------------------------------------------------------
+    ---  Instance Visibility
+    ---------------------------------------------------------------------------
+    local instanceConditionsHeader = SUI.SettingsSectionHeader.Acquire(false, self)
+    instanceConditionsHeader:SetID(100)
+    instanceConditionsHeader:SetTitle("Instance")
+    self.VisibilityRulesControls.instanceConditionsHeader = instanceConditionsHeader
+
+    for index, info in ipairs(_INSTANCE_VISIBILITY_ROWS_INFO) do 
+      local dropDownControl = SUI.SettingsDropDown.Acquire(false, self)
+      dropDownControl:SetID(100 + 10 * index)
+      dropDownControl:SetLabel(info.label)
+      dropDownControl:SetEntries(_ENTRIES_CONDITIONS_DROPDOWN)
+      dropDownControl:SetUserData("setting", info.setting)
+      dropDownControl:SetUserHandler("OnEntrySelected", OnVisibilityEntrySelected)
+      dropDownControl:SelectByValue(Style[self.Tracker][info.setting])
+      Style[dropDownControl].marginLeft = 20
+      self.VisibilityRulesControls[dropDownControl] = dropDownControl
+    end
+    ---------------------------------------------------------------------------
+    ---  Group Size Visibility
+    ---------------------------------------------------------------------------
+    local groupSizeConditionsHeader = SUI.SettingsSectionHeader.Acquire(false, self)
+    groupSizeConditionsHeader:SetID(200)
+    groupSizeConditionsHeader:SetTitle("Group Size")
+    self.VisibilityRulesControls.groupSizeConditionsHeader = groupSizeConditionsHeader
+
+    for index, info in ipairs(_GROUP_SIZE_VISIBILITY_ROWS_INFO) do 
+      local dropDownControl = SUI.SettingsDropDown.Acquire(false, self)
+      dropDownControl:SetID(200 + 10 * index)
+      dropDownControl:SetLabel(info.label)
+      dropDownControl:SetEntries(_ENTRIES_CONDITIONS_DROPDOWN)
+      dropDownControl:SetUserData("setting", info.setting)
+      dropDownControl:SetUserHandler("OnEntrySelected", OnVisibilityEntrySelected)
+      dropDownControl:SelectByValue(Style[self.Tracker][info.setting])
+      Style[dropDownControl].marginLeft = 20
+      self.VisibilityRulesControls[dropDownControl] = dropDownControl
+    end
+    ---------------------------------------------------------------------------
+    ---  Macro Visibility
+    ---------------------------------------------------------------------------
+    local macroConditionsHeader = SUI.SettingsSectionHeader.Acquire(false, self)
+    macroConditionsHeader:SetID(300)
+    macroConditionsHeader:SetTitle("Macro")
+    self.VisibilityRulesControls.macroConditionsHeader = macroConditionsHeader
+
+    ---------------------------------------------------------------------------
+    --- Macro -> Evaluate Macro At First
+    ---------------------------------------------------------------------------
+    local function OnEvaluateMacroAtFirstCheckBoxClick(checkBox)
+      local checked = checkBox:GetChecked()
+      self.Tracker:ApplyAndSaveSetting("evaluateMacroVisibilityAtFirst", checked)
+    end
+
+    local evaluateMacroAtFirst = SUI.SettingsCheckBox.Acquire(false, self)
+    evaluateMacroAtFirst:SetID(310)
+    evaluateMacroAtFirst:SetLabel("Evaluate the macro at first")
+    evaluateMacroAtFirst:SetChecked(Style[self.Tracker].evaluateMacroVisibilityAtFirst)
+    evaluateMacroAtFirst:SetUserHandler("OnCheckBoxClick", OnEvaluateMacroAtFirstCheckBoxClick)
+    Style[evaluateMacroAtFirst].marginLeft = 20
+    self.VisibilityRulesControls.evaluateMacroAtFirst = evaluateMacroAtFirst
+    ---------------------------------------------------------------------------
+    --- Macro -> Macro Visibility Text
+    ---------------------------------------------------------------------------
+    local function OnMacroTextEnterPressed(editBox)
+      local value = editBox:GetText()
+      editBox:ClearFocus()
+      self.Tracker:ApplyAndSaveSetting("macroVisibility", value)
+    end
+
+    local function OnMacroTextEscapePressed(editBox)
+      editBox:ClearFocus()
+    end
+
+    local macroText = SUI.MultiLineEditBox.Acquire(false, self)
+    macroText:SetID(320)
+    macroText:SetInstructions("[combat] hide; show")
+    macroText:SetText(Style[self.Tracker].macroVisibility)
+    macroText:SetUserHandler("OnEnterPressed", OnMacroTextEnterPressed)
+    macroText:SetUserHandler("OnEscapePressed", OnMacroTextEscapePressed)
+    Style[macroText].marginLeft   = 20 
+    Style[macroText].marginRight  = 0
+    self.VisibilityRulesControls.macroText = macroText
+  end
+  -----------------------------------------------------------------------------
+  --                 [Visibility Rules] Tab Release                          --
+  -----------------------------------------------------------------------------
+  function ReleaseVisibilityRulesTab(self)
+    for index, control in pairs(self.VisibilityRulesControls) do 
+      control:Release()
+      self.VisibilityRulesControls[index] = nil
+    end
+  end
+  
+
+  -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
   function BuildSettingControls(self)
@@ -610,6 +756,12 @@ class "SLT.SettingDefinitions.Tracker" (function(_ENV)
       name = "Contents Tracked",
       onAcquire = function() self:BuildContentsTrackedTab() end,
       onRelease = function() self:ReleaseContentsTrackedTab() end 
+    })
+
+    tabControl:AddTabPage({
+      name = "Visibility Rules",
+      onAcquire = function() self:BuildVisibilityRulesTab() end,
+      onRelease = function() self:ReleaseVisibilityRulesTab() end 
     })
 
     tabControl:Refresh()
@@ -653,6 +805,11 @@ class "SLT.SettingDefinitions.Tracker" (function(_ENV)
   property "ContentTabControls" {
     set = false,
     default = function() return Toolset.newtable(false, true) end
+  }
+
+  property "VisibilityRulesControls" {
+    set = false, 
+    default = function() return Toolset.newtable(false, true) end 
   }
 
   property "TrackerID" {

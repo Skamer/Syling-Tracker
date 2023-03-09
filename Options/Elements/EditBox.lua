@@ -13,10 +13,22 @@ class "SUI.EditBox" (function(_ENV)
   -- As we are in the SUI namespace, we need to use the full path of Scorpio
   -- EditBox for avoiding a overflow.
   inherit "Scorpio.UI.EditBox"
-
+  -----------------------------------------------------------------------------
+  --                               Methods                                   --
+  -----------------------------------------------------------------------------
   __Arguments__ { String }
   function SetInstructions(self, instructions)
     Style[self].Instructions.text = instructions
+  end
+
+  function OnAcquire(self)
+    self:InstantApplyStyle()
+  end
+
+  function OnRelease(self)
+    self:ClearAllPoints()
+    self:Hide()
+    self:SetParent()
   end
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
@@ -35,6 +47,10 @@ class "SUI.EditBox" (function(_ENV)
     end
   end
 end)
+
+__Widget__()
+class "SUI.MultiLineEditBox" { SUI.EditBox }
+
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
@@ -84,6 +100,20 @@ Style.UpdateSkin("Default", {
         Anchor("RIGHT"),
         Anchor("BOTTOM")
       }
+    }
+  },
+
+  [SUI.MultiLineEditBox] = {
+    multiLine = true,
+    maxletters = 0,
+    countInvisibleLetters = false,
+    historyLines = 10,
+    LeftBGTexture = NIL,
+    RightBGTexture = NIL,
+
+    MiddleBGTexture = {
+      color = Color(0.12, 0.12, 0.12, 0.8),
+      setAllPoints = true, 
     }
   }
 })
