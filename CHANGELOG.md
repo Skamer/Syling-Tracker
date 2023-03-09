@@ -8,11 +8,11 @@
 
 **CHANGES**
 
-- Changed the way on how the Blizzard objective tracker is replaced for avoiding propagating taints issues.
+- Changed the way on how the Blizzard objective tracker is replaced, so the addon will no longer taint it.
 
 **FIXES**
 
-- Fixed an error lua when a player died in mythic + .
+- Fixed an error lua when a player has died in mythic + .
 
 ---
 
