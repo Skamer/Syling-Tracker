@@ -1,4 +1,10 @@
-# 1.2.0
+# 1.2.1
+
+- bumped the toc version for 10.0.7
+
+---
+
+## 1.2.0
 
 - bumped the toc version for 10.0.5
 
