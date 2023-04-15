@@ -9,10 +9,7 @@
 Syling                      "SylingTracker.Core.Tracker"                     ""
 -- ========================================================================= --
 export {
-  __UIElement__         = SLT.__UIElement__,
-  Profiles              = SLT.Profiles,
-  Database              = SLT.Database,
-  SavedVariables        = SLT.SavedVariables,
+  IterateContentTypes   = API.IterateContentTypes,
 
   IsInInstance          = IsInInstance,
   GetActiveKeystoneInfo = C_ChallengeMode.GetActiveKeystoneInfo,
@@ -22,7 +19,7 @@ export {
 _Trackers       = System.Toolset.newtable(false, true)
 
 __UIElement__()
-class "SLT.TrackerMover" (function(_ENV)
+class "TrackerMover" (function(_ENV)
   inherit "Mover"
   -----------------------------------------------------------------------------
   --                               Methods                                   --
@@ -37,13 +34,13 @@ class "SLT.TrackerMover" (function(_ENV)
   --                            Constructors                                 --
   -----------------------------------------------------------------------------
   __Template__{
-    Text = SLT.FontString
+    Text = FontString
   }
   function __ctor() end 
 end)
 
 __UIElement__()
-class "SLT.Tracker" (function(_ENV)
+class "Tracker" (function(_ENV)
   inherit "Frame"
   -----------------------------------------------------------------------------
   --                               Events                                    --
@@ -210,7 +207,7 @@ class "SLT.Tracker" (function(_ENV)
   function AcquireMover(self)
     local mover = self:GetChild("Mover")
     if not mover then 
-      mover = SLT.TrackerMover.Acquire()
+      mover = TrackerMover.Acquire()
       mover:SetParent(self)
       mover:SetName("Mover")
       mover:InstantApplyStyle()
@@ -256,7 +253,7 @@ class "SLT.Tracker" (function(_ENV)
     return false
   end
 
-  __Arguments__ { SLT.IView }
+  __Arguments__ { View }
   function AddView(self, view)
     self.Views:Insert(view)
     view:SetParent(self:GetScrollContent())
@@ -270,7 +267,7 @@ class "SLT.Tracker" (function(_ENV)
     self:OnAdjustHeight()
   end
 
-  __Arguments__ { SLT.IView }
+  __Arguments__ { View }
   function RemoveView(self, view)
     self.Views:Remove(view)
 
@@ -288,7 +285,7 @@ class "SLT.Tracker" (function(_ENV)
     --- by the content type.
   end
 
-  __Arguments__ { SLT.IView }
+  __Arguments__ { IView }
   function DisplayView(self, view)
     view:OnAcquire()
     view:SetParent(self:GetScrollContent())
@@ -297,7 +294,7 @@ class "SLT.Tracker" (function(_ENV)
     self:OnAdjustHeight()
   end
 
-  __Arguments__ { SLT.IView }
+  __Arguments__ { IView }
   function HideView(self, view)
     view:OnRelease()
 
@@ -407,13 +404,7 @@ class "SLT.Tracker" (function(_ENV)
     end
   end
 
-  function OnAcquire(self)
-    self:SetPersistent(true)
-  end
-
   function OnRelease(self)
-    self:SetPersistent(false)
-
     self:ClearAllPoints()
     self:SetParent()
     self:Hide()
@@ -441,7 +432,7 @@ class "SLT.Tracker" (function(_ENV)
 
   property "Views" {
     set     = false,
-    default = function() return Array[SLT.IView]() end 
+    default = function() return Array[View]() end 
   }
 
   property "Contents" {
@@ -790,7 +781,7 @@ class "SLT.Tracker" (function(_ENV)
       local contentId, tracked = ...
       if tracked == nil then 
         --- The main tracker still track the content unless this has been said 
-        --- explicitely to no do it
+        --- explicitely to not do it
         if isMainTracker then 
           tracker:TrackContentType(contentId)
         else
@@ -923,7 +914,7 @@ class "SLT.Tracker" (function(_ENV)
     elseif setting:match("[%a]+Visibility") then 
       local visibility = ...
       SavedVariables.Profile().Path("visibilityRules").SaveValue(setting, visibility)
-    elseif setting == evaluateMacroVisibilityAtFirst then 
+    elseif setting == "evaluateMacroVisibilityAtFirst" then 
       local isFirst = ...
       SavedVariables.Profile().Path("visibilityRules").SaveValue(setting, isFirst)
     end
@@ -949,7 +940,7 @@ class "SLT.Tracker" (function(_ENV)
   -----------------------------------------------------------------------------
   __Template__{
     ScrollFrame = ScrollFrame,
-    ScrollBar   = SLT.ScrollBar,
+    ScrollBar   = ScrollBar,
     Resizer     = Resizer,
     {
       ScrollFrame = {
@@ -1000,30 +991,6 @@ class "SLT.Tracker" (function(_ENV)
   end
 end)
 
-local function OnTrackerHideHandler(self)
-  --- We save the changed to the DB only if the tracker is marked as persistent
-   --- at this time.
-  if self:IsPersistent() then
-    Profiles.PrepareDatabase()
-      
-    if Database.SelectTable(true, "trackers", self.ID) then 
-      Database.SetValue("hidden", true)
-    end
-  end
-end
-
-local function OnTrackerShowHandler(self)
-  --- We save the changed to the DB only if the tracker is marked as persistent
-   --- at this time.
-  if self:IsPersistent() then
-    Profiles.PrepareDatabase()
-      
-    if Database.SelectTable(true, "trackers", self.ID) then 
-      Database.SetValue("hidden", nil)
-    end
-  end
-end
-
 local function OnTrackerSizeChanged(self, width, height)
   self:SaveSetting("width", Round(width))
   self:SaveSetting("height", Round(height))
@@ -1037,7 +1004,7 @@ local function OnTrackerPositionChanged(self, xPos, yPos)
 end
 
 local function private__LoadContentsForTracker(tracker)
-  for _, content in SLT.API.IterateContentTypes() do 
+  for _, content in IterateContentTypes() do 
     local tracked = SavedVariables.Profile()
       .Path("trackers", tracker.ID, "contents", content.ID) 
       .GetValue("tracked")
@@ -1047,7 +1014,7 @@ local function private__LoadContentsForTracker(tracker)
 end
 
 local function private__NewTracker(id)
-  local tracker = SLT.Tracker.Acquire()
+  local tracker = Tracker.Acquire()
   tracker:SetParent(UIParent)
   tracker.ID = id 
 
@@ -1132,8 +1099,6 @@ end
 local function private__DeleteTracker(tracker)
   local trackerId = tracker.ID
 
-  Scorpio.FireSystemEvent("SLT_TRACKER_DELETED", tracker)
-
   --- Remove handlers
   tracker.OnSizeChanged = tracker.OnSizeChanged - OnTrackerSizeChanged
   tracker.OnPositionChanged = tracker.OnPositionChanged - OnTrackerPositionChanged
@@ -1150,84 +1115,75 @@ local function private__DeleteTracker(tracker)
 end
 
 -------------------------------------------------------------------------------
--- Enhancing the API                                                         --
+--                                   API                                     --
 -------------------------------------------------------------------------------
-class "SLT.API" (function(_ENV)
-
-  --- This is the public API for creating a tracker, it will prevent a tracker 
-  --- to be created if the id is "main"
-  __Arguments__ { String }
-  __Static__() function NewTracker(id)
-    if id == "main" then 
-      return 
-    end
-
-    local tracker = private__NewTracker(id)
-    --- Don't forget to add in the tracker list else it won't be created the 
-    --- next time
-    SavedVariables.Path("list", "tracker").SaveValue(id, true)
-
-    --- Load the contents tracked
-    private__LoadContentsForTracker(tracker)
-
-    Scorpio.FireSystemEvent("SLT_TRACKER_CREATED", tracker)
-
-    return tracker
+__Arguments__ { String }
+__Static__() function API.NewTracker(id)
+  if id == "main" then 
+    return 
   end
 
-  --- This is the public API for deleting a tracker, the main tracker cannot be 
-  --- deleted
-  __Arguments__ { SLT.Tracker + String}
-  __Static__() function DeleteTracker(trackerOrId)
-    local tracker
-    if type(trackerOrId) == "string" then 
-      if trackerOrId == "main" then 
-        return 
-      end
-      tracker = _Trackers[trackerOrId]
-    else
-      tracker = trackerOrId
+  local tracker = private__NewTracker(id)
+
+  -- Don't forger to add in the tracker list else it won't be created the
+  -- next time.
+  SavedVariables.Path("list", "tracker").SaveValue(id, true)
+  
+  -- Load the contents tracker 
+  private__LoadContentsForTracker(tracker)
+
+  -- Trigger a system event for outside.
+  Scorpio.FireSystemEvent("SylingTracker_TRACKER_CREATED", tracker)
+
+  return tracker
+end
+
+__Arguments__ { Tracker + String }
+__Static__() function API.DeleteTracker(trackerOrID)
+  local tracker = type(trackerOrID) == "string" and _Trackers[trackerOrID] or trackerOrID
+
+  -- We prevent the main tracker to be deleted
+  if not tracker or tracker == _MainTracker then 
+    return 
+  end
+  
+  private__DeleteTracker(tracker)
+
+  -- Trigger a system event for outside.
+  Scorpio.FireSystemEvent("SylingTracker_TRACKER_DELETED")
+end
+
+__Arguments__ { String }
+__Static__() function API.GetTracker(id)
+  return _Trackers[id]
+end
+
+__Iterator__()
+__Arguments__ { Boolean/true, Boolean/true }
+__Static__() function API.IterateTrackers(includeMainTracker, includeDisabledTrackers)
+  local yield = coroutine.yield
+
+  for trackerID, tracker in pairs(_Trackers) do 
+    local isIgnored = false 
+
+    if trackerID == "main" and includeMainTracker == false then 
+      isIgnored = true 
     end
 
-    if tracker == _MainTracker then 
-      return 
+    if tracker.Enabled == false and includeDisabledTrackers == false then 
+      isIgnored = true 
     end
 
-    private__DeleteTracker(tracker)
-  end
-
-
-  __Arguments__ { String }
-  __Static__() function GetTracker(id)
-    return _Trackers[id]
-  end
-
-  __Iterator__()
-  __Arguments__ { Boolean/true, Boolean/true}
-  function IterateTrackers(includeMainTracker, includeDisabledTrackers)
-    local yield = coroutine.yield
-    for trackerId, tracker in pairs(_Trackers) do
-      local isIgnored = false
-
-      if trackerId == "main" and includeMainTracker == false then 
-        isIgnored = true
-      end
-
-      if tracker.Enabled == false and includeDisabledTrackers == false then 
-        isIgnored = true 
-      end
-      
-      if not isIgnored then 
-        yield(trackerId, tracker)
-      end
+    if not isIgnored then 
+      yield(trackerID, tracker)
     end
   end
-end)
+end
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
-  [SLT.TrackerMover] = {
+  [TrackerMover] = {
     backdrop = {
       bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]]
     },
@@ -1239,11 +1195,11 @@ Style.UpdateSkin("Default", {
     Text = {
       text = "Click here to move the tracker",
       setAllPoints = true,
-      sharedMediaFont = FontType("PT Sans Narrow Bold", 13)
+      mediaFont = FontType("PT Sans Narrow Bold", 13)
     }
   },
 
-  [SLT.Tracker] = {
+  [Tracker] = {
     size = Size(300, 325),
     resizable = false,
     movable = false,
@@ -1363,7 +1319,6 @@ Style.UpdateSkin("Default", {
   }
 })
 
-
 function EvaluateTrackerVisibility(self, tracker)
   local macroText         = tracker.MacroVisibility
   local defaultVisibility = tracker.DefaultVisibility
@@ -1450,7 +1405,7 @@ __SystemEvent__ "MODIFIER_STATE_CHANGED" "ACTIONBAR_PAGE_CHANGED" "UPDATE_BONUS_
 "PLAYER_FOCUS_CHANGED" "PLAYER_REGEN_DISABLED" "PLAYER_REGEN_ENABLED" "UNIT_PET" 
 "GROUP_ROSTER_UPDATE" "CHALLENGE_MODE_START"
 function UPDATE_VISIBILITY_ON_EVENTS()
-  for _, tracker in SLT.API.IterateTrackers(true, false) do
+  for _, tracker in API.IterateTrackers(true, false) do
     local visibility = _M:EvaluateTrackerVisibility(tracker)
 
     if not visibility or (visibility ~= "hide" and visibility ~= "show") then 

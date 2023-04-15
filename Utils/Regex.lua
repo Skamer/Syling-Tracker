@@ -6,23 +6,10 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling                 "SylingTracker.AchievementUtils"                      ""
+Syling                  "SylingTracker.Utils.Regex"                          ""
 -- ========================================================================= --
-namespace                          "SLT"
--- ========================================================================= --
-GetTrackedAchievements = GetTrackedAchievements
 
-class "Utils" (function(_ENV)
-
-  class "Achievement" (function(_ENV)
-  
-    __Static__() function HasAchievements()
-      local achievements = GetTrackedAchievements()
-      if achievements ~= nil then 
-        return true 
-      else 
-        return false
-      end
-    end
-  end)
-end)
+__Arguments__ { String }
+__Static__() function Utils.EscapeSpecialRegexCharacter(str)
+ return str:gsub("[%(%)%.%%%+%-%*%?%[%]%^%$]", "%%%1")
+end

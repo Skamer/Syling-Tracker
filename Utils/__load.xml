@@ -1,8 +1,9 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
-  <Script file="Utils.lua"/>
-  <Script file="Math.lua"/>
-  <Script file="QuestUtils.lua"/>
-  <Script file="AchievementUtils.lua"/>
-  <Script file="TorghastUtils.lua"/>
+  <Script file="Utils.lua" />
+  <Script file="Version.lua" />
+  <Script file="Regex.lua" />
+  <Script file="Math.lua" />
+  <Script file="NavTable.lua" />
+  <Script file="Quests.lua" />
 </Ui>

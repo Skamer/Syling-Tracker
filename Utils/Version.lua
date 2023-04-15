@@ -6,8 +6,16 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling                     "SylingTracker.Utils"                             ""
+Syling                  "SylingTracker.Utils.Version"                        ""
 -- ========================================================================= --
-__Sealed__() __Final__() interface "Utils" {}
 
-namespace                  "SylingTracker.Utils"
+ADDON_VERSION     = GetAddOnMetadata("SylingTracker", "Version")
+SCORPIO_VERSION   = tonumber(GetAddOnMetadata("Scorpio", "Version"):match("%d+$"))
+
+function Utils.GetAddonVersion()
+  return ADDON_VERSION
+end
+
+function Utils.GetScorpioVersion()
+  return SCORPIO_VERSION
+end

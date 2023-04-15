@@ -41,8 +41,8 @@ class "SavedVariables" (function(_ENV)
   ALL               = false
 
   -- Caching 
-  CACHE_TABLES = System.Toolset.newtable(false, true)
-  CACHE_TABLES_ID_FETCHED = {}
+  CACHE_TABLES              = System.Toolset.newtable(false, true)
+  CACHE_TABLES_ID_FETCHED   = {}
   -----------------------------------------------------------------------------
   --                         Private Methods                                 --
   -----------------------------------------------------------------------------
@@ -75,7 +75,7 @@ class "SavedVariables" (function(_ENV)
   __Static__() function private__GetBaseTable()
     -- We don't need to check if the profile has a DB as this one has been 
     -- done previously by Path
-    if _BASE_DB == "profile" then
+    if BASE_DB == "profile" then
       local profilesDB = private__GetDB()["__profiles"]
       local profileDB = profilesDB and profilesDB[PROFILE]
       
@@ -113,7 +113,7 @@ class "SavedVariables" (function(_ENV)
       return path 
     end
 
-    return prefix .. ID_SEPERATOR_CHAR .. path
+    return prefix .. ID_SEPARATOR_CHAR .. path
   end
 
   __Arguments__ { (String + Number) * 0}
@@ -123,7 +123,7 @@ class "SavedVariables" (function(_ENV)
       if i == 1 then 
         PATH_ID = value 
       else 
-        PATH_ID = PATH_ID .. ID_SEPERATOR_CHAR .. value 
+        PATH_ID = PATH_ID .. ID_SEPARATOR_CHAR .. value 
       end 
 
       tinsert(PATH, value)
@@ -227,7 +227,7 @@ class "SavedVariables" (function(_ENV)
     local currentTable = private__GetBaseTable()
     local currentCacheId = ""
 
-    for i, k in ipairs(_PATH) do 
+    for i, k in ipairs(PATH) do 
       local t = currentTable[k]
       -- We stop if the table not exists, as SetValue not create the path
       if not t then 
@@ -313,7 +313,7 @@ class "SavedVariables" (function(_ENV)
       -- if the profile has been given, use the profile selected instead
       if not profile then 
         local specDB = private__GetSpecDB()
-        profile = _PROFILE_SELECTED
+        profile = PROFILE_SELECTED
       end
 
       if profile and profile ~= "__global" then
@@ -321,9 +321,9 @@ class "SavedVariables" (function(_ENV)
         -- We need to check the profile has a DB, all profiles created have a 
         -- DB as we have a "__profile_id" during the cureation
         if profilesDB and profilesDB[profile] then 
-          _BASE_DB = "profile"
-          _BASE_DB_ID = "profiles" .. _ID_SEPERATOR_CHAR .. profile
-          _PROFILE = profile
+          BASE_DB = "profile"
+          BASE_DB_ID = "profiles" .. ID_SEPARATOR_CHAR .. profile
+          PROFILE = profile
           return SavedVariables
         end
       end
@@ -411,7 +411,7 @@ class "SavedVariables" (function(_ENV)
     private__ImplicitPath()
 
     -- Check if the All() modifier has been used 
-    if _ALL then
+    if ALL then
       -- We start with global
       Global()
       private__SetValue(index, value)
@@ -423,7 +423,7 @@ class "SavedVariables" (function(_ENV)
           -- We need to manually change the base db and its id before calling 
           -- private__SaveValue
           BASE_DB = "profile"
-          BASE_DB_ID = "profiles" .. ID_SEPERATOR_CHAR .. profile
+          BASE_DB_ID = "profiles" .. ID_SEPARATOR_CHAR .. profile
           PROFILE = profile
           
           private__SetValue(index, value)
@@ -448,7 +448,7 @@ class "SavedVariables" (function(_ENV)
     private__ImplicitPath()
 
     --- Check if the All() modifier has been used 
-    if _ALL then
+    if ALL then
       --- We start with global
       Global()
       private__SaveValue(index, value)
@@ -460,7 +460,7 @@ class "SavedVariables" (function(_ENV)
           --- We need to manually change the base db and its id before calling 
           --- private__SaveValue
           BASE_DB = "profile"
-          BASE_DB_ID = "profiles" .. ID_SEPERATOR_CHAR .. profile
+          BASE_DB_ID = "profiles" .. ID_SEPARATOR_CHAR .. profile
           PROFILE = profile
           
           private__SaveValue(index, value)
@@ -482,7 +482,7 @@ class "SavedVariables" (function(_ENV)
     --- It does nothing if "Path" or "AbsPath" has been used for this current operation.
     private__ImplicitPath()
 
-    if _ALL then 
+    if ALL then 
       --- We start by global
       Global()
 
@@ -499,7 +499,7 @@ class "SavedVariables" (function(_ENV)
             --- We need to manually change the base db and its id before calling 
             --- private__SaveValue
             BASE_DB = "profile"
-            BASE_DB_ID = "profiles" .. ID_SEPERATOR_CHAR .. profile
+            BASE_DB_ID = "profiles" .. ID_SEPARATOR_CHAR .. profile
             PROFILE = profile
             
             fromValue = private__GetValue(fromIndex)
