@@ -1,4 +1,14 @@
-# 1.2.1
+# 1.2.2
+
+- bumped the version for 10.1.0
+
+**FIXES**
+
+- Fixed an issue where the quest module was broken when a quest with a tag was accepted.
+
+---
+
+## 1.2.1
 
 - bumped the toc version for 10.0.7
 

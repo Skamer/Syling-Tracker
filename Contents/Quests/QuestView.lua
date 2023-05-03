@@ -128,9 +128,10 @@ class "QuestView" (function(_ENV)
     -- Tag 
     local tag = data.tag 
     if tag then
-      local coords = QUEST_TAG_TCOORDS[tag.tagID]
-      if coords then
-        tagIcon:SetTexCoord(unpack(coords))
+      -- REVIEW: should we use QuestUtils_GetQuestTagAtlas instead ?
+      local atlas = QUEST_TAG_ATLAS[tag.tagID]
+      if atlas then
+        tagIcon:SetAtlas(atlas)
         tagIcon:Show() 
       else 
         tagIcon:Hide()
