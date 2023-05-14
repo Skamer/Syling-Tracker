@@ -67,8 +67,16 @@ class "UISetting" (function(_ENV)
   __Arguments__ { Any/nil}
   function SetValue(self, value)
     local id = self.id
-    local previousValue = SavedVariables.Profile().Path(UI_SETTINGS_DB_INDEX).GetValue(id) or self.Default
-    local newValue = value or self.Default
+    
+    local previousValue = SavedVariables.Profile().Path(UI_SETTINGS_DB_INDEX).GetValue(id)
+    if previousValue == nil then 
+      previousValue = self.Default
+    end
+
+    local newValue = value 
+    if newValue == nil then 
+      newValue = self.Default 
+    end
 
     -- If there no effective change in the value, don't continue.  
     if previousValue and newValue and previousValue == newValue then 

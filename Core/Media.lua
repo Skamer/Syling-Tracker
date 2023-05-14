@@ -20,6 +20,7 @@ FONTS         = {}
 SOUNDS        = {}
 STATUSBARS    = {}
 FONTS_OBJECTS = {}
+ATLASES       = {}
 
 enum "MediaType" {
   "background",
@@ -27,6 +28,16 @@ enum "MediaType" {
   "font",
   "statusbar",
   "sound"
+}
+
+struct "MediaAtlasInfo" {
+  { name = "name", type = String },
+  { name = "file", type = String + Number },
+  { name = "width", type = Number},
+  { name = "height", type = Number},
+  { name = "texCoords", type = RectType },
+  { name = "horizTile", type= Boolean },
+  { name = "vertTile", type = Boolean },
 }
 
 --- Register a media.
@@ -133,6 +144,29 @@ __Static__() function API.FetchFontObject(fontFile, fontHeight, flags)
 
   return fontObject
 end
+
+--- Register a media atlas 
+---
+--- @param the atlas name 
+--- @param the atlas definition 
+__Arguments__ { String, MediaAtlasInfo }
+__Static__() function API.RegisterMediaAtlas(name, atlas)
+  if ATLASES[name] then 
+    error(("Trying to register a media atlas with an id already used ('%s')"):format(name))
+  end
+
+  atlas.name = name 
+
+  ATLASES[name] = atlas 
+end
+
+--- Get the atlas definition 
+---
+--- @param the atlas name to return its definition 
+__Arguments__ { String }
+__Static__() function API.GetMediaAtlas(name)
+  return ATLASES[name]
+end
 -------------------------------------------------------------------------------
 -- Media: register the fonts
 -------------------------------------------------------------------------------
@@ -157,4 +191,10 @@ API.RegisterMedia("font", "DejaVuSansCondensed Italic", [[Interface\AddOns\Sylin
 -- Media: register the background
 -------------------------------------------------------------------------------
 API.RegisterMedia("background", "SylingTracker Background", [[Interface\AddOns\SylingTracker\Media\Textures\Frame-Background]])
-
+-------------------------------------------------------------------------------
+-- Media: register the atlases
+-------------------------------------------------------------------------------
+API.RegisterMediaAtlas("arrow-right", { file = [[Interface\AddOns\SylingTracker\Media\Textures\ContextMenu-Arrow]], width = 24, height = 24, texCoords = RectType(0, 32/128, 0, 1)  })
+API.RegisterMediaAtlas("arrow-bottom", { file = [[Interface\AddOns\SylingTracker\Media\Textures\ContextMenu-Arrow]], width = 24, height = 24, texCoords = RectType(32/128, 64/128, 0, 1) })
+API.RegisterMediaAtlas("arrow-left", { file = [[Interface\AddOns\SylingTracker\Media\Textures\ContextMenu-Arrow]], width = 24, height = 24, texCoords = RectType(64/128, 96/128, 0, 1) })
+API.RegisterMediaAtlas("arrow-bottom", { file = [[Interface\AddOns\SylingTracker\Media\Textures\ContextMenu-Arrow]], width = 24, height = 24, texCoords = RectType(96/128, 1, 0, 1) })

@@ -6,74 +6,45 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling                    "SylingTracker.UI.ProgressBar"                     ""
+Syling                     "SylingTracker.UI.ProgressBar"                    ""
 -- ========================================================================= --
-namespace                          "SLT"
--- ========================================================================= --
-__Recyclable__ "SylingTracker_ProgressBar%d"
+__UIElement__()
 class "ProgressBar" (function(_ENV)
   inherit "StatusBar"
 
-  function SetStatusBarTexture(self, val)
-    super.SetStatusBarTexture(self, val, "BORDER", -7)
-  end
-  
-  function OnRelease(self)
-    self:SetParent()
-    self:ClearAllPoints()
-    self:Hide()
-  end
-
-  function OnAcquire(self)
-    self:Show()
-  end 
-
-  -----------------------------------------------------------------------------
-  --                            Constructors                                 --
-  -----------------------------------------------------------------------------
   __Template__{
-    Text = SLTFontString
+    Text = FontString
   }
-  function __ctor(self) end
+  function __ctor(self) end 
 end)
-
+-------------------------------------------------------------------------------
+--                                Styles                                     --
+-------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
   [ProgressBar] = {
-    width = 150,
-    height = 24,
+    height = 20,
+    
     backdrop = { 
-      bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
-      edgeFile = [[Interface\Buttons\WHITE8X8]],
-      edgeSize = 3
+      bgFile              = [[Interface\Buttons\WHITE8X8]],
+      edgeFile            = [[Interface\Buttons\WHITE8X8]],
+      edgeSize            = 1
     },
-    backdropColor = { r = 0, g = 0, b = 0, a = 0.5},
-    backdropBorderColor = { r = 0, g = 0, b = 0, a = 1 },
-    statusBarColor = ColorType(0, 148/255, 1, 0.6),
-
-    -- StatusBar Texture
+    backdropColor         = { r = 0, g = 0, b = 0, a = 0.5},
+    backdropBorderColor   = { r = 0, g = 0, b = 0, a = 1 },
+    
     StatusBarTexture = {
-      file = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
-      location = {
-        Anchor("TOPLEFT", 3, -3),
-        Anchor("BOTTOMRIGHT", -3, 3)
-      }
+      file                = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
+      drawLayer           = "BACKGROUND"
     },
+    statusBarColor        = { r = 0, g = 148/255, b = 1, a = 0.6},
 
-    -- Text Child 
     Text = {
-      setAllPoints = true,
-      sharedMediaFont = FontType("PT Sans Bold Italic", 13),
-      textColor = Color(1, 1, 1),
-      justifyH = "CENTER",
-      justifyV = "MIDDLE",
+      text = "100%",
+      setAllPoints        = true,
+      mediaFont           = FontType("PT Sans Bold Italic", 12),
+      textColor           = Color.WHITE,
+      justifyH            = "CENTER",
+      justifyV            = "MIDDLE",
     }
   }
 })
-
-function OnLoad(self)
-  -- local pg = ProgressBar("ProgressBar #1")
-  -- pg:SetParent(UIParent)
-  -- pg:SetMinMaxValues(0, 1)
-  -- pg:SetValue(0.6)
-  -- pg:SetPoint("CENTER", 0, 200)
-end 

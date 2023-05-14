@@ -30,31 +30,35 @@ class "FontString" (function(_ENV)
   --                               Methods                                   --
   -----------------------------------------------------------------------------
   function SetMediaFont(self, font)
-    local _, fontHeight, flags = self:GetFont()
+    if font then 
+      local _, fontHeight, flags = self:GetFont()
 
-    if font.outline then 
-      if font.outline == "NORMAL" then 
-        flags = "OUTLINE"
-      elseif font.outline == "THICK" then 
-        flags = "THICKOUTLINE"
+      if font.outline then 
+        if font.outline == "NORMAL" then 
+          flags = "OUTLINE"
+        elseif font.outline == "THICK" then 
+          flags = "THICKOUTLINE"
+        end
       end
-    end
 
-    if font.monochrome then
-      if flags then 
-        flags = flags..",MONOCHROME"
-      else
-        flags = "MONOCHROME"
+      if font.monochrome then
+        if flags then 
+          flags = flags..",MONOCHROME"
+        else
+          flags = "MONOCHROME"
+        end
       end
+
+      if font.height then 
+        fontHeight = font.height
+      end
+
+      local mediaFont = GetMedia("font", font.font)
+
+      return self:SetFontObject(FetchFontObject(mediaFont, fontHeight or 10, flags))
     end
 
-    if font.height then 
-      fontHeight = font.height
-    end
-
-    local mediaFont = GetMedia("font", font.font)
-
-    return self:SetFontObject(FetchFontObject(mediaFont, fontHeight or 10, flags))
+    return self:SetFontObject(nil)
   end
 
   function SetText(self, text)
