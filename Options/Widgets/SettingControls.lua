@@ -6,79 +6,20 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling              "SylingTracker.Options.Elements.SettingControls"         ""
+Syling              "SylingTracker_Options.Widgets.SettingControls"          ""
 -- ========================================================================= --
+namespace               "SylingTracker.Options.Widgets"
+-- ========================================================================= --
+
 export {
-  ResetStyles       = SLT.Utils.ResetStyles,
-  TruncateDecimal   = SLT.Utils.Math.TruncateDecimal
+  ResetStyles       = SylingTracker.Utils.ResetStyles,
+  TruncateDecimal   = SylingTracker.Utils.TruncateDecimal,
+  GetSetting        = SylingTracker.API.GetSetting,
+  SetSetting        = SylingTracker.API.SetSetting
 }
 
 __Widget__()
-class "SUI.SettingsSectionHeader" (function(_ENV)
-  inherit "Frame"
-  -----------------------------------------------------------------------------
-  --                               Methods                                   --
-  -----------------------------------------------------------------------------
-  __Arguments__ { String/"" }
-  function SetTitle(self, title)
-    Style[self].Title.text = title
-  end
-
-  function OnAcquire(self)
-    self:InstantApplyStyle()
-  end
-
-  function OnRelease(self)
-    self:SetID(0)
-    self:Hide()
-    self:ClearAllPoints()
-    self:SetParent(nil)
-  end
-  -----------------------------------------------------------------------------
-  --                            Constructors                                 --
-  -----------------------------------------------------------------------------
-  __Template__ {
-    Title = FontString
-  }
-  function __ctor(self) end 
-
-end)
-
-__Widget__() 
-class "SUI.SettingsText" (function(_ENV)
-  inherit "Frame"
-  -----------------------------------------------------------------------------
-  --                               Methods                                   --
-  -----------------------------------------------------------------------------
-  __Arguments__{ String/"" }
-  function SetText(self, text)
-    Style[self].Text.text = text 
-  end
-
-  function OnAcquire(self)
-    self:InstantApplyStyle()
-  end
-
-  function OnRelease(self)
-    self:SetID(0)
-    self:Hide()
-    self:ClearAllPoints()
-    self:SetParent(nil)
-
-    ResetStyles(self, true)
-  end
-  -----------------------------------------------------------------------------
-  --                            Constructors                                 --
-  -----------------------------------------------------------------------------
-  __Template__ {
-    Text = FontString
-  }
-  function __ctor(self) end 
-
-end)
-
-__Widget__()
-class "SUI.SettingsEditBox" (function(_ENV)
+class "SettingsEditBox" (function(_ENV)
   inherit "Frame"
   -----------------------------------------------------------------------------
   --                               Methods                                   --
@@ -113,13 +54,13 @@ class "SUI.SettingsEditBox" (function(_ENV)
   -----------------------------------------------------------------------------
   __Template__ {
     Label = FontString,
-    EditBox = SUI.EditBox
+    EditBox = EditBox
   }
   function __ctor(self) end
 end)
 
 __Widget__()
-class "SUI.SettingsCheckBox" (function(_ENV)
+class "SettingsCheckBox" (function(_ENV)
   inherit "Frame"
   -----------------------------------------------------------------------------
   --                               Events                                    --
@@ -133,9 +74,9 @@ class "SUI.SettingsCheckBox" (function(_ENV)
     if self.Setting then 
       local value = self:IsChecked()
       if self.InvertSetting then  
-        SLT.Settings.Set(self.Setting, not value)
+        SetSetting(self.Setting, not value)
       else 
-        SLT.Settings.Set(self.Setting, value)
+        SetSetting(self.Setting, value)
       end
     end
   end
@@ -158,7 +99,7 @@ class "SUI.SettingsCheckBox" (function(_ENV)
 
   __Arguments__ { String, Boolean/false }
   function BindSetting(self, settingId, invert)
-      local value = SLT.Settings.Get(settingId)
+      local value = GetSetting(settingId)
 
       if value ~= nil then 
         
@@ -208,7 +149,7 @@ class "SUI.SettingsCheckBox" (function(_ENV)
   -----------------------------------------------------------------------------
   __Template__ {
     Label     = FontString,
-    CheckBox  = SUI.CheckBox
+    CheckBox  = CheckBox
   }
   function __ctor(self) 
     self.OnCheckBoxClickHandler = function() OnCheckBoxClickHandler(self) end
@@ -218,7 +159,7 @@ class "SUI.SettingsCheckBox" (function(_ENV)
 end)
 
 __Widget__()
-class "SUI.SettingsDropDown" (function(_ENV)
+class "SettingsDropDown" (function(_ENV)
   inherit "Frame"
   -----------------------------------------------------------------------------
   --                               Events                                    --
@@ -233,12 +174,12 @@ class "SUI.SettingsDropDown" (function(_ENV)
     Style[self].Label.text = label 
   end
 
-  __Arguments__ { SUI.EntryData}
+  __Arguments__ { EntryData}
   function AddEntry(self, entry)
     self:GetChild("DropDown"):AddEntry(entry)
   end
 
-  __Arguments__ { Array[SUI.EntryData] }
+  __Arguments__ { Array[EntryData] }
   function SetEntries(self, entries)
     self:GetChild("DropDown"):SetEntries(entries)
   end
@@ -272,14 +213,13 @@ class "SUI.SettingsDropDown" (function(_ENV)
   -----------------------------------------------------------------------------
   __Template__ {
     Label     = FontString,
-    DropDown  = SUI.DropDown
+    DropDown  = DropDown
   }
   function __ctor(self) end 
 end)
 
-
 __Widget__()
-class "SUI.SettingsSlider" (function(_ENV)
+class "SettingsSlider" (function(_ENV)
   inherit "Frame"
   -----------------------------------------------------------------------------
   --                               Events                                    --
@@ -317,14 +257,14 @@ class "SUI.SettingsSlider" (function(_ENV)
     self:GetChild("Slider"):SetValue(value)
   end
 
-  __Arguments__ { SUI.Slider.Label, Any/nil }
+  __Arguments__ { Slider.Label, Any/nil }
   function SetSliderLabelFormatter(self, labelType, value)
     self:GetChild("Slider"):SetLabelFormatter(labelType, value)
   end
 
     __Arguments__ { String }
   function BindSetting(self, settingId)
-      local value = SLT.Settings.Get(settingId)
+      local value = GetSetting(settingId)
 
       if value ~= nil then 
         self:SetValue(value)
@@ -363,16 +303,15 @@ class "SUI.SettingsSlider" (function(_ENV)
   -----------------------------------------------------------------------------
   __Template__ {
     Label   = FontString,
-    Slider  = SUI.Slider
+    Slider  = Slider
   }
   function __ctor(self)
     self.OnValueChanged = self.OnValueChanged + OnValueChangedHandler 
   end
 end)
 
-
 __Widget__()
-class "SUI.SettingsColorPicker" (function(_ENV)
+class "SettingsColorPicker" (function(_ENV)
   inherit "Frame"
   -----------------------------------------------------------------------------
   --                               Events                                    --
@@ -415,7 +354,7 @@ class "SUI.SettingsColorPicker" (function(_ENV)
   -----------------------------------------------------------------------------
   __Template__ {
     Label = FontString,
-    ColorPicker = SUI.ColorPicker
+    ColorPicker = ColorPicker
   }
   function __ctor(self) end
 
@@ -424,54 +363,7 @@ end)
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
-  [SUI.SettingsText] = {
-    height = 35,
-    marginRight = 0,
-
-    Text = {
-      fontObject = GameFontNormal,
-      textColor = NORMAL_FONT_COLOR,
-      setAllPoints = true,
-    }
-  },
-
-  [SUI.SettingsSectionHeader] = {
-    height = 45,
-    marginRight = 0,
-
-    Title = {
-      justifyH = "LEFT",
-      justifyV = "TOP",
-      fontObject = GameFontHighlightLarge,
-      location = {
-        Anchor("TOPLEFT", 7, -16)
-      }
-    }
-  },
-
-  [SUI.SettingsCheckBox] = {
-    height = 35,
-    marginRight = 0,
-
-    Label = {
-      fontObject = GameFontNormal,
-      textColor = NORMAL_FONT_COLOR,
-      justifyH = "LEFT",
-      wordWrap = false,
-      location = {
-        Anchor("LEFT"),
-        Anchor("RIGHT", 0, 0, nil, "CENTER"),  
-      }
-    },
-
-    CheckBox = {
-      location = {
-        Anchor("LEFT", 0, 0, "Label", "RIGHT")
-      }
-    }
-  },
-
-  [SUI.SettingsEditBox] = {
+  [SettingsEditBox] = {
     height  = 35,
     marginRight = 0,
 
@@ -493,7 +385,29 @@ Style.UpdateSkin("Default", {
     }
   },
 
-  [SUI.SettingsDropDown] = {
+  [SettingsCheckBox] = {
+    height = 35,
+    marginRight = 0,
+
+    Label = {
+      fontObject = GameFontNormal,
+      textColor = NORMAL_FONT_COLOR,
+      justifyH = "LEFT",
+      wordWrap = false,
+      location = {
+        Anchor("LEFT"),
+        Anchor("RIGHT", 0, 0, nil, "CENTER"),  
+      }
+    },
+
+    CheckBox = {
+      location = {
+        Anchor("LEFT", 0, 0, "Label", "RIGHT")
+      }
+    }
+  },
+
+  [SettingsDropDown] = {
     height = 35,
     marginRight = 0,
 
@@ -513,10 +427,9 @@ Style.UpdateSkin("Default", {
         Anchor("LEFT", 0, 0, "Label", "RIGHT")
       }
     }
-
   },
-  
-  [SUI.SettingsSlider] = {
+
+  [SettingsSlider] = {
     height  = 35,
     marginRight = 0,
 
@@ -538,7 +451,7 @@ Style.UpdateSkin("Default", {
     }
   },
 
-  [SUI.SettingsColorPicker] = {
+  [SettingsColorPicker] = {
     height = 35,
     marginRight = 0,
 

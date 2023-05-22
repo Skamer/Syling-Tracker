@@ -6,10 +6,13 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling              "SylingTracker.Options.Elements.CheckBox"                ""
+Syling              "SylingTracker_Options.Widgets.CheckBox"                 ""
 -- ========================================================================= --
+namespace               "SylingTracker.Options.Widgets"
+-- ========================================================================= --
+
 __Widget__()
-class "SUI.CheckBox" (function(_ENV)
+class "CheckBox" (function(_ENV)
   inherit "CheckButton"
   -----------------------------------------------------------------------------
   --                               Methods                                   --
@@ -28,7 +31,7 @@ end)
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
-  [SUI.CheckBox] = {
+  [CheckBox] = {
     size = Size(30, 29),
     checked = false,
 

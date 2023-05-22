@@ -6,12 +6,15 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling              "SylingTracker.Options.Elements.ScrollBar"               ""
+Syling              "SylingTracker_Options.Widgets.ScrollBar"                ""
 -- ========================================================================= --
+namespace               "SylingTracker.Options.Widgets"
+-- ========================================================================= --
+
 LEFT_BUTTON_NAME = "LeftButton"
 
 __Widget__()
-class "SUI.ScrollBarThumb" (function(_ENV)
+class "ScrollBarThumb" (function(_ENV)
   inherit "Button"
   -----------------------------------------------------------------------------
   --                               Methods                                   --
@@ -105,7 +108,7 @@ class "SUI.ScrollBarThumb" (function(_ENV)
 end)
 
 __Widget__()
-class "SUI.ScrollBar" (function(_ENV)
+class "ScrollBar" (function(_ENV)
   inherit "Frame"
   -----------------------------------------------------------------------------
   --                               Events                                    --
@@ -417,7 +420,7 @@ class "SUI.ScrollBar" (function(_ENV)
     Track = Frame,
     {
       Track = {
-        Thumb = SUI.ScrollBarThumb
+        Thumb = ScrollBarThumb
       }
     }
   }
@@ -440,7 +443,7 @@ end)
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
-  [SUI.ScrollBarThumb] = {
+  [ScrollBarThumb] = {
        width = 8,
         height = 150,
 
@@ -477,7 +480,7 @@ Style.UpdateSkin("Default", {
         }    
   },
 
-  [SUI.ScrollBar] = {
+  [ScrollBar] = {
     size = Size(8, 560),
 
     Track = {

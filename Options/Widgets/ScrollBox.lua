@@ -6,10 +6,13 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling              "SylingTracker.Options.Elements.ScrollBox"               ""
+Syling              "SylingTracker_Options.Widgets.ScrollBox"                ""
 -- ========================================================================= --
+namespace               "SylingTracker.Options.Widgets"
+-- ========================================================================= --
+
 __Widget__()
-class "SUI.ScrollFrame" (function(_ENV)
+class "ScrollFrame" (function(_ENV)
   -- We use "Scorpio.UI" namespace for avoiding conflict as there are the same
   -- name "ScrollFrame"
   inherit "Scorpio.UI.ScrollFrame"
@@ -24,14 +27,14 @@ class "SUI.ScrollFrame" (function(_ENV)
   --                            Constructors                                 --
   -----------------------------------------------------------------------------
   __Template__{
-    ScrollBar = SUI.ScrollBar
+    ScrollBar = ScrollBar
   }
   function __ctor(self) end 
 end)
 
 __Widget__()
-class "SUI.ScrollBox" (function(_ENV)
-  inherit "SUI.ScrollFrame"
+class "ScrollBox" (function(_ENV)
+  inherit "ScrollFrame"
   -----------------------------------------------------------------------------
   --                               Handlers                                  --
   -----------------------------------------------------------------------------
@@ -87,7 +90,7 @@ class "SUI.ScrollBox" (function(_ENV)
 end)
 
 __Widget__()
-class "SUI.FauxScrollFrame" (function(_ENV)
+class "FauxScrollFrame" (function(_ENV)
   inherit "Frame"
   -----------------------------------------------------------------------------
   --                               Methods                                   --
@@ -103,7 +106,7 @@ class "SUI.FauxScrollFrame" (function(_ENV)
   --                            Constructors                                 --
   -----------------------------------------------------------------------------
   __Template__{
-    ScrollBar = SUI.ScrollBar,
+    ScrollBar = ScrollBar,
     ScrollContent = Frame
   }
   function __ctor(self) end 
@@ -111,8 +114,8 @@ end)
 
 
 __Widget__()
-class "SUI.FauxScrollBox" (function(_ENV)
-  inherit "SUI.FauxScrollFrame"
+class "FauxScrollBox" (function(_ENV)
+  inherit "FauxScrollFrame"
   -----------------------------------------------------------------------------
   --                               Handlers                                  --
   -----------------------------------------------------------------------------
@@ -191,7 +194,7 @@ end)
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
-  [SUI.ScrollFrame] = {
+  [ScrollFrame] = {
     ScrollBar = {
       location = {
         Anchor("TOPLEFT", 8, -16, nil, "TOPRIGHT"),
@@ -199,7 +202,7 @@ Style.UpdateSkin("Default", {
       }      
     }
   },
-  [SUI.FauxScrollFrame] = {
+  [FauxScrollFrame] = {
     ScrollBar = {
       location = {
         Anchor("TOPLEFT", 8, -16, nil, "TOPRIGHT"),

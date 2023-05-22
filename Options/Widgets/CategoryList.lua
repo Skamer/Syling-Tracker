@@ -6,19 +6,21 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling              "SylingTracker.Options.Elements.CategoryList"            ""
+Syling              "SylingTracker_Options.Widgets.CategoryList"             ""
+-- ========================================================================= --
+namespace               "SylingTracker.Options.Widgets"
 -- ========================================================================= --
 export {
-  ResetStyles = SLT.Utils.ResetStyles
+  ResetStyles = SylingTracker.Utils.ResetStyles
 }
 
 __Widget__()
-class "SUI.CategoryEntryButton" (function(_ENV)
-  inherit "Button" extend "SUI.IButtonEntry"
+class "CategoryEntryButton" (function(_ENV)
+  inherit "Button" extend "IButtonEntry"
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------  
-  __Arguments__ { SUI.EntryData }
+  __Arguments__ { EntryData }
   function SetupFromEntryData(self, data)
     super.SetupFromEntryData(self, data)
 
@@ -62,25 +64,24 @@ class "SUI.CategoryEntryButton" (function(_ENV)
   --                               Properties                                --
   -----------------------------------------------------------------------------
   property "Selected" {
-    type = Boolean,
-    default = false,
-    handler = RefreshState
+    type      = Boolean,
+    default   = false,
+    handler   = RefreshState
   }
 
   __Template__ {
-    Label = FontString,
-    Texture = Texture
+    Label     = FontString,
+    Texture   = Texture
   }
   function __ctor(self)
     self.OnEnter = self.OnEnter + function() self:RefreshState() end
     self.OnLeave = self.OnLeave + function() self:RefreshState() end 
     self.OnClick = self.OnClick + function() self.Selected = true end
   end
-
 end)
 
 __Widget__()
-class "SUI.CategoryHeader" (function(_ENV)
+class "CategoryHeader" (function(_ENV)
   inherit "Frame"
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
@@ -89,12 +90,12 @@ class "SUI.CategoryHeader" (function(_ENV)
     Label = FontString
   }
   function __ctor(self) end 
-
 end)
 
+
 __Widget__()
-class "SUI.Category" (function(_ENV)
-  inherit "Frame" extend "SUI.IEntryProvider"
+class "Category" (function(_ENV)
+  inherit "Frame" extend "IEntryProvider"
   -----------------------------------------------------------------------------
   --                               Events                                    --
   -----------------------------------------------------------------------------
@@ -147,7 +148,7 @@ class "SUI.Category" (function(_ENV)
     end
   end
 
-  __Arguments__ { SUI.IEntry }
+  __Arguments__ { IEntry }
   function GetEntryIndex(self, entry)
     for index, e in pairs(self.Entries) do 
       if e == entry then 
@@ -156,14 +157,14 @@ class "SUI.Category" (function(_ENV)
     end
   end
 
-  __Arguments__ { Number, -SUI.IEntry }
+  __Arguments__ { Number, -IEntry }
   function AcquireEntry(self, index, entryClass)
     local entry = entryClass.Acquire()
     entry:SetParent(self)
     entry:SetID(index)
     
     --- If the Entry is a button, register onClick
-    if Class.IsObjectType(entry, SUI.IButtonEntry) then 
+    if Class.IsObjectType(entry, IButtonEntry) then 
       entry.OnClick = entry.OnClick + self.OnEntryClick
     end
 
@@ -235,10 +236,10 @@ class "SUI.Category" (function(_ENV)
   --                            Constructors                                 --
   -----------------------------------------------------------------------------
   __Template__ {
-    Header = SUI.CategoryHeader
+    Header = CategoryHeader
   }
   function __ctor(self)
-    self.DefaultEntryClass = SUI.CategoryEntryButton
+    self.DefaultEntryClass = CategoryEntryButton
 
     -- Create the event handlers 
     self.OnEntryClick = function(entry) OnEntryClick(self, entry) end
@@ -248,7 +249,7 @@ end)
 
 
 __Widget__()
-class "SUI.CategoryList" (function(_ENV)
+class "CategoryList" (function(_ENV)
   inherit "Frame"
   -----------------------------------------------------------------------------
   --                               Events                                    --
@@ -282,7 +283,7 @@ class "SUI.CategoryList" (function(_ENV)
       return 
     end
 
-    local category = SUI.Category.Acquire() 
+    local category = Category.Acquire() 
     local index = self.CategoriesCount + 1
 
     category:SetParent(self)
@@ -296,7 +297,7 @@ class "SUI.CategoryList" (function(_ENV)
     self.CategoriesCount = index
   end
 
-  __Arguments__ { SUI.EntryData, String }
+  __Arguments__ { EntryData, String }
   function AddCategoryEntry(self, entryData, categoryId)
     local category = self:AcquireCategory(categoryId)
 
@@ -314,7 +315,7 @@ class "SUI.CategoryList" (function(_ENV)
   end
   
 
-  __Arguments__ { String, SUI.EntryData }
+  __Arguments__ { String, EntryData }
   function RemoveEntry(self, categoryId, entryData)
     local category = self.Categories[categoryId]
     if category then 
@@ -367,12 +368,11 @@ class "SUI.CategoryList" (function(_ENV)
     self.OnCategoryEntrySelected = function(category, entry) OnCategoryEntrySelected(self, category, entry) end
   end
 end)
-
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
-  [SUI.CategoryEntryButton] = { 
+  [CategoryEntryButton] = { 
     width = 175,
     height = 20,
 
@@ -398,17 +398,15 @@ Style.UpdateSkin("Default", {
     }
   },
 
-  [SUI.CategoryHeader] = {
-    width = 175,
+  [CategoryHeader] = {
+    width = 225, -- 175
     height = 30,
-    
-    BackgroundTexture = {
-      atlas = AtlasType("Options_CategoryHeader_1", true),
-      drawLayer = "ARTWORK",
-      location = {
-        Anchor("TOPLEFT")
-      }
+
+    backdrop = {
+      bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
     },
+  
+    backdropColor       = { r = 1, g = 1, b = 1, a = 0.1},
 
     Label = {
       fontObject = GameFontHighlightMedium,
@@ -421,8 +419,8 @@ Style.UpdateSkin("Default", {
     }
   },
 
-  [SUI.Category] = {
-    width = 175,
+  [Category] = {
+    width = 225,
     height = 30,
     layoutManager = Layout.VerticalLayoutManager(),
     paddingTop = 32,
@@ -437,13 +435,13 @@ Style.UpdateSkin("Default", {
       }
     },
 
-    [SUI.CategoryEntryButton] = {
+    [CategoryEntryButton] = {
       marginRight = 0
     }
   },
 
-  [SUI.CategoryList] = {
-    width = 200,
+  [CategoryList] = {
+    width = 225,
     height = 30,
     layoutManager = Layout.VerticalLayoutManager(),
     paddingTop = 32,
@@ -452,6 +450,3 @@ Style.UpdateSkin("Default", {
     paddingRight = 0,    
   }
 })
-
-
-

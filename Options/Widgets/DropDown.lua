@@ -6,13 +6,16 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling          "SylingTracker.Options.Elements.DropDown"                    ""
+Syling            "SylingTracker_Options.Widgets.DropDown"                   ""
 -- ========================================================================= --
-__Widget__()
-class "SUI.DropDownPopout" { SUI.GridEntriesFauxScrollBox }
+namespace               "SylingTracker.Options.Widgets"
+-- ========================================================================= --
 
 __Widget__()
-class "SUI.DropDownPopoutButton" (function(_ENV)
+class "DropDownPopout" { GridEntriesFauxScrollBox }
+
+__Widget__()
+class "DropDownPopoutButton" (function(_ENV)
   inherit "Button"
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
@@ -33,8 +36,8 @@ class "SUI.DropDownPopoutButton" (function(_ENV)
 end)
 
 __Widget__()
-class "SUI.DropDown" (function(_ENV)
-  inherit "Frame" extend "SUI.IEntryProvider"
+class "DropDown" (function(_ENV)
+  inherit "Frame" extend "IEntryProvider"
   -----------------------------------------------------------------------------
   --                               Events                                    --
   -----------------------------------------------------------------------------
@@ -53,7 +56,7 @@ class "SUI.DropDown" (function(_ENV)
     local popout = self.popout
 
     if not popout then 
-      popout = SUI.DropDownPopout.Acquire()
+      popout = DropDownPopout.Acquire()
 
       local toggleButton = self:GetChild("TogglePopoutButton")
       popout:InstantApplyStyle()
@@ -118,7 +121,7 @@ class "SUI.DropDown" (function(_ENV)
     end
   end
 
-  __Arguments__ { SUI.EntryData/nil }
+  __Arguments__ { EntryData/nil }
   function SelectEntry(self, entry)
     Style[self].TogglePopoutButton.SelectedName.text = entry.text
 
@@ -128,13 +131,13 @@ class "SUI.DropDown" (function(_ENV)
   --                               Properties                                --
   -----------------------------------------------------------------------------
   property "SelectedEntry" {
-    type = SUI.EntryData
+    type = EntryData
   }
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
   -----------------------------------------------------------------------------
   __Template__{
-    TogglePopoutButton = SUI.DropDownPopoutButton
+    TogglePopoutButton = DropDownPopoutButton
   }
   function __ctor(self)
     local toggleButton = self:GetChild("TogglePopoutButton")
@@ -150,7 +153,7 @@ end)
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
-  [SUI.DropDownPopout] = {
+  [DropDownPopout] = {
     width = 230,
     ScrollBar = {
       location = {
@@ -230,7 +233,7 @@ Style.UpdateSkin("Default", {
     },    
   },
 
-  [SUI.DropDownPopoutButton] = {
+  [DropDownPopoutButton] = {
     height = 38,
 
     NormalTexture = {
@@ -256,7 +259,7 @@ Style.UpdateSkin("Default", {
     }    
   },
 
-  [SUI.DropDown] = {
+  [DropDown] = {
     size = Size(280, 26),
     TogglePopoutButton = {
       height = 38,

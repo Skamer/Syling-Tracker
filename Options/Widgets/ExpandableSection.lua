@@ -6,14 +6,17 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling          "SylingTracker.Options.Elements.ExpandableSection"           ""
+Syling          "SylingTracker_Options.Widgets.ExpandableSection"            ""
 -- ========================================================================= --
+namespace               "SylingTracker.Options.Widgets"
+-- ========================================================================= --
+
 export {
-  ResetStyles = SLT.Utils.ResetStyles,
+  ResetStyles = SylingTracker.Utils.ResetStyles,
 }
 
 __Widget__()
-class "SUI.ExpandableSection" (function(_ENV)
+class "ExpandableSection" (function(_ENV)
   inherit "Frame"
   -----------------------------------------------------------------------------
   --                               Handlers                                  --
@@ -101,7 +104,7 @@ end)
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
-  [SUI.ExpandableSection] = {
+  [ExpandableSection] = {
     height = 25,
     width = 200,
     layoutManager = Layout.VerticalLayoutManager(),

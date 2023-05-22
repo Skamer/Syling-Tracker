@@ -6,11 +6,14 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling              "SylingTracker.Options.Elements.Panel"                   ""
+Syling              "SylingTracker_Options.Widgets.Panel"                    ""
 -- ========================================================================= --
+namespace               "SylingTracker.Options.Widgets"
+-- ========================================================================= --
+
 __Widget__()
-class "SUI.Panel" (function(_ENV)
-  inherit "SUI.Window"
+class "Panel" (function(_ENV)
+  inherit "Window"
   -----------------------------------------------------------------------------
   --                               Events                                    --
   -----------------------------------------------------------------------------
@@ -23,8 +26,8 @@ class "SUI.Panel" (function(_ENV)
     Style[self].Footer.AddonVersion.text = version
   end
 
-  function SetAddonLogo(self, logoFile)
-    Style[self].Footer.AddonLogo.file = logoFile
+  function SetAddonLogo(self, file)
+    Style[self].Footer.AddonLogo.file = file
   end
 
   __Arguments__ { String, String/"" }
@@ -32,7 +35,7 @@ class "SUI.Panel" (function(_ENV)
     self:GetChild("Categories"):CreateCategory(id, text)
   end 
 
-  __Arguments__ { SUI.EntryData, String }
+  __Arguments__ { EntryData, String }
   function AddCategoryEntry(self, entryData, categoryId)
     self:GetChild("Categories"):AddCategoryEntry(entryData, categoryId)
 
@@ -89,15 +92,12 @@ class "SUI.Panel" (function(_ENV)
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
   -----------------------------------------------------------------------------
-  --- This is important to instant apply style for the scrollbox have a valid
-  --- size
-  __InstantApplyStyle__()
   __Template__ {
-    Categories = SUI.CategoryList,
+    Categories = CategoryList,
     Footer = Frame,
     InnerTexture = Texture,
-    Header = Frame,
-    Container = SUI.ScrollBox,
+    Header =  Frame,
+    Container = ScrollBox,
     {
       Footer = {
         AddonLogo = Texture,
@@ -109,13 +109,12 @@ class "SUI.Panel" (function(_ENV)
       }
     }
   }
-  function __ctor(self) end
+  function __ctor(self) end 
 end)
 
-
 __Widget__()
-class "SUI.SettingsPanel" (function(_ENV)
-  inherit "SUI.Panel"
+class "SettingsPanel" (function(_ENV)
+  inherit "Panel"
   -----------------------------------------------------------------------------
   --                               Handlers                                  --
   -----------------------------------------------------------------------------
@@ -167,30 +166,30 @@ class "SUI.SettingsPanel" (function(_ENV)
   end
 end)
 
+
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
-  [SUI.Panel] = {
-    width = 1051,
-    height = 775,
+  [Panel] = {
+    width   = 1051,
+    height  = 775,
 
-    Text = {
+    Title = {
       location = {
         Anchor("TOP", 0, -15),
         Anchor("LEFT", 60, 0),
         Anchor("RIGHT", -60, 0)
-      } 
+      }
     },
 
     Categories = {
-      visible = true,
       location = {
-        Anchor("TOPLEFT", 20, -15),
+        Anchor("TOPLEFT", 23, -15)
       },
 
-      [SUI.Category] = {
-        paddingTop = 40 
+      [Category] = {
+        paddingTop = 40
       }
     },
 
@@ -205,11 +204,12 @@ Style.UpdateSkin("Default", {
       }
     },
 
+
     Header = {
 
       height = 50,
       location = {
-        Anchor("TOP", 0, -45),
+        Anchor("TOP", 0, -30),
         Anchor("LEFT", 40, 0, "Categories", "RIGHT"),
         Anchor("RIGHT", -30, 0),
       },
@@ -242,10 +242,10 @@ Style.UpdateSkin("Default", {
         Anchor("BOTTOM", 0, 5, "Footer", "TOP")
       }
     },
-
+    
     Footer = {
       height = 36,
-      visible = true,
+      visible = true, 
       location = {
         Anchor("BOTTOM", 0, 10),
         Anchor("LEFT", 15, 0),
@@ -268,7 +268,7 @@ Style.UpdateSkin("Default", {
           Anchor("LEFT", 5, 0, "AddonLogo", "RIGHT")
         }
 
-      }
+      }      
     }
   }
 })

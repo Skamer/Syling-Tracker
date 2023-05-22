@@ -6,19 +6,22 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling            "SylingTracker.Options.Elements.Slider"                    ""
+Syling              "SylingTracker_Options.Widgets.Slider"                   ""
 -- ========================================================================= --
+namespace               "SylingTracker.Options.Widgets"
+-- ========================================================================= --
+
 export {
-  GetDecimalCount = SLT.Utils.Math.GetDecimalCount,
-  TruncateDecimal = SLT.Utils.Math.TruncateDecimal
+  GetDecimalCount = SylingTracker.Utils.GetDecimalCount,
+  TruncateDecimal = SylingTracker.Utils.TruncateDecimal
 }
 
 __Widget__()
-class "SUI.MinimalSlider"  { Slider }
+class "MinimalSlider"  { Slider }
 
 
 __Widget__()
-class "SUI.Slider" (function(_ENV)
+class "Slider" (function(_ENV)
   inherit "Frame"
   -----------------------------------------------------------------------------
   --                               Events                                    --
@@ -61,7 +64,7 @@ class "SUI.Slider" (function(_ENV)
     ---   0.25                2
     ---   0.002               3
     ---   0.200               1 
-    local valueRounded = SLT.Utils.Math.TruncateDecimal(new, self.DecimalCount, true)
+    local valueRounded = TruncateDecimal(new, self.DecimalCount, true)
 
     self.Value = valueRounded
   end
@@ -79,7 +82,7 @@ class "SUI.Slider" (function(_ENV)
 
 
   local function OnValueStepChangedHandler(self, new)
-    self.DecimalCount = SLT.Utils.Math.GetDecimalCount(new)
+    self.DecimalCount = GetDecimalCount(new)
     Style[self].Slider.valueStep = new
   end
   -----------------------------------------------------------------------------
@@ -129,7 +132,7 @@ class "SUI.Slider" (function(_ENV)
     ---   0.25                2
     ---   0.002               3
     ---   0.200               1 
-    local valueRounded = SLT.Utils.Math.TruncateDecimal(value, self.DecimalCount, true)
+    local valueRounded = TruncateDecimal(value, self.DecimalCount, true)
 
     self.Value = valueRounded
   end
@@ -194,7 +197,7 @@ class "SUI.Slider" (function(_ENV)
   --                            Constructors                                 --
   -----------------------------------------------------------------------------
   __Template__ {
-    Slider = SUI.MinimalSlider,
+    Slider = MinimalSlider,
     Back = Button,
     Forward = Button,
     LeftText = FontString,
@@ -238,7 +241,7 @@ end)
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
-  [SUI.MinimalSlider] = {
+  [MinimalSlider] = {
     width = 200,
     height = 10,
     orientation = "HORIZONTAL",
@@ -271,7 +274,7 @@ Style.UpdateSkin("Default", {
     }
   },
 
-  [SUI.Slider] = {
+  [Slider] = {
     width   = 250,
     height  = 40,
 

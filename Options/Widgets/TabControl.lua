@@ -6,44 +6,28 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling              "SylingTracker.Options.Elements.TabControl"              ""
+Syling              "SylingTracker_Options.Widgets.TabControl"               ""
 -- ========================================================================= --
+namespace               "SylingTracker.Options.Widgets"
+-- ========================================================================= --
+
 __Widget__()
-class "SUI.TabButton" (function(_ENV)
+class "TabButton" (function(_ENV)
   inherit "Button"
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
-  function GetAtlas(self)
-    if self.Selected then
-      return self.SelectedLeftTexture, self.SelectedRightTexture, self.SelectedMiddleTexture
-    end
-
-    if self:IsMouseOver() then 
-      return self.OverLeftTexture, self.OverRightTexture, self.OverMiddleTexture
-    end
-
-    return self.UpLeftTexture, self.UpRightTexture, self.UpMiddleTexture
-  end
-
-  function UpdateAtlas(self)
-    local leftAtlas, rightAtlas, middleAtlas = self:GetAtlas()
-    Style[self].LeftBGTexture.atlas = leftAtlas
-    Style[self].RightBGTexture.atlas = rightAtlas
-    Style[self].MiddleBGTexture.atlas = middleAtlas
-  end
-
   function UpdateState(self)
-    self:UpdateAtlas()
-
-    local text = self:GetChild("Text")
-    if self.Selected then
-      text:SetPoint("BOTTOM", 0, 6)
-      text:SetFontObject("GameFontHighlightSmall")
-    else 
-      text:SetPoint("BOTTOM", 0, 4)
-      text:SetFontObject("GameFontNormalSmall")
-    end 
+    if self.Selected then 
+      Style[self].BottomBGTexture.vertexColor = Color.ORANGE
+      Style[self].BottomBGTexture.height = 2
+    elseif self.Mouseover then 
+      Style[self].BottomBGTexture.vertexColor = { r = 1, g = 1, b = 1 }
+      Style[self].BottomBGTexture.height = 1
+    else
+      Style[self].BottomBGTexture.vertexColor = { r = 0.5, g = 0.5, b = 0.5 }
+      Style[self].BottomBGTexture.height = 1
+    end
   end
 
   __Arguments__ { String/"" }
@@ -52,11 +36,7 @@ class "SUI.TabButton" (function(_ENV)
     
     -- Update the width based on the text width
     local text = self:GetChild("Text")
-    Style[self].width = text:GetStringWidth() + 40
-  end
-
-  function OnRelease(self)
-    self.Selected = nil
+    Style[self].width = text:GetStringWidth() + 60
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
@@ -64,53 +44,15 @@ class "SUI.TabButton" (function(_ENV)
   property "Selected" {
     type      = Boolean,
     default   = false,
-    handler   = function(self) self:UpdateState() end 
+    handler   = function(self) self:UpdateState() end
   }
 
-  property "UpLeftTexture" {
-    type    = AtlasType,
-    default = AtlasType("Options_Tab_Left", true)
+  property "Mouseover" {
+    type = Boolean,
+    default = false, 
+    handler = function(self) self:UpdateState() end
   }
 
-  property "UpMiddleTexture" {
-    type    = AtlasType,
-    default = AtlasType("Options_Tab_Middle", true)
-  }
-
-  property "UpRightTexture" {
-    type    = AtlasType,
-    default = AtlasType("Options_Tab_Right", true)
-  }
-
-  property "OverLeftTexture" { 
-    type    = AtlasType,
-    default = AtlasType("Options_Tab_Left", true)
-  }
-
-  property "OverMiddleTexture" {
-    type    = AtlasType,
-    default = AtlasType("Options_Tab_Middle", true)
-  }
-
-  property "OverRightTexture" {
-    type    = AtlasType,
-    default = AtlasType("Options_Tab_Right", true)
-  }
-
-  property "SelectedLeftTexture" {
-    type    = AtlasType,
-    default = AtlasType("Options_Tab_Active_Left", true)
-  }
-
-  property "SelectedMiddleTexture" {
-    type    = AtlasType,
-    default = AtlasType("Options_Tab_Active_Middle", true)
-  }
-
-  property "SelectedRightTexture" {
-    type    = AtlasType,
-    default = AtlasType("Options_Tab_Active_Right", true)
-  }
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
   -----------------------------------------------------------------------------
@@ -118,32 +60,32 @@ class "SUI.TabButton" (function(_ENV)
     Text = FontString
   }
   function __ctor(self)
-    -- We need to instant apply style for having a valid text width
     self:InstantApplyStyle()
 
     local text = self:GetChild("Text")
-    Style[self].width = text:GetStringWidth() + 40
+    Style[self].width = text:GetStringWidth() + 60
 
     self:UpdateState()
 
-    -- Bind handlers
-    self.OnEnter = self.OnEnter + function() self:UpdateAtlas() end 
-    self.OnLeave = self.OnLeave + function() self:UpdateAtlas() end
-    self.OnEnable = self.OnEnable + function() self:UpdateAtlas() end 
-    self.OnDisable = self.OnDisable + function() self:UpdateAtlas() end
-    self.OnClick = self.OnClick + function() self.Selected = true end
+    -- Bind handlers 
+    self.OnEnter = self.OnEnter + function() self.Mouseover = true end 
+    self.OnLeave = self.OnLeave + function() self.Mouseover = false  end 
+    self.OnEnable = self.OnEnable + function() self:UpdateState() end 
+    self.OnDisable = self.OnDisable + function() self:UpdateState() end 
+    self.OnClick = self.OnClick + function() self.Selected = true end 
   end
+
 end)
 
-struct "SUI.TabPageInfo" {
+
+struct "TabPageInfo" {
   { name = "name", type = String},
   { name = "onAcquire", type = Function},
-  { name = "OnRelease", type = Function},
+  { name = "OnRelease", type = Function},  
 }
 
-
 __Widget__()
-class "SUI.TabControl" (function(_ENV)
+class "TabControl" (function(_ENV)
   inherit "Frame"
   -----------------------------------------------------------------------------
   --                               Handlers                                  --
@@ -160,7 +102,7 @@ class "SUI.TabControl" (function(_ENV)
   end
 
   function AcquireTabButton(self)
-    local tabButton = SUI.TabButton.Acquire()
+    local tabButton = TabButton.Acquire()
     tabButton:SetParent(self:GetHeader())
 
     tabButton.OnClick = tabButton.OnClick + self.OnTabButtonClick
@@ -177,7 +119,7 @@ class "SUI.TabControl" (function(_ENV)
     end
   end
 
-  __Arguments__ { SUI.TabPageInfo }
+  __Arguments__ { TabPageInfo }
   function AddTabPage(self, pageInfo)
     local index = self.PagesInfo.Count + 1
     local tabButton = self:AcquireTabButton()
@@ -196,7 +138,7 @@ class "SUI.TabControl" (function(_ENV)
       if index == 1 then 
         tabButton:SetPoint("LEFT")
       else
-        tabButton:SetPoint("LEFT", previousTabButton, "RIGHT", 10, 0)
+        tabButton:SetPoint("LEFT", previousTabButton, "RIGHT", 0, 0)
       end 
       previousTabButton = tabButton
     end
@@ -267,7 +209,7 @@ class "SUI.TabControl" (function(_ENV)
 
   property "PagesInfo" {
     set = false,
-    default = function() return Array[SUI.TabPageInfo]() end 
+    default = function() return Array[TabPageInfo]() end 
   }
 
   property "TabButtons" {
@@ -291,34 +233,29 @@ end)
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
-  [SUI.TabButton] = {
-    height =  37,
+  [TabButton] = {
+    height = 37,
     width = 100,
 
-    LeftBGTexture = {
-      location = {
-        Anchor("BOTTOMLEFT")
-      }
-    },
-    RightBGTexture = {
-      location = {
-        Anchor("BOTTOMRIGHT")
-      }
-    },
-    MiddleBGTexture = {
-      location = {
-        Anchor("TOPLEFT", 0, 0, "LeftBGTexture", "TOPRIGHT"),
-        Anchor("TOPRIGHT", 0, 0, "RightBGTexture", "TOPLEFT")
-      }
+    Text = {
+      setAllPoints = true,
+      fontObject = GameFontNormalSmall
     },
 
-    Text = {
-      fontObject = GameFontNormalSmall
-    }
+     BottomBGTexture = {
+      file = "Interface\\Buttons\\WHITE8X8",
+      drawLayer = "BORDER",
+      location = {
+        Anchor("BOTTOMLEFT"),
+        Anchor("BOTTOMRIGHT")
+      }
+     }
   },
-  [SUI.TabControl] = {
+
+  [TabControl] = {
     layoutManager = Layout.VerticalLayoutManager(true, true),
     paddingTop = 50,
+    width = 550,
 
     Header = {
       height = 37,

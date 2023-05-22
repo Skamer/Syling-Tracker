@@ -6,11 +6,14 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling            "SylingTracker.Options.Elements.ColorPicker"               ""
+Syling              "SylingTracker_Options.Widgets.ColorPicker"              ""
 -- ========================================================================= --
+namespace               "SylingTracker.Options.Widgets"
+-- ========================================================================= --
+
 __Widget__()
-class "SUI.ColorPicker" (function(_ENV)
-  inherit "SUI.PushButton"
+class "ColorPicker" (function(_ENV)
+  inherit "PushButton"
   -----------------------------------------------------------------------------
   --                               Events                                    --
   -----------------------------------------------------------------------------
@@ -127,8 +130,8 @@ class "SUI.ColorPicker" (function(_ENV)
   --                            Constructors                                 --
   -----------------------------------------------------------------------------
   __Template__{
-    ColorTexture = Texture,
-    ColorCheckers = Texture
+    ColorTexture    = Texture,
+    ColorCheckers   = Texture
   }
   function __ctor(self)
     self.OnClick = self.OnClick + OnClickHandler
@@ -138,8 +141,8 @@ end)
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
-  [SUI.ColorPicker] = {
-    size = Size(46, 40),
+  [ColorPicker] = {
+    size = Size(32, 26),
 
     Text = {
       visible = false

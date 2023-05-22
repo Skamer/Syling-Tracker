@@ -6,10 +6,13 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling            "SylingTracker.Options.Elements.EditBox"                   ""
+Syling            "SylingTracker_Options.Widgets.EditBox"                    ""
 -- ========================================================================= --
+namespace               "SylingTracker.Options.Widgets"
+-- ========================================================================= --
+
 __Widget__()
-class "SUI.EditBox" (function(_ENV)
+class "EditBox" (function(_ENV)
   -- As we are in the SUI namespace, we need to use the full path of Scorpio
   -- EditBox for avoiding a overflow.
   inherit "Scorpio.UI.EditBox"
@@ -49,13 +52,13 @@ class "SUI.EditBox" (function(_ENV)
 end)
 
 __Widget__()
-class "SUI.MultiLineEditBox" { SUI.EditBox }
+class "MultiLineEditBox" { EditBox }
 
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
-  [SUI.EditBox] = {
+  [EditBox] = {
     size = Size(280, 26),
     autoFocus = false,
     fontObject = ChatFontNormal,
@@ -103,7 +106,7 @@ Style.UpdateSkin("Default", {
     }
   },
 
-  [SUI.MultiLineEditBox] = {
+  [MultiLineEditBox] = {
     multiLine = true,
     maxletters = 0,
     countInvisibleLetters = false,

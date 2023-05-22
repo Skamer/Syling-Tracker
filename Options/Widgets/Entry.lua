@@ -6,9 +6,12 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling              "SylingTracker.Options.Elements.Entry"                   ""
+Syling              "SylingTracker_Options.Widgets.Entry"                     ""
 -- ========================================================================= --
-struct "SUI.EntryData" {
+namespace               "SylingTracker.Options.Widgets"
+-- ========================================================================= --
+
+struct "EntryData" {
     { name = "text",          type = String },
     { name = "value",         type = Any },
     { name = "id",            type = String},
@@ -18,12 +21,12 @@ struct "SUI.EntryData" {
     { name = "styles",        type = Table}
 }
 
-interface "SUI.IEntry" (function(_ENV)
-  require "Frame"
+interface "IEntry" (function(_ENV)
+  require "Scorpio.UI.Frame"
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
-  __Arguments__ { SUI.EntryData}
+  __Arguments__ { EntryData}
   function SetupFromEntryData(self, data) 
     self:SetEntryData(data)
     self:InitProperties(data)
@@ -34,12 +37,12 @@ interface "SUI.IEntry" (function(_ENV)
     return self.EntryData 
   end
   
-  __Arguments__{  SUI.EntryData/nil}
+  __Arguments__{  EntryData/nil}
   function SetEntryData(self, data) 
     self.EntryData = data 
   end 
 
-  __Arguments__ { SUI.EntryData}
+  __Arguments__ { EntryData}
   function InitProperties(self, data)
     if data.properties then 
       for property, value in pairs(data.properties) do 
@@ -57,28 +60,26 @@ interface "SUI.IEntry" (function(_ENV)
   --                               Properties                                --
   -----------------------------------------------------------------------------
   property "EntryData" {
-    type = SUI.EntryData
+    type = EntryData
   }
 end)
 
-
-interface "SUI.IButtonEntry" (function(_ENV)
-  require "Button" extend "SUI.IEntry"
+interface "IButtonEntry" (function(_ENV)
+  require "Button" extend "IEntry"
 end)
 
 __Widget__()
-class "SUI.SeparatorEntry" (function(_ENV)
-  inherit "Frame" extend "SUI.IEntry"
+class "SeparatorEntry" (function(_ENV)
+  inherit "Frame" extend "IEntry"
 end)
 
-
 __Widget__()
-class "SUI.EntryButton" (function(_ENV)
-  inherit "Button" extend "SUI.IButtonEntry"
+class "EntryButton" (function(_ENV)
+  inherit "Button" extend "IButtonEntry"
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
-  __Arguments__{ SUI.EntryData }
+  __Arguments__{ EntryData }
   function SetupFromEntryData(self, data)
     super.SetupFromEntryData(self, data)
 
@@ -107,7 +108,7 @@ class "SUI.EntryButton" (function(_ENV)
     
     selectionName:SetTextColor(fontColor:GetRGB())
   end
-
+  
   function OnRelease(self)
     self:SetID(0)
     self:SetParent()
@@ -119,7 +120,7 @@ class "SUI.EntryButton" (function(_ENV)
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
-  -----------------------------------------------------------------------------
+  ----------------------------------------------------------------------------- 
   property "Selected" {
     type = Boolean,
     default = false,
@@ -152,16 +153,16 @@ class "SUI.EntryButton" (function(_ENV)
 end)
 
 --- The interface adds the properties for holding the entries data
-interface "SUI.IEntryProvider" (function(_ENV)
+interface "IEntryProvider" (function(_ENV)
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
-  __Arguments__ { SUI.EntryData }
+  __Arguments__ { EntryData }
   function AddEntry(self, entry)
     self.EntriesData:Insert(entry)
   end
 
-  __Arguments__ { SUI.EntryData }
+  __Arguments__ { EntryData }
   function RemoveEntry(self, entry)
     self.EntriesData:Remove(entry)
   end
@@ -171,7 +172,7 @@ interface "SUI.IEntryProvider" (function(_ENV)
   end
 
 
-  __Arguments__ { Array[SUI.EntryData] }
+  __Arguments__ { Array[EntryData] }
   function SetEntries(self, entries)
     self.EntriesData:Clear()
 
@@ -188,22 +189,22 @@ interface "SUI.IEntryProvider" (function(_ENV)
   -----------------------------------------------------------------------------
   property "EntriesData" {
     set = false,
-    default = function() return Array[SUI.EntryData]() end 
+    default = function() return Array[EntryData]() end 
   }
 
   property "DefaultEntryClass" {
-    type = -SUI.IEntry,
-    default = SUI.EntryButton
+    type = -IEntry,
+    default = EntryButton
   }
 end)
 
 --- Similar to EntryProvider excepted it doesn't hold entries data, only keep 
 --- a weak reference to them
-interface "SUI.IProxyEntryProvider" (function(_ENV)
+interface "IProxyEntryProvider" (function(_ENV)
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
-  __Arguments__ { Array[SUI.EntryData]/nil }
+  __Arguments__ { Array[EntryData]/nil }
   function LinkEntries(self, entriesData)
     self.EntriesData = entriesData
   end
@@ -218,19 +219,18 @@ interface "SUI.IProxyEntryProvider" (function(_ENV)
   --- check if the data source is still avalaible.
   __Set__(PropertySet.Weak)
   property "EntriesData" {
-    type    = Array[SUI.EntryData]
+    type    = Array[EntryData]
   }
 
   property "DefaultEntryClass" {
-    type    = -SUI.IEntry,
-    default = SUI.EntryButton
+    type    = -IEntry,
+    default = EntryButton
   }
 end)
 
-
 __Widget__()
-class "SUI.GridEntriesFauxScrollBox" (function(_ENV)
-  inherit "SUI.FauxScrollBox" extend "SUI.IProxyEntryProvider"
+class "GridEntriesFauxScrollBox" (function(_ENV)
+  inherit "FauxScrollBox" extend "IProxyEntryProvider"
   -----------------------------------------------------------------------------
   --                               Events                                    --
   -----------------------------------------------------------------------------
@@ -252,13 +252,13 @@ class "SUI.GridEntriesFauxScrollBox" (function(_ENV)
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
-  __Arguments__ { Number, -SUI.IEntry}
+  __Arguments__ { Number, -IEntry}
   function AcquireEntry(self, index, entryClass)
     local entry = entryClass.Acquire()
     entry:SetParent(self:GetScrollContent())
 
     -- If the Entry is a button, register onClick
-    if Class.IsObjectType(entry, SUI.IButtonEntry) then 
+    if Class.IsObjectType(entry, IButtonEntry) then 
       entry.OnClick = entry.OnClick + self.OnEntryClick
     end
 
@@ -270,7 +270,7 @@ class "SUI.GridEntriesFauxScrollBox" (function(_ENV)
   function ReleaseEntries(self)
     for index, entry in pairs(self.EntryFrames) do 
       -- if the entry is a button, remove onClick handler 
-      if Class.IsObjectType(entry, SUI.IButtonEntry) then 
+      if Class.IsObjectType(entry, IButtonEntry) then 
         entry.OnClick = entry.OnClick - self.OnEntryClick
       end
 
@@ -361,7 +361,7 @@ class "SUI.GridEntriesFauxScrollBox" (function(_ENV)
   --                               Properties                                --
   -----------------------------------------------------------------------------
   property "SelectedEntry" {
-    type = SUI.EntryData,
+    type = EntryData,
     default = nil
   }
 
@@ -416,11 +416,11 @@ end)
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
-  [SUI.SeparatorEntry] = {
+  [SeparatorEntry] = {
     size = Size(250, 20)
   },
 
-  [SUI.EntryButton] = {
+  [EntryButton] = {
     size = Size(250, 20),
     SelectionDetails = {
       location = {
@@ -470,7 +470,7 @@ Style.UpdateSkin("Default", {
       }
     }
   },
-  [SUI.GridEntriesFauxScrollBox] = {
+  [GridEntriesFauxScrollBox] = {
     size = Size(200, 200),
     ScrollBar = {
       location = {

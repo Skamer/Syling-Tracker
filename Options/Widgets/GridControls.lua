@@ -6,10 +6,13 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling           "SylingTracker.Options.Elements.GridControls"               ""
+Syling           "SylingTracker_Options.Elements.GridControls"               ""
 -- ========================================================================= --
+namespace               "SylingTracker.Options.Widgets"
+-- ========================================================================= --
+
 __Widget__()
-class "SUI.GridControls" (function(_ENV)
+class "GridControls" (function(_ENV)
   inherit "Frame"
   -----------------------------------------------------------------------------
   --                               Methods                                   --
