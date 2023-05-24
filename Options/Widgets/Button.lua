@@ -15,18 +15,16 @@ __Widget__()
 class "PushButton" (function(_ENV)
   inherit "Button"
   -----------------------------------------------------------------------------
-  --                               Handlers                                  --
+  --                               Methods                                   --
   -----------------------------------------------------------------------------
-  local function RefreshState(self)
+  function RefreshState(self)
     if self.Mouseover then 
       Style[self].backdropBorderColor = Color(1, 1, 0, 0.75)
     else
       Style[self].backdropBorderColor = self.__normalBorderColor
     end
   end
-  -----------------------------------------------------------------------------
-  --                               Methods                                   --
-  -----------------------------------------------------------------------------
+
   __Arguments__ { String/""}
   function SetText(self, text)
     Style[self].Text.text = text
@@ -51,7 +49,7 @@ class "PushButton" (function(_ENV)
         self.__normalBorderColor = Style[self].backdropBorderColor
       end
 
-      RefreshState(self)
+      self:RefreshState()
 
       if not new then 
         self.__normalBorderColor = nil 
@@ -67,8 +65,6 @@ class "PushButton" (function(_ENV)
   function __ctor(self)
     self.OnEnter = self.OnEnter + function() self.Mouseover = true end 
     self.OnLeave = self.OnLeave + function() self.Mouseover = false end
-
-    RefreshState(self)
   end
 end)
 

@@ -10,29 +10,40 @@ Syling            "SylingTracker_Options.Widgets.DropDown"                   ""
 -- ========================================================================= --
 namespace               "SylingTracker.Options.Widgets"
 -- ========================================================================= --
+export {
+  IterateMedia      = SylingTracker.API.IterateMedia,
+  FetchFontObject   = SylingTracker.API.FetchFontObject,
+  MediaType         = SylingTracker.MediaType
+}
 
 __Widget__()
 class "DropDownPopout" { GridEntriesFauxScrollBox }
 
 __Widget__()
-class "DropDownPopoutButton" (function(_ENV)
-  inherit "Button"
+class "DropDownPopoutButton" (function(ENV)
+  inherit "PushButton"
+  -----------------------------------------------------------------------------
+  --                               Methods                                   --
+  -----------------------------------------------------------------------------
+  function RefreshState(self)
+    super.RefreshState(self)
+
+    if self.Mouseover then 
+      Style[self].Arrow.vertexColor = Color(1, 1, 0, 0.75)
+      Style[self].Arrow.visible = true
+    else
+      Style[self].Arrow.vertexColor = self.__normalBorderColor
+      Style[self].Arrow.visible = false
+    end
+  end
+
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
   -----------------------------------------------------------------------------
   __Template__ {
-    SelectedName = FontString
+    Arrow = Texture
   }
-  function __ctor(self)
-    self.OnEnter = self.OnEnter + function()
-      Style[self].NormalTexture.atlas = AtlasType("charactercreate-customize-dropdownbox-hover")
-    end
-
-
-    self.OnLeave = self.OnLeave + function()
-        Style[self].NormalTexture.atlas = AtlasType("charactercreate-customize-dropdownbox")
-    end  
-  end
+  function __ctor(self) end
 end)
 
 __Widget__()
@@ -123,15 +134,50 @@ class "DropDown" (function(_ENV)
 
   __Arguments__ { EntryData/nil }
   function SelectEntry(self, entry)
-    Style[self].TogglePopoutButton.SelectedName.text = entry.text
+    Style[self].TogglePopoutButton.Text.text = entry.text
+
+    if self.MediaType == "font" then
+      local fontObject =  entry.styles.SelectionDetails.SelectionName.fontObject
+      Style[self].TogglePopoutButton.Text.fontObject = fontObject
+    end
 
     self.SelectedEntry = entry
+  end
+
+  __Arguments__ { MediaType/nil }
+  function SetMediaType(self, mediaType)
+    self.MediaType = mediaType
+
+    local entries = Array[EntryData]()
+    for id, file in IterateMedia(mediaType) do 
+      local entryData = {}
+      entryData.text  = id 
+      entryData.value = id
+
+      if mediaType == "font" then 
+        entryData.styles = {
+          SelectionDetails = {
+            SelectionName = {
+              fontObject = FetchFontObject(file, 12)
+            }
+          }
+        }
+      end
+
+      entries:Insert(entryData)
+    end
+
+    self:SetEntries(entries)
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
   property "SelectedEntry" {
     type = EntryData
+  }
+
+  property "MediaType" {
+    type = String
   }
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
@@ -234,35 +280,46 @@ Style.UpdateSkin("Default", {
   },
 
   [DropDownPopoutButton] = {
-    height = 38,
+    height = 26,
 
-    NormalTexture = {
-      atlas = AtlasType("charactercreate-customize-dropdownbox")
+    Text = {
+      setAllPoints = true,
+      fontObject = GameFontNormal,
+      justifyH = "CENTER",
+      maxLines = 1,
+      text = "Button",
     },
 
-    HighlightTexture = {
-      atlas = AtlasType("charactercreate-customize-dropdownbox-open"),
-      alphaMode = "ADD",
-      alpha = 0
-    },
+    Arrow = {
+      visible = false,
+      height = 10,
+      width  = 22,
+      drawLayer = "BORDER",
+      file = [[Interface\Buttons\WHITE8X8]],
+      vertexColor = { r = 0.35, g = 0.35, b = 0.35, a = 0.75 },
 
-    SelectedName = {
-        height = 20,
-        width = 225,
-        setAllPoints = true,
-        fontObject = GameFontNormal,
-        justifyH = "CENTER",
-        maxLines = 1,
-        -- drawLayer = "OVERLAY",
-        -- subLevel = 1,
-        text = "Button",
-    }    
+      location = {
+        Anchor("TOP", 0, 1, nil, "BOTTOM")
+      },
+
+      maskTexture = {
+        height = 10,
+        width  = 22,
+        atlas = AtlasType("helptip-arrow-mask"),
+        location = {
+          Anchor("TOP"),
+        },
+        hWrapMode = "CLAMPTOBLACKADDITIVE",
+        vWrapMode = "CLAMPTOBLACKADDITIVE",
+      }
+    }
   },
 
   [DropDown] = {
-    size = Size(280, 26),
+    height = 26,
+    width  = 150,
     TogglePopoutButton = {
-      height = 38,
+      height = 26,
       location = {
         Anchor("LEFT"),
         Anchor("RIGHT")

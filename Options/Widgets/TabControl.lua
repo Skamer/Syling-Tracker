@@ -132,6 +132,7 @@ class "TabControl" (function(_ENV)
 
   function BuildHeader(self)
     local previousTabButton
+    local width = 0
     for index, pageInfo in self.PagesInfo:GetIterator() do 
       local tabButton = self.TabButtons[index]
       tabButton:ClearAllPoints()
@@ -141,7 +142,10 @@ class "TabControl" (function(_ENV)
         tabButton:SetPoint("LEFT", previousTabButton, "RIGHT", 0, 0)
       end 
       previousTabButton = tabButton
+      width = width + tabButton:GetWidth()
     end
+
+    self:GetHeader():SetWidth(width)
   end
 
   function Refresh(self)
