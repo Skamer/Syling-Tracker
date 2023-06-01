@@ -80,8 +80,7 @@ class "FontString" (function(_ENV)
 
     self.TextHeight = self:GetStringHeight()
   end
-
-
+  
   __Async__()
   function SetFontObject(self, ...)
     super.SetFontObject(self, ...)

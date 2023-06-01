@@ -1,18 +1,26 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
+  <!--  Base non ui files-->
+  <Script file="Media.lua" />
+  <Script file="SavedVariables.lua" />
+  <Script file="Settings.lua" />
+  <Script file="UISettings.lua" />
   <Script file="UIElement.lua" />
-  <Script file="Fonts.lua"/>
-  <Script file="Recyclable.lua"/>
-  <Script file="CallbackManager.lua"/>
-  <Script file="SavedVariables.lua"/>
-  <Script file="Database.lua"/>
-  <Script file="Profiles.lua"/>
-  <Script file="Settings.lua"/>
-  <Script file="FontString.lua"/>
-  <Script file="IView.lua"/>
-  <Script file="Model.lua"/>
-  <Script file="ScrollBar.lua"/>
-  <Script file="Tracker.lua"/>
-  <Script file="ContentType.lua"/>
+  <Script file="DataStore.lua" />
+  <Script file="SharedInterfaces.lua" />
+
+  <!-- Base UIObjects files -->
+  <Include file="UIObjects\__load.xml"/>
+
+  <!-- <Script file="View.lua" /> -->
   <Script file="ItemBar.lua"/>
+  <Script file="ListView.lua"/>
+  <Script file="ScrollBar.lua" />
+  <Script file="Tracker.lua" />
+  <Script file="ContentManager.lua"/>
+  <!-- <Script file="Icon.lua" />
+  <Script file="Experiment.lua"/> -->
+  <!-- <Script file="Exp2.lua"/> -->
 </Ui>
+
+
