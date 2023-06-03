@@ -2,7 +2,7 @@
 
 **FIXES**
 
-- Fixed [ticket #72](https://github.com/Skamer/Syling-Tracker/issues/72) : where the quest popups didn't be displayed anymore after the first one.
+- Fixed [ticket #72](https://github.com/Skamer/Syling-Tracker/issues/72) : where the quest popups were no longer displayed after the first one.
 
 ---
 
