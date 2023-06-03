@@ -62,11 +62,17 @@ class "AutoQuestsContentView" (function(_ENV)
       autoQuests:SetParent(self)
       autoQuests:SetName("AutoQuests")
 
+      -- @HACK: Fix the issue the height is incorrect, probably a better way to 
+      -- do it, but plan to rework completely this element in the next major update.
+      autoQuests:SetPoint("TOP")
+      autoQuests:SetPoint("LEFT")
+      autoQuests:SetPoint("RIGHT")
+
       -- It's important to only style it once we have set its parent and its new
       -- name
-      if self.AutoQuests then 
-        Style[autoQuests] = self.AutoQuests
-      end
+      -- if self.AutoQuests then 
+      --   Style[autoQuests] = self.AutoQuests
+      -- end
 
       -- Register the events 
       autoQuests.OnSizeChanged = autoQuests.OnSizeChanged + self.OnAutoQuestsSizeChanged

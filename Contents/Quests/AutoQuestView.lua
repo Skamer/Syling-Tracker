@@ -261,7 +261,7 @@ end)
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
   [AutoQuestView] = {
-    height = 46,
+    height = 60,
     backdrop = { 
       bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
       edgeFile = [[Interface\Buttons\WHITE8X8]],

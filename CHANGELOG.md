@@ -1,4 +1,12 @@
-# 1.2.2
+# 1.2.3
+
+**FIXES**
+
+- Fixed [ticket #72](https://github.com/Skamer/Syling-Tracker/issues/72) : where the quest popups didn't be displayed anymore after the first one.
+
+---
+
+## 1.2.2
 
 - bumped the version for 10.1.0
 
