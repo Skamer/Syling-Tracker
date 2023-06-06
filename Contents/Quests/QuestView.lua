@@ -143,14 +143,7 @@ class "QuestView" (function(_ENV)
     -- Update the conditionnal children if exists
     local objectivesView = self.__objectivesView
     if objectivesView then
-      if data.isAutoComplete and data.isComplete then
-        objectivesView:UpdateView({
-          [1] = { isCompleted = true, text = QUEST_WATCH_QUEST_COMPLETE},
-          [2] = { isCompleted = false, text = QUEST_WATCH_CLICK_TO_COMPLETE}
-        })
-      else 
-        objectivesView:UpdateView(data.objectives)
-      end
+      objectivesView:UpdateView(data.objectives)
     end
 
     local itemBadge = self.__itemBadge

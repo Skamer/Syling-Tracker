@@ -1,4 +1,13 @@
-# 1.2.3
+# 1.2.4
+
+**CHANGES**
+
+- The quests now use waypoints and will be added as objectives, helping the player to navigate to the quest area.
+- Improved the part where the player must be notified when a quest just needs to be turned in, an objective will be used to clearly indicate this case.
+
+---
+
+## 1.2.3
 
 **FIXES**
 

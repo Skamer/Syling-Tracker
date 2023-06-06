@@ -28,6 +28,7 @@ export {
   GetDistanceSqToQuest                = C_QuestLog.GetDistanceSqToQuest,
   GetInfo                             = C_QuestLog.GetInfo,
   GetLogIndexForQuestID               = C_QuestLog.GetLogIndexForQuestID,
+  GetNextWaypointText                 = C_QuestLog.GetNextWaypointText,
   GetNumQuestLogEntries               = C_QuestLog.GetNumQuestLogEntries,
   GetNumQuestObjectives               = C_QuestLog.GetNumQuestObjectives,
   GetNumQuestWatches                  = C_QuestLog.GetNumQuestWatches,
@@ -43,6 +44,7 @@ export {
   GetTimeAllowed                      = C_QuestLog.GetTimeAllowed,
   IsCampaignQuest                     = Utils.Quest.IsCampaignQuest,
   IsDungeonQuest                      = Utils.Quest.IsDungeonQuest,
+  IsFailed                            = C_QuestLog.IsFailed,
   IsLegendaryQuest                    = C_QuestLog.IsLegendaryQuest,
   IsOnMap                             = C_QuestLog.IsOnMap,
   IsQuestBounty                       = C_QuestLog.IsQuestBounty,
@@ -214,6 +216,7 @@ function UpdateQuest(self, questID)
   local questLogIndex     = GetLogIndexForQuestID(questID)
   local numObjectives     = GetNumQuestObjectives(questID)
   local isComplete        = IsQuestComplete(questID)
+  local isFailed          = IsFailed(questID)
   local isTask            = IsQuestTask(questID)
   local isBounty          = IsQuestBounty(questID)
   local distance          = GetDistanceSqToQuest(questID)
@@ -224,6 +227,8 @@ function UpdateQuest(self, questID)
   local isLegendary       = IsLegendaryQuest(questID)
   local tag               = GetQuestTagInfo(questID)
   local campaignID        = GetCampaignID(questID)
+  local isSequenced       = IsQuestSequenced(questID)
+  local isSuperTracked    = (questID == C_SuperTrack.GetSuperTrackedQuestID())
   
   if not distance then
     distance = 99999
@@ -232,40 +237,46 @@ function UpdateQuest(self, questID)
   end
 
   local failureTime, timeElapsed = GetTimeAllowed(questID)
-  local isOnMap, hasLocalPOI      = IsOnMap(questID)
+  local isOnMap, hasLocalPOI = IsOnMap(questID)
+
+  local shouldShowWaypoint = isSuperTracked or (questID == QuestMapFrame_GetFocusedQuestID())
 
   -- local isStory        
   -- local startEvent      
   -- local isAutoComplete
 
   local questData = {
-    questID         = questID,
-    title           = title,
-    name            = title,
-    level           = level,
-    header          = header,
-    category        = header,
-    campaignID      = campaignID,
-    questLogIndex   = questLogIndex,
-    numObjectives   = numObjectives,
-    isComplete      = isComplete,
-    isTask          = isTask,
-    isBounty        = isBounty,
-    requiredMoney   = requiredMoney,
-    failureTime     = failureTime,
-    isOnMap         = isOnMap,
-    hasLocalPOI     = hasLocalPOI,
-    questType       = questType,
-    tag             = questType,
-    isStory         = isStory,
-    startEvent      = startEvent,
-    isAutoComplete  = isAutoComplete,
-    suggestedGroup  = suggestedGroup,
-    distance        = distance,
-    isDungeon       = isDungeon,
-    isRaid          = isRaid,
-    isLegendary     = isLegendary,
-    tag             = tag
+    questID             = questID,
+    title               = title,
+    name                = title,
+    level               = level,
+    header              = header,
+    category            = header,
+    campaignID          = campaignID,
+    questLogIndex       = questLogIndex,
+    numObjectives       = numObjectives,
+    isComplete          = isComplete,
+    isFailed            = isFailed,
+    isTask              = isTask,
+    isBounty            = isBounty,
+    requiredMoney       = requiredMoney,
+    failureTime         = failureTime,
+    isOnMap             = isOnMap,
+    hasLocalPOI         = hasLocalPOI,
+    questType           = questType,
+    tag                 = questType,
+    isStory             = isStory,
+    startEvent          = startEvent,
+    isAutoComplete      = isAutoComplete,
+    suggestedGroup      = suggestedGroup,
+    distance            = distance,
+    isDungeon           = isDungeon,
+    isRaid              = isRaid,
+    isLegendary         = isLegendary,
+    tag                 = tag,
+    shouldShowWaypoint  = shouldShowWaypoint,
+    isSequenced         = isSequenced,
+    isSuperTracked      = isSuperTracked
   }
 
   -- Is the quest has an item quest ?
@@ -298,18 +309,64 @@ function UpdateQuest(self, questID)
     QUESTS_WITH_ITEMS[questID] = nil 
   end
 
-  -- Fetch the objectives
-  if numObjectives > 0 then
-    local objectivesData = {}
-    for index = 1, numObjectives do 
+
+  local objectivesData = {}
+  if isComplete then
+    if not isAutoComplete then 
       for index = 1, numObjectives do 
-        local text, type, finished = GetQuestObjectiveInfo(questID, index, false)
-        local data = {
-          text = text,
-          type = type, 
-          isCompleted = finished
-        }
-      
+        local text, type, finished = GetQuestObjectiveInfo(questID, index, true)
+        tinsert(objectivesData, { text = text, type = type, isCompleted = finished })
+      end
+    end
+
+    -- We don't display the progress bar if it's completed, we remove it from tracking.
+    QUESTS_WITH_PROGRESS[questID] = nil
+
+    -- In case where the quest is auto complete, this say the user needs to click 
+    -- for finishing the quest. We need to notify the player. 
+    if isAutoComplete then
+      tinsert(objectivesData, { isCompleted = true, text = QUEST_WATCH_QUEST_COMPLETE })
+      tinsert(objectivesData, { isCompleted = false, text = QUEST_WATCH_CLICK_TO_COMPLETE })
+    else
+      local completionText = GetQuestLogCompletionText(questLogIndex)
+      if completionText then 
+
+        -- The waypoint text is here for helping the player to navigate for completing the quest.
+        if shouldShowWaypoint then 
+          local waypointText = GetNextWaypointText(questID)
+          if waypointText then 
+            tinsert(objectivesData, { isCompleted = false, text =  WAYPOINT_OBJECTIVE_FORMAT_OPTIONAL:format(waypointText)})
+          end
+        end
+
+        tinsert(objectivesData, { isCompleted = false, text= completionText} )
+      else 
+        local waypointText = GetNextWaypointText(questID)
+        if waypointText then 
+          tinsert(objectivesData, { isCompleted = false, text = waypointText})
+        else
+          tinsert(objectivesData, { isCompleted = false, text = QUEST_WATCH_QUEST_READY})
+        end
+      end
+    end
+  elseif isFailed then
+    objectivesData = { [1] = { isCompleted = false, failed = true, text = FAILED } }
+
+    -- We don't display the progress bar if it's failed, we remove it from tracking.
+    QUESTS_WITH_PROGRESS[questID] = nil
+  else
+    if shouldShowWaypoint then 
+      -- The waypoint text is here for helping the player to navigate for progress on the quest, it's still optional.
+      local waypointText = GetNextWaypointText(questID)
+      if waypointText then
+        tinsert(objectivesData, { isCompleted = false, text = WAYPOINT_OBJECTIVE_FORMAT_OPTIONAL:format(waypointText)})
+      end
+    end
+
+    for index = 1, numObjectives do 
+      local text, type, finished = GetQuestObjectiveInfo(questID, index, false)
+      local data = { text = text, type = type, isCompleted = finished }
+
         if type == "progressbar" then
           local progress = GetQuestProgressBarPercent(questID)
           data.hasProgressBar = true
@@ -322,28 +379,26 @@ function UpdateQuest(self, questID)
           QUESTS_WITH_PROGRESS[questID] = nil 
         end
 
-        objectivesData[index] = data
-      end 
+        tinsert(objectivesData, data)
     end
 
-    questData.objectives = objectivesData
-  else
+    --- Display the money objective if the player hasn't enought for the quest.
+    local playerMoney = GetMoney()
+    if requiredMoney > playerMoney then 
+      local text = GetMoneyString(playerMoney) .. " / " .. GetMoneyString(requiredMoney)
+      tinsert(objectivesData, { isCompleted = false, text = text })
+    end
+  end
 
-    SetSelectedQuest(questID)
-    local text = GetQuestLogCompletionText()
-    questData.objectives = {
-      [1] = {
-        text = text,
-        isCompleted = false
-      }
-    }
-  end 
-  
   _QuestModel:AddQuestData(questID, questData)
+  -- For the objectives, we use 'SetData' directly to be sure there are no old 
+  -- data about them, in addition to keep the 'AddQuestData' feature for the
+  -- other quest data.
+  _QuestModel:SetData(objectivesData, "quests", questID, "objectives")
 end
 
 
-__SystemEvent__ "QUEST_LOG_UPDATE"
+__SystemEvent__ "QUEST_LOG_UPDATE" "SUPER_TRACKING_CHANGED"
 function QUESTS_UPDATE()
   for questID in pairs(QUESTS_CACHE) do
     _M:UpdateQuest(questID)
@@ -517,6 +572,8 @@ end
 -- ========================================================================= --
 -- Debug Utils Tools
 -- ========================================================================= --
-if ViragDevTool_AddData then 
-  ViragDevTool_AddData(_QuestModel, "SLT Quest Model")
+function OnEnable(self)
+  if ViragDevTool.AddData then 
+    ViragDevTool:AddData(_QuestModel, "SLT Quest Model")
+  end
 end
