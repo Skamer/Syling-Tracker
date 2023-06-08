@@ -573,7 +573,7 @@ end
 -- Debug Utils Tools
 -- ========================================================================= --
 function OnEnable(self)
-  if ViragDevTool.AddData then 
+  if ViragDevTool and ViragDevTool.AddData then 
     ViragDevTool:AddData(_QuestModel, "SLT Quest Model")
   end
 end

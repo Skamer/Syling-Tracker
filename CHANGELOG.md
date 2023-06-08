@@ -1,4 +1,12 @@
-# 1.2.4
+# 1.2.5
+
+**FIXES**
+
+- Fixed [ticket #74](https://github.com/Skamer/Syling-Tracker/issues/74) : an error lua about ViragDevTool if the addon isn't installed.
+
+---
+
+## 1.2.4
 
 **CHANGES**
 
