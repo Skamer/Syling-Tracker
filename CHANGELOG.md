@@ -2,7 +2,7 @@
 
 **FIXES**
 
-- Fixed [ticket #74](https://github.com/Skamer/Syling-Tracker/issues/74) : an error lua about ViragDevTool if the addon isn't installed.
+- Fixed [ticket #74](https://github.com/Skamer/Syling-Tracker/issues/74) : an error lua about ViragDevTool if this one wasn't installed.
 
 ---
 
