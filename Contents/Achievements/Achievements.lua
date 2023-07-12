@@ -113,7 +113,7 @@ end
 
 
 function LoadAchievements(self)
-  local trackedAchievements = { GetTrackedAchievements() }
+  local trackedAchievements = C_ContentTracking.GetTrackedIDs(_G.Enum.ContentTrackingType.Achievement)
   for i = 1, #trackedAchievements do 
     local achievementID = trackedAchievements[i]
     TRACKED_ACHIEVEMENT_LIST_CHANGED(achievementID, true)

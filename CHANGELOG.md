@@ -1,4 +1,13 @@
-# 1.2.5
+# 1.2.6
+
+**FIXES**
+
+- Fix some errors relative to achievements, the addon will no longer be broken because of this.
+  NOTE: The achievements tracking is currently not working, this will be fixed in a future fix.
+
+---
+
+## 1.2.5
 
 **FIXES**
 

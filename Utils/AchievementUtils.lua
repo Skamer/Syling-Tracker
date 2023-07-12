@@ -10,7 +10,9 @@ Syling                 "SylingTracker.AchievementUtils"                      ""
 -- ========================================================================= --
 namespace                          "SLT"
 -- ========================================================================= --
-GetTrackedAchievements = GetTrackedAchievements
+GetTrackedAchievements = function()
+  return C_ContentTracking.GetTrackedIDs(_G.Enum.ContentTrackingType.Achievement)
+end
 
 class "Utils" (function(_ENV)
 
@@ -18,7 +20,7 @@ class "Utils" (function(_ENV)
   
     __Static__() function HasAchievements()
       local achievements = GetTrackedAchievements()
-      if achievements ~= nil then 
+      if #achievements > 0 then 
         return true 
       else 
         return false
