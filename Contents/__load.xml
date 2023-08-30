@@ -1,12 +1,18 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
-  <Script file="ContextMenuPatterns.lua"/>
-  <Include file="Quests\__load.xml"/>
-  <Include file="Tasks\__load.xml"/>
-  <Include file="WorldQuests\__load.xml"/>
-  <Include file="Achievements\__load.xml"/>
-  <Include file="Scenario\__load.xml"/>
-  <Include file="Dungeon\__load.xml"/>
-  <Include file="Keystone\__load.xml"/>
-  <Include file="Torghast\__load.xml"/>
+  <!-- Quests -->
+  <Script file="Quests\QuestData.lua" />
+  <Script file="Quests\QuestsContentSubject.lua" />
+  <Script file="Quests\QuestView.lua" />
+  <Script file="Quests\QuestCategoryView.lua" />
+  <Script file="Quests\QuestsContentView.lua" />
+  <Script file="Quests\Quests.lua" />
+  <!-- Dungeons -->
+  <Script file="Dungeon\DungeonContentSubject.lua" />
+  <Script file="Dungeon\DungeonContentView.lua" />
+  <Script file="Dungeon\Dungeon.lua"/>
+
+  <!-- Contents Loading -->
+  <Script file="Contents.lua" />
 </Ui>
+

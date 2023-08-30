@@ -99,20 +99,24 @@ __Static__() function API.IterateMedia(mediaType)
   local yield = coroutine.yield
   local mediaList
   if mediaType == "background" then 
-    mediaList = LibSharedMedia and LibSharedMedia.MediaType.BACKGROUND or BACKGROUND
+    mediaList = LibSharedMedia and LibSharedMedia:HashTable(mediaType) or BACKGROUND
   elseif mediaType == "border" then 
-    mediaList = LibSharedMedia and LibSharedMedia.MediaType.BORDER or BORDER
+    mediaList = LibSharedMedia and LibSharedMedia:HashTable(mediaType) or BORDER
   elseif mediaType == "font" then 
-    mediaList = LibSharedMedia and LibSharedMedia.MediaType.FONT or FONTS
+    mediaList = LibSharedMedia and LibSharedMedia:List(mediaType) or FONTS
   elseif mediaType == "statusbar" then 
-    mediaList = LibSharedMedia and LibSharedMedia.MediaType.STATUSBARS or STATUSBARS
+    mediaList = LibSharedMedia and LibSharedMedia:HashTable(mediaType) or STATUSBARS
   elseif mediaType == "sound" then 
-    mediaList = LibSharedMedia and LibSharedMedia.MediaType.SOUNDS or SOUNDS
+    mediaList = LibSharedMedia and LibSharedMedia:HashTable(mediaType) or SOUNDS
   end
 
-  if mediaList then 
-    for id, file in pairs(mediaList) do
-      yield(id, file)
+  if mediaList then
+    if LibSharedMedia then 
+      for index, id in pairs(mediaList) do
+        yield(id, LibSharedMedia.MediaTable[mediaType][id])
+      end
+    else 
+      return pairs(mediaList)
     end
   end
 end
@@ -124,7 +128,7 @@ end
 --- @param fontFile the font filepath 
 --- @param fontHeight the font height
 --- @param flags the font flags
-__Arguments__ { String, Number, String }
+__Arguments__ { String, Number, String/"" }
 __Static__() function API.FetchFontObject(fontFile, fontHeight, flags)
   local id 
   if flags then 
@@ -197,4 +201,4 @@ API.RegisterMedia("background", "SylingTracker Background", [[Interface\AddOns\S
 API.RegisterMediaAtlas("arrow-right", { file = [[Interface\AddOns\SylingTracker\Media\Textures\ContextMenu-Arrow]], width = 24, height = 24, texCoords = RectType(0, 32/128, 0, 1)  })
 API.RegisterMediaAtlas("arrow-bottom", { file = [[Interface\AddOns\SylingTracker\Media\Textures\ContextMenu-Arrow]], width = 24, height = 24, texCoords = RectType(32/128, 64/128, 0, 1) })
 API.RegisterMediaAtlas("arrow-left", { file = [[Interface\AddOns\SylingTracker\Media\Textures\ContextMenu-Arrow]], width = 24, height = 24, texCoords = RectType(64/128, 96/128, 0, 1) })
-API.RegisterMediaAtlas("arrow-bottom", { file = [[Interface\AddOns\SylingTracker\Media\Textures\ContextMenu-Arrow]], width = 24, height = 24, texCoords = RectType(96/128, 1, 0, 1) })
+API.RegisterMediaAtlas("arrow-top", { file = [[Interface\AddOns\SylingTracker\Media\Textures\ContextMenu-Arrow]], width = 24, height = 24, texCoords = RectType(96/128, 1, 0, 1) })

@@ -69,5 +69,4 @@ class "Texture" (function(_ENV)
     type = MediaTextureType,
     handler = function(self, mediaTexture) self:SetMediaTexture(mediaTexture) end 
   }
-
 end)

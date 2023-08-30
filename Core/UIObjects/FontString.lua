@@ -78,7 +78,7 @@ class "FontString" (function(_ENV)
 
     Next()
 
-    self.TextHeight = self:GetStringHeight()
+    self.TextHeight = Round(self:GetStringHeight())
   end
   
   __Async__()
@@ -87,7 +87,7 @@ class "FontString" (function(_ENV)
 
     Next()
 
-    self.TextHeight = self:GetStringHeight()
+    self.TextHeight = Round(self:GetStringHeight())
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --

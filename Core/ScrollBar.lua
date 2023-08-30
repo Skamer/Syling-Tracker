@@ -24,7 +24,7 @@ SCROLLBAR_THUMB_BOTTOM_HOVER_COORDS = { left = 0.3125, top = 0.421875, right = 0
 SCROLLBAR_THUMB_MIDDLE_HOVER_COORDS = { left = 0.328125, top = 0.0009765625, right = 0.453125, bottom = 0.69921875 }
 
 class "ScrollBarThumb" (function(_ENV)
-  inherit "Button"
+  inherit "Scorpio.UI.Button"
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
@@ -127,7 +127,7 @@ class "ScrollBarThumb" (function(_ENV)
 end)
 
 class "ScrollBar" (function(_ENV)
-  inherit "Frame"
+  inherit "Scorpio.UI.Frame"
   -----------------------------------------------------------------------------
   --                               Events                                    --
   -----------------------------------------------------------------------------
@@ -284,7 +284,7 @@ class "ScrollBar" (function(_ENV)
 
   --- returns the height if the scrollbar is vertical or the width if its 
   --- horizontal
-  __Arguments__ { Frame }
+  __Arguments__ { Scorpio.UI.Frame }
   function GetFrameExtent(self, frame)
     local width, height = frame:GetSize()
     return self.IsHorizontal and width or height
@@ -292,7 +292,7 @@ class "ScrollBar" (function(_ENV)
 
   --- Sets the height if the scrollbar is vertical or the width if its 
   --- horizontal.
-  __Arguments__ { Frame, Number }
+  __Arguments__ { Scorpio.UI.Frame, Number }
   function SetFrameExtent(self, frame, value)
     if self.IsHorizontal then 
       frame:SetWidth(value)
@@ -445,7 +445,7 @@ class "ScrollBar" (function(_ENV)
   --                            Constructors                                 --
   -----------------------------------------------------------------------------
   __Template__ {
-    Track = Frame,
+    Track = Scorpio.UI.Frame,
     {
       Track = {
         Thumb = ScrollBarThumb

@@ -16,6 +16,8 @@ SUBJECTS_ONLOAD_PROCESS_DONE  = false
 UI_SETTINGS_DB_INDEX          = "uiSettings"
 UI_SETTING_SUBJECTS           = {}
 
+UI_SETTINGS_DB = nil
+
 class "UISetting" (function(_ENV)
   -----------------------------------------------------------------------------
   --                                Methods                                  --
@@ -54,7 +56,7 @@ class "UISetting" (function(_ENV)
 
     local subject = UI_SETTING_SUBJECTS[self.id]
 
-    if subject then 
+    if subject then
       subject:OnNext(value)
     end
   end
@@ -68,7 +70,8 @@ class "UISetting" (function(_ENV)
   function SetValue(self, value)
     local id = self.id
     
-    local previousValue = SavedVariables.Profile().Path(UI_SETTINGS_DB_INDEX).GetValue(id)
+    local previousValue = UI_SETTINGS_DB[id]
+    -- local previousValue = SavedVariables.Profile().Path(UI_SETTINGS_DB_INDEX).GetValue(id)
     if previousValue == nil then 
       previousValue = self.Default
     end
@@ -85,8 +88,10 @@ class "UISetting" (function(_ENV)
 
     if value == nil then
       SavedVariables.Profile().Path(UI_SETTINGS_DB_INDEX).SetValue(id, nil)
+      -- UI_SETTINGS_DB[id] = nil
     else
       SavedVariables.Profile().Path(UI_SETTINGS_DB_INDEX).SaveValue(id, value)
+      -- UI_SETTINGS_DB[id] = value 
     end
 
     if not self.ResolvedSetting then
@@ -133,16 +138,20 @@ class "UISetting" (function(_ENV)
   function GetValue(self, includeParent, includeDefault )
     local useCacheResolution = includeParent and includeDefault
 
+    
     if useCacheResolution and self.ResolvedSetting and self.ResolvedSetting ~= self then
       return self.ResolvedSetting:GetValue(), self.ResolvedSetting
     end
-
-    local value = SavedVariables.Profile().Path(UI_SETTINGS_DB_INDEX).GetValue(self.id)
+    
+    local value = SavedVariables.AbsPath(UI_SETTINGS_DB_INDEX).GetValue(self.id)
+    -- local value = UI_SETTINGS_DB[self.id]
+    -- print("Finished", GetTime() - START_TIME)
+    -- print("Get Value", self.id)
     if value then
       if useCacheResolution and not self.ResolvedSetting then 
         self.ResolvedSetting = self 
       end
-
+      
       return value, useCacheResolution and self.ResolvedSetting
     end
 
@@ -153,17 +162,18 @@ class "UISetting" (function(_ENV)
       
       return self.Default, useCacheResolution and self.ResolvedSetting
     end
-
-
+    
+    
     if includeParent and self.Parent then
       local value, resolvedSetting = self.Parent:GetValue(includeParent, includeDefault)
-
+      
       if not self.ResolvedSetting and useCacheResolution then 
         self.ResolvedSetting = resolvedSetting
       end
-
+      
       return value, useCacheResolution and self.ResolvedSetting
     end
+
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
@@ -308,8 +318,30 @@ __Static__() function API.FromUISetting(id)
   end)
 end
 
+__Arguments__ { String * 0}
+__Static__() function API.FromUISettings(...)
+  local observable
+  local useNext = false
+  for i = 1, select("#", ...) do 
+    local arg = select(i, ...)
+    observable = observable and observable:CombineLatest(API.FromUISetting(arg)) or API.FromUISetting(arg)
+
+    if i > 1 then 
+      useNext = true
+    end
+  end
+
+  if useNext then 
+    return observable:Next()
+  end
+
+  return observable
+end
+
 function OnLoad(self)
   -- When the db is initialized, we read the ui settings and notify the observer
+  UI_SETTINGS_DB = SavedVariables.Profile().GetValue(UI_SETTINGS_DB_INDEX) or {}
+
   for id, subject in pairs(UI_SETTING_SUBJECTS) do 
     local setting = UI_SETTINGS[id]
     if setting then

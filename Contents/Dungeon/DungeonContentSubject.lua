@@ -6,16 +6,11 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling                     "SylingTracker.Core.Button"                       ""
+Syling            "SylingTracker.Contents.DungeonContentSubject"             ""
 -- ========================================================================= --
-class "Button" { Scorpio.UI.Button }
-
-UI.Property         {
-    name            = "NormalTexture",
-    type            = Texture,
-    require         = Button,
-    nilable         = true,
-    childtype       = Texture,
-    clear           = Button.ClearNormalTexture and function(self) self:ClearNormalTexture() end,
-    set             = function(self, val) self:SetNormalTexture(val) end,
+__DataProperties__ {
+  { name = "objectives", type = ObjectiveData, isArray = true, singularName = "objective"},
+  { name = "name", type = String },
+  { name = "numObjectives", type = Number }
 }
+class "DungeonContentSubject" { ContentSubject }

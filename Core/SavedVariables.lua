@@ -13,7 +13,6 @@ export {
   UnitName                          = UnitName
 }
 
-
 -- Helper fo combining the paths
 local combinePaths = setmetatable({ [0] = function(...) return ... end }, { __index = function(self, cnt)
     local args = List(cnt, "i=>'a['.. i .. ']'"):Join(",")
@@ -165,16 +164,17 @@ class "SavedVariables" (function(_ENV)
     local cacheId = private__CreateCacheId(BASE_DB_ID, PATH_ID)
     local cache, alreadyFetched = private__GetTableFromCache(cacheId)
 
-    if cache then 
+    if cache then
       return cache[index]
+    else
     end
-
+    
     -- If the cache is nil, and it's has been previously fetch, don't need 
     -- to continue because the path not exists, so the value in all case is nil 
     if alreadyFetched then 
       return 
     end
-
+    
     -- If we here, we need to iterate the table for trying to get the value 
     -- We take also the opportunity for building the cache for each table iterated 
     local currentTable = private__GetBaseTable()

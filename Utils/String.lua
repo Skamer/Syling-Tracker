@@ -6,16 +6,16 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling                     "SylingTracker.Core.Button"                       ""
+Syling                  "SylingTracker.Utils.String"                         ""
 -- ========================================================================= --
-class "Button" { Scorpio.UI.Button }
+__Static__() function Utils.ExecStringFunction(func, ...)
+  func = "return" .. " " .. func 
 
-UI.Property         {
-    name            = "NormalTexture",
-    type            = Texture,
-    require         = Button,
-    nilable         = true,
-    childtype       = Texture,
-    clear           = Button.ClearNormalTexture and function(self) self:ClearNormalTexture() end,
-    set             = function(self, val) self:SetNormalTexture(val) end,
-}
+  local result, err = System.Toolset.loadsnippet(func)
+
+  if result then 
+    return true, result()(...)
+  end
+
+  return false, err
+end

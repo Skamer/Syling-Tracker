@@ -1,26 +1,30 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
-  <!--  Base non ui files-->
+  <Script file="Attributes\Recyclable.lua" />
+  <Script file="Attributes\UIElement.lua" />
+  <Script file="Attributes\DataProperties.lua" />
+  <Script file="Attributes\ObjectDataProperty.lua" />
+  
+  <Script file="Interfaces\IObjectData.lua" />
+  <Script file="Interfaces\IView.lua" />
+  <Script file="Interfaces\IQueueAdjustHeight.lua" />
+  <Script file="Interfaces\IQueueLayout.lua" />
+  <Script file="Interfaces\ISizeAnimation.lua" />
+
   <Script file="Media.lua" />
   <Script file="SavedVariables.lua" />
   <Script file="Settings.lua" />
   <Script file="UISettings.lua" />
-  <Script file="UIElement.lua" />
-  <Script file="DataStore.lua" />
-  <Script file="SharedInterfaces.lua" />
+  <Script file="ObjectData.lua" />
 
-  <!-- Base UIObjects files -->
-  <Include file="UIObjects\__load.xml"/>
+  <Script file="UIObjects\FontString.lua" />
+  <Script file="UIObjects\Texture.lua" />
+  <Script file="UIObjects\StatusBar.lua" />
+  <Script file="UIObjects\Frame.lua" />
+  <Script file="UIObjects\Button.lua" />
 
-  <!-- <Script file="View.lua" /> -->
-  <Script file="ItemBar.lua"/>
-  <Script file="ListView.lua"/>
   <Script file="ScrollBar.lua" />
   <Script file="Tracker.lua" />
-  <Script file="ContentManager.lua"/>
-  <!-- <Script file="Icon.lua" />
-  <Script file="Experiment.lua"/> -->
-  <!-- <Script file="Exp2.lua"/> -->
+  <Script file="ContentManager.lua" />
 </Ui>
-
 

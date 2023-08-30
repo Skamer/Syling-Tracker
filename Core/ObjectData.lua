@@ -6,16 +6,15 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling                     "SylingTracker.Core.Button"                       ""
+Syling                   "SylingTracker.Core.ObjectData"                     ""
 -- ========================================================================= --
-class "Button" { Scorpio.UI.Button }
+__Recyclable__()
+class "ObjectData" (function(_ENV)
+  extend "IObjectData"
 
-UI.Property         {
-    name            = "NormalTexture",
-    type            = Texture,
-    require         = Button,
-    nilable         = true,
-    childtype       = Texture,
-    clear           = Button.ClearNormalTexture and function(self) self:ClearNormalTexture() end,
-    set             = function(self, val) self:SetNormalTexture(val) end,
-}
+  function OnRelease(self)
+    if self.ResetDataProperties then 
+      self:ResetDataProperties() 
+    end
+  end
+end)

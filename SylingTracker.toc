@@ -11,24 +11,19 @@
 # Embed libs
 embeds.xml
 
-# Module Type file
 SylingModule.lua
+Environment.lua
 
-# Localization files
-Locales\__load.xml
-
-# Utils file
+# Utilities files 
 Utils\__load.xml
 
 # Core files
 Core\__load.xml
 
-# UI Element files
-UI\__load.xml
+# Base files
+Base\__load.xml
 
-# Main file
-SylingTracker.lua
-
-# Content files
+# Contents files 
 Contents\__load.xml
 
+Boot.lua
