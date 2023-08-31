@@ -34,6 +34,7 @@ class "__DataProperties__" (function(_ENV)
       local methodSingularPart = firstToUpper(singularName)
       local methodPluralPart = firstToUpper(pluralName)
       local collectionIndex = "__" .. propertyName
+      local collectionCounter = 0
 
       -- Generate Properties
       Environment.Apply(manager, function(_ENV)
@@ -88,8 +89,12 @@ class "__DataProperties__" (function(_ENV)
 
       -- Generate methods 
       Environment.Apply(manager, function(_ENV)
-        
         target["Acquire"..methodSingularPart] = function(self, key)
+          if isArray and key == nil then
+            collectionCounter = collectionCounter + 1
+            key = collectionCounter
+          end
+
           local obj = self[propertyName][key]
           if not obj then 
             obj = propertyType()
@@ -121,6 +126,31 @@ class "__DataProperties__" (function(_ENV)
               self[propertyName][k] = nil
             end
           end
+
+          if isArray then
+            target["Start"..methodPluralPart.."Counter"] = function(self)
+              collectionCounter = 0
+            end
+
+            target["Stop"..methodPluralPart.."Counter"] = function(self)
+              local collection = self[collectionIndex]
+              if not collection then 
+                return 
+              end
+
+              local oldCount = self[collectionIndex].Count
+              
+              if oldCount == collectionCounter then 
+                return 
+              end
+              
+              for i = 1, oldCount do 
+                if i > collectionCounter then 
+                  collection[i] = nil 
+                end
+              end
+            end
+          end
         end
       end)
     end
@@ -147,10 +177,14 @@ class "__DataProperties__" (function(_ENV)
             local isArray = attributeInfo.isArray
             local collectionIndex = "__" .. propertyName
 
-            if isArray then 
-              info:SetValue(propertyName, obj[collectionIndex], Array[propertyType])
-            elseif isMap then 
-              info:SetValue(propertyName, obj[collectionIndex], Table)
+            if isArray then
+              if obj[collectionIndex] and obj[collectionIndex].Count > 0  then 
+                info:SetValue(propertyName, obj[collectionIndex], Array[propertyType])
+              end
+            elseif isMap then
+              if obj[collectionIndex] and next(obj[collectionIndex]) ~= nil then 
+                info:SetValue(propertyName, obj[collectionIndex], Table)
+              end
             else
               info:SetValue(propertyName, obj[propertyName], propertyType)
             end

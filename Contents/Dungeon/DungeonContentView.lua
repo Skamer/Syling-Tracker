@@ -17,7 +17,7 @@ class "DungeonContentView" (function(_ENV)
   function OnViewUpdate(self, data, metadata)
     super.OnViewUpdate(self, data, metadata)
 
-    if data and data.objectives then 
+    if data then 
       local objectives = self:GetChild("Objectives")
       objectives:UpdateView(data.objectives, metadata)
     end
@@ -152,7 +152,7 @@ Style.UpdateSkin("Default", {
     },
 
     Objectives = {
-      autoAdjustHeight = false,
+      autoAdjustHeight = true,
       height = 32,
       backdrop = { 
         bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],

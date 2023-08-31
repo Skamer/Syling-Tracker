@@ -75,14 +75,13 @@ class "ListView" (function(_ENV)
       view:Release()
       self.Views[key] = nil 
 
-      new = true 
+      new = true
     end
 
     if not view or new then 
       view = classType.Acquire()
       view:SetParent(self)
       view:Show()
-      -- view:InstantApplyStyle()
 
       view.OnSizeChanged = view.OnSizeChanged + self.OnViewSizeChanged
 
@@ -95,7 +94,6 @@ class "ListView" (function(_ENV)
   end
 
   function OnAdjustHeight(self)
-
     local height = 0
     local count = 0
 
@@ -106,7 +104,6 @@ class "ListView" (function(_ENV)
     end
 
     height = height + self.Spacing * math.max(0, count - 1) + self.PaddingBottom
-
 
     self:SetHeight(height)
   end
@@ -122,12 +119,10 @@ class "ListView" (function(_ENV)
   function ReleaseUnusedViews(self)
     for key, view in pairs(self.Views) do
       if not self.ViewKeys[key] then
-        view.OnSizeChanged = view.OnSizeChanged - self.OnViewSizeChanged 
+        view.OnSizeChanged = view.OnSizeChanged - self.OnViewSizeChanged
         view:Release() 
-
-        self.Views[key] = nil 
-
-        self:AdjustHeight()
+        
+        self.Views[key] = nil
       end
     end
   end
