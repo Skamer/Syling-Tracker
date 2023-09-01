@@ -40,7 +40,13 @@ class "Frame" (function(_ENV)
   --                               Handlers                                  --
   -----------------------------------------------------------------------------
   local function OnStateChanged(self)
-    self:GetParent():AdjustHeight()
+    local parent = self:GetParent()
+
+    -- As the common frame (e.g, Scorpio RecycleHolder) can be a parent, we 
+    -- need to check the parent has the 'AdjustHeight' method
+    if parent and parent.AdjustHeight then
+      parent:AdjustHeight()
+    end
   end
 
   local function OnChildChanged(self, child, isAdd, noAdjust)

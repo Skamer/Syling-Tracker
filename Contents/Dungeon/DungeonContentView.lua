@@ -8,6 +8,10 @@
 -- ========================================================================= --
 Syling                 "SylingTracker.Contents.DungeonContentView"           ""
 -- ========================================================================= --
+export {
+  FromUIProperty = Wow.FromUIProperty
+}
+
 __UIElement__()
 class "DungeonContentView" (function(_ENV)
   inherit "ContentView"
@@ -18,8 +22,14 @@ class "DungeonContentView" (function(_ENV)
     super.OnViewUpdate(self, data, metadata)
 
     if data then 
+      self.DungeonName = data.name
+      self.DungeonTextureFileID = data.textureFileID
+
       local objectives = self:GetChild("Objectives")
       objectives:UpdateView(data.objectives, metadata)
+    else 
+      self.DungeonName = nil 
+      self.DungeonTextureFileID = nil
     end
   end
 
@@ -32,6 +42,16 @@ class "DungeonContentView" (function(_ENV)
     Style[self].TopDungeonInfo.visible = false
     Style[self].Objectives.visible = false
   end
+
+  __Observable__()
+  property "DungeonTextureFileID" {
+    type = Number
+  }
+
+  __Observable__()
+  property "DungeonName" {
+    type = String
+  }
 
 
   __Template__{
@@ -81,7 +101,8 @@ Style.UpdateSkin("Default", {
       },
 
       DungeonIcon = {
-        fileID = 4742929,
+        fileID = FromUIProperty("DungeonTextureFileID"),
+        --fileID = 4742929, [<<--- used ]
         -- texCoords = { left = 0.07,  right = 0.7, top = 0.08, bottom = 0.52 } ,
         texCoords = { left = 0.04,  right = 0.64, top = 0.02, bottom = 0.70 } ,
         vertexColor = { r = 1, g = 1, b = 1, a = 0.5 },
@@ -132,7 +153,8 @@ Style.UpdateSkin("Default", {
       -- },
 
       DungeonName = {
-        text = "Académie d'Algeth'ar",
+        -- text = "Académie d'Algeth'ar",
+        text = FromUIProperty("DungeonName"),
         fontObject = Game18Font,
         textColor = { r = 1, g = 0.914, b = 0.682},
 
@@ -167,3 +189,9 @@ Style.UpdateSkin("Default", {
     }
   }
 })
+
+-- function OnLoad(self)
+--   local currentMapID = select(8, GetInstanceInfo())
+--   C_EncounterJournal.GetInstanceForGameMap(currentMapID)
+-- EJ_GetInstanceInfo()
+-- end

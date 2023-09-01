@@ -11,6 +11,7 @@ Syling            "SylingTracker.Contents.DungeonContentSubject"             ""
 __DataProperties__ {
   { name = "objectives", type = ObjectiveData, isArray = true, singularName = "objective"},
   { name = "name", type = String },
-  { name = "numObjectives", type = Number }
+  { name = "numObjectives", type = Number },
+  { name = "textureFileID", type = Number}
 }
 class "DungeonContentSubject" { ContentSubject }

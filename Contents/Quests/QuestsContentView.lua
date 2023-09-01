@@ -17,10 +17,11 @@ class "QuestsContentView"(function(_ENV)
   function OnViewUpdate(self, data, metadata)
     super.OnViewUpdate(self, data, metadata)
 
-    local showCategories = true
-
+    
+    local showCategories = false
+    
     if data and data.quests then
-
+      
       if showCategories then
         Style[self].Categories.visible = self.Expanded
         local categoriesListView = self:GetPropertyChild("Categories")

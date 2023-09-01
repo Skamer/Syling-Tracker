@@ -486,7 +486,8 @@ function QUEST_WATCH_LIST_CHANGED(questID, isAdded)
       QUESTS_WITH_ITEMS[questID] = nil 
     end
 
-    QUESTS_CONTENT_SUBJECT:RemoveQuestData(questID)
+    -- QUESTS_CONTENT_SUBJECT:RemoveQuestData(questID)
+    QUESTS_CONTENT_SUBJECT.quests[questID] = nil
   end
 end
 
@@ -567,7 +568,7 @@ function UpdateDistance()
     local distanceSq = GetDistanceSqToQuest(questID)
 
     if distanceSq then 
-      local questData = QUESTS_CONTENT_SUBJECT:GetQuestData(questID)
+      local questData = QUESTS_CONTENT_SUBJECT:AcquireQuest(questID)
       questData.distance = math.sqrt(distanceSq)
     end
   end

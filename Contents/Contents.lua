@@ -49,6 +49,7 @@ RegisterContent({
   order = 30,
   viewClass = DungeonContentView,
   data = API.GetObservableContent("dungeon"),
+  statusFunc = function(data) return (data and data.name) and true or false end 
 })
 -------------------------------------------------------------------------------
 --                             Keystone                                      --
@@ -82,6 +83,7 @@ RegisterContent({
   icon = { atlas = AtlasType("QuestDaily") },
   order = 60,
   viewClass = ContentView,
+  data = API.GetObservableContent("worldQuests")
 })
 -------------------------------------------------------------------------------
 --                             Tasks                                         --
@@ -190,32 +192,32 @@ RegisterContent({
 -------------------------------------------------------------------------------
 --                             Dungeon Quests                                --
 -------------------------------------------------------------------------------
-RegisterContent({
-  id = "dungeonQuests",
-  name = "OnMap Quests",
-  description = "QUESTS_PH_DESC",
-  icon = { atlas =  AtlasType("QuestNormal") },
-  order = 115,
-  viewClass = QuestsContentView,
-  data = API.GetObservableContent("quests"):Map(function(data)
-    local dungeonQuests = {}
-    if data and data.quests then 
-      for questID, questData in pairs(data.quests) do 
-        if questData.isOnMap or questData.hasLocalPOI then
-          dungeonQuests[questID] = questData
-        end
-      end
-    end
+-- RegisterContent({
+--   id = "dungeonQuests",
+--   name = "OnMap Quests",
+--   description = "QUESTS_PH_DESC",
+--   icon = { atlas =  AtlasType("QuestNormal") },
+--   order = 115,
+--   viewClass = QuestsContentView,
+--   data = API.GetObservableContent("quests"):Map(function(data)
+--     local dungeonQuests = {}
+--     if data and data.quests then 
+--       for questID, questData in pairs(data.quests) do 
+--         if questData.isOnMap or questData.hasLocalPOI then
+--           dungeonQuests[questID] = questData
+--         end
+--       end
+--     end
 
-    return { quests = dungeonQuests}
-  end),
-    statusFunc = function(data)
-    if data and data.quests then
-      for k, v in pairs(data.quests) do
-        return true 
-      end
-    end
+--     return { quests = dungeonQuests}
+--   end),
+--     statusFunc = function(data)
+--     if data and data.quests then
+--       for k, v in pairs(data.quests) do
+--         return true 
+--       end
+--     end
 
-    return false
-  end
-})
+--     return false
+--   end
+-- })

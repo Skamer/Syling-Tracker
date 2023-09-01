@@ -38,6 +38,15 @@ function LoadAndUpdate(self)
   DUNGEON_CONTENT_SUBJECT.name = name 
   DUNGEON_CONTENT_SUBJECT.numObjectives = numObjectives
 
+  local textureFileID
+  local currentMapID = select(8, GetInstanceInfo())
+  if currentMapID then
+    textureFileID = select(4, EJ_GetInstanceInfo(C_EncounterJournal.GetInstanceForGameMap(currentMapID)))
+  end
+
+  DUNGEON_CONTENT_SUBJECT.textureFileID = textureFileID
+  
+
   DUNGEON_CONTENT_SUBJECT:StartObjectivesCounter()
   if numObjectives > 0 then 
     for index = 1, numObjectives do 

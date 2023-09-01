@@ -7,6 +7,8 @@
   <Script file="Quests\QuestCategoryView.lua" />
   <Script file="Quests\QuestsContentView.lua" />
   <Script file="Quests\Quests.lua" />
+  <!-- World Quests -->
+  <Script file="WorldQuests\WorldQuests.lua" />
   <!-- Dungeons -->
   <Script file="Dungeon\DungeonContentSubject.lua" />
   <Script file="Dungeon\DungeonContentView.lua" />

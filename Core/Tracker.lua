@@ -115,6 +115,7 @@ class "Tracker" (function(_ENV)
   function AddView(self, view)
     self.Views:Insert(view)
     view:SetParent(self:GetScrollContent())
+    view:Show()
 
     -- Bind the events 
     view.OnSizeChanged = view.OnSizeChanged + self.OnViewSizeChanged
@@ -144,7 +145,7 @@ class "Tracker" (function(_ENV)
   end  
 
   __Iterator__()
-  function interateViews(self)
+  function IterateViews(self)
     local yield = coroutine.yield
     local index = 0
 
@@ -160,7 +161,7 @@ class "Tracker" (function(_ENV)
     local content = self:GetScrollContent()
     local previousView 
 
-    for index, view in self:interateViews() do 
+    for index, view in self:IterateViews() do
       if index > 1 then 
         view:SetPoint("TOP", previousView, "BOTTOM", 0, -10)
         view:SetPoint("LEFT")
@@ -176,10 +177,12 @@ class "Tracker" (function(_ENV)
   end
 
   function OnAdjustHeight(self)
-    local height = 0
+    -- IMPORTANT: For avoiding the content height might not be computed and 
+    -- not displayed, we need to use '1' as minimun height.
+    local height = 1
     local count = 0
     local content = self:GetScrollContent()
-    for _, view in self:interateViews() do 
+    for _, view in self:IterateViews() do 
       count = count + 1
       height = height + view:GetHeight()
     end
@@ -664,7 +667,7 @@ __Async__() function PLAYER_ENTERING_WORLD(isInitialLogin, isReloadingUI)
     _MainTracker:TrackContent("dungeon")
     -- _MainTracker:TrackContent("keystone")
     -- _MainTracker:TrackContent("torghast")
-    -- _MainTracker:TrackContent("worldQuests")
+    _MainTracker:TrackContent("worldQuests")
     -- _MainTracker:TrackContent("tasks")
     -- _MainTracker:TrackContent("bonusTasks")
     -- _MainTracker:TrackContent("achievements")
