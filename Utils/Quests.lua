@@ -54,3 +54,15 @@ __Static__() function Utils.HasWorldQuests()
   
   return false
 end
+
+__Static__() function Utils.HasTasks(self)
+  local tasks = GetTasksTable()
+  for _, questID in ipairs(tasks) do 
+    local isInArea = GetTaskInfo(questID)
+    if not IsWorldQuest(questID) and isInArea then 
+      return true 
+    end 
+  end
+  
+  return false
+end

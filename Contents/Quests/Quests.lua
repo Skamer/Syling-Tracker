@@ -25,6 +25,7 @@ export {
   GetDistanceSqToQuest                = C_QuestLog.GetDistanceSqToQuest,
   GetInfo                             = C_QuestLog.GetInfo,
   GetLogIndexForQuestID               = C_QuestLog.GetLogIndexForQuestID,
+  GetNextWaypointText                 = C_QuestLog.GetNextWaypointText,
   GetNumQuestLogEntries               = C_QuestLog.GetNumQuestLogEntries,
   GetNumQuestObjectives               = C_QuestLog.GetNumQuestObjectives,
   GetNumQuestWatches                  = C_QuestLog.GetNumQuestWatches,
@@ -282,8 +283,6 @@ function UpdateQuest(self, questID)
   --     ItemBar_RemoveItem(questID)
   --   end
   -- end
-    
-    
 
   -- Updating the objectives 
   local objectiveCount = 0

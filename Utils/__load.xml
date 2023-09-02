@@ -6,4 +6,5 @@
   <Script file="Regex.lua" />
   <Script file="Math.lua" />
   <Script file="Quests.lua" />
+  <Script file="Achievement.lua" />
 </Ui>

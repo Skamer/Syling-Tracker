@@ -1,5 +1,12 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
+  <!-- Achievements -->
+  <Script file="Achievements\AchievementData.lua" />
+  <Script file="Achievements\AchievementsContentSubject.lua"/>
+  <Script file="Achievements\Achievements.lua"/>
+  <!-- Profession Recipes -->
+  <Script file="ProfessionRecipes\ProfessionRecipesData.lua" />
+  <Script file="ProfessionRecipes\ProfessionRecipes.lua" />
   <!-- Quests -->
   <Script file="Quests\QuestData.lua" />
   <Script file="Quests\QuestsContentSubject.lua" />
@@ -7,13 +14,16 @@
   <Script file="Quests\QuestCategoryView.lua" />
   <Script file="Quests\QuestsContentView.lua" />
   <Script file="Quests\Quests.lua" />
+  <!-- Tasks -->
+  <Script file="Tasks\TaskData.lua" />
+  <Script file="Tasks\TasksContentSubject.lua" />
+  <Script file="Tasks\Tasks.lua" /> 
   <!-- World Quests -->
   <Script file="WorldQuests\WorldQuests.lua" />
   <!-- Dungeons -->
   <Script file="Dungeon\DungeonContentSubject.lua" />
   <Script file="Dungeon\DungeonContentView.lua" />
   <Script file="Dungeon\Dungeon.lua"/>
-
   <!-- Contents Loading -->
   <Script file="Contents.lua" />
 </Ui>
