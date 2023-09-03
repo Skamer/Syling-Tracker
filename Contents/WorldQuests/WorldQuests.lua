@@ -54,6 +54,9 @@ function UpdateWorldQuest(self, questID)
   local isInArea, isOnMap, numObjectives, questName, displayAsObjective = GetTaskInfo(questID)
 
   local worldQuestData = WORLD_QUESTS_CONTENT_SUBJECT:AcquireQuest(questID)
+  worldQuestData.title = questName
+  worldQuestData.name = questName
+  worldQuestData.numObjectives = numObjectives
 
   worldQuestData:StartObjectivesCounter()
   if numObjectives > 0 then 
