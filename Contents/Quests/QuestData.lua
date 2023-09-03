@@ -26,6 +26,7 @@ __DataProperties__ {
   { name = "hasTimer", type = Boolean },
   { name = "totalTime", type = Number },
   { name = "elapsedTime", type = Number },
+  { name = "startTime", type = Number},
   { name = "isOnMap", type = Boolean },
   { name = "hasLocalPOI", type = Boolean },
   { name = "questType", type = Any },

@@ -57,15 +57,13 @@ class "QuestView" (function(_ENV)
 
     if data.hasTimer then 
       Style[self].Timer.visible     = true 
-      Style[self].Timer.startTime   = GetTime() - data.elapsedTime
+      Style[self].Timer.startTime   = data.startTime
       Style[self].Timer.duration    = data.totalTime
       self.ObjectiveHasTimer        = true 
     else
       Style[self].Timer             = NIL
       self.ObjectiveHasTimer        = false 
     end
-
-
 
     self.QuestName = data.name 
     self.QuestLevel = data.level

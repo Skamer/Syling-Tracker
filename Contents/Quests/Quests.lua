@@ -215,6 +215,7 @@ function UpdateQuest(self, questID)
   questData.requiredMoney = requiredMoney
   questData.totalTime = totalTime
   questData.elapsedTime = elapsedTime
+  questData.startTime =  GetTime() - elapsedTime
   questData.hasTimer = (totalTime and elapsedTime) and true
   questData.isOnMap = isOnMap
   questData.hasLocalPOI = hasLocalPOI
@@ -298,11 +299,19 @@ function UpdateQuest(self, questID)
         objectiveData.isCompleted =  finished
         
         objectiveCount = objectiveCount + 1
+
+        if oType == "progressbar" then 
+          objectiveData.hasProgress = nil 
+          objectiveData.progress = nil 
+          objectiveData.minProgress = nil
+          objectiveData.maxProgress = nil
+          objectiveData.progressText = nil
+          
+          -- We don't display the progress bar if it's completed, we remove it from tracking 
+          QUESTS_WITH_PROGRESS[questID] = nil
+        end
       end
     end
-
-    -- We don't display the progress bar if it's completed, we remove it from tracking 
-    QUESTS_WITH_PROGRESS[questID] = nil
 
     -- In case where the quest is auto completed, this says the user needs to click 
     -- for finishing the quest. We need to notify the player 
@@ -337,7 +346,7 @@ function UpdateQuest(self, questID)
         objectiveCount = objectiveCount + 1
       else
         local waypointText = GetNextWaypointText(questID)
-        local objectiveWaypointData = QuestData:AcquireObjective(objectiveCount + 1)
+        local objectiveWaypointData = questData:AcquireObjective(objectiveCount + 1)
         objectiveWaypointData.isCompleted = false
         objectiveCount = objectiveCount + 1
 
@@ -416,7 +425,6 @@ function UpdateQuest(self, questID)
   --   lastObjective.startTime = GetTime() - elapsedTime
   --   lastObjective.duration = totalTime 
   -- end
-  
 end
 
 __SystemEvent__ "QUEST_LOG_UPDATE"

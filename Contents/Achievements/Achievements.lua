@@ -27,9 +27,6 @@ export {
 
 ACHIEVEMENTS_CONTENT_SUBJECT = RegisterObservableContent("achievements", AchievementsContentSubject)
 
--- local trackedAchievements = C_ContentTracking.GetTrackedIDs(Enum.ContentTrackingType.Achievement)
-
-
 __ActiveOnEvents__ "PLAYER_ENTERING_WORLD" "TRACKED_ACHIEVEMENT_LIST_CHANGED" "CONTENT_TRACKING_UPDATE"
 function BecomeActiveOn(self, event)
   return HasAchievements()

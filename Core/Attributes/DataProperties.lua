@@ -94,7 +94,7 @@ class "__DataProperties__" (function(_ENV)
             collectionCounter = collectionCounter + 1
             key = collectionCounter
           end
-
+          
           local obj = self[propertyName][key]
           if not obj then 
             obj = propertyType()
@@ -199,16 +199,16 @@ class "__DataProperties__" (function(_ENV)
             local isArray = attributeInfo.isArray
             local collectionIndex = "__" .. propertyName
 
-            if isMap then 
-              for k in pairs(self[collectionIndex]) do 
-                self[propertyName][k] = nil 
+            if isMap and obj[collectionIndex] then 
+              for k in pairs(obj[collectionIndex]) do 
+                obj[propertyName][k] = nil 
               end
-            elseif isArray and self[collectionIndex] then
-              for k in self[collectionIndex]:GetIterator() do 
-                  self[propertyName][k] = nil 
+            elseif isArray and obj[collectionIndex] then
+              for k in obj[collectionIndex]:GetIterator() do 
+                  obj[propertyName][k] = nil 
               end
             else 
-              self[propertyName] = nil 
+              obj[propertyName] = nil 
             end
           end
         end

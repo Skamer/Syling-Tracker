@@ -36,7 +36,7 @@ class "Timer" (function(_ENV)
   end
 
   function OnRelease(self)
-    super.OnRelease()
+    super.OnRelease(self)
 
     self.Duration = nil
     self.StartTime = nil
