@@ -215,7 +215,7 @@ function UpdateQuest(self, questID)
   questData.requiredMoney = requiredMoney
   questData.totalTime = totalTime
   questData.elapsedTime = elapsedTime
-  questData.startTime =  GetTime() - elapsedTime
+  questData.startTime =  elapsedTime and GetTime() - elapsedTime
   questData.hasTimer = (totalTime and elapsedTime) and true
   questData.isOnMap = isOnMap
   questData.hasLocalPOI = hasLocalPOI

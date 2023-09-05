@@ -3,7 +3,6 @@
   <Script file="Attributes\Recyclable.lua" />
   <Script file="Attributes\UIElement.lua" />
   <Script file="Attributes\DataProperties.lua" />
-  <Script file="Attributes\ObjectDataProperty.lua" />
   
   <Script file="Interfaces\IObjectData.lua" />
   <Script file="Interfaces\IView.lua" />

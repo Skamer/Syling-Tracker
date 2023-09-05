@@ -83,7 +83,8 @@ RegisterContent({
   icon = { atlas = AtlasType("QuestDaily") },
   order = 60,
   viewClass = ContentView,
-  data = API.GetObservableContent("worldQuests")
+  data = API.GetObservableContent("worldQuests"),
+  statusFunc = function(data) return (data and data.quests) and true or false end
 })
 -------------------------------------------------------------------------------
 --                             Tasks                                         --
@@ -127,7 +128,9 @@ RegisterContent({
   description = "ACTIVITIES_PH_DESC",
   icon = { atlas = AtlasType("UI-HUD-MicroMenu-AdventureGuide-Mouseover") },
   order = 100,
-  viewClass = ContentView,
+  viewClass = ActivitiesContentView,
+  data = API.GetObservableContent("activities"),
+  statusFunc = function(data) return (data and data.activities) and true or false end
 })
 -------------------------------------------------------------------------------
 --                             Profession Recipes                            --
