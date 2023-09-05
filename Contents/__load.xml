@@ -4,6 +4,11 @@
   <Script file="Achievements\AchievementData.lua" />
   <Script file="Achievements\AchievementsContentSubject.lua"/>
   <Script file="Achievements\Achievements.lua"/>
+  <!-- Activities -->
+  <Script file="Activities\ActivitiesData.lua" />
+  <Script file="Activities\ActivityView.lua"/>
+  <Script file="Activities\ActivitiesContentView.lua"/>
+  <Script file="Activities\Activities.lua" />
   <!-- Profession Recipes -->
   <Script file="ProfessionRecipes\ProfessionRecipesData.lua" />
   <Script file="ProfessionRecipes\ProfessionRecipes.lua" />
