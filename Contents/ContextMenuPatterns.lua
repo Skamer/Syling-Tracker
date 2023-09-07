@@ -30,7 +30,6 @@ export {
 
   -- Achievement
   GetAchievementLink                    = GetAchievementLink,
-  RemoveTrackedAchievement              = RemoveTrackedAchievement,
 
   -- Helper 
   ShowHelperWindow                      = API.ShowHelperWindow
@@ -318,7 +317,7 @@ do
   stopWatching.order = 30
   stopWatching.icon = { atlas = AtlasType("transmog-icon-hidden") }
   stopWatching.handler = function(achievementID)
-    RemoveTrackedAchievement(achievementID)
+    C_ContentTracking.StopTracking(_G.Enum.ContentTrackingType.Achievement, achievementID, _G.Enum.ContentTrackingStopType.Manual)
   end
   achievementPattern:AddAction(stopWatching)
 

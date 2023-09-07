@@ -18,6 +18,7 @@ RegisterModel       = API.RegisterModel
 _AchievementModel = RegisterModel(AchievementModel, "achievements-data")
 -- ========================================================================= --
 CreateTextureMarkup                 = CreateTextureMarkup
+AchievementContentTrackingType      = _G.Enum.ContentTrackingType.Achievement
 HasAchievements                     = Utils.Achievement.HasAchievements
 GetAchievementInfo                  = GetAchievementInfo
 GetAchievementNumCriteria           = GetAchievementNumCriteria
@@ -34,14 +35,14 @@ RegisterContentType({
   DefaultOrder = 80,
   DefaultModel = _AchievementModel,
   DefaultViewClass = AchievementsContentView,
-  Events = { "TRACKED_ACHIEVEMENT_LIST_CHANGED", "PLAYER_ENTERING_WORLD" },
+  Events = { "CONTENT_TRACKING_UPDATE", "PLAYER_ENTERING_WORLD" },
   Status = function() return HasAchievements() end
 })
 -- ========================================================================= --
 _AchievementsCache = {}
 _ReadyForFetching  = false
 -- ========================================================================= --
-__ActiveOnEvents__ "PLAYER_ENTERING_WORLD" "TRACKED_ACHIEVEMENT_LIST_CHANGED"
+__ActiveOnEvents__ "PLAYER_ENTERING_WORLD" "TRACKED_ACHIEVEMENT_LIST_CHANGED" "CONTENT_TRACKING_UPDATE"
 function ActivateOn(self, event)
   if event == "PLAYER_ENTERING_WORLD" then 
     _ReadyForFetching = true 
@@ -68,13 +69,8 @@ function OnInactive(self)
 end
 -- ========================================================================= --
 __SystemEvent__()
-function TRACKED_ACHIEVEMENT_UPDATE(achievementID)
-  -- NOTE: We need to check the achievement is tracked for avoiding to add 
-  -- untracked achievements. 
-  if _AchievementsCache[achievementID] then 
-    _M:UpdateAchievement(achievementID)
-    _AchievementModel:Flush()
-  end
+function CONTENT_TRACKING_LIST_UPDATE()
+  _M:UpdateAllAchievements()
 end
 
 __SystemEvent__()
@@ -86,7 +82,11 @@ function PLAYER_ENTERING_WORLD()
 end
 
 __SystemEvent__()
-function TRACKED_ACHIEVEMENT_LIST_CHANGED(achievementID, isAdded)
+function CONTENT_TRACKING_UPDATE(contentType, achievementID, isAdded)
+  if not contentType == AchievementContentTrackingType then 
+    return 
+  end
+
   if not _ReadyForFetching then 
     return 
   end
@@ -116,7 +116,7 @@ function LoadAchievements(self)
   local trackedAchievements = C_ContentTracking.GetTrackedIDs(_G.Enum.ContentTrackingType.Achievement)
   for i = 1, #trackedAchievements do 
     local achievementID = trackedAchievements[i]
-    TRACKED_ACHIEVEMENT_LIST_CHANGED(achievementID, true)
+    CONTENT_TRACKING_UPDATE(AchievementContentTrackingType, achievementID, true)
   end
 end
 

@@ -1,4 +1,14 @@
-# 1.2.6
+# 1.2.7
+
+- bumped the toc version for 10.1.7
+
+**FIXES**
+
+- Fixed the achievements.
+
+---
+
+## 1.2.6
 
 **FIXES**
 
