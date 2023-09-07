@@ -117,7 +117,9 @@ RegisterContent({
   description = "ACHIEVEMENTS_PH_DESC",
   icon = { atlas = AtlasType("UI-HUD-MicroMenu-Achievements-Mouseover")},
   order = 90,
-  viewClass = ContentView,
+  viewClass = AchievementsContentView,
+  data = API.GetObservableContent("achievements"),
+  statusFunc = function(data) return (data and data.achievements) and true or false end
 })
 -------------------------------------------------------------------------------
 --                             Activities                                    --

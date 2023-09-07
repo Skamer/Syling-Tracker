@@ -1,8 +1,9 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
   <!-- Achievements -->
-  <Script file="Achievements\AchievementData.lua" />
-  <Script file="Achievements\AchievementsContentSubject.lua"/>
+  <Script file="Achievements\AchievementsData.lua" />
+  <Script file="Achievements\AchievementView.lua"/>
+  <Script file="Achievements\AchievementsContentView.lua"/>
   <Script file="Achievements\Achievements.lua"/>
   <!-- Activities -->
   <Script file="Activities\ActivitiesData.lua" />

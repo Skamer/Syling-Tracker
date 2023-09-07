@@ -153,10 +153,13 @@ class "Frame" (function(_ENV)
     if maxOuterBottom then
       local _, minHeight = self:GetResizeBounds()
 
+      -- NOTE: As 'paddingBottom' is an UI.Property, self.PaddingBottom won't work
+      -- so we need to pass by Style[self]
+      local paddingBottom = Style[self].paddingBottom or 0
       if minHeight and minHeight > 0 then 
-        return max(minHeight, Round(self:GetTop() - maxOuterBottom)), maxChild
+        return max(minHeight, Round(self:GetTop() - maxOuterBottom)) + paddingBottom, maxChild
       else
-        return Round(self:GetTop() - maxOuterBottom), maxChild
+        return Round(self:GetTop() - maxOuterBottom) + paddingBottom, maxChild
       end
     end
   end
@@ -169,7 +172,3 @@ class "Frame" (function(_ENV)
     handler = AdjustHeightHandler
   }
 end)
-
--- adjustHeight
-
--- AutoAdjustHeight

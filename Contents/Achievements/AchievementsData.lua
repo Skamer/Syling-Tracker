@@ -6,12 +6,13 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling                   "SylingTracker.Data.AchievementData"                ""
+Syling                   "SylingTracker.Data.AchievementsData"               ""
 -- ========================================================================= --
 __DataProperties__ {
   { name = "achievementID", type = Number},
   { name = "title", type = String},
   { name = "name", type = String},
+  { name = "description", type = String},
   { name = "numObjectives", type = Number},
   { name = "points", type = Number},
   { name = "isFailed", type = Boolean },
@@ -28,3 +29,8 @@ __DataProperties__ {
   { name = "objectives", type = ObjectiveData, isArray = true, singularName = "objective"}
 }
 class "AchievementData" { ObjectData }
+
+__DataProperties__ {
+  { name = "achievements", type = AchievementData, isMap = true, singularName = "achievement"}
+}
+class "AchievementsContentSubject" { ContentSubject }
