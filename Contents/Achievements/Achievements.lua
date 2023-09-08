@@ -97,7 +97,7 @@ end
 
 __SystemEvent__()
 function CONTENT_TRACKING_UPDATE(contentType, id, isTracked)
-  if not contentType == AchievementContentTrackingType then 
+  if not (contentType == AchievementContentTrackingType) then 
     return 
   end
 

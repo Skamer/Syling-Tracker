@@ -10,6 +10,9 @@
   <Script file="Activities\ActivityView.lua"/>
   <Script file="Activities\ActivitiesContentView.lua"/>
   <Script file="Activities\Activities.lua" />
+  <!-- Collections -->
+  <Script file="Collections\CollectionsData.lua" />
+  <Script file="Collections\Collections.lua" />  
   <!-- Profession Recipes -->
   <Script file="ProfessionRecipes\ProfessionRecipesData.lua" />
   <Script file="ProfessionRecipes\ProfessionRecipes.lua" />
