@@ -6,10 +6,10 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling             "SylingTracker.Contents.AchievementContentView"           ""
--- ========================================================================= -
+Syling             "SylingTracker.Contents.CollectionsContentView"           ""
+-- ========================================================================= --
 __UIElement__()
-class "AchievementsContentView" (function(_ENV)
+class "CollectionsContentView" (function(_ENV)
   inherit "ContentView"
   -----------------------------------------------------------------------------
   --                                Methods                                  --
@@ -17,36 +17,37 @@ class "AchievementsContentView" (function(_ENV)
   function OnViewUpdate(self, data, metadata)
     super.OnViewUpdate(self, data, metadata)
 
-    if data and data.achievements then
-      Style[self].Achievements.visible = self.Expanded
-      local achievementsListView = self:GetPropertyChild("Achievements")
-      achievementsListView:UpdateView(data.achievements, metadata)
-    else
-      Style[self].Achievements = NIL 
+    if data and data.collections then 
+        Style[self].Collections.visible = self.Expanded
+        local collectionsListView = self:GetPropertyChild("Collections")
+        collectionsListView:UpdateView(data.collections, metadata)    
+    else 
+        Style[self].Collections = NIL 
     end
   end
 
+  
   function OnExpand(self)
-    if self:GetPropertyChild("Achievements") then 
-      Style[self].Achievements.visible = true 
+    if self:GetPropertyChild("Collections") then 
+      Style[self].Collections.visible = true 
     end
   end
 
   function OnCollapse(self)
-    if self:GetPropertyChild("Achievements") then 
-      Style[self].Achievements.visible = false 
+    if self:GetPropertyChild("Collections") then 
+      Style[self].Collections.visible = false 
     end
   end
 end)
 
-__ChildProperty__(AchievementsContentView, "Achievements")
-__UIElement__() class(tostring(AchievementsContentView) .. ".Achievements") { AchievementListView }
+__ChildProperty__(CollectionsContentView, "Collections")
+__UIElement__() class(tostring(CollectionsContentView) .. ".Collections") { CollectableListView }
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
-  [AchievementsContentView] = {
-    [AchievementsContentView.Achievements] = {
+  [CollectionsContentView] = {
+    [CollectionsContentView.Collections] = {
       location = {
         Anchor("TOP", 0, -10, "Header", "BOTTOM"),
         Anchor("LEFT"),

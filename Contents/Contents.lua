@@ -143,8 +143,24 @@ RegisterContent({
   description = "PROFESSION_RECIPES_PH_DESC",
   icon = { atlas = AtlasType("Professions-Crafting-Orders-Icon") },
   order = 110,
-  viewClass = ContentView,
+  viewClass = ProfessionRecipesContentView,
+  data = API.GetObservableContent("professionRecipes"),
+  statusFunc = function(data) return (data and (data.recipes or data.recraftRecipes)) and true or false end
 })
+-------------------------------------------------------------------------------
+--                             Collections                                   --
+-------------------------------------------------------------------------------
+RegisterContent({
+  id = "collections",
+  name = "Collections",
+  description = "COLLECTIONS_PH_DESC",
+  icon = { atlas = AtlasType("UI-HUD-MicroMenu-Collections-Mouseover") },
+  order = 120,
+  viewClass = CollectionsContentView,
+  data = API.GetObservableContent("collections"),
+  statusFunc = function(data) return (data and data.collections) and true or false end
+})
+
 -------------------------------------------------------------------------------
 --                             Campaign Quests                               --
 -------------------------------------------------------------------------------
@@ -169,7 +185,7 @@ RegisterContent({
   name = "Campaign Quests",
   description = "CAMPAIGN_QUESTS_PH_DESC",
   icon =  { atlas = AtlasType("quest-campaign-available") },
-  order = 120,
+  order = 130,
   viewClass = QuestsContentView,
   data = campaignQuestsData,
   statusFunc = function(data)
@@ -190,7 +206,7 @@ RegisterContent({
   name = "Quests",
   description = "QUESTS_PH_DESC",
   icon = { atlas =  AtlasType("QuestNormal") },
-  order = 130,
+  order = 140,
   viewClass = QuestsContentView,
   data = API.GetObservableContent("quests"),
 })

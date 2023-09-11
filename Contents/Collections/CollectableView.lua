@@ -6,14 +6,14 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling                 "SylingTracker.Contents.AchievementView"              ""
+Syling                 "SylingTracker.Contents.CollectableView"              ""
 -- ========================================================================= --
 export {
-  FromUIProperty  = Wow.FromUIProperty,
+  FromUIProperty            = Wow.FromUIProperty,  
 }
 
 __UIElement__()
-class "AchievementView" (function(_ENV)
+class "CollectableView" (function(_ENV)
   inherit "Frame" extend "IView"
   -----------------------------------------------------------------------------
   --                               Methods                                   --
@@ -26,123 +26,66 @@ class "AchievementView" (function(_ENV)
       objectivesView:UpdateView(data.objectives, ...)
     end
 
-    self.AchievementName = data.name
-    self.AchievementDesc = data.description
-    self.AchievementIconFileID = data.icon
+    self.CollectableName = data.name
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
   __Observable__()
-  property "AchievementName" {
+  property "CollectableName" {
     type = String,
     default = ""
-  }
-
-  __Observable__()
-  property "AchievementDesc" {
-    type = String,
-    default = ""
-  }
-
-  __Observable__()
-  property "AchievementIconFileID" {
-    type = Number
   }
   -----------------------------------------------------------------------------
   --                              Constructors                               --
   -----------------------------------------------------------------------------
   __Template__ {
-    Header = Frame, 
-    {
-      Header = {
-        Name = FontString,
-        Icon = Texture,
-        Description = FontString,
-      }
-    }
-
+    Name = FontString
   }
   function __ctor(self) end
 end)
 
 -- Optional Children for QuestView 
-__ChildProperty__(AchievementView, "Objectives")
-class(tostring(AchievementView) .. ".Objectives") { ObjectiveListView }
+__ChildProperty__(CollectableView, "Objectives")
+class(tostring(CollectableView) .. ".Objectives") { ObjectiveListView }
 
 __UIElement__()
-class "AchievementListView" { ListView }
+class "CollectableListView" { ListView }
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
-  [AchievementView] = {
-    height = 24,
-    minResize = { width = 0, height = 24},
-    autoAdjustHeight = true,
+  [CollectableView] = {
+    autoAdjustHeight = true, 
 
     backdrop = { 
       bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
     },
     backdropColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
-
-    Header = {
-      height = 1,
-      autoAdjustHeight = true,
-      paddingBottom = 5,
-      Name = {
-        text = FromUIProperty("AchievementName"),
-        justifyV = "MIDDLE",
-        height = 24,
-        mediaFont = FontType("DejaVuSansCondensed Bold", 10),
-        location = {
-          Anchor("TOP", 0, -5),
-          Anchor("LEFT"),
-          Anchor("RIGHT"),
-        }
-      },
-
-      Description = {
-        text = FromUIProperty("AchievementDesc"),
-        mediaFont = FontType("PT Sans Bold", 11),
-        textColor = Color.WHITE,
-        justifyH = "LEFT",
-        justifyV = "TOP",
-        location = {
-          Anchor("TOP", 0, -5, "Name", "BOTTOM"),
-          Anchor("LEFT", 5, 0, "Icon", "RIGHT"),
-          Anchor("RIGHT")
-        }
-      },
-
-      Icon = {
-        fileID = FromUIProperty("AchievementIconFileID"),
-        width = 32,
-        height = 32,
-        texCoords = { left = 0.07,  right = 0.93, top = 0.07, bottom = 0.93 } ,
-        location = {
-          Anchor("TOPLEFT", 5, -5, "Name", "BOTTOMLEFT")
-        }
-      },
-
+    
+    Name = {
+      text = FromUIProperty("CollectableName"),
+      justifyV = "MIDDLE",
+      mediaFont = FontType("DejaVuSansCondensed Bold", 10),
       location = {
-        Anchor("TOPLEFT"),
-        Anchor("TOPRIGHT")
+        Anchor("TOP"),
+        Anchor("LEFT"),
+        Anchor("RIGHT")
       }
     },
 
-    [AchievementView.Objectives] = {
+    [CollectableView.Objectives] = {
       spacing = 5,
 
       location = {
-        Anchor("TOPLEFT", 0, -5, "Header", "BOTTOMLEFT"),
-        Anchor("TOPRIGHT", 0, -5, "Header", "BOTTOMRIGHT")
+        Anchor("TOPLEFT", 0, -5, "Name", "BOTTOMLEFT"),
+        Anchor("TOPRIGHT", 0, -5, "Name", "BOTTOMRIGHT")
       }
     }
   },
 
-  [AchievementListView] = {
-    viewClass = AchievementView,
+  [CollectableListView] = {
+    viewClass = CollectableView,
     indexed = false
   }
 })

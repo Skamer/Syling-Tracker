@@ -6,10 +6,10 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling             "SylingTracker.Contents.AchievementContentView"           ""
--- ========================================================================= -
+Syling             "SylingTracker.Contents.ProfessionRecipesContentView"     ""
+-- ========================================================================= --
 __UIElement__()
-class "AchievementsContentView" (function(_ENV)
+class "ProfessionRecipesContentView"(function(_ENV)
   inherit "ContentView"
   -----------------------------------------------------------------------------
   --                                Methods                                  --
@@ -17,36 +17,51 @@ class "AchievementsContentView" (function(_ENV)
   function OnViewUpdate(self, data, metadata)
     super.OnViewUpdate(self, data, metadata)
 
-    if data and data.achievements then
-      Style[self].Achievements.visible = self.Expanded
-      local achievementsListView = self:GetPropertyChild("Achievements")
-      achievementsListView:UpdateView(data.achievements, metadata)
+    if data and (data.recipes or data.recraftRecipes) then
+      local recipes 
+      if data.recipes and data.recraftRecipes then
+        recipes = {}
+        for recipeID, recipeData in pairs(data.recraftRecipes) do 
+          recipes[-recipeID] = recipeData
+        end
+
+        for recipeID, recipeData in pairs(data.recipes) do 
+          recipes[recipeID] = recipeData
+        end
+      else
+        recipes = data.recipes or data.recraftRecipes 
+      end
+
+      Style[self].Recipes.visible = self.Expanded
+      local recipesListView = self:GetPropertyChild("Recipes")
+      recipesListView:UpdateView(recipes, metadata) 
     else
-      Style[self].Achievements = NIL 
+      Style[self].Recipes = NIL
     end
   end
 
+
   function OnExpand(self)
-    if self:GetPropertyChild("Achievements") then 
-      Style[self].Achievements.visible = true 
+    if self:GetPropertyChild("Recipes") then
+      Style[self].Recipes.visible = true 
     end
   end
 
   function OnCollapse(self)
-    if self:GetPropertyChild("Achievements") then 
-      Style[self].Achievements.visible = false 
+    if self:GetPropertyChild("Recipes") then 
+      Style[self].Recipes.visible = false 
     end
   end
 end)
 
-__ChildProperty__(AchievementsContentView, "Achievements")
-__UIElement__() class(tostring(AchievementsContentView) .. ".Achievements") { AchievementListView }
+__ChildProperty__(ProfessionRecipesContentView, "Recipes")
+__UIElement__() class(tostring(ProfessionRecipesContentView) .. ".Recipes") { ProfessionRecipeListView }
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
-  [AchievementsContentView] = {
-    [AchievementsContentView.Achievements] = {
+  [ProfessionRecipesContentView] = {
+    [ProfessionRecipesContentView.Recipes] = {
       location = {
         Anchor("TOP", 0, -10, "Header", "BOTTOM"),
         Anchor("LEFT"),

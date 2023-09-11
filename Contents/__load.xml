@@ -12,9 +12,13 @@
   <Script file="Activities\Activities.lua" />
   <!-- Collections -->
   <Script file="Collections\CollectionsData.lua" />
+  <Script file="Collections\CollectableView.lua"/>
+  <Script file="Collections\CollectionsContentView.lua"/>
   <Script file="Collections\Collections.lua" />  
   <!-- Profession Recipes -->
   <Script file="ProfessionRecipes\ProfessionRecipesData.lua" />
+  <Script file="ProfessionRecipes\ProfessionRecipeView.lua"/>
+  <Script file="ProfessionRecipes\ProfessionRecipesContentView.lua"/>
   <Script file="ProfessionRecipes\ProfessionRecipes.lua" />
   <!-- Quests -->
   <Script file="Quests\QuestData.lua" />

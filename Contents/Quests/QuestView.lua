@@ -1,9 +1,9 @@
 -- ========================================================================= --
---                              EskaTracker 2                                --
---           https://www.curseforge.com/wow/addons/eskatracker-2             --
+--                              SylingTracker                                --
+--           https://www.curseforge.com/wow/addons/sylingtracker             --
 --                                                                           --
 --                               Repository:                                 --
---                   https://github.com/Skamer/EskaTracker2                  --
+--                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
 Syling                 "SylingTracker.Contents.QuestView"                    ""

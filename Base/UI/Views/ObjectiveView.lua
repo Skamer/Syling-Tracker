@@ -1,9 +1,9 @@
 -- ========================================================================= --
---                              EskaTracker 2                                --
---           https://www.curseforge.com/wow/addons/eskatracker-2             --
+--                              SylingTracker                                --
+--           https://www.curseforge.com/wow/addons/sylingtracker             --
 --                                                                           --
 --                               Repository:                                 --
---                   https://github.com/Skamer/EskaTracker2                  --
+--                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
 Syling                 "SylingTracker.UI.ObjectiveView"                      ""
@@ -241,6 +241,7 @@ Style.UpdateSkin("Default", {
   [ObjectiveView] = {
     height = 15,
     width = 150,
+    -- clipChildren = true,
     autoAdjustHeight = true,
 
     -- backdrop = { 
@@ -255,6 +256,9 @@ Style.UpdateSkin("Default", {
       -- mediaTexture =  { color = { r = 148/255, g = 148/255, b =  148/255 } },
       mediaTexture = ObjectiveView.FromStateWithIconUISetting("mediaTexture"),
       size = ObjectiveView.FromStateWithIconUISetting("size"),
+      -- SnapToPixelGrid = false,
+      -- TexelSnappingBias = 0 ,
+
       -- size = Size(8, 8),
 
       location = {

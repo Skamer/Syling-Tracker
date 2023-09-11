@@ -1,9 +1,9 @@
 -- ========================================================================= --
---                              EskaTracker 2                                --
---           https://www.curseforge.com/wow/addons/eskatracker-2             --
+--                              SylingTracker                                --
+--           https://www.curseforge.com/wow/addons/sylingtracker             --
 --                                                                           --
 --                               Repository:                                 --
---                   https://github.com/Skamer/EskaTracker2                  --
+--                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
 Syling                  "SylingTracker.UI.ContentView"                       ""
@@ -82,9 +82,6 @@ class "ContentView" (function(_ENV)
     minimizeButton.OnClick = minimizeButton.OnClick + function()
       self.Expanded = not self.Expanded
     end
-
-    -- self:SetHeight(1)
-    -- self:SetClipsChildren(true)
   end
 end)
 -------------------------------------------------------------------------------
