@@ -82,7 +82,7 @@ RegisterContent({
   description = "WORLD_QUESTS_PH_DESC",
   icon = { atlas = AtlasType("QuestDaily") },
   order = 60,
-  viewClass = ContentView,
+  viewClass = TasksContentView,
   data = API.GetObservableContent("worldQuests"),
   statusFunc = function(data) return (data and data.quests) and true or false end
 })
@@ -96,6 +96,23 @@ RegisterContent({
   icon = { atlas = AtlasType("QuestBonusObjective") },
   order = 70,
   viewClass = ContentView,
+  data = API.GetObservableContent("tasks"):Map(function(data)
+    local normalTasks
+    if data and data.quests then 
+      for questID, taskData in pairs(data.quests) do 
+        if taskData.displayAsObjective then 
+          if not normalTasks then 
+            normalTasks = {}
+          end
+
+          normalTasks[questID] = taskData
+        end
+      end
+    end
+
+    return { quests = normalTasks }
+  end),
+  statusFunc = function(data) return (data and data.quests) and true or false end
 })
 -------------------------------------------------------------------------------
 --                             Bonus Tasks                                   --
@@ -106,7 +123,24 @@ RegisterContent({
   description = "BONUS_TASKS_PH_DESC",
   icon = { atlas = AtlasType("QuestBonusObjective") },
   order = 80,
-  viewClass = ContentView,
+  viewClass = TasksContentView,
+  data = API.GetObservableContent("tasks"):Map(function(data)
+    local bonusTasks
+    if data and data.quests then 
+      for questID, taskData in pairs(data.quests) do 
+        if not taskData.displayAsObjective then 
+          if not bonusTasks then 
+            bonusTasks = {}
+          end
+
+          bonusTasks[questID] = taskData
+        end
+      end
+    end
+
+    return { quests = bonusTasks }
+  end),
+  statusFunc = function(data) return (data and data.quests) and true or false end
 })
 -------------------------------------------------------------------------------
 --                             Achievements                                  --

@@ -10,13 +10,12 @@ Syling                   "SylingTracker.Data.TaskData"                      ""
 -- ========================================================================= --
 __DataProperties__ {
   { name = "questID", type = Number },
-  { name = "title", type = String },
   { name = "name", type = String},
-  { name = "numObjectives", type = Boolean },
+  { name = "numObjectives", type = Number },
   { name = "isInArea", type = Boolean},
   { name = "isOnMap", type = Boolean},
   { name = "isComplete", type = Boolean},
   { name = "displayAsObjective", type = Boolean },
-  { name = "objectives", type = ObjectData, isArray = true, singularName = "objective"}
+  { name = "objectives", type = ObjectiveData, isArray = true, singularName = "objective"}
 }
 class "TaskData" { ObjectData }

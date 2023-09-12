@@ -30,6 +30,8 @@
   <!-- Tasks -->
   <Script file="Tasks\TaskData.lua" />
   <Script file="Tasks\TasksContentSubject.lua" />
+  <Script file="Tasks\TaskView.lua"/>
+  <Script file="Tasks\TasksContentView.lua"/>
   <Script file="Tasks\Tasks.lua" /> 
   <!-- World Quests -->
   <Script file="WorldQuests\WorldQuests.lua" />
@@ -40,4 +42,3 @@
   <!-- Contents Loading -->
   <Script file="Contents.lua" />
 </Ui>
-
