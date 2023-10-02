@@ -663,7 +663,7 @@ __Async__() function PLAYER_ENTERING_WORLD(isInitialLogin, isReloadingUI)
       Next()
     end
     
-    -- _MainTracker:TrackContent("scenario")
+    _MainTracker:TrackContent("scenario")
     _MainTracker:TrackContent("dungeon")
     -- _MainTracker:TrackContent("keystone")
     -- _MainTracker:TrackContent("torghast")

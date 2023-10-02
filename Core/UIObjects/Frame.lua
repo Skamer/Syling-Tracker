@@ -172,3 +172,11 @@ class "Frame" (function(_ENV)
     handler = AdjustHeightHandler
   }
 end)
+
+Style.UpdateSkin("Default", {
+  [Frame] = {
+    -- IMPORTANT: We clip children for all frames to avoid a visual issue with textures when 
+    -- the frame is resized or moved.
+    clipChildren = true,
+  }
+})

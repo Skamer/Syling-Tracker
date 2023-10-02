@@ -78,11 +78,37 @@ class "__DataProperties__" (function(_ENV)
             end
           }
         else
-          property(propertyName) { 
-            type = propertyType, 
-            default = propertyDefault, 
-            handler = function(self) self.DataChanged = true end
-          }
+          if Class.IsSubType(propertyType, IObjectData) then
+            property(propertyName) {
+              type = propertyType,
+              get = function(self)
+                local value = self[collectionIndex]
+                if not value then 
+                  value = propertyType()
+                  value:SetParent(self)
+                  self[collectionIndex] = value
+                end
+                return value
+              end,
+              set = function(self, value)
+                if value == nil then
+                  local oldValue = self[collectionIndex]
+                  if oldValue then 
+                    oldValue:SetParent(nil)
+                    self.DataChanged = true
+                    self[collectionIndex] = nil
+                  end
+                end
+              end
+            }
+
+          else
+            property(propertyName) { 
+              type = propertyType, 
+              default = propertyDefault, 
+              handler = function(self) self.DataChanged = true end
+            }
+          end
         end
       end)
 
@@ -186,7 +212,11 @@ class "__DataProperties__" (function(_ENV)
                 info:SetValue(propertyName, obj[collectionIndex], Table)
               end
             else
-              info:SetValue(propertyName, obj[propertyName], propertyType)
+              if Class.IsSubType(propertyType, IObjectData) then 
+                info:SetValue(propertyName, obj[collectionIndex], propertyType)
+              else 
+                info:SetValue(propertyName, obj[propertyName], propertyType)
+              end
             end
           end
         end

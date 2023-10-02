@@ -36,7 +36,9 @@ RegisterContent({
   description = "SCENARIO_PH_DESC",
   icon = { atlas = AtlasType("ScenariosIcon") },
   order = 20,
-  viewClass = ContentView,
+  viewClass = ScenarioContentView,
+  data = API.GetObservableContent("scenario"),
+  statusFunc = function(data) return (data and data.scenario) and true or false end
 })
 -------------------------------------------------------------------------------
 --                             Dungeon                                       --
@@ -95,7 +97,7 @@ RegisterContent({
   description = "TASKS_PH_DESC",
   icon = { atlas = AtlasType("QuestBonusObjective") },
   order = 70,
-  viewClass = ContentView,
+  viewClass = TasksContentView,
   data = API.GetObservableContent("tasks"):Map(function(data)
     local normalTasks
     if data and data.quests then 
@@ -104,7 +106,6 @@ RegisterContent({
           if not normalTasks then 
             normalTasks = {}
           end
-
           normalTasks[questID] = taskData
         end
       end

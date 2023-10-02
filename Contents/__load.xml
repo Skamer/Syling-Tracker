@@ -35,6 +35,10 @@
   <Script file="Tasks\Tasks.lua" /> 
   <!-- World Quests -->
   <Script file="WorldQuests\WorldQuests.lua" />
+  <!-- Scenario -->
+  <Script file="Scenario\ScenarioData.lua" />
+  <Script file="Scenario\ScenarioContentView.lua" />
+  <Script file="Scenario\Scenario.lua" />
   <!-- Dungeons -->
   <Script file="Dungeon\DungeonContentSubject.lua" />
   <Script file="Dungeon\DungeonContentView.lua" />
