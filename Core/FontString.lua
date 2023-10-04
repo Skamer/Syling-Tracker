@@ -17,7 +17,7 @@ export {
 --- transform process
 _TextRaw          = Toolset.newtable(true, false)
 
-__Recyclable__ "SylingTracker_FontString%i"
+SLT.__Recyclable__ "SylingTracker_FontString%i"
 class "SLT.FontString" (function(_ENV)
   inherit "Scorpio.UI.FontString"
   -----------------------------------------------------------------------------
@@ -100,6 +100,6 @@ end)
 
 --- SLT.SLTFontString is now deprecated, and this part has been added for
 --- backward compatibility (the time to migrate to SLT.FontString)
-__Recyclable__ "SylingTracker_SLTFontString%i"
+SLT.__Recyclable__ "SylingTracker_SLTFontString%i"
 class "SLT.SLTFontString" { SLT.FontString }
 

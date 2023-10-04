@@ -1,4 +1,12 @@
-# 1.2.7
+# 1.2.8
+
+**FIXES**
+
+- Fixed an error occurred when entering in a scenario with bonus objectives.
+
+---
+
+## 1.2.7
 
 - bumped the toc version for 10.1.7
 
