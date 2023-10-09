@@ -20,6 +20,36 @@ export {
   SetUISetting      = SylingTracker.API.SetUISetting,
 }
 
+__Widget__()
+class "SettingsSectionHeader" (function(_ENV)
+  inherit "Frame"
+  -----------------------------------------------------------------------------
+  --                               Methods                                   --
+  -----------------------------------------------------------------------------
+  __Arguments__ { String/"" }
+  function SetTitle(self, title)
+    Style[self].Title.text = title 
+  end
+
+  function OnAcquire(self)
+    self:InstantApplyStyle()
+  end
+
+  function OnRelease(self)
+    self:SetID(0)
+    self:Hide()
+    self:ClearAllPoints()
+    self:SetParent(nil)
+  end
+  -----------------------------------------------------------------------------
+  --                            Constructors                                 --
+  -----------------------------------------------------------------------------
+  __Template__ {
+    Title = FontString
+  }
+  function __ctor(self) end 
+end)
+
 __Widget__() 
 class "SettingsText" (function(_ENV)
   inherit "Frame"
@@ -744,6 +774,20 @@ end)
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
+  [SettingsSectionHeader] = {
+    height = 45,
+    marginRight = 0,
+
+    Title = {
+      justifyH = "LEFT",
+      justifyV = "TOP",
+      fontObject = GameFontHighlightLarge,
+      location = {
+        Anchor("TOPLEFT", 7, -16)
+      }
+    }
+  },
+
   [SettingsText] = {
     height = 35,
     marginRight = 0,

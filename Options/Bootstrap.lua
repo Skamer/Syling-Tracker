@@ -66,6 +66,16 @@ __Async__() function SylingTracker_OPEN_OPTIONS()
 end
 
 function CreateTrackerEntries(self, panel)
+  panel:AddCategoryEntry({
+    text = "Main",
+    id = "main",
+    value = function()
+      local settings = SettingDefinitions.Tracker.Acquire()
+      settings.TrackerID = "main"
+      return settings
+    end
+  }, "trackers")
+
   panel:AddCategoryEntry({ 
     text = "|A:tradeskills-icon-add:16:16|a |cff00ff00Create a tracker|r",
     value = SettingDefinitions.CreateTracker,

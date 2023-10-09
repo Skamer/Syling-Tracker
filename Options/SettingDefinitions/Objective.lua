@@ -33,51 +33,51 @@ class "SettingDefinitions.Objective" (function(_ENV)
   end
 
   function BuildTextTab(self)
-    local font = Widgets.SettingsMediaFont.Acquire(false, self)
-    font:SetID(10)
-    font:BindUISetting("objective.text.mediaFont")
-    self.SettingControls[font] = true
+    local mediaFont = Widgets.SettingsMediaFont.Acquire(false, self)
+    mediaFont:SetID(10)
+    mediaFont:BindUISetting("objective.text.mediaFont")
+    self.TabSettingControls.mediaFont = mediaFont
 
     local textColorSection = Widgets.SettingsExpandableSection.Acquire(false, self)
     textColorSection:SetID(20)
     textColorSection:SetTitle("Text Color")
-    self.SettingControls[textColorSection] = true
+    self.TabSettingControls.textColorSection = textColorSection
 
     local textColorProgressColorPicker = Widgets.SettingsColorPicker.Acquire(false, textColorSection)
     textColorProgressColorPicker:SetID(10)
     textColorProgressColorPicker:SetLabel(Color.LIGHTGRAY .. "Progress")
     textColorProgressColorPicker:SetLabelStyle("small")
     textColorProgressColorPicker:BindUISetting("objective.progress.text.textColor")
-    self.SettingControls[textColorProgressColorPicker] = true
+    self.TabSettingControls.textColorProgressColorPicker = textColorProgressColorPicker
 
     local textColorCompletedColorPicker = Widgets.SettingsColorPicker.Acquire(false, textColorSection)
     textColorCompletedColorPicker:SetID(20)
     textColorCompletedColorPicker:SetLabel(Color.GREEN .. "Completed")
     textColorCompletedColorPicker:SetLabelStyle("small")
     textColorCompletedColorPicker:BindUISetting("objective.completed.text.textColor")
-    self.SettingControls[textColorCompletedColorPicker] = true
+    self.TabSettingControls.textColorCompletedColorPicker = textColorCompletedColorPicker
 
     local textColorFailedColorPicker = Widgets.SettingsColorPicker.Acquire(false, textColorSection)
     textColorFailedColorPicker:SetID(30)
     textColorFailedColorPicker:SetLabel(Color.RED .. "Failed")
     textColorFailedColorPicker:SetLabelStyle("small")
     textColorFailedColorPicker:BindUISetting("objective.failed.text.textColor")
-    self.SettingControls[textColorFailedColorPicker] = true
+    self.TabSettingControls.textColorFailedColorPicker = textColorFailedColorPicker
 
     local textTransform = Widgets.SettingsDropDown.Acquire(false, self)
     textTransform:SetID(30)
     textTransform:SetLabel("Text Transform")
-    self.SettingControls[textTransform] = true
+    self.TabSettingControls.textTransform = textTransform
 
     local textJustifyV = Widgets.SettingsDropDown.Acquire(false, self)
     textJustifyV:SetID(40)
     textJustifyV:SetLabel("Text Justify V")
-    self.SettingControls[textJustifyV] = true
+    self.TabSettingControls.textJustifyV = textJustifyV
 
     local textJustifyH = Widgets.SettingsDropDown.Acquire(false, self)
     textJustifyH:SetID(50)
     textJustifyH:SetLabel("Text Justify H")
-    self.SettingControls[textJustifyH] = true
+    self.TabSettingControls.textJustifyH = textJustifyH
   end
 
   -----------------------------------------------------------------------------
@@ -96,7 +96,7 @@ class "SettingDefinitions.Objective" (function(_ENV)
     tabControl:AddTabPage({
       name = "Text",
       onAcquire = function() self:BuildTextTab() end,
-      onRelease = function() self:ReleaseSettingControls() end, 
+      onRelease = function() self:ReleaseTabSettingControls() end, 
     })
 
     tabControl:AddTabPage({
@@ -119,6 +119,7 @@ class "SettingDefinitions.Objective" (function(_ENV)
 
     tabControl:Refresh()
     tabControl:SelectTab(1)
+    self.SettingControls.tabControl = tabControl
   end
 
   function OnBuildSettings(self)
@@ -126,10 +127,27 @@ class "SettingDefinitions.Objective" (function(_ENV)
   end
 
   function ReleaseSettingControls(self)
-    for control in pairs(self.SettingControls) do 
-      self.SettingControls[control] = nil 
+    for key, control in pairs(self.SettingControls) do 
+      self.SettingControls[key] = nil 
       control:Release()
     end    
+  end
+
+  function ReleaseTabSettingControls(self)
+    for key, control in pairs(self.TabSettingControls) do 
+      self.TabSettingControls[key] = nil 
+      control:Release()
+    end       
+  end
+
+  function OnRelease(self)
+    self:SetID(0)
+    self:SetParent()
+    self:ClearAllPoints()
+    self:Hide()
+
+    self:ReleaseSettingControls()
+    self:ReleaseTabSettingControls()
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
@@ -137,6 +155,11 @@ class "SettingDefinitions.Objective" (function(_ENV)
   property "SettingControls" {
     set = false,
     default = function() return Toolset.newtable(false, true) end 
+  }
+
+  property "TabSettingControls" {
+    set = false,
+    default = function() return Toolset.newtable(false, true) end
   }
 
   property "StateControls" {

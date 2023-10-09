@@ -33,11 +33,12 @@ RegisterContent({
 RegisterContent({
   id = "scenario",
   name = "Scenario",
+  formattedName = CreateAtlasMarkup("ScenariosIcon", 16, 16) .. " Scenario",
   description = "SCENARIO_PH_DESC",
   icon = { atlas = AtlasType("ScenariosIcon") },
   order = 20,
   viewClass = ScenarioContentView,
-  data = API.GetObservableContent("scenario"),
+  data = GetObservableContent("scenario"),
   statusFunc = function(data) return (data and data.scenario) and true or false end
 })
 -------------------------------------------------------------------------------
@@ -46,11 +47,12 @@ RegisterContent({
 RegisterContent({
   id = "dungeon",
   name = "Dungeon",
+  formattedName = CreateAtlasMarkup("Dungeon", 16, 16) .. " Dungeon",
   description = "DUNGEON_PH_DESC",
   icon = { atlas = AtlasType("Dungeon") },
   order = 30,
   viewClass = DungeonContentView,
-  data = API.GetObservableContent("dungeon"),
+  data = GetObservableContent("dungeon"),
   statusFunc = function(data) return (data and data.name) and true or false end 
 })
 -------------------------------------------------------------------------------
@@ -59,6 +61,7 @@ RegisterContent({
 RegisterContent({
   id = "keystone",
   name = "Mythic +",
+  formattedName = CreateAtlasMarkup("Dungeon", 16, 16) .. " Mythic +",
   description = "KEYSTONE_PH_DESC",
   icon = { atlas = AtlasType("Dungeon") },
   order = 40,
@@ -70,6 +73,7 @@ RegisterContent({
 RegisterContent({
   id = "torghast",
   name = "Torghast",
+  formattedName = CreateAtlasMarkup("poi-torghast", 16, 16) .. " Torghast",
   description = "TORGHAST_PH_DESC",
   icon = { atlas = AtlasType("poi-torghast") },
   order = 50,
@@ -81,11 +85,12 @@ RegisterContent({
 RegisterContent({
   id = "worldQuests",
   name = "World Quests",
+  formattedName = CreateAtlasMarkup("QuestDaily", 16, 16) .. " World Quests",
   description = "WORLD_QUESTS_PH_DESC",
   icon = { atlas = AtlasType("QuestDaily") },
   order = 60,
   viewClass = TasksContentView,
-  data = API.GetObservableContent("worldQuests"),
+  data = GetObservableContent("worldQuests"),
   statusFunc = function(data) return (data and data.quests) and true or false end
 })
 -------------------------------------------------------------------------------
@@ -94,11 +99,12 @@ RegisterContent({
 RegisterContent({
   id = "tasks",
   name = "Tasks",
+  formattedName = CreateAtlasMarkup("QuestBonusObjective", 16, 16) .. " Tasks",
   description = "TASKS_PH_DESC",
   icon = { atlas = AtlasType("QuestBonusObjective") },
   order = 70,
   viewClass = TasksContentView,
-  data = API.GetObservableContent("tasks"):Map(function(data)
+  data = GetObservableContent("tasks"):Map(function(data)
     local normalTasks
     if data and data.quests then 
       for questID, taskData in pairs(data.quests) do 
@@ -121,11 +127,12 @@ RegisterContent({
 RegisterContent({
   id = "bonusTasks",
   name = "Bonus Tasks",
+  formattedName = CreateAtlasMarkup("QuestBonusObjective", 16, 16) .. " Bonus Tasks",
   description = "BONUS_TASKS_PH_DESC",
   icon = { atlas = AtlasType("QuestBonusObjective") },
   order = 80,
   viewClass = TasksContentView,
-  data = API.GetObservableContent("tasks"):Map(function(data)
+  data = GetObservableContent("tasks"):Map(function(data)
     local bonusTasks
     if data and data.quests then 
       for questID, taskData in pairs(data.quests) do 
@@ -149,11 +156,12 @@ RegisterContent({
 RegisterContent({
   id = "achievements",
   name = "Achievements",
+  formattedName = CreateAtlasMarkup("UI-HUD-MicroMenu-Achievements-Mouseover", 16, 16) .. " Achievements",
   description = "ACHIEVEMENTS_PH_DESC",
   icon = { atlas = AtlasType("UI-HUD-MicroMenu-Achievements-Mouseover")},
   order = 90,
   viewClass = AchievementsContentView,
-  data = API.GetObservableContent("achievements"),
+  data = GetObservableContent("achievements"),
   statusFunc = function(data) return (data and data.achievements) and true or false end
 })
 -------------------------------------------------------------------------------
@@ -162,11 +170,12 @@ RegisterContent({
 RegisterContent({
   id = "activities",
   name = "Activities",
+  formattedName = CreateAtlasMarkup("UI-HUD-MicroMenu-AdventureGuide-Mouseover", 16, 16) .. " Activities",
   description = "ACTIVITIES_PH_DESC",
   icon = { atlas = AtlasType("UI-HUD-MicroMenu-AdventureGuide-Mouseover") },
   order = 100,
   viewClass = ActivitiesContentView,
-  data = API.GetObservableContent("activities"),
+  data = GetObservableContent("activities"),
   statusFunc = function(data) return (data and data.activities) and true or false end
 })
 -------------------------------------------------------------------------------
@@ -175,11 +184,12 @@ RegisterContent({
 RegisterContent({
   id = "professionRecipes",
   name = "Profession",
+  formattedName = CreateAtlasMarkup("Professions-Crafting-Orders-Icon", 16, 16) .. " Profession",
   description = "PROFESSION_RECIPES_PH_DESC",
   icon = { atlas = AtlasType("Professions-Crafting-Orders-Icon") },
   order = 110,
   viewClass = ProfessionRecipesContentView,
-  data = API.GetObservableContent("professionRecipes"),
+  data = GetObservableContent("professionRecipes"),
   statusFunc = function(data) return (data and (data.recipes or data.recraftRecipes)) and true or false end
 })
 -------------------------------------------------------------------------------
@@ -188,11 +198,12 @@ RegisterContent({
 RegisterContent({
   id = "collections",
   name = "Collections",
+  formattedName = CreateAtlasMarkup("UI-HUD-MicroMenu-Collections-Mouseover", 16, 16) .. " Collections",
   description = "COLLECTIONS_PH_DESC",
   icon = { atlas = AtlasType("UI-HUD-MicroMenu-Collections-Mouseover") },
   order = 120,
   viewClass = CollectionsContentView,
-  data = API.GetObservableContent("collections"),
+  data = GetObservableContent("collections"),
   statusFunc = function(data) return (data and data.collections) and true or false end
 })
 
@@ -218,6 +229,7 @@ RegisterObservableContent("campaignQuests", campaignQuestsData)
 RegisterContent({
   id = "campaignQuests",
   name = "Campaign Quests",
+  formattedName = CreateAtlasMarkup("quest-campaign-available", 16, 16) .. " Campaign Quests",
   description = "CAMPAIGN_QUESTS_PH_DESC",
   icon =  { atlas = AtlasType("quest-campaign-available") },
   order = 130,
@@ -239,11 +251,12 @@ RegisterContent({
 RegisterContent({
   id = "quests",
   name = "Quests",
+  formattedName = CreateAtlasMarkup("QuestNormal", 16, 16) .. " Quests",
   description = "QUESTS_PH_DESC",
   icon = { atlas =  AtlasType("QuestNormal") },
   order = 140,
   viewClass = QuestsContentView,
-  data = API.GetObservableContent("quests"),
+  data = GetObservableContent("quests"),
 })
 -------------------------------------------------------------------------------
 --                             Dungeon Quests                                --

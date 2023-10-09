@@ -10,7 +10,6 @@ Syling              "SylingTracker_Options.Widgets.TabControl"               ""
 -- ========================================================================= --
 namespace               "SylingTracker.Options.Widgets"
 -- ========================================================================= --
-
 __Widget__()
 class "TabButton" (function(_ENV)
   inherit "Button"
@@ -38,6 +37,23 @@ class "TabButton" (function(_ENV)
     local text = self:GetChild("Text")
     Style[self].width = text:GetStringWidth() + 60
   end
+
+  function OnRelease(self)
+    self:SetID(0)
+    self:Hide()
+    self:ClearAllPoints()
+    self:SetParent(nil)
+
+    self.Selected = nil 
+    self.Mouseover = nil
+
+    self:UpdateState()
+  end
+
+  function OnAcquire(self)
+    self:UpdateState()
+    self:Show()
+  end
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
@@ -64,8 +80,6 @@ class "TabButton" (function(_ENV)
 
     local text = self:GetChild("Text")
     Style[self].width = text:GetStringWidth() + 60
-
-    self:UpdateState()
 
     -- Bind handlers 
     self.OnEnter = self.OnEnter + function() self.Mouseover = true end 
@@ -104,6 +118,7 @@ class "TabControl" (function(_ENV)
   function AcquireTabButton(self)
     local tabButton = TabButton.Acquire()
     tabButton:SetParent(self:GetHeader())
+    tabButton:InstantApplyStyle()
 
     tabButton.OnClick = tabButton.OnClick + self.OnTabButtonClick
 
