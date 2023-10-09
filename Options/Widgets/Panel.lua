@@ -93,7 +93,7 @@ class "Panel" (function(_ENV)
   --                            Constructors                                 --
   -----------------------------------------------------------------------------
   __Template__ {
-    Categories = CategoryList,
+    Categories = PanelCategories,
     Footer = Frame,
     InnerTexture = Texture,
     Header =  Frame,
@@ -161,7 +161,7 @@ class "SettingsPanel" (function(_ENV)
   __Template__{}
   function __ctor(self)
     self.OnPanelCategorySelected = function(_, entry) OnPanelCategorySelected(self, entry) end
-  
+
     self.OnCategorySelected = self.OnCategorySelected + self.OnPanelCategorySelected
   end
 end)
@@ -184,13 +184,14 @@ Style.UpdateSkin("Default", {
     },
 
     Categories = {
+      height = 680,
       location = {
-        Anchor("TOPLEFT", 23, -15)
+        Anchor("TOPLEFT", 23, -40)
       },
 
-      [Category] = {
-        paddingTop = 40
-      }
+      -- [Category] = {
+      --   paddingTop = 40
+      -- }
     },
 
     InnerTexture = {

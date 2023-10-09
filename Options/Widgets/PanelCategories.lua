@@ -6,20 +6,21 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling              "SylingTracker_Options.Widgets.CategoryList"             ""
+Syling              "SylingTracker_Options.Widgets.PanelCategories"          ""
 -- ========================================================================= --
 namespace               "SylingTracker.Options.Widgets"
 -- ========================================================================= --
 export {
+  newtable = Toolset.newtable,
   ResetStyles = SylingTracker.Utils.ResetStyles
 }
 
 __Widget__()
-class "CategoryEntryButton" (function(_ENV)
+class "PanelCategoryEntryButton" (function(_ENV)
   inherit "Button" extend "IButtonEntry"
   -----------------------------------------------------------------------------
   --                               Methods                                   --
-  -----------------------------------------------------------------------------  
+  -----------------------------------------------------------------------------
   __Arguments__ { EntryData }
   function SetupFromEntryData(self, data)
     super.SetupFromEntryData(self, data)
@@ -71,7 +72,7 @@ class "CategoryEntryButton" (function(_ENV)
 
   __Template__ {
     Label     = FontString,
-    Texture   = Texture
+    Texture   = Texture,
   }
   function __ctor(self)
     self.OnEnter = self.OnEnter + function() self:RefreshState() end
@@ -81,20 +82,7 @@ class "CategoryEntryButton" (function(_ENV)
 end)
 
 __Widget__()
-class "CategoryHeader" (function(_ENV)
-  inherit "Frame"
-  -----------------------------------------------------------------------------
-  --                            Constructors                                 --
-  -----------------------------------------------------------------------------
-  __Template__{
-    Label = FontString
-  }
-  function __ctor(self) end 
-end)
-
-
-__Widget__()
-class "Category" (function(_ENV)
+class "PanelCategory" (function(_ENV)
   inherit "Frame" extend "IEntryProvider"
   -----------------------------------------------------------------------------
   --                               Events                                    --
@@ -160,9 +148,10 @@ class "Category" (function(_ENV)
   __Arguments__ { Number, -IEntry }
   function AcquireEntry(self, index, entryClass)
     local entry = entryClass.Acquire()
-    entry:SetParent(self)
+    entry:Hide()
     entry:SetID(index)
-    
+    entry:SetParent(self)
+
     --- If the Entry is a button, register onClick
     if Class.IsObjectType(entry, IButtonEntry) then 
       entry.OnClick = entry.OnClick + self.OnEntryClick
@@ -207,18 +196,9 @@ class "Category" (function(_ENV)
     end
   end
 
-
-  function Release(self)
-    self:ReleaseEntries()
-    self.EntriesData:Clear()
-    self.SelectedIndex = nil
-    self.__pendingTriggerEvent = nil
-  end
-
   function ClearEntries(self)
-    super.ClearEntries(self)
 
-    self.SelectedIndex = nil
+
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
@@ -230,32 +210,37 @@ class "Category" (function(_ENV)
 
   property "Entries" {
     set = false,
-    default = function() return Toolset.newtable(false, true) end
+    default = function() return newtable(false, true) end
   }
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
   -----------------------------------------------------------------------------
   __Template__ {
-    Header = CategoryHeader
+    Header = Frame, 
+    {
+      Header = {
+        Label = FontString
+      }
+    }
   }
-  function __ctor(self)
-    self.DefaultEntryClass = CategoryEntryButton
+  function __ctor(self) 
+    self.DefaultEntryClass = PanelCategoryEntryButton
 
     -- Create the event handlers 
-    self.OnEntryClick = function(entry) OnEntryClick(self, entry) end
+    self.OnEntryClick = function(entry) OnEntryClick(self, entry) end  
   end
-
 end)
 
-
 __Widget__()
-class "CategoryList" (function(_ENV)
+class "PanelCategories" (function(_ENV)
   inherit "Frame"
   -----------------------------------------------------------------------------
   --                               Events                                    --
   -----------------------------------------------------------------------------
   event "OnEntrySelected"
-
+  -----------------------------------------------------------------------------
+  --                               Handler                                   --
+  -----------------------------------------------------------------------------
   local function OnCategoryEntrySelected(self, category, entry)
     for id, c in pairs(self.Categories) do 
       if c ~= category then 
@@ -265,71 +250,68 @@ class "CategoryList" (function(_ENV)
         self:OnEntrySelected(entry)
       end
     end
-  end
+  end  
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
-  __Arguments__ { String }
-  function AcquireCategory(self, id)
-    return self.Categories[id]
-  end
-
-  __Arguments__ { String, String/"" }
+  __Arguments__ { String, String/""}
   function CreateCategory(self, id, text)
-    
-    -- A category must have a id different than others categories already 
-    -- added
-    if self:AcquireCategory(id) then 
+    -- A category must have an id different than other categories already added
+    if self.Categories[id] then 
       return 
     end
 
-    local category = Category.Acquire() 
-    local index = self.CategoriesCount + 1
-
-    category:SetParent(self)
-    category:SetID(index)
-
-    Style[category].Header.Label.text = text
+    local category = PanelCategory.Acquire()
+    category:InstantApplyStyle()
+    category:Hide()
+    
+    Style[category].Header.Label.text = text 
 
     category.OnEntrySelected = category.OnEntrySelected + self.OnCategoryEntrySelected
+    
+    local index = self.CategoriesCount + 1
+    category:SetID(index)
+    category:SetParent(self:GetChild("ScrollBox"):GetChild("ScrollContent"))
 
     self.Categories[id] = category
-    self.CategoriesCount = index
+    self.CategoriesCount = index 
   end
 
-  __Arguments__ { EntryData, String }
-  function AddCategoryEntry(self, entryData, categoryId)
-    local category = self:AcquireCategory(categoryId)
 
+  __Arguments__ { EntryData, String}
+  function AddCategoryEntry(self, entryData, categoryId)
+    local category = self.Categories[categoryId]
+    
     if category then 
       category:AddEntry(entryData)
-    end 
+    end
   end
 
   __Arguments__ { String, Number }
   function SelectEntry(self, categoryId, index)
     local category = self.Categories[categoryId]
+    
     if category then 
-      category:SelectEntry(index)
+      category:SelectEntry(entryData)
     end
   end
-  
 
   __Arguments__ { String, EntryData }
   function RemoveEntry(self, categoryId, entryData)
     local category = self.Categories[categoryId]
+    
     if category then 
       category:RemoveEntry(entryData)
     end
   end
 
-  __Arguments__ { String/nil}
+  __Arguments__ { String/nil }
   function Refresh(self, categoryId)
     for cId, category in pairs(self.Categories) do
       if categoryId == nil or (categoryId and categoryId == cId) then 
         category:Refresh()
       end
-    end 
+    end
   end
 
   __Arguments__ { String/nil}
@@ -354,25 +336,42 @@ class "CategoryList" (function(_ENV)
   -----------------------------------------------------------------------------
   property "Categories" {
     set = false,
-    default = function() return Toolset.newtable(false, true) end
+    default = function() return newtable(false, true) end
   }
 
   property "CategoriesCount" {
     type = Number,
-    default = 0
+    default = 0,
   }
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
   -----------------------------------------------------------------------------
+  __Template__ {
+    ScrollBox     = ScrollBox,
+    {
+      ScrollBox = {
+        ScrollContent = Frame,
+      }
+    }
+  }
+  __InstantApplyStyle__()
   function __ctor(self)
+
     self.OnCategoryEntrySelected = function(category, entry) OnCategoryEntrySelected(self, category, entry) end
+
+    local scrollBox = self:GetChild("ScrollBox")
+    local scrollContent = scrollBox:GetChild("ScrollContent")
+    scrollBox:SetScrollTarget(scrollContent)
+
+     -- We move the scroll to begin
+    scrollBox:SetVerticalScroll(0)
   end
 end)
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
-  [CategoryEntryButton] = { 
+  [PanelCategoryEntryButton] = {
     width = 175,
     height = 20,
 
@@ -390,7 +389,6 @@ Style.UpdateSkin("Default", {
     Label = {
       drawLayer = "ARTWORK",
       justifyH = "LEFT",
-      text = "Test",
       location = {
         Anchor("TOPLEFT", 36, 1),
         Anchor("BOTTOMRIGHT", 0, 1)
@@ -398,56 +396,55 @@ Style.UpdateSkin("Default", {
     }
   },
 
-  [CategoryHeader] = {
-    width = 225, -- 175
-    height = 30,
-
-    backdrop = {
-      bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
-    },
-  
-    backdropColor       = { r = 1, g = 1, b = 1, a = 0.1},
-
-    Label = {
-      fontObject = GameFontHighlightMedium,
-      drawLayer = "OVERLAY",
-      justifyH = "LEFT",
-      text = "Test",
-      location = {
-        Anchor("LEFT", 20, -1)
-      }
-    }
-  },
-
-  [Category] = {
+  [PanelCategory] = {
     width = 225,
-    height = 30,
-    layoutManager = Layout.VerticalLayoutManager(),
+    minResize = { width = 0, height = 30},
+    layoutManager = Layout.VerticalLayoutManager(true, true),
     paddingTop = 32,
     paddingBottom = 10,
-    paddingLeft = 0,
-    paddingRight = 0,
-    
-  
+    clipChildren = true,
+
     Header = {
+      width = 225,
+      height = 30,
+      backdrop = {
+        bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
+      },
+    
+      backdropColor       = { r = 1, g = 1, b = 1, a = 0.1},
+
+      Label = {
+        fontObject = GameFontHighlightMedium,
+        drawLayer = "OVERLAY",
+        justifyH = "LEFT",
+        location = {
+          Anchor("LEFT", 20, -1)
+        }
+      },
+
       location = {
         Anchor("TOPLEFT"),
         Anchor("TOPRIGHT")
       }
-    },
-
-    [CategoryEntryButton] = {
-      marginRight = 0
     }
   },
 
-  [CategoryList] = {
+  [PanelCategories] = {
     width = 225,
-    height = 30,
-    layoutManager = Layout.VerticalLayoutManager(),
-    paddingTop = 32,
-    paddingBottom = 10,
-    paddingLeft = 0,
-    paddingRight = 0,    
+    ScrollBox = {
+      ScrollContent = {
+        width = 225,
+        height = 1,
+        layoutManager = Layout.VerticalLayoutManager(true, true),
+      
+      },
+      
+      location = {
+        Anchor("TOP"),
+        Anchor("LEFT"),
+        Anchor("RIGHT"),
+        Anchor("BOTTOM")
+      }
+    },
   }
 })

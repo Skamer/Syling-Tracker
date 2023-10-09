@@ -361,6 +361,16 @@ class "SettingsColorPicker" (function(_ENV)
   __Bubbling__ { ColorPicker = "OnColorConfirmed"}
   event "OnColorConfirmed"
   -----------------------------------------------------------------------------
+  --                               Handlers                                  --
+  -----------------------------------------------------------------------------
+  local function OnColorConfirmedHandler(self, r, g, b, a)
+    if self.UISetting then 
+      SetUISetting(self.UISetting, Color(r, g, b, a))
+    elseif self.Setting then 
+      SetSetting(self.Setting, Color(r, g, b, a))
+    end
+  end
+  -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
   __Arguments__ { String/"" }
@@ -373,6 +383,29 @@ class "SettingsColorPicker" (function(_ENV)
     self:GetChild("ColorPicker"):SetColor(r, g, b, a)
   end
 
+  __Arguments__ { String }
+  function SetLabelStyle(self, style)
+    if style == "small" then 
+      Style[self].Label.fontObject = GameFontNormalSmall
+    end
+  end
+
+  __Arguments__ { String }
+  function BindUISetting(self, uiSetting)
+    local color
+
+    if uiSetting then 
+      color = GetUISetting(uiSetting)
+    end
+
+    if color then
+      self:SetColor(color.r, color.g, color.b, color.a)
+    end
+
+    self.UISetting  = uiSetting
+    self.Setting    = nil
+  end
+
   function OnAcquire(self)
     self:InstantApplyStyle()
   end
@@ -380,7 +413,7 @@ class "SettingsColorPicker" (function(_ENV)
   function OnRelease(self)
     self:SetID(0)
     self:Hide()
-    self:ClearAllPoints()
+    -- self:ClearAllPoints()
     self:SetParent(nil)
 
     ResetStyles(self, true)
@@ -389,13 +422,24 @@ class "SettingsColorPicker" (function(_ENV)
     self:SetColor()
   end
   -----------------------------------------------------------------------------
+  --                               Properties                                --
+  -----------------------------------------------------------------------------
+  property "UISetting" {
+    type = String 
+  }
+
+  property "Setting" {
+    type = String 
+  }
+  -----------------------------------------------------------------------------
   --                            Constructors                                 --
   -----------------------------------------------------------------------------
   __Template__ {
     Label = FontString,
     ColorPicker = ColorPicker
   }
-  function __ctor(self) 
+  function __ctor(self)
+    self.OnColorConfirmed = self.OnColorConfirmed + OnColorConfirmedHandler
   end
 end)
 
@@ -520,6 +564,17 @@ class "SettingsMediaFont" (function(_ENV)
     self.UISetting  = uiSetting
     self.Setting    = nil
   end
+
+  function OnRelease(self)
+    self:SetID(0)
+    self:Hide()
+
+    self:SetParent(nil)
+
+    self.Setting = nil 
+    self.UISetting = nil 
+    self.Font = nil 
+  end
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
@@ -596,6 +651,94 @@ class "SettingsMediaFont" (function(_ENV)
     end
   end
 end)
+
+__Widget__()
+class "SettingsExpandableSection" (function(_ENV)
+  inherit "Frame"
+  -----------------------------------------------------------------------------
+  --                               Handlers                                  --
+  -----------------------------------------------------------------------------
+  local function OnChildChangedHandler(self, child, isAdded)
+    if isAdded and child:GetID() > 0 then 
+      child:SetShown(self.Expanded)
+    end
+  end
+  -----------------------------------------------------------------------------
+  --                               Handlers                                  --
+  -----------------------------------------------------------------------------
+  function UpdateVisibility(self)
+    local button = self:GetChild("Button")
+    if self.Expanded then 
+      Style[button].ExpandTexture.atlas = AtlasType("UI-HUD-Minimap-Zoom-Out", true)
+    else 
+      Style[button].ExpandTexture.atlas = AtlasType("UI-HUD-Minimap-Zoom-In", true)
+    end
+    
+    for name, frame in self:GetChilds() do
+      if Class.IsObjectType(frame, Frame) and frame:GetID() > 0 then 
+        frame:SetShown(self.Expanded)
+      end
+    end
+  end
+
+  function SetTitle(self, title)
+    Style[self].Button.Text.text = title
+  end
+
+  __Arguments__ { Boolean/nil}
+  function SetExpanded(self, expanded)
+    self.Expanded = expanded
+  end
+
+  function IsExpanded(self)
+    return self.Expanded
+  end
+
+  function OnAcquire(self)
+    self:InstantApplyStyle()
+  end
+
+  function OnRelease(self)
+    self:SetID(0)
+    self:Hide()
+    self:ClearAllPoints()
+    self:SetParent(nil)
+
+    ResetStyles(self, true)
+
+    self.Expanded = nil
+  end
+  -----------------------------------------------------------------------------
+  --                               Properties                                --
+  -----------------------------------------------------------------------------  
+  property "Expanded" {
+    type = Boolean,
+    default = false,
+    handler = UpdateVisibility
+  }
+  -----------------------------------------------------------------------------
+  --                            Constructors                                 --
+  -----------------------------------------------------------------------------
+  __Template__ {
+    Button = Button,
+    {
+      Button = {
+        Text = FontString,
+        ExpandTexture = Texture,
+      }
+    }
+  }
+  function __ctor(self) 
+    local button = self:GetChild("Button")
+    button.OnClick = button.OnClick + function()
+      self:SetExpanded(not self:IsExpanded())
+    end
+
+    self.OnChildChanged = self.OnChildChanged + OnChildChangedHandler
+  end
+
+end)
+
 
 -------------------------------------------------------------------------------
 --                                Styles                                     --
@@ -755,6 +898,52 @@ Style.UpdateSkin("Default", {
         Anchor("TOPLEFT", 0, 0, "FontOutlineSetting", "BOTTOMLEFT"),
         Anchor("TOPRIGHT", 0, 0, "FontOutlineSetting", "BOTTOMRIGHT")
       }      
+    }
+  },
+
+  [SettingsExpandableSection] = {
+    height = 35,
+    marginRight = 0,
+    layoutManager = Layout.VerticalLayoutManager(),
+    paddingTop = 35,
+    paddingBottom = 0,
+    paddingLeft = 20,
+    paddingRight = 20,
+    marginRight = 0,
+
+    Button = {
+      height = 35,
+
+      Text = {
+        fontObject = GameFontNormal,
+        justifyH = "LEFT",
+        text = "Text Color",
+        setAllPoints = true,
+      },
+
+      ExpandTexture = {
+        atlas = AtlasType("UI-HUD-Minimap-Zoom-Out", true),
+        location = {
+          Anchor("LEFT", 0, 0, nil, "CENTER")
+        }
+      },
+
+      location = {
+        Anchor("TOPLEFT"),
+        Anchor("TOPRIGHT"),
+      },
+
+      HighlightTexture = {
+        file = [[Interface\Buttons\WHITE8X8]],
+        vertexColor = { r = 1, g = 1, b = 1, a = 0.05},
+        setAllPoints = true,
+      },
+    },
+
+    [SettingsColorPicker] = {
+      Label = {
+        fontObject = GameFontNormalSmall
+      }
     }
   }
 })

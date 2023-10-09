@@ -15,6 +15,7 @@
   <Script file="TabControl.lua" />
   <Script file="ColorPicker.lua"/>
   <Script file="Window.lua"/>
+  <Script file="PanelCategories.lua"/>
   <Script file="Panel.lua"/>
   <Script file="SettingControls.lua"/>
 </Ui>
