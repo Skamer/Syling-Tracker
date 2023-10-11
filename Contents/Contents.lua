@@ -26,6 +26,7 @@ RegisterContent({
   description = "AUTO_QUESTS_PH_DESC",
   order = 10,
   viewClass = ContentView,
+  statusFunc = function() return false end,
 })
 -------------------------------------------------------------------------------
 --                              Scenario                                     --
@@ -66,6 +67,7 @@ RegisterContent({
   icon = { atlas = AtlasType("Dungeon") },
   order = 40,
   viewClass = ContentView,
+  statusFunc = function() return false end,
 })
 -------------------------------------------------------------------------------
 --                             Torghast                                      --
@@ -78,6 +80,7 @@ RegisterContent({
   icon = { atlas = AtlasType("poi-torghast") },
   order = 50,
   viewClass = ContentView,
+  statusFunc = function() return false end,
 })
 -------------------------------------------------------------------------------
 --                             World Quests                                  --

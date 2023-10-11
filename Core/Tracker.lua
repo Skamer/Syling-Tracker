@@ -10,8 +10,21 @@ Syling                      "SylingTracker.Core.Tracker"                     ""
 -- ========================================================================= --
 export {
   GetCurrentTarget        = Scorpio.UI.Style.GetCurrentTarget,
-  GetNearestFrameForType  = Utils.GetNearestFrameForType
+  GetNearestFrameForType  = Utils.GetNearestFrameForType,
+  FromUIProperty          = Wow.FromUIProperty,
+
 }
+
+__UIElement__()
+class "TrackerMinimizeButton" (function(_ENV)
+  inherit "Button"
+
+  __Observable__()
+  property "Minimized" {
+    type = Boolean,
+    default = false
+  }
+end)
 
 __UIElement__()
 class "Tracker" (function(_ENV)
@@ -52,7 +65,7 @@ class "Tracker" (function(_ENV)
   end
 
   local function OnLockedChanged(self, value)
-    if value then 
+    if value then
       Style[self].Mover           = NIL
       Style[self].movable         = false
       Style[self].resizable       = false
@@ -222,6 +235,10 @@ class "Tracker" (function(_ENV)
   function GetScrollContent(self)
     return self:GetScrollFrame():GetChild("Content")
   end
+  
+  function GetMinimizeButton(self)
+    return self.__minimizeButton or self:GetChild("MinimizeButton")
+  end
 
   function SetSetting(self, setting, value, notify)
     return API.SetTrackerSetting(self, setting, value, notify)
@@ -248,6 +265,12 @@ class "Tracker" (function(_ENV)
     handler   = OnLockedChanged
   }
 
+  __Observable__()
+  property "Minimized" {
+    type      = Boolean,
+    default   = false
+  }
+
   property "ShowScrollBar" {
     type = Boolean,
     default = true,
@@ -269,10 +292,11 @@ class "Tracker" (function(_ENV)
     ScrollFrame = ScrollFrame,
     ScrollBar = ScrollBar,
     Resizer = Resizer,
+    MinimizeButton = TrackerMinimizeButton,
     {
       ScrollFrame = {
         Content = Frame
-      }
+      },
     }
   }    
   function __ctor(self)
@@ -300,6 +324,22 @@ class "Tracker" (function(_ENV)
     scrollFrame:SetScrollChild(content)
     scrollFrame.OnSizeChanged = scrollFrame.OnSizeChanged + function(_, width)
       content:SetWidth(width)
+    end
+
+    local minimizeButton = self:GetMinimizeButton()
+    minimizeButton.OnClick = minimizeButton.OnClick + function()
+      local minimized = not self.Minimized
+      if minimized then 
+        minimizeButton:SetParent(UIParent)
+        self.__minimizeButton = minimizeButton
+      else
+        minimizeButton:SetParent(self)
+        self.__minimizeButton = nil
+      end
+
+      minimizeButton.Minimized = minimized
+
+      self.Minimized = minimized
     end
 
     -- @TODO: Finish the handlers part
@@ -361,7 +401,6 @@ local function private__NewTracker(id)
   -- @TODO: Bind handlers
   -- tracker.OnTrackerMoved = tracker.OnTrackerMoved + OnTrackerStopMoving
   -- tracker.OnTrackerResized = tracker.OnTrackerResized + OnTrackerStopResized
-
 
   tracker.OnStopResizing  = tracker.OnStopResizing + OnTrackerStopResizing
   tracker.OnStopMoving    = tracker.OnStopMoving + OnTrackerStopMoving
@@ -541,7 +580,6 @@ __Static__() function API.SetTrackerSetting(trackerOrID, setting, value, notify)
     return 
   end
 
-
   if value ~= nil then 
     SavedVariables.Profile().Path("trackers", tracker.id).SaveValue(setting, value)
   else
@@ -560,6 +598,71 @@ __Static__() function API.SetTrackerSetting(trackerOrID, setting, value, notify)
   end
 end
 
+--- Set if the content must be tracked for a tracker
+---
+--- @param trackerOrID the tracker object or the tracker id
+--- @param contentID the content id 
+--- @param tracked if the content must be tracker
+__Arguments__ { Tracker + String, String, Boolean/nil}
+__Static__() function API.SetContentTracked(trackerOrID, contentID, tracked)
+  if type(trackerOrID) == "string" then
+    trackerID = trackerOrID 
+    tracker = TRACKERS[trackerOrID]
+  else
+    tracker = trackerOrID
+    trackerID = tracker.id
+  end
+
+  local shouldTrack = false
+
+  SavedVariables.Profile().Path("trackers", trackerID, "contents", contentID)
+  if trackerID == "main" then 
+    if tracked ~= nil and tracked == false then 
+      SavedVariables.SaveValue("tracked", false)
+      shouldTrack = true
+    else
+      SavedVariables.SaveValue("tracked", nil)
+      shouldTrack = false 
+    end
+  else
+    if tracked then 
+      SavedVariables.SaveValue("tracked", true)
+      shouldTrack = true
+    else
+      SavedVariables.SaveValue("tracked", nil)
+      shouldTrack = false
+    end
+  end
+
+  if tracker then 
+    if shouldTrack then 
+      tracker:TrackContent(contentID)
+    else
+      tracker:UntrackContent(contentID)
+    end
+  end
+end
+
+--- Reserved only during the loading when the trackers are created.
+local function private__LoadContentsForTracker(tracker)
+  for _, content in API.IterateContents() do 
+    local tracked = SavedVariables.Profile()
+      .Path("trackers", tracker.id, "content", content.id)
+      .GetValue("tracked")
+
+      
+    if tracker.id == "main" then 
+      if tracked or tracked == nil then 
+        tracker:TrackContent(content.id)
+      end
+    else
+      if tracked then 
+        tracker:TrackContent(content.id)
+      end
+    end
+  end
+end
+
 __UIElement__()
 __ChildProperty__(Tracker, "Mover")
 class "TrackerMover" (function(_ENV)
@@ -570,10 +673,9 @@ class "TrackerMover" (function(_ENV)
   __Template__ {
     Text = FontString
   }
-  function __ctor() end 
+  function __ctor(self) 
+   end 
 end)
-
-
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
@@ -589,10 +691,44 @@ Style.UpdateSkin("Default", {
       text = "Click here to move the tracker",
       setAllPoints = true,
       mediaFont = FontType("PT Sans Narrow Bold", 13)
+    },
+  },
+
+  [TrackerMinimizeButton] = {
+    size = { width = 24, height = 24 },
+    registerForClicks = { "AnyUp"},
+
+    NormalTexture = {
+      setAllPoints = true,
+      atlas = FromUIProperty("Minimized"):Map(function(minimized)
+        if minimized then 
+          return AtlasType("common-button-dropdown-closed", false)
+        else
+          return AtlasType("common-button-dropdown-open", false)
+        end
+      end)
+    },
+    PushedTexture = {
+      setAllPoints = true,
+      atlas = FromUIProperty("Minimized"):Map(function(minimized)
+        if minimized then 
+          return AtlasType("common-button-dropdown-closedpressed", false)
+        else
+          return AtlasType("common-button-dropdown-openpressed", false)
+        end
+      end)
+    },
+
+    HighlightTexture        = {
+      atlas = AtlasType("common-iconmask", false),
+      setAllPoints = true,
+      vertexColor = { r = 1, g = 1, b = 1, a = 0.05}
     }
   },
 
   [Tracker] = {
+    clipChildren = false,
+    visible = FromUIProperty("Minimized"):Map(function(minimized) return not minimized end),
     size = API.FromTrackerSetting("size", Size(300, 325)),
     location = API.FromTrackerSetting("position"):Map(function(pos, tracker)
       if pos then
@@ -608,6 +744,12 @@ Style.UpdateSkin("Default", {
       location = {
         Anchor("TOPLEFT"),
         Anchor("BOTTOMRIGHT")
+      }
+    },
+
+    MinimizeButton = {
+      location = {
+        Anchor("BOTTOMLEFT", 5, 0, nil, "TOPRIGHT")
       }
     },
 
@@ -646,7 +788,7 @@ Style.UpdateSkin("Default", {
 function OnEnable(self)
   -- Create the main tracker 
   _MainTracker = private__NewTracker("main")
-  Style[_MainTracker].Locked = false
+  _MainTracker.Locked = false
 end
 
 __SystemEvent__()
@@ -662,20 +804,16 @@ __Async__() function PLAYER_ENTERING_WORLD(isInitialLogin, isReloadingUI)
       trackerBottom = _MainTracker:GetBottom()
       Next()
     end
-    
-    _MainTracker:TrackContent("scenario")
-    _MainTracker:TrackContent("dungeon")
-    -- _MainTracker:TrackContent("keystone")
-    -- _MainTracker:TrackContent("torghast")
-    _MainTracker:TrackContent("worldQuests")
-    _MainTracker:TrackContent("tasks")
-    _MainTracker:TrackContent("bonusTasks")
-    _MainTracker:TrackContent("achievements")
-    _MainTracker:TrackContent("activities")
-    _MainTracker:TrackContent("professionRecipes")
-    _MainTracker:TrackContent("collections")
-    _MainTracker:TrackContent("dungeonQuests")
-    _MainTracker:TrackContent("campaignQuests")
-    _MainTracker:TrackContent("quests")
+
+    -- Load the contents tracked for the main tracker 
+    private__LoadContentsForTracker(_MainTracker)
+
+    -- Create the custom trackers, and load the contents tracked by them 
+    local trackers = SavedVariables.Path("list").GetValue("tracker")
+    if trackers then 
+      for trackerID in pairs(trackers) do 
+        local tracker = private__NewTracker(trackerID)
+      end
+    end
   end
 end
