@@ -250,7 +250,7 @@ class "Content" (function(_ENV)
 
   __Arguments__ { Tracker }
   function UnregisterTracker(self, tracker)
-    local view = self.View[tracker]
+    local view = self.Views[tracker]
 
     if not view then 
       return 

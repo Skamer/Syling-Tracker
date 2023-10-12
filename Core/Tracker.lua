@@ -208,11 +208,15 @@ class "Tracker" (function(_ENV)
   __Arguments__ { String }
   function TrackContent(self, contentID)
     Scorpio.FireSystemEvent("SylingTracker_TRACK_CONTENT", self, contentID)
+
+    self.ContentsTracked[contentID] = true
   end
 
   __Arguments__ { String }
   function UntrackContent(self, contentID)
     Scorpio.FireSystemEvent("SylingTracker_UNTRACK_CONTENT", self, contentID)
+
+    self.ContentsTracked[contentID] = false
   end
 
   __Arguments__ { String }
@@ -619,10 +623,10 @@ __Static__() function API.SetContentTracked(trackerOrID, contentID, tracked)
   if trackerID == "main" then 
     if tracked ~= nil and tracked == false then 
       SavedVariables.SaveValue("tracked", false)
-      shouldTrack = true
+      shouldTrack = false
     else
       SavedVariables.SaveValue("tracked", nil)
-      shouldTrack = false 
+      shouldTrack = true 
     end
   else
     if tracked then 
@@ -727,6 +731,7 @@ Style.UpdateSkin("Default", {
   },
 
   [Tracker] = {
+    locked = API.FromTrackerSetting("locked", false),
     clipChildren = false,
     minResize = { width = 100, height = 100},
     visible = FromUIProperty("Minimized"):Map(function(minimized) return not minimized end),
