@@ -412,7 +412,7 @@ __Static__() function API.IterateContents()
   local yield = coroutine.yield
 
   for contentID, content in pairs(CONTENTS) do
-    yield(index, content)
+    yield(contentID, content)
   end
 end
 
