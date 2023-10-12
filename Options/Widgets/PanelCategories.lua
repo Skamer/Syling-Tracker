@@ -196,9 +196,17 @@ class "PanelCategory" (function(_ENV)
     end
   end
 
+  function Release(self)
+    self:ReleaseEntries()
+    self.EntriesData:Clear()
+    self.SelectedIndex = nil
+    self.__pendingTriggerEvent = nil
+  end
+
   function ClearEntries(self)
+    super.ClearEntries(self)
 
-
+    self.SelectedIndex = nil
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
@@ -292,7 +300,7 @@ class "PanelCategories" (function(_ENV)
     local category = self.Categories[categoryId]
     
     if category then 
-      category:SelectEntry(entryData)
+      category:SelectEntry(index)
     end
   end
 

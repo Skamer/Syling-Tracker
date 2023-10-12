@@ -32,7 +32,7 @@ __Async__() function SylingTracker_OPEN_OPTIONS()
     panel:CreateCategory("contents", "Contents")
     -- panel:CreateCategory("userContents", "My Contents")
 
-    panel:AddCategoryEntry({ text = "Settings" }, "general")
+    panel:AddCategoryEntry({ text = "Settings", value = SettingDefinitions.General }, "general")
     panel:AddCategoryEntry({ text = "Media"}, "general")
     panel:AddCategoryEntry({ text = "Item Bar" }, "general")
     panel:AddCategoryEntry({ text = "Context Menu"}, "general")
@@ -52,9 +52,14 @@ __Async__() function SylingTracker_OPEN_OPTIONS()
     panel:AddCategoryEntry({ text = "Torghast"}, "contents")
     panel:AddCategoryEntry({ text = "Quests"}, "contents")
     
-    --- Refresh the panel for creating entries
+    -- Refresh the panel for creating entries
     panel:Refresh()
 
+    -- We select the first entry of 'general' category
+    panel:SelectEntry("general", 1)
+
+    -- We add a slight delay for giving some time the panel entries to be created
+    -- on the first opening.
     for i = 1, 6 do 
       Next()
     end

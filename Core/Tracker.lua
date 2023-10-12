@@ -728,6 +728,7 @@ Style.UpdateSkin("Default", {
 
   [Tracker] = {
     clipChildren = false,
+    minResize = { width = 100, height = 100},
     visible = FromUIProperty("Minimized"):Map(function(minimized) return not minimized end),
     size = API.FromTrackerSetting("size", Size(300, 325)),
     location = API.FromTrackerSetting("position"):Map(function(pos, tracker)

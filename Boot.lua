@@ -11,7 +11,9 @@ Syling                     "SylingTracker.Bootstrap"                         ""
 export {
   LibDataBroker       = LibStub("LibDataBroker-1.1"),
   LibDBIcon           = LibStub("LibDBIcon-1.0"),
-  GetAddonVersion     = Utils.GetAddonVersion
+  GetAddonVersion     = Utils.GetAddonVersion,
+  RegisterSetting     = API.RegisterSetting,
+  GetSetting          = API.GetSetting
 }
 
 SLT_LOGO           = [[Interface\AddOns\SylingTracker\Media\logo]]
@@ -23,6 +25,18 @@ function OnLoad(self)
   _DB:SetDefault{ dbVersion = 2 }
   _DB:SetDefault{ minimap = { hide = false }}
 
+  -- Register the settings 
+  RegisterSetting("showBlizzardObjectiveTracker", false, function(show) BLIZZARD_TRACKER_VISIBLITY_CHANGED(show) end)
+  RegisterSetting("showMinimapIcon", true, function(show) 
+    if show then 
+      LibDBIcon:Show("SylingTracker")
+    else
+      LibDBIcon:Hide("SylingTracker")
+    end
+
+    _DB.minimap.hide = not show
+  end)
+
   -- Setup the minimap button
   self:SetupMinimapButton()
 
@@ -30,6 +44,10 @@ function OnLoad(self)
 
   -- Fire an event for saying the DATABASE is fully loaded and ready to be fetched
   FireSystemEvent("SylingTracker_DATABASE_LOADED")
+end
+
+function OnEnable(self)
+  BLIZZARD_TRACKER_VISIBLITY_CHANGED(GetSetting("showBlizzardObjectiveTracker"))
 end
 
 __SystemEvent__()
