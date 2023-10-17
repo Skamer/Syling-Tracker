@@ -390,7 +390,7 @@ local function private__NewTracker(id)
   -- Call InstantApplyTracker on the tracker before will run this iterator but 
   -- this is not needed, and this iterator is here for cover thise case where 
   -- an instant apply style is called. 
-  for settingID, subject in tracker:IterateSettingSubjects() do 
+  for settingID, subject in tracker:IterateSettingSubjects() do
     local value = SavedVariables.Profile().GetValue(settingID)
     subject:OnNext(value, tracker)
   end
@@ -418,7 +418,7 @@ end
 --- 
 --- @param id the tracker id to register (note: the id 'main' is reserved)
 __Arguments__ { String }
-function API.NewTracker(id)
+__Static__() function API.NewTracker(id)
   -- the 'main' id is reserved for the main tracker. 
   if id == "main" then 
     return 
@@ -429,10 +429,7 @@ function API.NewTracker(id)
   -- Don't forget to add in the tracker list else it won't be persisted for 
   -- the next time.
   SavedVariables.Path("list", "tracker").SaveValue(id, true)
-
-  -- Load the contents tracker 
-  -- @TODO: private__LoadContentsForTracker(tracker)
-
+  
   -- Trigger a system event for notifying the outside
   Scorpio.FireSystemEvent("SylingTracker_TRACKER_CREATED", tracker)
 
@@ -440,13 +437,13 @@ function API.NewTracker(id)
 end
 
 local function private__DeleteTracker(tracker)
-  local trackerID = tracker.id 
+  local trackerID = tracker.id
 
   Scorpio.FireSystemEvent("SylingTracker_TRACKER_DELETED", tracker)
 
   -- Remove handlers 
   tracker.OnStopResizing      = tracker.OnStopResizing - OnTrackerStopResizing
-  tracker.OnPositionChanged   = tracker.OnPositionChanged - OnTrackerPositionChanged
+  tracker.OnStopMoving        = tracker.OnStopMoving - OnTrackerStopMoving
 
   -- Remove the tracker from the list 
   SavedVariables.Path("list", "tracker").SetValue(trackerID, nil)
@@ -467,16 +464,18 @@ __Arguments__ { Tracker + String  }
 __Static__() function API.DeleteTracker(trackerOrID)
   local tracker
   if type(trackerOrID) == "string" then 
-    tracker = trackerOrID
-  else
     tracker = TRACKERS[trackerOrID]
+  else
+    tracker = trackerOrID
   end
 
   if not tracker or tracker.id == "main" then 
     return 
   end
 
-  private__DeleteTracker(tracker)
+  if tracker then 
+    private__DeleteTracker(tracker)
+  end
 end
 
 --- Return an iterafor for the trackers 
@@ -651,10 +650,9 @@ end
 local function private__LoadContentsForTracker(tracker)
   for _, content in API.IterateContents() do 
     local tracked = SavedVariables.Profile()
-      .Path("trackers", tracker.id, "content", content.id)
+      .Path("trackers", tracker.id, "contents", content.id)
       .GetValue("tracked")
 
-      
     if tracker.id == "main" then 
       if tracked or tracked == nil then 
         tracker:TrackContent(content.id)
@@ -817,8 +815,9 @@ __Async__() function PLAYER_ENTERING_WORLD(isInitialLogin, isReloadingUI)
     -- Create the custom trackers, and load the contents tracked by them 
     local trackers = SavedVariables.Path("list").GetValue("tracker")
     if trackers then 
-      for trackerID in pairs(trackers) do 
+      for trackerID in pairs(trackers) do
         local tracker = private__NewTracker(trackerID)
+        private__LoadContentsForTracker(tracker)
       end
     end
   end

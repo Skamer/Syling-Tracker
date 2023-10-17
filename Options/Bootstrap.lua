@@ -8,6 +8,9 @@
 -- ========================================================================= --
 Syling                "SylingTracker_Options.Bootstrap"                      ""
 -- ========================================================================= --
+export {
+  IterateTrackers               = SylingTracker.API.IterateTrackers
+}
 
 LOGO_WHITE = [[Interface\AddOns\SylingTracker_Options\Media\logo_white]]
 SETTINGS_PANEL = nil 
@@ -64,6 +67,10 @@ __Async__() function SylingTracker_OPEN_OPTIONS()
       Next()
     end
 
+    -- We makes the panel is closable with the 'Escape' key
+    _G["SylingTracker_Options"] = panel 
+    tinsert(UISpecialFrames, "SylingTracker_Options")
+
     SETTINGS_PANEL = panel 
   end
 
@@ -81,6 +88,18 @@ function CreateTrackerEntries(self, panel)
     end
   }, "trackers")
 
+  for trackerID, tracker in IterateTrackers(false) do 
+    panel:AddCategoryEntry({
+      text = trackerID:gsub("^%l", string.upper),
+      id = trackerID,
+      value = function()
+        local settings = SettingDefinitions.Tracker.Acquire()
+        settings.TrackerID = trackerID
+        return settings
+      end
+    }, "trackers")
+  end
+
   panel:AddCategoryEntry({ 
     text = "|A:tradeskills-icon-add:16:16|a |cff00ff00Create a tracker|r",
     value = SettingDefinitions.CreateTracker,
@@ -88,4 +107,20 @@ function CreateTrackerEntries(self, panel)
       marginTop = 10
     }
   }, "trackers")
+end
+
+__SystemEvent__()
+function SylingTracker_TRACKER_CREATED(tracker)
+  SETTINGS_PANEL:ClearEntries("trackers")
+  _M:CreateTrackerEntries(SETTINGS_PANEL)
+  SETTINGS_PANEL:Refresh()
+  SETTINGS_PANEL:SelectEntryById("trackers", tracker.id)
+end
+
+
+__SystemEvent__()
+function SylingTracker_TRACKER_DELETED(tracker)
+  SETTINGS_PANEL:RemoveEntryById(tracker.id)
+  SETTINGS_PANEL:SelectEntry("general", 1)
+  SETTINGS_PANEL:Refresh("trackers")
 end

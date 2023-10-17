@@ -165,7 +165,7 @@ class "PanelCategory" (function(_ENV)
   function ReleaseEntries(self)
     for index, entry in pairs(self.Entries) do 
       --- If the Entry is a button, remove onClick
-      if Class.IsObjectType(entry, SUI.IButtonEntry) then 
+      if Class.IsObjectType(entry, Widgets.IButtonEntry) then 
         entry.OnClick = entry.OnClick - self.OnEntryClick
       end
 

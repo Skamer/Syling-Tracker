@@ -76,7 +76,7 @@ class "SettingDefinitions.CreateTracker" (function(_ENV)
         --- create lof of frame.
         Scorpio.Continue(function()
           for contentID, isTracked in pairs(self.ContentsTracked) do
-            tracker:ApplyAndSaveSetting("contentTracked", contentID, isTracked)
+            SetContentTracked(tracker, contentID, isTracked)
             Scorpio.Next()
           end
         end)
@@ -88,7 +88,7 @@ class "SettingDefinitions.CreateTracker" (function(_ENV)
     createButton:SetPoint("BOTTOM")
     createButton:SetID(9999)
     Style[createButton].marginLeft = 0.35
-    -- createButton:SetUserHandler("OnClick", OnCreateButtonClick)
+    createButton:SetUserHandler("OnClick", OnCreateButtonClick)
     self.SettingControls.createButton = createButton
 
 
@@ -149,6 +149,32 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     lockTrackerCkeckBox:SetChecked(self.Tracker.Locked)
     lockTrackerCkeckBox:SetUserHandler("OnCheckBoxClick", OnLockTrackerCheckBoxClick)
     self.GeneralTabControls.lockTrackerCkeckBox = lockTrackerCkeckBox
+    ---------------------------------------------------------------------------
+    --- Danger Zone Section
+    ---------------------------------------------------------------------------
+    --- The "Danger zone" won't appear for main tracker as it's not intended to be deleted.
+    if self.Tracker.id ~= "main" then 
+      local dangerZoneSection = Widgets.ExpandableSection.Acquire(false, self)
+      dangerZoneSection:SetExpanded(false)
+      dangerZoneSection:SetID(999)
+      dangerZoneSection:SetTitle("|cffff0000Danger Zone|r")
+      self.GeneralTabControls.dangerZoneSection = dangerZoneSection
+      -------------------------------------------------------------------------
+      --- Danger Zone -> Delete the tracker
+      -------------------------------------------------------------------------   
+      local function OnDeleteTrackerClick(button)
+        DeleteTracker(self.TrackerID)
+      end
+
+      local deleteTrackerButton = Widgets.DangerPushButton.Acquire(false, dangerZoneSection)
+      deleteTrackerButton:SetText("Delete the tracker")
+      deleteTrackerButton:SetID(10)
+      deleteTrackerButton:SetUserHandler("OnClick", OnDeleteTrackerClick)
+      Style[deleteTrackerButton].marginLeft = 0.35
+      self.GeneralTabControls.deleteTrackerButton = deleteTrackerButton
+      
+    end
+
   end
   -----------------------------------------------------------------------------
   --                    [General] Tab Release                                --
@@ -202,6 +228,146 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     end
   end
   -----------------------------------------------------------------------------
+  --                 [Visibility Rules] Tab Builder                          --
+  -----------------------------------------------------------------------------
+  -- hide     -> say explicitely the tracker must be hidden.
+  -- show     -> say explicitely the tracker must be shown.
+  -- default  -> say to take the default value.
+  -- ignore   -> say to ignore this condition, and check the next one.
+  _ENTRIES_CONDITIONS_DROPDOWN = Array[Widgets.EntryData]()
+  _ENTRIES_CONDITIONS_DROPDOWN:Insert({ text = "|cffff0000Hide|r", value = "hide"})
+  _ENTRIES_CONDITIONS_DROPDOWN:Insert({ text = "|cff00ff00Show|r", value = "show"})
+  _ENTRIES_CONDITIONS_DROPDOWN:Insert({ text = "Default", value = "default"})
+  _ENTRIES_CONDITIONS_DROPDOWN:Insert({ text = "Ignore", value = "ignore"})
+
+  -- Contains below the info for every instance or group size condition option to 
+  -- build 
+  _INSTANCE_VISIBILITY_ROWS_INFO = {
+    [1] = { label = "Dungeon", setting = "inDungeonVisibility" },
+    [2] = { label = "Mythic +", setting = "inKeystoneVisibility"},
+    [3] = { label = "Raid", setting = "inRaidVisibility"}, 
+    [4] = { label = "Scenario", setting = "inScenarioVisibility"},
+    [5] = { label = "Arena", setting = "inArenaVisibility"},
+    [6] = { label = "Battleground", setting = "inBattlegroundVisibility"}
+  }
+
+  _GROUP_SIZE_VISIBILITY_ROWS_INFO = {
+    [1] = { label = "Party", setting = "inPartyVisibility"},
+    [2] = { label = "Raid Group", setting = "inRaidGroupVisibility" }
+  }
+
+  function BuildVisibilityRulesTab(self)
+    local function OnVisibilityEntrySelected(dropdown, entry)
+      local data    = entry:GetEntryData()
+      local setting = dropdown:GetUserData("setting")
+
+      -- self.Tracker:ApplyAndSaveSetting(setting, data.value)
+    end
+
+    ---------------------------------------------------------------------------
+    ---  Default Visibility
+    ---------------------------------------------------------------------------
+    local defaultVisibilityDropDown = Widgets.SettingsDropDown.Acquire(false, self)
+    defaultVisibilityDropDown:SetID(10)
+    defaultVisibilityDropDown:SetLabel("Default Visibility")
+    defaultVisibilityDropDown:AddEntry({ text = "|cffff0000Hidden|r", value = "hide"})
+    defaultVisibilityDropDown:AddEntry({ text = "|cff00ff00Show|r", value = "show"})
+    defaultVisibilityDropDown:SetUserData("setting", "defaultVisibility")
+    defaultVisibilityDropDown:SelectByValue("show")
+    self.VisibilityRulesControls.defaultVisibilityDropDown = defaultVisibilityDropDown
+    ---------------------------------------------------------------------------
+    ---  Instance Visibility
+    ---------------------------------------------------------------------------
+    local instanceConditionHeader = Widgets.SettingsSectionHeader.Acquire(false, self)
+    instanceConditionHeader:SetID(100)
+    instanceConditionHeader:SetTitle("Instance")
+    self.VisibilityRulesControls.instanceConditionHeader = instanceConditionHeader
+    
+    for index, info in ipairs(_INSTANCE_VISIBILITY_ROWS_INFO) do 
+      local dropDownControl = Widgets.SettingsDropDown.Acquire(false, self)
+      dropDownControl:SetID(100 + 10 * index)
+      dropDownControl:SetLabel(info.label)
+      dropDownControl:SetEntries(_ENTRIES_CONDITIONS_DROPDOWN)
+      dropDownControl:SetUserData("setting", info.setting)
+      dropDownControl:SetUserHandler("OnEntrySelected", OnVisibilityEntrySelected)
+      -- dropDownControl:SelectByValue(Style[self.Tracker][info.setting])
+      Style[dropDownControl].marginLeft = 20
+      self.VisibilityRulesControls[dropDownControl] = dropDownControl    
+    end
+    ---------------------------------------------------------------------------
+    ---  Group Size Visibility
+    ---------------------------------------------------------------------------
+    local groupSizeConditionsHeader = Widgets.SettingsSectionHeader.Acquire(false, self)
+    groupSizeConditionsHeader:SetID(200)
+    groupSizeConditionsHeader:SetTitle("Group Size")
+    self.VisibilityRulesControls.groupSizeConditionsHeader = groupSizeConditionsHeader
+
+    for index, info in ipairs(_GROUP_SIZE_VISIBILITY_ROWS_INFO) do 
+      local dropDownControl = Widgets.SettingsDropDown.Acquire(false, self)
+      dropDownControl:SetID(200 + 10 * index)
+      dropDownControl:SetLabel(info.label)
+      dropDownControl:SetEntries(_ENTRIES_CONDITIONS_DROPDOWN)
+      dropDownControl:SetUserData("setting", info.setting)
+      dropDownControl:SetUserHandler("OnEntrySelected", OnVisibilityEntrySelected)
+      -- dropDownControl:SelectByValue(Style[self.Tracker][info.setting])
+      Style[dropDownControl].marginLeft = 20
+      self.VisibilityRulesControls[dropDownControl] = dropDownControl
+    end
+      ---------------------------------------------------------------------------
+    ---  Macro Visibility
+    ---------------------------------------------------------------------------
+    local macroConditionsHeader = Widgets.SettingsSectionHeader.Acquire(false, self)
+    macroConditionsHeader:SetID(300)
+    macroConditionsHeader:SetTitle("Macro")
+    self.VisibilityRulesControls.macroConditionsHeader = macroConditionsHeader
+    ---------------------------------------------------------------------------
+    --- Macro -> Evaluate Macro At First
+    ---------------------------------------------------------------------------
+    local function OnEvaluateMacroAtFirstCheckBoxClick(checkBox)
+      local checked = checkBox:IsChecked()
+      -- self.Tracker:ApplyAndSaveSetting("evaluateMacroVisibilityAtFirst", checked)
+    end
+
+    local evaluateMacroAtFirstCheckBox = Widgets.SettingsCheckBox.Acquire(false, self)
+    evaluateMacroAtFirstCheckBox:SetID(310)
+    evaluateMacroAtFirstCheckBox:SetLabel("Evaluate the macro at first")
+    -- evaluateMacroAtFirstCheckBox:SetChecked(Style[self.Tracker].evaluateMacroVisibilityAtFirst)
+    evaluateMacroAtFirstCheckBox:SetUserHandler("OnCheckBoxClick", OnEvaluateMacroAtFirstCheckBoxClick)
+    Style[evaluateMacroAtFirstCheckBox].marginLeft = 20
+    self.VisibilityRulesControls.evaluateMacroAtFirstCheckBox = evaluateMacroAtFirstCheckBox
+    ---------------------------------------------------------------------------
+    --- Macro -> Macro Visibility Text
+    ---------------------------------------------------------------------------
+    local function OnMacroTextEnterPressed(editBox)
+      local value = editBox:GetText()
+      editBox:ClearFocus()
+      -- self.Tracker:ApplyAndSaveSetting("macroVisibility", value)
+    end
+
+    local function OnMacroTextEscapePressed(editBox)
+      editBox:ClearFocus()
+    end
+
+    local macroTextEditBox = Widgets.MultiLineEditBox.Acquire(false, self)
+    macroTextEditBox:SetID(320)
+    macroTextEditBox:SetInstructions("[combat] hide; show")
+    -- macroTextEditBox:SetText(Style[self.Tracker].macroVisibility)
+    macroTextEditBox:SetUserHandler("OnEnterPressed", OnMacroTextEnterPressed)
+    macroTextEditBox:SetUserHandler("OnEscapePressed", OnMacroTextEscapePressed)
+    Style[macroTextEditBox].marginLeft   = 20 
+    Style[macroTextEditBox].marginRight  = 0
+    self.VisibilityRulesControls.macroTextEditBox = macroTextEditBox  
+  end
+  -----------------------------------------------------------------------------
+  --                 [Visibility Rules] Tab Release                          --
+  -----------------------------------------------------------------------------
+  function ReleaseVisibilityRulesTab(self)
+    for index, control in pairs(self.VisibilityRulesControls) do 
+      control:Release()
+      self.VisibilityRulesControls[index] = nil
+    end
+  end
+  -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
   function BuildSettingControls(self)
@@ -221,8 +387,8 @@ class "SettingDefinitions.Tracker" (function(_ENV)
 
     tabControl:AddTabPage({
       name = "Visibility Rules",
-      onAcquire = function() end,
-      onRelease = function() end 
+      onAcquire = function() self:BuildVisibilityRulesTab() end,
+      onRelease = function() self:ReleaseVisibilityRulesTab() end
     })
 
     tabControl:Refresh()
@@ -264,6 +430,11 @@ class "SettingDefinitions.Tracker" (function(_ENV)
   }
 
   property "ContentTabControls" {
+    set = false,
+    default = function() return newtable(false, true) end
+  }
+
+  property "VisibilityRulesControls" {
     set = false,
     default = function() return newtable(false, true) end
   }
