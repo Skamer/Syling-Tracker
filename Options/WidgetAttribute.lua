@@ -20,7 +20,6 @@ local function RegisterWidgetForSystemEvent(widget, event)
     t = newtable(true, false)
     _M:RegisterEvent(event, function(...)
       for obj in pairs(t) do
-        print(obj, t, obj.OnSystemEvent, obj.__isReleased) 
         if obj.OnSystemEvent and not obj.__isReleased then
           obj:OnSystemEvent(event, ...)
         end

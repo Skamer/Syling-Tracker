@@ -1,5 +1,7 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
+  <!-- Context Menu Patterns Loading -->
+  <Script file="ContextMenuPatterns.lua" />
   <!-- Achievements -->
   <Script file="Achievements\AchievementsData.lua" />
   <Script file="Achievements\AchievementView.lua"/>
@@ -7,7 +9,7 @@
   <Script file="Achievements\Achievements.lua"/>
   <!-- Activities -->
   <Script file="Activities\ActivitiesData.lua" />
-  <Script file="Activities\ActivityView.lua"/>
+  <Script file="Activities\ActivityView.lua" />
   <Script file="Activities\ActivitiesContentView.lua"/>
   <Script file="Activities\Activities.lua" />
   <!-- Collections -->

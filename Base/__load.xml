@@ -8,4 +8,6 @@
   <Script file="UI\Views\ListView.lua" />
   <Script file="UI\Views\ObjectiveView.lua" />
   <Script file="UI\Views\ContentView.lua" />
+
+  <Script file="Features\ContextMenu.lua" />
 </Ui>

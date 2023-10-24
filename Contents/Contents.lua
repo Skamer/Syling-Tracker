@@ -259,7 +259,27 @@ RegisterContent({
   icon = { atlas =  AtlasType("QuestNormal") },
   order = 140,
   viewClass = QuestsContentView,
-  data = GetObservableContent("quests"),
+  data = GetObservableContent("quests"):Map(function(data)
+    local quests = {}
+    if data and data.quests then
+      for questID, questData in pairs(data.quests) do 
+        if not questData.campaignID or questData.campaignID == 0 then
+          quests[questID] = questData
+        end
+      end
+    end
+
+    return { quests = quests }
+  end),
+  statusFunc = function(data)
+    if data and data.quests then 
+      for k, v in pairs(data.quests) do 
+        return true 
+      end
+    end
+
+    return false   
+  end
 })
 -------------------------------------------------------------------------------
 --                             Dungeon Quests                                --

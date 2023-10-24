@@ -9,14 +9,15 @@
 Syling                 "SylingTracker.Contents.QuestView"                    ""
 -- ========================================================================= --
 export {
-  FromUIProperty            = Wow.FromUIProperty,
-  GetQuestDifficultyColor   = GetQuestDifficultyColor,
-  TryToComputeHeightFromChildren = Utils.Frame_TryToComputeHeightFromChildren,
+  FromUIProperty                  = Wow.FromUIProperty,
+  GetQuestDifficultyColor         = GetQuestDifficultyColor,
+  TryToComputeHeightFromChildren  = Utils.Frame_TryToComputeHeightFromChildren,
+  ContextMenu_Show                = API.ContextMenu_Show
 }
 
 __UIElement__()
 class "QuestView" (function(_ENV)
-  inherit "Frame" extend "IView" 
+  inherit "Button" extend "IView" 
   -----------------------------------------------------------------------------
   --                            Helper functions                             --
   -----------------------------------------------------------------------------
@@ -42,6 +43,16 @@ class "QuestView" (function(_ENV)
   -----------------------------------------------------------------------------
   --                               Handlers                                  --
   -----------------------------------------------------------------------------
+  local function OnClickHandler(self, mouseButton)
+    local questID = self.QuestID
+    local contextMenuPattern = self.ContextMenuPattern
+
+    if mouseButton == "RightButton" then 
+      if questID and contextMenuPattern then 
+        ContextMenu_Show(contextMenuPattern, self, questID)
+      end
+    end
+  end
 
   -----------------------------------------------------------------------------
   --                               Methods                                   --
@@ -65,6 +76,7 @@ class "QuestView" (function(_ENV)
       self.ObjectiveHasTimer        = false 
     end
 
+    self.QuestID = data.questID
     self.QuestName = data.name 
     self.QuestLevel = data.level
     self.QuestTagID = data.tag and data.tag.tagID
@@ -94,6 +106,14 @@ class "QuestView" (function(_ENV)
   property "QuestTagID" {
     type = Number
   }
+
+  property "QuestID" {
+    type = Number
+  }
+
+  property "ContextMenuPattern" {
+    type = String
+  }
   -----------------------------------------------------------------------------
   --                              Constructors                               --
   -----------------------------------------------------------------------------
@@ -117,6 +137,9 @@ class "QuestView" (function(_ENV)
     end
 
     self:SetClipsChildren(true)
+
+    self.OnClick = self.OnClick + OnClickHandler
+    self.ContextMenuPattern = "quests"
   end   
 end)
 
@@ -147,6 +170,7 @@ Style.UpdateSkin("Default", {
     minResize = { width = 0, height = 24},
     width = 250,
     autoAdjustHeight = true,
+    registerForClicks = { "LeftButtonDown", "RightButtonDown" },
 
     backdrop = { 
       bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
