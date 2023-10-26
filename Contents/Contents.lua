@@ -25,8 +25,9 @@ RegisterContent({
   name = "Auto Quests PopUp",
   description = "AUTO_QUESTS_PH_DESC",
   order = 10,
-  viewClass = ContentView,
-  statusFunc = function() return false end,
+  viewClass = AutoQuestsContentView,
+  data = GetObservableContent("autoQuests"),
+  statusFunc = function(data) return (data and data.autoQuests) and true or false end,
 })
 -------------------------------------------------------------------------------
 --                              Scenario                                     --
@@ -66,7 +67,8 @@ RegisterContent({
   description = "KEYSTONE_PH_DESC",
   icon = { atlas = AtlasType("Dungeon") },
   order = 40,
-  viewClass = ContentView,
+  viewClass = KeystoneContentView,
+  data = GetObservableContent("keystone"),
   statusFunc = function() return false end,
 })
 -------------------------------------------------------------------------------

@@ -2,6 +2,11 @@
 ..\FrameXML\UI.xsd">
   <!-- Context Menu Patterns Loading -->
   <Script file="ContextMenuPatterns.lua" />
+  <!-- Auto Quests -->
+  <Script file="AutoQuests\AutoQuestsData.lua" />
+  <Script file="AutoQuests\AutoQuestView.lua"/>
+  <Script file="AutoQuests\AutoQuestsContentView.lua"/>
+  <Script file="AutoQuests\AutoQuests.lua"/>
   <!-- Achievements -->
   <Script file="Achievements\AchievementsData.lua" />
   <Script file="Achievements\AchievementView.lua"/>
@@ -45,6 +50,10 @@
   <Script file="Dungeon\DungeonContentSubject.lua" />
   <Script file="Dungeon\DungeonContentView.lua" />
   <Script file="Dungeon\Dungeon.lua"/>
+  <!-- Keystone -->
+  <Script file="Keystone\KeystoneData.lua" />
+  <Script file="Keystone\KeystoneContentView.lua" />
+  <Script file="Keystone\Keystone.lua" />
   <!-- Contents Loading -->
   <Script file="Contents.lua" />
 </Ui>

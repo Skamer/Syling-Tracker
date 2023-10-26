@@ -10,4 +10,5 @@
   <Script file="UI\Views\ContentView.lua" />
 
   <Script file="Features\ContextMenu.lua" />
+  <Script file="Features\HelperWindow.lua" />
 </Ui>

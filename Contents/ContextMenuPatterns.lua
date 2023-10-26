@@ -21,7 +21,10 @@ export {
   QuestLogPopupDetailFrame_Show       = QuestLogPopupDetailFrame_Show,
   GetQuestLink                        = GetQuestLink,
   LFGListUtil_FindQuestGroup          = LFGListUtil_FindQuestGroup,
-   QuestMapQuestOptions_AbandonQuest  = QuestMapQuestOptions_AbandonQuest,
+  QuestMapQuestOptions_AbandonQuest   = QuestMapQuestOptions_AbandonQuest,
+
+  -- Helper 
+  ShowHelperWindow                    = API.ShowHelperWindow
 }
 -------------------------------------------------------------------------------
 --                   Quests Context Menu Pattern                             --
@@ -106,6 +109,6 @@ RegisterContextMenuPattern("quests", {
     text = "Help",
     order = 70,
     icon  =  { atlas = AtlasType("QuestTurnin") },
-    handler = function(questID) end,
+    handler = function(questID) ShowHelperWindow("quest", questID) end,
   }
 })
