@@ -39,7 +39,7 @@ class "ListView" (function(_ENV)
             view:SetPoint("TOP")
           end
           
-          view:SetPoint("LEFT")
+          view:SetPoint("LEFT", self.PaddingLeft, 0)
           view:SetPoint("RIGHT")
 
           -- Update the view with the data 
@@ -159,6 +159,11 @@ class "ListView" (function(_ENV)
     type = Number,
     default = 5
   }
+
+  property "PaddingLeft" {
+    type = Number,
+    default = 5
+  }
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
   -----------------------------------------------------------------------------
@@ -175,6 +180,6 @@ end)
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
   [ListView] = {
-    autoAdjustHeight = true
+    autoAdjustHeight = true,
   }
 })

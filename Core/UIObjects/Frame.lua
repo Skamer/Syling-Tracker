@@ -49,6 +49,12 @@ class "Frame" (function(_ENV)
     end
   end
 
+  local function OnStyleAppliedHandler(self)
+    if self.AdjustHeight then 
+      self:AdjustHeight()
+    end
+  end
+
   local function OnChildChanged(self, child, isAdd, noAdjust)
     if self.AdjustHeight then 
       if isAdd then
@@ -61,6 +67,10 @@ class "Frame" (function(_ENV)
           child.OnTextHeightChanged = child.OnTextHeightChanged + OnStateChanged
         end
 
+        if child.OnStyleApplied then 
+          child.OnStyleApplied = child.OnStyleApplied + OnStateChanged
+        end
+        
         child.OnShow        = child.OnShow + OnStateChanged
         child.OnHide        = child.OnHide + OnStateChanged
       else
@@ -84,6 +94,7 @@ class "Frame" (function(_ENV)
   local function AdjustHeightHandler(self, new)
     if new then
       self.OnChildChanged = self.OnChildChanged + OnChildChanged
+      self.OnStyleApplied = self.OnStyleApplied + OnStyleAppliedHandler
 
       for name, child in self:GetChildrenForAdjustment() do 
         OnChildChanged(self, child, true, true)
@@ -92,6 +103,7 @@ class "Frame" (function(_ENV)
       self:AdjustHeight()
     else
       self.OnChildChanged = self.OnChildChanged - OnChildChanged
+      self.OnStyleApplied = self.OnStyleApplied - OnStyleAppliedHandler
 
       for name, child in self:GetChildrenForAdjustment() do 
         OnChildChanged(self, child, false)
@@ -156,6 +168,7 @@ class "Frame" (function(_ENV)
       -- NOTE: As 'paddingBottom' is an UI.Property, self.PaddingBottom won't work
       -- so we need to pass by Style[self]
       local paddingBottom = Style[self].paddingBottom or 0
+
       if minHeight and minHeight > 0 then 
         return max(minHeight, Round(self:GetTop() - maxOuterBottom)) + paddingBottom, maxChild
       else

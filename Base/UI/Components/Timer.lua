@@ -47,13 +47,14 @@ class "Timer" (function(_ENV)
   property "StartTime" {
     type = Number,
     default = 0,
-    handler = OnTimeSettingsHandler
+    handler = OnTimeSettingsHandler,
   }
 
   property "Duration" {
     type = Number,
     default = 10,
-    handler = OnTimeSettingsHandler
+    handler = OnTimeSettingsHandler,
+    event = "OnDurationChanged"
   }
 
   property "ShowRemainingTime" {
@@ -77,7 +78,7 @@ end)
 -------------------------------------------------------------------------------
 --                              UI Settings                                  --
 -------------------------------------------------------------------------------
-RegisterUISetting("timer.showRemainingTime", true)
+RegisterUISetting("timer.showRemainingTime", false)
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------

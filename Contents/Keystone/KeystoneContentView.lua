@@ -10,6 +10,7 @@ Syling                 "SylingTracker.Contents.KeystoneContentView"          ""
 -- ========================================================================= --
 export {
   FromUIProperty                      = Wow.FromUIProperty,
+  GetFrameByType                      = Wow.GetFrameByType,
 }
 
 __UIElement__()
@@ -89,16 +90,117 @@ end)
 
 __UIElement__()
 class "KeystoneTimer" (function(_ENV)
+  inherit "Timer"
+  -----------------------------------------------------------------------------
+  --                               Handlers                                  --
+  -----------------------------------------------------------------------------
+  local function OnTimerBarSizeChangedHandler(self)
+    self:GetParent():UpdateSubTimers()
+  end
+
+  local function OnDurationChangedHandler(self)
+    self:UpdateSubTimers()
+  end
+
+  function UpdateSubTimers(self)
+    local timerBar = self:GetChild("TimerBar")
+    local maxWidth = math.floor(timerBar:GetWidth() + 0.5)
+
+    if maxWidth == 0 then 
+      return 
+    end
+
+    local twoChestLine = self:GetChild("TwoChestLine")
+    twoChestLine:SetPoint("CENTER", timerBar, "RIGHT", -math.floor(Lerp(0, maxWidth, 0.2) + 0.5), 0)
+
+
+    local threeChestLine = self:GetChild("ThreeChestLine")
+    threeChestLine:SetPoint("CENTER", timerBar, "RIGHT", -math.floor(Lerp(0, maxWidth, 0.4) + 0.5), 0)
+  end
+  -----------------------------------------------------------------------------
+  --                               Properties                                --
+  -----------------------------------------------------------------------------
+  property "KeystoneTimeLimit" {
+    type    = Number
+  }
+
+  property "ShowSubTimers" {
+    type    = Boolean,
+    default = true
+  }
+
+  property "showSubTimersWithRemainingTime" {
+    type    = Boolean,
+    default = true
+  }
+
+  property "TimeLimit" {
+    type    = Number,
+  }
+  -----------------------------------------------------------------------------
+  --                              Constructors                               --
+  -----------------------------------------------------------------------------
+  __Template__ {
+    TimerBar        = ProgressBar,
+    TwoChestLine    = Texture,
+    TwoChestTimer   = FontString,
+    ThreeChestLine  = Texture,
+    ThreeChestTimer = FontString
+  }
+  function __ctor(self) 
+    local timerBar= self:GetChild("TimerBar")
+    timerBar.OnSizeChanged = timerBar.OnSizeChanged + OnTimerBarSizeChangedHandler
+
+    self.OnDurationChanged = self.OnDurationChanged + OnDurationChangedHandler
+  end
+end)
+
+__UIElement__()
+class "KeystoneEnemyBar"(function(_ENV)
   inherit "Frame"
   -----------------------------------------------------------------------------
   --                              Constructors                               --
   -----------------------------------------------------------------------------
   __Template__ {
-    Timer = Timer,
-    TimerBar = ProgressBar,
+    CurrentBar  = ProgressBar,
+    TotalBar    = ProgressBar
   }
   function __ctor(self) end
 end)
+
+
+__UIElement__()
+class "KeystoneEnemyForces" (function(_ENV)
+  inherit "Frame"
+
+  enum "EState" {
+    Progress = 1,
+    Completed = 2
+  }
+  -----------------------------------------------------------------------------
+  --                               Properties                                --
+  -----------------------------------------------------------------------------
+  __Observable__()
+  property "EnemyForcesState" {
+    type    = EState,
+    default = EState.Progress
+  }
+
+  __Observable__()
+  property "EnemyForcesPending" {
+    type    = Number,
+    default = 0
+  }
+  -----------------------------------------------------------------------------
+  --                              Constructors                               --
+  -----------------------------------------------------------------------------
+  __Template__ {
+    Text      = FontString,
+    Progress  = ProgressWithExtraBar
+  }
+  function __ctor(self) end
+end)
+
 
 __UIElement__()
 class "KeystoneContentView" (function(_ENV)
@@ -113,15 +215,16 @@ class "KeystoneContentView" (function(_ENV)
       self.DungeonName = data.name
       self.DungeonTextureFileID = data.textureFileID
 
-      local objectives = self:GetChild("Objectives")
+      local objectives = self:GetChild("Content"):GetChild("Objectives")
       objectives:UpdateView(data.objectives, metadata)
 
       local affixes = self:GetChild("TopDungeonInfo"):GetChild("Affixes")
       affixes:UpdateFromData(data.affixes)
 
-      local timer = self:GetChild("TimerInfo"):GetChild("Timer")
+      local timer = self:GetChild("Content"):GetChild("TimerInfo")
       timer.StartTime = data.startTime
       timer.Duration = data.timeLimit
+      timer.TimeLimit = data.timeLimit
     else 
       self.DungeonName = nil 
       self.DungeonTextureFileID = nil
@@ -153,24 +256,29 @@ class "KeystoneContentView" (function(_ENV)
   --                              Constructors                               --
   -----------------------------------------------------------------------------
   __Template__{
-    TopDungeonInfo = Frame,
-    TimerInfo = KeystoneTimer,
-    Objectives = ObjectiveListView,
+    TopDungeonInfo  = Frame,
+    Content         = Frame, 
     {
+      Content = {
+        TimerInfo   = KeystoneTimer,
+        EnemyBar    = KeystoneEnemyForces,
+        Objectives  = ObjectiveListView,
+      },
       TopDungeonInfo = {
         Level       = FontString,
-        Affixes = KeystoneAffixes,
+        Affixes     = KeystoneAffixes,
         DungeonName = FontString,
-        DungeonIcon = Texture,
+        DungeonIcon = Texture
       },
     }
   }
-  function __ctor(self) end
+  function __ctor(self)
+  end
 end)
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
-Style.UpdateSkin("Default", {
+API.UpdateDefaultSkin({
   [KeystoneAffixe] = {
     height = 16,
     width  = 16,
@@ -183,15 +291,248 @@ Style.UpdateSkin("Default", {
   },
 
   [KeystoneTimer] = {
-    height = 25,
-    Timer = {
-      setAllPoints = true
+    autoAdjustHeight = true,
+
+    Text = {
+      text = GetFrameByType(KeystoneTimer, FromUIProperty("ElapsedTime")):Map(function(timer)
+        local clock = timer.ShowRemainingTime 
+                      and SecondsToClock(max(0, timer.Duration - timer.ElapsedTime)) 
+                      or SecondsToClock(timer.ElapsedTime) .. " / " .. SecondsToClock(timer.Duration)
+        
+        if timer.ElapsedTime > timer.Duration then 
+          return Color.RED .. clock 
+        else
+          return clock
+        end
+      end),
+      mediaFont = FontType("PT Sans Narrow Bold", 21),
+    },
+
+    TimerBar = {
+      height = 10,
+      frameStrata = "LOW",
+      value = GetFrameByType(KeystoneTimer, FromUIProperty("ElapsedTime")):Map(function(timer)
+        if timer.ShowRemainingTime then
+          return Lerp(0, 100, max(0, (timer.Duration - timer.ElapsedTime) / timer.Duration))
+        else 
+          return Lerp(100, 0, max(0, (timer.Duration - timer.ElapsedTime) / timer.Duration))
+        end
+      end),
+      statusBarColor = GetFrameByType(KeystoneTimer, FromUIProperty("ElapsedTime")):Map(function(timer)
+        if timer.ElapsedTime > timer.Duration then
+          return Color(0.3, 0.3, 0.3, 0.9)
+        end
+
+        return { r = 0, g = 148/255, b = 1, a = 0.9 }
+      end),    
+    },
+
+    TwoChestLine = {
+      height = 14,
+      width = 2,
+      drawLayer           = "OVERLAY",
+      subLevel            = 2,
+      texelSnappingBias    = 0,
+      snapToPixelGrid     = false,
+      texelSnappingBias    = 0,
+      color = GetFrameByType(KeystoneTimer, FromUIProperty("ElapsedTime")):Map(function(timer)
+        if timer.ElapsedTime > timer.Duration * 0.8 then 
+          return Color.RED 
+        end 
+
+        return Color.GREEN
+      end),
+    },
+    TwoChestTimer = {
+      visible = GetFrameByType(KeystoneTimer, FromUIProperty("ElapsedTime")):Map(function(timer)
+        if timer.showSubTimersWithRemainingTime and timer.ElapsedTime > timer.Duration * 0.8 then 
+          return false
+        else 
+          return true
+        end
+      end),
+      text = GetFrameByType(KeystoneTimer, FromUIProperty("ElapsedTime")):Map(function(timer)
+        if timer.showSubTimersWithRemainingTime then 
+          return SecondsToClock(max(0, timer.Duration * 0.8 - timer.ElapsedTime))
+        else 
+          return SecondsToClock(timer.Duration * 0.8)
+        end
+      end),
+      textColor = GetFrameByType(KeystoneTimer, FromUIProperty("ElapsedTime")):Map(function(timer)
+        if timer.ElapsedTime > timer.Duration * 0.8 then 
+          return Color.RED 
+        end 
+
+        return Color.GREEN
+      end),
+      height = 25,
+      justifyV = "MIDDLE",
+      justifyH = "CENTER",
+    },
+
+    ThreeChestLine = {
+      height = 14,
+      width = 2,
+      drawLayer           = "OVERLAY",
+      subLevel            = 2,
+      texelSnappingBias    = 0,
+      snapToPixelGrid     = false,
+      texelSnappingBias    = 0,
+      color = GetFrameByType(KeystoneTimer, FromUIProperty("ElapsedTime")):Map(function(timer)
+        if timer.ElapsedTime > timer.Duration * 0.6 then 
+          return Color.RED 
+        end 
+
+        return Color.GREEN
+      end),
+    },
+
+    ThreeChestTimer = {
+      visible = GetFrameByType(KeystoneTimer, FromUIProperty("ElapsedTime")):Map(function(timer)
+        if timer.showSubTimersWithRemainingTime and timer.ElapsedTime > timer.Duration * 0.6 then 
+          return false
+        else 
+          return true
+        end
+      end),
+
+      text = GetFrameByType(KeystoneTimer, FromUIProperty("ElapsedTime")):Map(function(timer)
+        if timer.showSubTimersWithRemainingTime then 
+          return SecondsToClock(max(0, timer.Duration * 0.6 - timer.ElapsedTime))
+        else 
+          return SecondsToClock(timer.Duration * 0.6)
+        end
+      end),
+      textColor = GetFrameByType(KeystoneTimer, FromUIProperty("ElapsedTime")):Map(function(timer)
+        if timer.ElapsedTime > timer.Duration * 0.6 then 
+          return Color.RED 
+        end 
+
+        return Color.GREEN
+      end),
+      height = 25,
+      justifyV = "MIDDLE",
+      justifyH = "CENTER",
     }
   },
 
   [KeystoneAffixes] = {
     height = 24,
     width = 72,
+  },
+
+  [KeystoneEnemyForces] = {
+    autoAdjustHeight = true,
+    Text = {
+      text = "Enemy Forces",
+      mediaFont = FontType("PT Sans Narrow Bold", 13),
+      textColor = Color(0.9, 0.9, 0.9),
+    },
+  },
+
+  [KeystoneContentView] = {
+    Header = {
+      visible = false
+    },
+
+    TopDungeonInfo = {
+      backdrop = {
+        bgFile = [[Interface\Buttons\WHITE8X8]],
+        edgeFile  = [[Interface\Buttons\WHITE8X8]],
+        edgeSize  = 1
+      },
+      backdropColor       = { r = 0, g = 0, b = 0, a = 0.65}, -- 87
+      backdropBorderColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
+      height = 48,
+
+      DungeonIcon = {
+        fileID = FromUIProperty("DungeonTextureFileID"),
+        texCoords = { left = 0.04,  right = 0.64, top = 0.02, bottom = 0.70 } ,
+        vertexColor = { r = 1, g = 1, b = 1, a = 0.5 },
+        height = 44,
+      },
+
+      Level = {
+        text = "Level 12",
+        justifyV = "TOP",
+        justifyH = "LEFT",
+      },
+      
+      DungeonName = {
+        text = FromUIProperty("DungeonName"),
+        fontObject = Game18Font,
+        textColor = { r = 1, g = 0.914, b = 0.682},
+        justifyV = "MIDDLE",
+        justifyH = "CENTER",
+      }
+    },
+
+    Content = {
+      autoAdjustHeight = true,
+      paddingBottom = 5,
+
+      backdrop = { 
+        bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
+      },
+
+      backdropColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
+
+      Objectives = {
+        autoAdjustHeight = true,
+        height = 32,
+      },
+      
+      EnemyBar = {
+        Progress = {
+          value = 50,
+          extraValue = 80,
+          Text = {
+            text = "75.89% -> 78.30%"
+          },
+
+          ExtraBarTexture = {
+            vertexColor = { r = 1, g = 193/255, b = 25/255, a = 0.7}
+          }
+        },
+      },
+    }
+  }
+})
+
+API.UpdateAddonSkin({
+  [KeystoneTimer] = {
+    inherit = "default",
+
+    Text = {
+      location = {
+        Anchor("TOPLEFT"),
+        Anchor("TOPRIGHT")
+      }      
+    },
+
+    TimerBar = {
+      location = {
+        Anchor("TOP", 0, -5, "Text", "BOTTOM"),
+        Anchor("LEFT", 20, 0),
+        Anchor("RIGHT", -20, 0)      
+      }
+    },
+
+    TwoChestTimer = {
+      location = {
+        Anchor("TOP", 0, -2, "TwoChestLine", "BOTTOM")
+      }      
+    },
+
+    ThreeChestTimer = {
+      location = {
+        Anchor("TOP", 0, -2, "ThreeChestLine", "BOTTOM")
+      }      
+    }
+  },
+
+  [KeystoneAffixes] = {
+    inherit = "default",
 
     Affix1 = {
       location = {
@@ -211,94 +552,103 @@ Style.UpdateSkin("Default", {
     }
   },
 
-  [KeystoneContentView] = {
-    backdrop = { 
-      bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
+  [KeystoneEnemyForces] = {
+    inherit = "default",
+
+    Text = {
+      location = {
+        Anchor("TOP"),
+        Anchor("LEFT"),
+        Anchor("RIGHT")
+      }
     },
-    backdropColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
+
+    Progress = {
+      location = {
+        Anchor("TOP", 0, -5, "Text", "BOTTOM"),
+        Anchor("LEFT"),
+        Anchor("RIGHT")        
+      }
+    }
+  },
+  
+  [KeystoneContentView] = {
+    inherit = "default",
 
     TopDungeonInfo = {
-      backdrop = {
-        bgFile = [[Interface\Buttons\WHITE8X8]],
-        edgeFile  = [[Interface\Buttons\WHITE8X8]],
-        edgeSize  = 1
+      DungeonIcon = {
+        location = {
+          Anchor("LEFT", 1, 0),
+          Anchor("RIGHT", -1, 0)
+        }        
       },
-      backdropColor       = { r = 0, g = 0, b = 0, a = 0.65}, -- 87
-      backdropBorderColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
-      height = 48,
 
       location = {
-        Anchor("TOP", 0, 0, "Header", "BOTTOM"),
+        Anchor("TOP"),
         Anchor("LEFT"),
         Anchor("RIGHT")
       },
 
-      DungeonIcon = {
-        fileID = FromUIProperty("DungeonTextureFileID"),
-        texCoords = { left = 0.04,  right = 0.64, top = 0.02, bottom = 0.70 } ,
-        vertexColor = { r = 1, g = 1, b = 1, a = 0.5 },
-        height = 44,
-        location = {
-          Anchor("LEFT", 1, 0),
-          Anchor("RIGHT", -1, 0)
-        }
-
-      },
-
       Level = {
-        text = "Level 20",
-        justifyV = "TOP",
-        justifyH = "LEFT",
         location = {
-          Anchor("TOPLEFT", 5, -5),
-          -- Anchor("BOTTOMLEFT", 0, 0)
+          Anchor("TOPLEFT", 5, -5),        
         }
       },
+
       Affixes = {
         location = {
           Anchor("TOPLEFT", 0, -5, "Level", "BOTTOMLEFT"),
-        }
+        }        
       },
-      
-      DungeonName = {
-        -- text = "Académie d'Algeth'ar",
-        text = FromUIProperty("DungeonName"),
-        fontObject = Game18Font,
-        textColor = { r = 1, g = 0.914, b = 0.682},
-        justifyV = "MIDDLE",
-        justifyH = "CENTER",
 
+      DungeonName = {
         location = {
           Anchor("LEFT", 70, 0),
           Anchor("TOP"),
           Anchor("BOTTOM"),
           Anchor("RIGHT")
+        }        
+      }
+    },
+
+    Content = {
+      TimerInfo = {
+        location = {
+          Anchor("TOP", 0, -5),
+          Anchor("LEFT"),
+          Anchor("RIGHT")
+        }        
+      },
+
+      Objectives = {
+        location = {
+          Anchor("TOP", 0, -5, "TimerInfo", "BOTTOM"),
+          Anchor("LEFT"),
+          Anchor("RIGHT")
         }
-      }
-    },
+      },
 
-    TimerInfo = {
-      location = {
-        Anchor("TOP", 0, 0, "TopDungeonInfo", "BOTTOM"),
-        Anchor("LEFT"),
-        Anchor("RIGHT")
-      }
-    },
-
-
-    Objectives = {
-      autoAdjustHeight = true,
-      height = 32,
-      -- backdrop = { 
-      --   bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
-      -- },
-      -- backdropColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
+      EnemyBar = {
+        location = {
+          Anchor("TOP", 0, -5, "Objectives", "BOTTOM"),
+          Anchor("LEFT", 20, 0),
+          Anchor("RIGHT", -20, 0)
+        }        
+      },
 
       location = {
-        Anchor("TOP", 0, 0, "TimerInfo", "BOTTOM"),
+        Anchor("TOP", 0, -5, "TopDungeonInfo", "BOTTOM"),
         Anchor("LEFT"),
         Anchor("RIGHT")
       }
     }
   }
 })
+
+API.RegisterSkinTag("keystone", 
+  KeystoneContentView, 
+  KeystoneAffixe, 
+  KeystoneAffixes, 
+  KeystoneTimer, 
+  KeystoneEnemyForces
+)

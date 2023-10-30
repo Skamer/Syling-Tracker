@@ -26,4 +26,7 @@ Base\__load.xml
 # Contents files 
 Contents\__load.xml
 
+# Skin files 
+Skins\__load.xml
+
 Boot.lua
