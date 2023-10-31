@@ -69,7 +69,7 @@ RegisterContent({
   order = 40,
   viewClass = KeystoneContentView,
   data = GetObservableContent("keystone"),
-  statusFunc = function() return false end,
+  statusFunc = function() return C_ChallengeMode.GetActiveKeystoneInfo() > 0 end,
 })
 -------------------------------------------------------------------------------
 --                             Torghast                                      --

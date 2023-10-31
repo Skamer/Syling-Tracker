@@ -447,11 +447,16 @@ API.UpdateBaseSkin({
         text = GetFrameByType(KeystoneEnemyForces, FromUIProperty("EnemyForcesQuantity", "EnemyForcesTotalQuantity", "EnemyForcesPendingQuantity"))
               :Next()
               :Map(function(_, current, total, pending)
-                if pending > 0 then 
-                  return string.format("%i / %i ( %i )", current, total, pending)
-                end 
 
-                return string.format("%i / %i", current, total)
+                if current and total then 
+                  if pending and pending > 0 then 
+                    return string.format("%i / %i ( %i )", current, total, pending)
+                  end 
+
+                  return string.format("%i / %i", current, total)
+                end
+                
+                return ""
               end)
       }
     }
