@@ -80,6 +80,8 @@ end
 __SystemEvent__ "PLAYER_REGEN_ENABLED" "PLAYER_DEAD"
 function ResetEnemiesPull()
   for key, _ in pairs(ENEMIES_PULL) do 
-    ENEMIES_PULL[key] = true
+    ENEMIES_PULL[key] = nil
   end
+
+  _M:CalculatePullCount()
 end

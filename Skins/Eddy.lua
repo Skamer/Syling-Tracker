@@ -13,10 +13,9 @@ export {
   GetFrameByType = Wow.GetFrameByType
 }
 
-Style.RegisterSkin("Eddy", {
+API.RegisterCustomSkin("Eddy", {
   [KeystoneTimer] = {
     inherit = "default",
-
 
     Text = {
       mediaFont = FontType("PT Sans Narrow Bold", 25),
@@ -77,14 +76,6 @@ Style.RegisterSkin("Eddy", {
     Text = {
       visible = false
     },
-
-    Text = {
-      location = {
-        Anchor("TOP"),
-        Anchor("LEFT"),
-        Anchor("RIGHT")
-      }
-    },
     
     Progress = {
       location = {
@@ -98,54 +89,8 @@ Style.RegisterSkin("Eddy", {
   [KeystoneContentView] = {
     inherit = "default",
 
-    TopDungeonInfo = {
-      DungeonIcon = {
-        location = {
-          Anchor("LEFT", 1, 0),
-          Anchor("RIGHT", -1, 0)
-        }        
-      },
-
-      location = {
-        Anchor("TOP"),
-        Anchor("LEFT"),
-        Anchor("RIGHT")
-      },
-
-      Level = {
-        location = {
-          Anchor("TOPLEFT", 5, -5),        
-        }
-      },
-
-      Affixes = {
-        location = {
-          Anchor("TOPLEFT", 0, -5, "Level", "BOTTOMLEFT"),
-        }        
-      },
-
-      DungeonName = {
-        location = {
-          Anchor("LEFT", 70, 0),
-          Anchor("TOP"),
-          Anchor("BOTTOM"),
-          Anchor("RIGHT")
-        }        
-      }
-    },
-
     Content = {
-      TimerInfo = {
-        location = {
-          Anchor("TOP", 0, -5),
-          Anchor("LEFT"),
-          Anchor("RIGHT")
-        }        
-      },
-
-      EnemyBar = {
-        id = 2,
-        marginTop = 8,
+      EnemyForces = {
         location = {
           Anchor("TOP", 0, -8, "TimerInfo", "BOTTOM"),
           Anchor("LEFT", 10, 0),
@@ -154,18 +99,11 @@ Style.RegisterSkin("Eddy", {
       },
   
       Objectives = {
-        id = 3,
         location = {
-          Anchor("TOP", 0, -5, "EnemyBar", "BOTTOM"),
+          Anchor("TOP", 0, -5, "EnemyForces", "BOTTOM"),
           Anchor("LEFT"),
           Anchor("RIGHT")
         }
-      },
-
-      location = {
-        Anchor("TOP", 0, -5, "TopDungeonInfo", "BOTTOM"),
-        Anchor("LEFT"),
-        Anchor("RIGHT")
       }
     }
   },

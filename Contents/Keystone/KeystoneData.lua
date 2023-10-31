@@ -25,7 +25,7 @@ __DataProperties__ {
   { name = "startTime", type = Number},
   { name = "timeLimit", type = Number},
   { name = "enemyForcesQuantity", type = Number, default = 0 },
-  { name = "enemyFocesTotalQuantity", type = Number, default = 0},
+  { name = "enemyForcesTotalQuantity", type = Number, default = 0},
   { name = "enemyForcesPendingQuantity", type = Number, default = 0},
 }
 class "KeystoneContentSubject" { ContentSubject }

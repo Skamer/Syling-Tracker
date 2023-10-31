@@ -150,6 +150,14 @@ class "Frame" (function(_ENV)
   function TryToComputeHeightFromChildren(self)
     local maxOuterBottom
     local maxChild
+    local top = self:GetTop()
+    local _, minHeight = self:GetResizeBounds()
+
+    -- As top may be nil, we need to check it. In case where it's nil, we 
+    -- return the minHeight. minHeight is by default '0'
+    if top == nil then 
+      return minHeight
+    end
 
     for _, child in self:GetChildrenForAdjustment() do 
       local outerBottom = child:GetBottom()
@@ -163,8 +171,6 @@ class "Frame" (function(_ENV)
     end
 
     if maxOuterBottom then
-      local _, minHeight = self:GetResizeBounds()
-
       -- NOTE: As 'paddingBottom' is an UI.Property, self.PaddingBottom won't work
       -- so we need to pass by Style[self]
       local paddingBottom = Style[self].paddingBottom or 0

@@ -120,10 +120,6 @@ class "KeystoneTimer" (function(_ENV)
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
-  property "KeystoneTimeLimit" {
-    type    = Number
-  }
-
   property "ShowSubTimers" {
     type    = Boolean,
     default = true
@@ -132,10 +128,6 @@ class "KeystoneTimer" (function(_ENV)
   property "showSubTimersWithRemainingTime" {
     type    = Boolean,
     default = true
-  }
-
-  property "TimeLimit" {
-    type    = Number,
   }
   -----------------------------------------------------------------------------
   --                              Constructors                               --
@@ -156,20 +148,6 @@ class "KeystoneTimer" (function(_ENV)
 end)
 
 __UIElement__()
-class "KeystoneEnemyBar"(function(_ENV)
-  inherit "Frame"
-  -----------------------------------------------------------------------------
-  --                              Constructors                               --
-  -----------------------------------------------------------------------------
-  __Template__ {
-    CurrentBar  = ProgressBar,
-    TotalBar    = ProgressBar
-  }
-  function __ctor(self) end
-end)
-
-
-__UIElement__()
 class "KeystoneEnemyForces" (function(_ENV)
   inherit "Frame"
 
@@ -187,7 +165,19 @@ class "KeystoneEnemyForces" (function(_ENV)
   }
 
   __Observable__()
-  property "EnemyForcesPending" {
+  property "EnemyForcesPendingQuantity" {
+    type    = Number,
+    default = 0
+  }
+
+  __Observable__()
+  property "EnemyForcesQuantity" {
+    type    = Number,
+    default = 0
+  }
+
+  __Observable__()
+  property "EnemyForcesTotalQuantity" {
     type    = Number,
     default = 0
   }
@@ -213,6 +203,7 @@ class "KeystoneContentView" (function(_ENV)
 
     if data then 
       self.DungeonName = data.name
+      self.KeystoneLevel = data.level
       self.DungeonTextureFileID = data.textureFileID
 
       local objectives = self:GetChild("Content"):GetChild("Objectives")
@@ -224,7 +215,11 @@ class "KeystoneContentView" (function(_ENV)
       local timer = self:GetChild("Content"):GetChild("TimerInfo")
       timer.StartTime = data.startTime
       timer.Duration = data.timeLimit
-      timer.TimeLimit = data.timeLimit
+
+      local enemyForces = self:GetChild("Content"):GetChild("EnemyForces")
+      enemyForces.EnemyForcesTotalQuantity = data.enemyForcesTotalQuantity
+      enemyForces.EnemyForcesQuantity = data.enemyForcesQuantity
+      enemyForces.EnemyForcesPendingQuantity = data.enemyForcesPendingQuantity
     else 
       self.DungeonName = nil 
       self.DungeonTextureFileID = nil
@@ -252,6 +247,12 @@ class "KeystoneContentView" (function(_ENV)
   property "DungeonName" {
     type = String
   }
+
+  __Observable__()
+  property "KeystoneLevel" {
+    type = Number,
+    default = 0,
+  }
   -----------------------------------------------------------------------------
   --                              Constructors                               --
   -----------------------------------------------------------------------------
@@ -261,7 +262,7 @@ class "KeystoneContentView" (function(_ENV)
     {
       Content = {
         TimerInfo   = KeystoneTimer,
-        EnemyBar    = KeystoneEnemyForces,
+        EnemyForces = KeystoneEnemyForces,
         Objectives  = ObjectiveListView,
       },
       TopDungeonInfo = {
@@ -278,7 +279,7 @@ end)
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
-API.UpdateDefaultSkin({
+API.UpdateBaseSkin({
   [KeystoneAffixe] = {
     height = 16,
     width  = 16,
@@ -428,6 +429,32 @@ API.UpdateDefaultSkin({
       mediaFont = FontType("PT Sans Narrow Bold", 13),
       textColor = Color(0.9, 0.9, 0.9),
     },
+
+    Progress = {
+      value = GetFrameByType(KeystoneEnemyForces, FromUIProperty("EnemyForcesQuantity")):Map(function(enemyForces)
+        return enemyForces.EnemyForcesQuantity
+      end),
+
+      minMaxValues = GetFrameByType(KeystoneEnemyForces, FromUIProperty("EnemyForcesTotalQuantity")):Map(function(enemyForces)
+        return MinMax(0, enemyForces.EnemyForcesTotalQuantity)
+      end),
+
+      extraValue = GetFrameByType(KeystoneEnemyForces, FromUIProperty("EnemyForcesPendingQuantity")):Map(function(enemyForces)
+        return min(enemyForces.EnemyForcesPendingQuantity + enemyForces.EnemyForcesQuantity, enemyForces.EnemyForcesTotalQuantity)
+      end),
+
+      Text = {
+        text = GetFrameByType(KeystoneEnemyForces, FromUIProperty("EnemyForcesQuantity", "EnemyForcesTotalQuantity", "EnemyForcesPendingQuantity"))
+              :Next()
+              :Map(function(_, current, total, pending)
+                if pending > 0 then 
+                  return string.format("%i / %i ( %i )", current, total, pending)
+                end 
+
+                return string.format("%i / %i", current, total)
+              end)
+      }
+    }
   },
 
   [KeystoneContentView] = {
@@ -453,7 +480,9 @@ API.UpdateDefaultSkin({
       },
 
       Level = {
-        text = "Level 12",
+        text = FromUIProperty("KeystoneLevel"):Map(function(level)
+          return CHALLENGE_MODE_POWER_LEVEL:format(level)
+        end),
         justifyV = "TOP",
         justifyH = "LEFT",
       },
@@ -482,14 +511,8 @@ API.UpdateDefaultSkin({
         height = 32,
       },
       
-      EnemyBar = {
+      EnemyForces = {
         Progress = {
-          value = 50,
-          extraValue = 80,
-          Text = {
-            text = "75.89% -> 78.30%"
-          },
-
           ExtraBarTexture = {
             vertexColor = { r = 1, g = 193/255, b = 25/255, a = 0.7}
           }
@@ -499,9 +522,9 @@ API.UpdateDefaultSkin({
   }
 })
 
-API.UpdateAddonSkin({
+API.UpdateDefaultSkin({
   [KeystoneTimer] = {
-    inherit = "default",
+    inherit = "base",
 
     Text = {
       location = {
@@ -532,7 +555,7 @@ API.UpdateAddonSkin({
   },
 
   [KeystoneAffixes] = {
-    inherit = "default",
+    inherit = "base",
 
     Affix1 = {
       location = {
@@ -553,7 +576,7 @@ API.UpdateAddonSkin({
   },
 
   [KeystoneEnemyForces] = {
-    inherit = "default",
+    inherit = "base",
 
     Text = {
       location = {
@@ -573,7 +596,7 @@ API.UpdateAddonSkin({
   },
   
   [KeystoneContentView] = {
-    inherit = "default",
+    inherit = "base",
 
     TopDungeonInfo = {
       DungeonIcon = {
@@ -628,7 +651,7 @@ API.UpdateAddonSkin({
         }
       },
 
-      EnemyBar = {
+      EnemyForces = {
         location = {
           Anchor("TOP", 0, -5, "Objectives", "BOTTOM"),
           Anchor("LEFT", 20, 0),
@@ -646,9 +669,9 @@ API.UpdateAddonSkin({
 })
 
 API.RegisterSkinTag("keystone", 
-  KeystoneContentView, 
+  KeystoneEnemyForces,
   KeystoneAffixe, 
   KeystoneAffixes, 
-  KeystoneTimer, 
-  KeystoneEnemyForces
+  KeystoneTimer,
+  KeystoneContentView
 )

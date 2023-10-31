@@ -34,7 +34,7 @@ end
 function OnActive(self)
   self:UpdateKeystoneInfo()
   self:LoadAndUpdate()
-  self:UpdateTimer()
+  -- self:UpdateTimer()
 end
 
 function LoadAndUpdate(self)
@@ -65,7 +65,7 @@ function LoadAndUpdate(self)
         -- if there is weight progress, we can say this is 'Enemy Forces'
         local quantity = tonumber(strsub(quantityString, 1, -2))
         KEYSTONE_CONTENT_SUBJECT.enemyForcesQuantity = quantity
-        KEYSTONE_CONTENT_SUBJECT.enemyFocesTotalQuantity = totalQuantity
+        KEYSTONE_CONTENT_SUBJECT.enemyForcesTotalQuantity = totalQuantity
       end
     end
   end

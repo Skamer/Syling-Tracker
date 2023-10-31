@@ -101,6 +101,7 @@ class "ProgressWithExtraBar"(function(_ENV)
   __Template__ {
     ExtraBarTexture = Texture
   }
+  __InstantApplyStyle__()
   function __ctor(self) 
     super(self)
 
