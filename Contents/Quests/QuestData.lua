@@ -8,6 +8,12 @@
 -- ========================================================================= --
 Syling                   "SylingTracker.Data.QuestData"                      ""
 -- ========================================================================= --
+__DataProperties__{
+  { name = "link", type = Any },
+  { name = "texture", type = Any}
+}
+class "QuestItemData" { ObjectData }
+
 __DataProperties__ {
   { name = "questLogIndex", type = Number },
   { name = "questID", type = Number },
@@ -39,6 +45,7 @@ __DataProperties__ {
   { name = "distance", type = Number },
   { name = "isRaid", type = Boolean },
   { name = "isLegendary", type = Boolean },
-  { name = "objectives", type = ObjectiveData, isArray = true, singularName = "objective"}
+  { name = "objectives", type = ObjectiveData, isArray = true, singularName = "objective"},
+  { name = "item", type = QuestItemData }
 }
 class "QuestData" { ObjectData }

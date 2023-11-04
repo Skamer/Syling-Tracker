@@ -23,7 +23,7 @@ local function RegisterFrameForSystemEvent(frame, event)
     t = Toolset.newtable(true, false)
     _M:RegisterEvent(event, function(...)
       for obj in pairs(t) do
-        if obj.OnSystemEvent and not obj:IsReleased() then
+        if obj.OnSystemEvent then
           obj:OnSystemEvent(event, ...)
         end
       end

@@ -65,8 +65,7 @@ class "DungeonContentView" (function(_ENV)
       }
     }
   }
-  function __ctor(self) 
-  end
+  function __ctor(self) end
 end)
 -------------------------------------------------------------------------------
 --                                Styles                                     --

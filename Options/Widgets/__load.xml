@@ -17,5 +17,6 @@
   <Script file="Window.lua"/>
   <Script file="PanelCategories.lua"/>
   <Script file="Panel.lua"/>
+  <Script file="TexturePicker.lua"/>
   <Script file="SettingControls.lua"/>
 </Ui>

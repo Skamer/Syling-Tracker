@@ -37,7 +37,7 @@ __Async__() function SylingTracker_OPEN_OPTIONS()
 
     panel:AddCategoryEntry({ text = "Settings", value = SettingDefinitions.General }, "general")
     panel:AddCategoryEntry({ text = "Media"}, "general")
-    panel:AddCategoryEntry({ text = "Item Bar" }, "general")
+    panel:AddCategoryEntry({ text = "Item Bar", value = SettingDefinitions.ItemBar }, "general")
     panel:AddCategoryEntry({ text = "Context Menu"}, "general")
     panel:AddCategoryEntry({ text = "Objective", value = SettingDefinitions.Objective}, "general")
 

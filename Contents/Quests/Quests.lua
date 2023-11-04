@@ -239,51 +239,18 @@ function UpdateQuest(self, questID)
     itemLink, itemTexture = GetQuestLogSpecialItemInfo(questLogIndex)
   end
 
-  -- if itemLink and itemTexture then
-  --   -- QUESTS_DATASTORE:Path("item"):SaveValue("link", itemLink)
-  --   -- QUESTS_DATASTORE:Path("item"):SaveValue("texture", itemTexture)
-  --   questData.itemLink = itemLink
-  --   questData.itemTexture = itemTexture
+  if itemLink and itemTexture then 
+    local itemData = questData.item
 
-  --   -- We check if the quest has already the item for avoiding useless data update 
-  --   if not QUESTS_WITH_ITEMS[questID] then 
-  --     ItemBar_AddItem(questID, {
-  --       link = itemLink,
-  --       texture = itemTexture,
-  --       distance = distance
-  --     })
+    itemData.link = itemLink
+    itemData.texture = itemTexture
 
-  --     ItemBar_Update()
+    -- We don't need to check if the item has been already added, as it's done 
+    -- internally, and in this case the call is ignored. 
+    ItemBar_AddItem(questID, itemLink, itemTexture, distance)
 
-  --     QUESTS_WITH_ITEMS[questID] = true 
-  --   end
-  -- else 
-  --   if QUESTS_WITH_ITEMS[questID] then 
-  --     ItemBar_RemoveItem(questID)
-  --     QUESTS_WITH_ITEMS[questID] = nil
-
-  --     -- QUESTS_DATASTORE:SetValue("item", nil)
-  --     questData.itemLink = nil 
-  --     questData.itemTexture = nil
-  --   end
-  -- end
-
-  -- if itemLink and itemTexture then
-  --   if not ItemBar_HasItem(questID) then 
-  --     ItemBar_AddItem(questID, {
-  --       link = itemLink,
-  --       texture = itemTexture,
-  --       distance = distance
-  --     })
-  --   else
-  --     ItemBar_SetItemLink(questID, itemLink)
-  --     ItemBar_SetItemTexture(questID, itemTexture)
-  --   end
-  -- else 
-  --   if ItemBar_HasItem(questID) then 
-  --     ItemBar_RemoveItem(questID)
-  --   end
-  -- end
+    QUESTS_WITH_ITEMS[questID] = true
+  end
 
   -- Updating the objectives 
   local objectiveCount = 0
@@ -489,7 +456,6 @@ function QUEST_WATCH_LIST_CHANGED(questID, isAdded)
 
     if QUESTS_WITH_ITEMS[questID] then 
       ItemBar_RemoveItem(questID)
-      ItemBar_Update()
       QUESTS_WITH_ITEMS[questID] = nil 
     end
 

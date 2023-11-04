@@ -44,6 +44,8 @@ class "ScenarioContentView" (function(_ENV)
       TopScenarioInfo = {
         ScenarioName = FontString,
         ScenarioIcon = Texture,
+        StageName = FontString,
+        StageCouter = FontString,
       }
     }
   }
@@ -62,7 +64,7 @@ Style.UpdateSkin("Default", {
       },
       backdropColor       = { r = 0, g = 0, b = 0, a = 0.65}, -- 87
       backdropBorderColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
-      height = 48,
+      height = 54,
       
       location = {
         Anchor("TOP", 0, 0, "Header", "BOTTOM"),
@@ -74,7 +76,7 @@ Style.UpdateSkin("Default", {
         atlas = AtlasType("groupfinder-background-scenarios"),
         texCoords = { left = 0.1,  right = 0.9, top = 0.1, bottom = 0.9 } ,
         vertexColor = { r = 1, g = 1, b = 1, a = 0.5 },
-        height = 44,
+        height = 48,
         location = {
           Anchor("LEFT", 1, 0),
           Anchor("RIGHT", -1, 0)
@@ -90,6 +92,28 @@ Style.UpdateSkin("Default", {
           Anchor("TOP"),
           Anchor("BOTTOM"),
           Anchor("RIGHT")
+        }
+      },
+
+      StageCouter = {
+        text = "1/4",
+        justifyH = "RIGHT",
+        location = {
+          Anchor("TOP"),
+          Anchor("LEFT", 1, 0),
+          Anchor("RIGHT", -1, 0),
+        }
+      },
+
+      StageName = {
+        text = "PH_STAGE_NAME",
+        justifyH = "CENTER",
+        fontObject = GameFontNormal,
+        location = {
+          Anchor("TOP", 0, -15, "ScenarioName", "CENTER"),
+          Anchor("LEFT"),
+          Anchor("RIGHT"),
+          Anchor("BOTTOM", 0, 5)
         }
       }
     },

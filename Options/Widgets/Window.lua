@@ -43,7 +43,7 @@ Style.UpdateSkin("Default", {
       edgeSize            = 1
     },
 
-    backdropColor         = { r = 0, g = 0, b = 0, a = 0.5},
+    backdropColor         = { r = 0, g = 0, b = 0, a = 0.65},
     backdropBorderColor   = { r = 0, g = 0, b = 0, a = 1 },    
 
 

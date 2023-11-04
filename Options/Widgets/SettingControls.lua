@@ -18,6 +18,15 @@ export {
   SetSetting        = SylingTracker.API.SetSetting,
   GetUISetting      = SylingTracker.API.GetUISetting,
   SetUISetting      = SylingTracker.API.SetUISetting,
+  GetItemBarSetting = SylingTracker.API.GetItemBarSetting,
+  SetItemBarSetting = SylingTracker.API.SetItemBarSetting
+}
+
+enum "BindSettingType" {
+  "setting",
+  "uiSetting",
+  "tracker",
+  "itemBar"
 }
 
 __Widget__()
@@ -136,12 +145,17 @@ class "SettingsCheckBox" (function(_ENV)
   --                               Handlers                                  --
   -----------------------------------------------------------------------------
   local function OnCheckBoxClickHandler(self, checkbox)
-    if self.Setting then 
-      local value = self:IsChecked()
-      if self.InvertSetting then  
-        SetSetting(self.Setting, not value)
-      else 
-        SetSetting(self.Setting, value)
+    local setting = self.Setting
+    if setting then
+      local settingType = self.SettingType
+      local value = self.InvertSetting and (not self:IsChecked()) or self:IsChecked()
+
+      if settingType == "setting" then 
+        SetSetting(setting, value)
+      elseif settingType == "uiSetting" then 
+        SetUISetting(setting, value)
+      elseif settingType == "itemBar" then 
+        SetItemBarSetting(setting, value)
       end
     end
   end
@@ -162,22 +176,44 @@ class "SettingsCheckBox" (function(_ENV)
     return self:GetChild("CheckBox"):GetChecked()
   end
 
-  __Arguments__ { String, Boolean/false }
-  function BindSetting(self, settingId, invert)
-      local value = GetSetting(settingId)
+  __Arguments__ { String/nil, Boolean/false, BindSettingType/"setting"}
+  function BindSetting(self, setting, invert, settingType)
+    local value, hasDefault, defaultValue
 
-      if value ~= nil then 
-        
-        if invert then 
-          self:SetChecked(not value)
-        else 
-          self:SetChecked(value )
-        end
-
-        self.Setting = settingId
+    if setting then 
+      if settingType == "setting" then 
+        value, hasDefault, defaultValue = GetSetting(setting)
+      elseif settingType == "uiSetting" then 
+        value, hasDefault, defaultValue = GetUISetting(setting)
+      elseif settingType == "itemBar" then 
+        value, hasDefault, defaultValue = GetItemBarSetting(setting)
       end
+    end
 
-      self.InvertSetting = invert
+    if value == nil and hasDefault then 
+      value = defaultValue
+    end
+
+    if invert then 
+      self:SetChecked(not value)
+    else 
+      self:SetChecked(value )
+    end
+
+    self.Setting        = setting
+    self.SettingType    = settingType
+    self.Default        = defaultValue
+    self.InvertSetting  = invert
+  end
+
+  __Arguments__ { String/nil, Boolean/nil}
+  function BindUISetting(self, setting, invert)
+    return self:BindSetting(setting, invert, "uiSetting")
+  end
+
+  __Arguments__ { String/nil, Boolean/nil}
+  function BindItemBarSetting(self, setting, invert)
+    return self:BindSetting(setting, invert, "itemBar")
   end
 
   function OnAcquire(self)
@@ -196,18 +232,29 @@ class "SettingsCheckBox" (function(_ENV)
 
     ResetStyles(self, true)
 
-    self.Setting = nil 
+    self.Setting        = nil
+    self.SettingType    = nil 
+    self.Default        = nil 
+    self.InvertSetting  = nil
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
   property "Setting" {
-    type = String
+    type    = String
   }
 
   property "InvertSetting" {
-    type = Boolean,
+    type    =   Boolean,
     default = false
+  }
+
+  property "SettingType" {
+    type    = BindSettingType
+  }
+
+  property "Default" {
+    type    = Any
   }
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
@@ -231,6 +278,24 @@ class "SettingsDropDown" (function(_ENV)
   -----------------------------------------------------------------------------
   __Bubbling__{ DropDown = "OnEntrySelected"}
   event "OnEntrySelected"
+  -----------------------------------------------------------------------------
+  --                               Handlers                                  --
+  -----------------------------------------------------------------------------
+  local function OnEntrySelectedHandler(self, entry)
+    local setting = self.Setting
+    if setting then 
+      local settingType = self.SettingType
+      local data = entry:GetEntryData()
+
+      if settingType == "setting" then 
+        SetSetting(setting, data.value)
+      elseif settingType == "uiSetting" then 
+        SetUISetting(setting, data.value)
+      elseif settingType == "itemBar" then 
+        SetItemBarSetting(setting, data.value)
+      end
+    end
+  end
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
@@ -263,6 +328,43 @@ class "SettingsDropDown" (function(_ENV)
     self:GetChild("DropDown"):SetMediaType(mediaType)
   end
 
+  __Arguments__ { String/nil, BindSettingType/"setting"}
+  function BindSetting(self, setting, settingType)
+    local value, hasDefault= defaultValue
+
+    if setting then 
+      if settingType == "setting" then 
+        value, hasDefault, defaultValue = GetSetting(setting)
+      elseif settingType == "uiSetting" then 
+        value, hasDefault, defaultValue = GetUISetting(setting)
+      elseif settingType == "itemBar" then 
+        value, hasDefault, defaultValue = GetItemBarSetting(setting)
+      end
+    end
+
+    if value == nil and hasDefault then 
+      value = defaultValue
+    end
+
+    if value then 
+      self:SelectByValue(value)
+    end
+
+    self.Setting      = setting
+    self.SettingType  = settingType
+    self.Default      = defaultValue
+  end
+
+  __Arguments__ { String/nil }
+  function BindUISetting(self, setting)
+    return self:BindSetting(setting, "uiSetting")
+  end
+
+  __Arguments__ { String/nil }
+  function BindItemBarSetting(self, setting)
+    return self:BindSetting(setting, "itemBar")
+  end
+
   function OnAcquire(self)
     self:InstantApplyStyle()
   end
@@ -276,7 +378,25 @@ class "SettingsDropDown" (function(_ENV)
     self:GetChild("DropDown"):ClearEntries()
 
     ResetStyles(self, true)
+
+    self.Setting      = nil 
+    self.SettingType  = nil
+    self.Default      = nil
   end
+  -----------------------------------------------------------------------------
+  --                               Properties                                --
+  -----------------------------------------------------------------------------
+  property "Setting" {
+    type = String 
+  }
+
+  property "SettingType" {
+    type = BindSettingType
+  }
+
+  property "Default" {
+    type = Any
+  }
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
   -----------------------------------------------------------------------------
@@ -284,7 +404,9 @@ class "SettingsDropDown" (function(_ENV)
     Label     = FontString,
     DropDown  = DropDown
   }
-  function __ctor(self) end 
+  function __ctor(self) 
+    self.OnEntrySelected = self.OnEntrySelected + OnEntrySelectedHandler
+  end 
 end)
 
 __Widget__()
@@ -299,8 +421,16 @@ class "SettingsSlider" (function(_ENV)
   --                               Handlers                                  --
   -----------------------------------------------------------------------------
   local function OnValueChangedHandler(self, value)
-    if self.Setting then 
-      SLT.Settings.Set(self.Setting, value)
+    local setting = self.Setting
+    if setting then
+      local settingType = self.SettingType
+      if settingType == "setting" then 
+        SetSetting(setting, value)
+      elseif settingType == "uiSetting" then 
+        SetUISetting(setting, value)
+      elseif settingType == "itemBar" then 
+        SetItemBarSetting(setting, value)
+      end
     end
   end
   -----------------------------------------------------------------------------
@@ -331,16 +461,40 @@ class "SettingsSlider" (function(_ENV)
     self:GetChild("Slider"):SetLabelFormatter(labelType, value)
   end
 
-    __Arguments__ { String }
-  function BindSetting(self, settingId)
-      local value = GetSetting(settingId)
+  __Arguments__ { String/nil, BindSettingType/"setting"}
+  function BindSetting(self, setting, settingType)
+    local value, hasDefault, defaultValue 
 
-      if value ~= nil then 
-        self:SetValue(value)
-
-        self.Setting = settingId
+    if setting then 
+      if settingType == "setting" then 
+        value, hasDefault, defaultValue = GetSetting(setting)
+      elseif settingType == "uiSetting" then 
+        value, hasDefault, defaultValue = GetUISetting(setting)
+      elseif settingType == "itemBar" then 
+        value, hasDefault, defaultValue = GetItemBarSetting(setting)
       end
-  end 
+    end
+
+    if value then 
+      self:SetValue(value)
+    elseif hasDefault then 
+      self:SetValue(defaultValue)
+    end
+
+    self.Setting      = setting
+    self.SettingType  = settingType
+    self.Default      = defaultValue
+  end
+
+  __Arguments__ { String/nil}
+  function BindUISetting(self, setting)
+    return self:BindSetting(setting, "uiSetting")
+  end
+
+  __Arguments__ { String/nil}
+  function BindItemBarSetting(self, setting)
+    return self:BindSetting(setting, "itemBar")
+  end
 
   function OnAcquire(self)
     self:InstantApplyStyle()
@@ -354,7 +508,8 @@ class "SettingsSlider" (function(_ENV)
 
     ResetStyles(self, true)
 
-    self.Setting = nil
+    self.Setting      = nil
+    self.SettingType  = nil
     --- It's important these functions are called after Setting has been set 
     --- to nil for avoiding the setting vlaue is updated by an incorrect value
     self:SetValue(0)
@@ -366,6 +521,14 @@ class "SettingsSlider" (function(_ENV)
   -----------------------------------------------------------------------------
   property "Setting" {
     type = String
+  }
+
+  property "SettingType" {
+    type = BindSettingType 
+  }
+
+  property "Default" {
+    type = Any
   }
   -----------------------------------------------------------------------------
   --                            Constructors                                 --

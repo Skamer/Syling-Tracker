@@ -6,7 +6,7 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling                      "SylingTracker.Dungeon"                ""
+Syling                      "SylingTracker.Dungeon"                          ""
 -- ========================================================================= --
 _Active                             = false
 -- ========================================================================= --
@@ -31,6 +31,10 @@ end
 
 function OnActive(self)
   self:LoadAndUpdate()
+end
+
+function OnInactive(self)
+  DUNGEON_CONTENT_SUBJECT.name = nil
 end
 
 function LoadAndUpdate(self)
