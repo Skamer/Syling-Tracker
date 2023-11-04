@@ -11,4 +11,5 @@
 
   <Script file="Features\ContextMenu.lua" />
   <Script file="Features\HelperWindow.lua" />
+  <Script file="Features\ItemBar.lua" />
 </Ui>
