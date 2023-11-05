@@ -1,12 +1,59 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
-  <Script file="ContextMenuPatterns.lua"/>
-  <Include file="Quests\__load.xml"/>
-  <Include file="Tasks\__load.xml"/>
-  <Include file="WorldQuests\__load.xml"/>
-  <Include file="Achievements\__load.xml"/>
-  <Include file="Scenario\__load.xml"/>
-  <Include file="Dungeon\__load.xml"/>
-  <Include file="Keystone\__load.xml"/>
-  <Include file="Torghast\__load.xml"/>
+  <!-- Context Menu Patterns Loading -->
+  <Script file="ContextMenuPatterns.lua" />
+  <!-- Auto Quests -->
+  <Script file="AutoQuests\AutoQuestsData.lua" />
+  <Script file="AutoQuests\AutoQuestView.lua"/>
+  <Script file="AutoQuests\AutoQuestsContentView.lua"/>
+  <Script file="AutoQuests\AutoQuests.lua"/>qz
+  <!-- Achievements -->
+  <Script file="Achievements\AchievementsData.lua" />
+  <Script file="Achievements\AchievementView.lua"/>
+  <Script file="Achievements\AchievementsContentView.lua"/>
+  <Script file="Achievements\Achievements.lua"/>
+  <!-- Activities -->
+  <Script file="Activities\ActivitiesData.lua" />
+  <Script file="Activities\ActivityView.lua" />
+  <Script file="Activities\ActivitiesContentView.lua"/>
+  <Script file="Activities\Activities.lua" />
+  <!-- Collections -->
+  <Script file="Collections\CollectionsData.lua" />
+  <Script file="Collections\CollectableView.lua"/>
+  <Script file="Collections\CollectionsContentView.lua"/>
+  <Script file="Collections\Collections.lua" />  
+  <!-- Profession Recipes -->
+  <Script file="ProfessionRecipes\ProfessionRecipesData.lua" />
+  <Script file="ProfessionRecipes\ProfessionRecipeView.lua"/>
+  <Script file="ProfessionRecipes\ProfessionRecipesContentView.lua"/>
+  <Script file="ProfessionRecipes\ProfessionRecipes.lua" />
+  <!-- Quests -->
+  <Script file="Quests\QuestData.lua" />
+  <Script file="Quests\QuestsContentSubject.lua" />
+  <Script file="Quests\QuestView.lua" />
+  <Script file="Quests\QuestCategoryView.lua" />
+  <Script file="Quests\QuestsContentView.lua" />
+  <Script file="Quests\Quests.lua" />
+  <!-- Tasks -->
+  <Script file="Tasks\TaskData.lua" />
+  <Script file="Tasks\TasksContentSubject.lua" />
+  <Script file="Tasks\TaskView.lua"/>
+  <Script file="Tasks\TasksContentView.lua"/>
+  <Script file="Tasks\Tasks.lua" /> 
+  <!-- World Quests -->
+  <Script file="WorldQuests\WorldQuests.lua" />
+  <!-- Scenario -->
+  <Script file="Scenario\ScenarioData.lua" />
+  <Script file="Scenario\ScenarioContentView.lua" />
+  <Script file="Scenario\Scenario.lua" />
+  <!-- Dungeons -->
+  <Script file="Dungeon\DungeonContentSubject.lua" />
+  <Script file="Dungeon\DungeonContentView.lua" />
+  <Script file="Dungeon\Dungeon.lua"/>
+  <!-- Keystone -->
+  <Script file="Keystone\KeystoneData.lua" />
+  <Script file="Keystone\KeystoneContentView.lua" />
+  <Script file="Keystone\Keystone.lua" />
+  <!-- Contents Loading -->
+  <Script file="Contents.lua" />
 </Ui>

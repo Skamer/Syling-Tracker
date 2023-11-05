@@ -6,29 +6,21 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling          "SylingTracker.Options.SettingDefinitions.Trackers"          ""
+Syling          "SylingTracker_Options.SettingDefinitions.Trackers"          ""
 -- ========================================================================= --
 export {
-  GetContentTypes = SLT.API.GetContentTypes,
-  NewTracker      = SLT.API.NewTracker,
-  DeleteTracker   = SLT.API.DeleteTracker,
-  GetTracker      = SLT.API.GetTracker
+  newtable                      = Toolset.newtable,
+  IterateContents               = SylingTracker.API.IterateContents,
+  NewTracker                    = SylingTracker.API.NewTracker,
+  DeleteTracker                 = SylingTracker.API.DeleteTracker,
+  GetTracker                    = SylingTracker.API.GetTracker,
+  SetContentTracked             = SylingTracker.API.SetContentTracked
 }
--- ========================================================================= --
-__Iterator__()
-function IterateContentTypes()
-  local yield = coroutine.yield
-
-  --- Name is used for sorting as there is no markup inside
-  for k,v in GetContentTypes():Sort("x,y=>x.Name<y.Name"):GetIterator() do 
-    yield(k,v)
-  end
-end
 
 __Widget__()
-class "SLT.SettingDefinitions.CreateTracker" (function(_ENV)
+class "SettingDefinitions.CreateTracker" (function(_ENV)
   inherit "Frame"
-  ----------------------------------------------------------------------------
+  -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
   function BuildSettingControls(self)
@@ -41,7 +33,7 @@ class "SLT.SettingDefinitions.CreateTracker" (function(_ENV)
     ---------------------------------------------------------------------------
     --- Tracker Name 
     ---------------------------------------------------------------------------
-    local trackerNameEditBox = SUI.SettingsEditBox.Acquire(false, self)
+    local trackerNameEditBox = Widgets.SettingsEditBox.Acquire(false, self)
     trackerNameEditBox:SetID(10)
     trackerNameEditBox:SetLabel("Tracker Name")
     trackerNameEditBox:SetInstructions("Enter the tracker name")
@@ -49,7 +41,7 @@ class "SLT.SettingDefinitions.CreateTracker" (function(_ENV)
     ---------------------------------------------------------------------------
     --- Contents Tracked Section Header 
     ---------------------------------------------------------------------------
-    local contentsTrackedSectionHeader = SUI.SettingsSectionHeader.Acquire(false, self)
+    local contentsTrackedSectionHeader = Widgets.SettingsSectionHeader.Acquire(false, self)
     contentsTrackedSectionHeader:SetID(20)
     contentsTrackedSectionHeader:SetTitle("Contents Tracked")
     self.SettingControls.contentsTrackedSectionHeader = contentsTrackedSectionHeader
@@ -62,18 +54,17 @@ class "SLT.SettingDefinitions.CreateTracker" (function(_ENV)
       self.ContentsTracked[contentID] = isTracked
     end
 
-    for index, contentType in IterateContentTypes() do 
-      local content = SUI.SettingsCheckBox.Acquire(true, self)
-      content:SetID(30+index)
-      content:SetLabel(contentType.DisplayName)
-      content:SetChecked(false)
-      content:SetUserData("contentID", contentType.ID)
-      content:SetUserHandler("OnCheckBoxClick", OnContentCheckBoxClick)
-      Style[content].MarginLeft = 20
+    for index, content in List(IterateContents()):Sort("x,y=>x.Name<y.Name"):GetIterator() do
+      local contentCheckBox = Widgets.SettingsCheckBox.Acquire(false, self)
+      contentCheckBox:SetID(30 * index)
+      contentCheckBox:SetLabel(content.FormattedName)
+      contentCheckBox:SetChecked(false)
+      contentCheckBox:SetUserData("contentID", content.id)
+      contentCheckBox:SetUserHandler("OnCheckBoxClick", OnContentCheckBoxClick)
 
-      self.SettingControls[content] = content
+      self.SettingControls[contentCheckBox] = contentCheckBox
     end
-    ---------------------------------------------------------------------------
+      ---------------------------------------------------------------------------
     --- Create Button
     ---------------------------------------------------------------------------
     local function OnCreateButtonClick(button)
@@ -85,30 +76,33 @@ class "SLT.SettingDefinitions.CreateTracker" (function(_ENV)
         --- create lof of frame.
         Scorpio.Continue(function()
           for contentID, isTracked in pairs(self.ContentsTracked) do
-            tracker:ApplyAndSaveSetting("contentTracked", contentID, isTracked)
+            SetContentTracked(tracker, contentID, isTracked)
             Scorpio.Next()
           end
         end)
       end
     end
 
-    local createButton = SUI.SuccessPushButton.Acquire(true, self)
+    local createButton = Widgets.SuccessPushButton.Acquire(false, self)
     createButton:SetText("Create")
     createButton:SetPoint("BOTTOM")
+    createButton:SetID(9999)
+    Style[createButton].marginLeft = 0.35
     createButton:SetUserHandler("OnClick", OnCreateButtonClick)
     self.SettingControls.createButton = createButton
+
+
   end
 
-
   function ReleaseSettingControls(self)
-    --- Release the widgets
-    for index, control in pairs(self.SettingControls) do
+    --- Release the widgets 
+    for index, control in pairs(self.SettingControls) do 
       control:Release()
-      self.SettingControls[control] = nil 
+      self.SettingControls[index] = nil
     end
   end
 
-  function OnAcquire(self)
+  function OnBuildSettings(self)
     self:BuildSettingControls()
   end
 
@@ -135,7 +129,7 @@ class "SLT.SettingDefinitions.CreateTracker" (function(_ENV)
 end)
 
 __Widget__()
-class "SLT.SettingDefinitions.Tracker" (function(_ENV)
+class "SettingDefinitions.Tracker" (function(_ENV)
   inherit "Frame"
   -----------------------------------------------------------------------------
   --                   [General] Tab Builder                                 --
@@ -146,81 +140,41 @@ class "SLT.SettingDefinitions.Tracker" (function(_ENV)
     ---------------------------------------------------------------------------
     local function OnLockTrackerCheckBoxClick(checkBox)
       local isLocked = checkBox:IsChecked()
-      self.Tracker:ApplyAndSaveSetting("locked", isLocked)
+      self.Tracker:SetSetting("locked", isLocked)
     end
 
-    local lock = SUI.SettingsCheckBox.Acquire(false, self)
-    lock:SetID(10)
-    lock:SetLabel("Lock")
-    lock:SetChecked(self.Tracker.Locked)
-    lock:SetUserHandler("OnCheckBoxClick", OnLockTrackerCheckBoxClick)
-    self.GeneralTabControls.lockTrackerButton = lock
-    ---------------------------------------------------------------------------
-    --- Show Tracker
-    ---------------------------------------------------------------------------
-    local function OnShowTrackerCheckBoxClick(checkBox)
-      local isShow = checkBox:IsChecked()
-      self.Tracker:ApplyAndSaveSetting("hidden", not isShow)
-    end
-
-    local show = SUI.SettingsCheckBox.Acquire(false, self)
-    show:SetID(20)
-    show:SetLabel("Show")
-    show:SetChecked(self.Tracker.Enabled)
-    show:SetUserHandler("OnCheckBoxClick", OnShowTrackerCheckBoxClick)
-    self.GeneralTabControls.showTrackerButton = show
-    ---------------------------------------------------------------------------
-    --- Tracker Scale
-    ---------------------------------------------------------------------------
-    local function OnTrackerScaleChanged(slider, value)
-      self.Tracker:ApplyAndSaveSetting("scale", value)
-    end
-
-    local scaleSlider = SUI.SettingsSlider.Acquire(false, self)
-    scaleSlider:SetID(30)
-    scaleSlider:SetLabel("Scale")
-    scaleSlider:SetMinMaxValues(0.1, 5)
-    scaleSlider:SetValueStep(0.01)
-    scaleSlider:SetValue(Style[self.Tracker].Scale)
-    scaleSlider:SetSliderLabelFormatter(SUI.Slider.Label.Right)
-    scaleSlider:SetUserHandler("OnValueChanged", OnTrackerScaleChanged)
-    self.GeneralTabControls.trackerScaleSlider = scaleSlider
-    ---------------------------------------------------------------------------
-    --- Background Section
-    ---------------------------------------------------------------------------
-    local backgroundSection = self:CreateBackgroundSection()
-    backgroundSection:SetExpanded(false)
-    backgroundSection:SetID(40)
-    backgroundSection:SetTitle("Background")
-    Style[backgroundSection].marginTop = 15
-    self.GeneralTabControls.backgroundSection = backgroundSection
-    ---------------------------------------------------------------------------
-    --- Border Section
-    ---------------------------------------------------------------------------
-    local borderSection = self:CreateBorderSection()
-    borderSection:SetExpanded(false)
-    borderSection:SetID(50)
-    borderSection:SetTitle("Border")
-    self.GeneralTabControls.borderSection = borderSection
-    ---------------------------------------------------------------------------
-    --- Scroll Bar Section
-    ---------------------------------------------------------------------------
-    local scrollBarSection = self:CreateScrollBarSection()
-    scrollBarSection:SetExpanded(false)
-    scrollBarSection:SetID(60)
-    scrollBarSection:SetTitle("Scroll Bar")
-    self.GeneralTabControls.scrollBarSection = scrollBarSection 
+    local lockTrackerCkeckBox = Widgets.SettingsCheckBox.Acquire(false, self)
+    lockTrackerCkeckBox:SetID(10)
+    lockTrackerCkeckBox:SetLabel("Lock")
+    lockTrackerCkeckBox:SetChecked(self.Tracker.Locked)
+    lockTrackerCkeckBox:SetUserHandler("OnCheckBoxClick", OnLockTrackerCheckBoxClick)
+    self.GeneralTabControls.lockTrackerCkeckBox = lockTrackerCkeckBox
     ---------------------------------------------------------------------------
     --- Danger Zone Section
     ---------------------------------------------------------------------------
     --- The "Danger zone" won't appear for main tracker as it's not intended to be deleted.
-    if self.Tracker.ID ~= "main" then 
-      local dangerZoneSection = self:CreateDangerZoneSection()
+    if self.Tracker.id ~= "main" then 
+      local dangerZoneSection = Widgets.ExpandableSection.Acquire(false, self)
       dangerZoneSection:SetExpanded(false)
       dangerZoneSection:SetID(999)
       dangerZoneSection:SetTitle("|cffff0000Danger Zone|r")
       self.GeneralTabControls.dangerZoneSection = dangerZoneSection
+      -------------------------------------------------------------------------
+      --- Danger Zone -> Delete the tracker
+      -------------------------------------------------------------------------   
+      local function OnDeleteTrackerClick(button)
+        DeleteTracker(self.TrackerID)
+      end
+
+      local deleteTrackerButton = Widgets.DangerPushButton.Acquire(false, dangerZoneSection)
+      deleteTrackerButton:SetText("Delete the tracker")
+      deleteTrackerButton:SetID(10)
+      deleteTrackerButton:SetUserHandler("OnClick", OnDeleteTrackerClick)
+      Style[deleteTrackerButton].marginLeft = 0.35
+      self.GeneralTabControls.deleteTrackerButton = deleteTrackerButton
+      
     end
+
   end
   -----------------------------------------------------------------------------
   --                    [General] Tab Release                                --
@@ -232,335 +186,14 @@ class "SLT.SettingDefinitions.Tracker" (function(_ENV)
     end
   end
   -----------------------------------------------------------------------------
-  --                    [General] Background Section                         --
-  -----------------------------------------------------------------------------
-  function CreateBackgroundSection(self)
-    local backgroundSection = SUI.ExpandableSection.Acquire(false, self)
-    ---------------------------------------------------------------------------
-    --- Background -> Show Background
-    ---------------------------------------------------------------------------
-    local function OnShowBackgroundCheckBoxClick(checkBox)
-      local isShow = checkBox:IsChecked()
-      self.Tracker:ApplyAndSaveSetting("showBackground", isShow) 
-    end
-
-    local showBackground = SUI.SettingsCheckBox.Acquire(true, backgroundSection)
-    showBackground:SetID(10)
-    showBackground:SetLabel("Show")
-    showBackground:SetChecked(Style[self.Tracker].BackgroundTexture.visible)
-    showBackground:SetUserHandler("OnCheckBoxClick", OnShowBackgroundCheckBoxClick)
-    self.GeneralTabControls.showBackgroundCheckBox = showBackground
-    ---------------------------------------------------------------------------
-    --- Background -> Background Color
-    ---------------------------------------------------------------------------
-    local function OnBackgroundColorChangedHandler(colorPicker, r, g, b, a)
-      self.Tracker:ApplySetting("backgroundColor", r, g, b, a)
-    end
-
-    local function OnBackgroundColorConfirmedHandler(colorPicker, r, g, b, a)
-      self.Tracker:ApplyAndSaveSetting("backgroundColor", r, g, b, a)
-    end
-
-    local backgroundColor = Style[self.Tracker].BackgroundTexture.vertexColor
-    local backgroundColorPicker = SUI.SettingsColorPicker.Acquire(true, backgroundSection)
-    backgroundColorPicker:SetID(20)
-    backgroundColorPicker:SetLabel("Background color")
-
-    if backgroundColor then 
-      backgroundColorPicker:SetColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a)
-    end
-
-    backgroundColorPicker:SetUserHandler("OnColorChanged", OnBackgroundColorChangedHandler)
-    backgroundColorPicker:SetUserHandler("OnColorConfirmed", OnBackgroundColorConfirmedHandler)
-    self.GeneralTabControls.backgroundColorPicker = backgroundColorPicker
-
-
-    --- NOTE: The section will be added in the controls list and configured by outside. 
-    return backgroundSection
-  end
-  -----------------------------------------------------------------------------
-  --                    [General] Border Section                             --
-  -----------------------------------------------------------------------------
-  _BorderControlsInfo = {
-    --- Edges
-    { id = "topBorder", settingShow = "showTopBorder", settingColor = "topBorderColor", settingSize = "topBorderSize", label = "Top Edge" },
-    { id = "bottomBorder", settingShow = "showBottomBorder", settingColor = "bottomBorderColor", settingSize = "bottomBorderSize", label = "Bottom Edge"},
-    { id = "leftBorder", settingShow = "showLeftBorder", settingColor = "leftBorderColor", settingSize = "leftBorderSize", label = "Left Edge"},
-    { id = "rightBorder", settingShow = "showRightBorder", settingColor = "rightBorderColor", settingSize = "rightBorderSize", label = "Right Edge"},
-    --- Corners
-    { id = "topLeftBorder", settingShow = "showTopLeftBorder", settingColor = "topLeftBorderColor", label = "Top Left Corner", isCorner = true},
-    { id = "topRightBorder", settingShow = "showTopRightBorder", settingColor = "topRightBorderColor", label = "Top Right Corner", isCorner = true},
-    { id = "bottomLeftBorder", settingShow = "showBottomLeftBorder", settingColor = "bottomLeftBorderColor", label = "Bottom Left Corner", isCorner = true},
-    { id = "bottomRightBorder", settingShow = "showBottomRightBorder", settingColor = "bottomRightBorderColor", label = "Bottom Right Corner", isCorner = true}
-  }  
-
-  function CreateBorderSection(self)
-    local borderSection = SUI.ExpandableSection.Acquire(false, self)
-    ---------------------------------------------------------------------------
-    --- Border -> Grid Border Controls 
-    ---------------------------------------------------------------------------
-    local gridBorders = SUI.GridControls.Acquire(true, borderSection)
-    gridBorders:SetID(10)
-    gridBorders:SetColumnCount(4)
-    gridBorders:SetRowCount(#_BorderControlsInfo + 2)
-    gridBorders:SetDefaultRowHeight(40)
-    gridBorders:SetColumnWidths(150, 60, 60, 180)
-    self.GeneralTabControls.gridBorders = gridBorders
-    ---------------------------------------------------------------------------
-    --- Border -> Grid Border -> Headers
-    ---------------------------------------------------------------------------
-    local showBorderHeader = SUI.SettingsText.Acquire(true, gridBorders)
-    showBorderHeader:SetText("Show")
-    gridBorders:SetCellControl(1, 2, showBorderHeader, 1, 1)
-    self.GeneralTabControls.showBorderHeader = showBorderHeader
-
-    local borderColorHeader = SUI.SettingsText.Acquire(true, gridBorders)
-    borderColorHeader:SetText("Color")
-    gridBorders:SetCellControl(1, 3, borderColorHeader, 1, 1)
-    self.GeneralTabControls.borderColorHeader = borderColorHeader
-
-    local borderSizeHeader = SUI.SettingsText.Acquire(true, gridBorders)
-    borderSizeHeader:SetText("Size")
-    gridBorders:SetCellControl(1, 4, borderSizeHeader, 1, 1)
-    self.GeneralTabControls.borderSizeHeader = borderSizeHeader
-    ---------------------------------------------------------------------------
-    --- Border -> Grid Border -> Show All Borders
-    ---------------------------------------------------------------------------
-    local function OnShowAllBorderCheckBoxClick(checkBox)
-      local checked = checkBox:GetChecked()
-
-      for _, info in pairs(_BorderControlsInfo) do 
-        self.Tracker:ApplyAndSaveSetting(info.settingShow, checked)
-      end
-
-      for _, control in pairs(self.GeneralTabControls) do 
-        if control:GetUserData("showBorderControl") then 
-          control:SetChecked(checked)
-        end
-      end
-    end
-
-    local showAllBorder = SUI.CheckBox.Acquire(true, gridBorders)
-    showAllBorder:SetUserHandler("OnClick", OnShowAllBorderCheckBoxClick)
-    gridBorders:SetCellControl(2, 2, showAllBorder, nil, nil, nil, -6)
-    self.GeneralTabControls.showAllBorderCheckBox = showAllBorder
-    ---------------------------------------------------------------------------
-    --- Border -> Grid Border -> All Border Color
-    ---------------------------------------------------------------------------
-    local function OnAllBorderColorChanged(colorPicker, r, g, b, a)
-      for _, info in pairs(_BorderControlsInfo) do 
-        self.Tracker:ApplySetting(info.settingColor, r, g, b, a)
-      end
-
-      for _, control in pairs(self.GeneralTabControls) do 
-        if control:GetUserData("borderColorControl") then 
-          control:SetColor(r, g, b, a)
-        end
-      end 
-    end
-
-    local function OnAllBorderColorConfirmed(colorPicker, r, g, b, a)
-      for _, info in pairs(_BorderControlsInfo) do 
-        self.Tracker:ApplyAndSaveSetting(info.settingColor, r, g, b, a)
-      end
-
-      for _, control in pairs(self.GeneralTabControls) do 
-        if control:GetUserData("borderColorControl") then 
-          control:SetColor(r, g, b, a)
-        end
-      end 
-    end
-
-    local allBorderColorPicker = SUI.ColorPicker.Acquire(true, gridBorders)
-    allBorderColorPicker:SetUserHandler("OnColorChanged", OnAllBorderColorChanged)
-    allBorderColorPicker:SetUserHandler("OnColorConfirmed", OnAllBorderColorConfirmed)
-    gridBorders:SetCellControl(2, 3, allBorderColorPicker)
-    self.GeneralTabControls.allBorderColorPicker = allBorderColorPicker
-    ---------------------------------------------------------------------------
-    --- Border -> Grid Border -> All Border Size
-    ---------------------------------------------------------------------------
-    local function OnAllBorderSizeChanged(slider, value)
-      for _, info in pairs(_BorderControlsInfo) do
-        if not info.isCorner then  
-          self.Tracker:ApplyAndSaveSetting(info.settingSize, value)
-        end
-      end
-      
-      for _, control in pairs(self.GeneralTabControls) do 
-        if control:GetUserData("borderSizeControl") then 
-          control:SetValue(value)
-        end
-      end       
-    end
-
-    local allBorderSize = SUI.Slider.Acquire(true, gridBorders)
-    allBorderSize:SetLabelFormatter(SUI.Slider.Label.Right)
-    allBorderSize:SetMinMaxValues(MinMax(1, 20))
-    allBorderSize:SetValueStep(1)
-    allBorderSize:SetValue(1)
-    allBorderSize:SetUserHandler("OnValueChanged", OnAllBorderSizeChanged)
-    gridBorders:SetCellControl(2, 4, allBorderSize, 1)
-    self.GeneralTabControls.allBorderSizeSlider = allBorderSize
-    ---------------------------------------------------------------------------
-    --- Border -> Grid Border -> Border Controls
-    ---------------------------------------------------------------------------
-    local function OnShowBorderCheckBoxClick(checkBox)
-      local setting = checkBox:GetUserData("setting")
-      local checked = checkBox:GetChecked()
-      self.Tracker:ApplyAndSaveSetting(setting, checked)
-    end
-
-    local function OnBorderColorChanged(colorPicker, r, g, b, a)
-      local setting = colorPicker:GetUserData("setting")
-      self.Tracker:ApplySetting(setting, r, g, b, a)
-    end
-
-    local function OnBorderColorConfirmed(colorPicker, r, g, b, a)
-      local setting = colorPicker:GetUserData("setting")
-      self.Tracker:ApplyAndSaveSetting(setting, r, g, b, a)
-    end
-
-    local function OnBorderSizeChanged(slider, value)
-      local setting = slider:GetUserData("setting")
-      self.Tracker:ApplyAndSaveSetting(setting, value)  
-    end
-
-    for index, info in ipairs(_BorderControlsInfo) do 
-      --- Border Label
-      local borderLabel = SUI.SettingsText.Acquire(true, gridBorders)
-      borderLabel:SetText(info.label)
-      gridBorders:SetCellControl(2 + index, 1, borderLabel, 1, 1)
-      self.GeneralTabControls[borderLabel] = borderLabel
-      
-      --- Show Border
-      local showBorder = SUI.CheckBox.Acquire(true, gridBorders)
-      showBorder:SetChecked(Style[self.Tracker][info.settingShow])
-      showBorder:SetUserData("setting", info.settingShow)
-      showBorder:SetUserData("showBorderControl", true)
-      showBorder:SetUserHandler("OnClick", OnShowBorderCheckBoxClick)
-      gridBorders:SetCellControl(2 + index, 2, showBorder, nil, nil, nil, -6)
-      self.GeneralTabControls[showBorder] = showBorder
-
-      --- Border Color 
-      local borderColor = Style[self.Tracker][info.settingColor]
-      local borderColorPicker = SUI.ColorPicker.Acquire(true, gridBorders)
-      borderColorPicker:SetColor(borderColor.r, borderColor.g, borderColor.b, borderColor.a)
-      borderColorPicker:SetUserData("setting", info.settingColor)
-      borderColorPicker:SetUserData("borderColorControl", true)
-      borderColorPicker:SetUserHandler("OnColorChanged", OnBorderColorChanged)
-      borderColorPicker:SetUserHandler("OnColorConfirmed", OnBorderColorConfirmed)
-      gridBorders:SetCellControl(2 + index, 3, borderColorPicker)
-      self.GeneralTabControls[borderColorPicker] = borderColorPicker
-
-      --- Border Size
-      if not info.isCorner then 
-        local borderSize = SUI.Slider.Acquire(true, gridBorders)
-        borderSize:SetLabelFormatter(SUI.Slider.Label.Right)
-        borderSize:SetMinMaxValues(MinMax(1, 20))
-        borderSize:SetValueStep(1)
-        borderSize:SetValue(Style[self.Tracker][info.settingSize])
-        borderSize:SetUserData("setting", info.settingSize)
-        borderSize:SetUserData("borderSizeControl", true)
-        borderSize:SetUserHandler("OnValueChanged", OnBorderSizeChanged)
-        gridBorders:SetCellControl(2 + index, 4, borderSize, 1)
-        self.GeneralTabControls[borderSize] = borderSize
-      end
-    end
-    --- Don't forget to refresh the grid control at last
-    gridBorders:Refresh()
-
-    --- NOTE: The section will be added in the controls list and configured by outside. 
-    return borderSection
-  end
-  -----------------------------------------------------------------------------
-  --                    [General] Scroll Bar Section                         --
-  -----------------------------------------------------------------------------
-  function CreateScrollBarSection(self)
-    local scrollBarSection = SUI.ExpandableSection.Acquire(false, self)
-    ---------------------------------------------------------------------------
-    --- Scroll Bar -> Show
-    ---------------------------------------------------------------------------
-    local function OnShowScrollBarCheckBoxClick(checkBox)
-      local isShow = checkBox:IsChecked()
-      self.Tracker:ApplyAndSaveSetting("showScrollBar", isShow)
-    end
-
-    local showScrollBar = SUI.SettingsCheckBox.Acquire(true, scrollBarSection)
-    showScrollBar:SetID(10)
-    showScrollBar:SetLabel("Show")
-    showScrollBar:SetChecked(self.Tracker.ShowScrollBar)
-    showScrollBar:SetUserHandler("OnCheckBoxClick", OnShowScrollBarCheckBoxClick)
-    self.GeneralTabControls.showScrollBarCheckBox = showScrollBar
-    ---------------------------------------------------------------------------
-    --- Scroll Bar -> Position
-    ---------------------------------------------------------------------------
-    local function OnScrollBarPositionEntrySelected(dropdown, entry)
-      local data = entry:GetEntryData()
-      self.Tracker:ApplyAndSaveSetting("scrollBarPosition", data.value)
-    end
-
-    local scrollBarPosition = SUI.SettingsDropDown.Acquire(true, scrollBarSection)
-    scrollBarPosition:SetID(20)
-    scrollBarPosition:SetLabel("Position")
-    scrollBarPosition:AddEntry({ text = "Left", value = "LEFT"})
-    scrollBarPosition:AddEntry({ text = "Right", value = "RIGHT"})
-    scrollBarPosition:SelectByValue(self.Tracker.ScrollBarPosition)
-    scrollBarPosition:SetUserHandler("OnEntrySelected", OnScrollBarPositionEntrySelected)
-    self.GeneralTabControls.scrollBarPositionDropDown = scrollBarPosition
-    ---------------------------------------------------------------------------
-    --- Scroll Bar -> Thumb Color
-    ---------------------------------------------------------------------------
-    local function OnThumbColorChanged(colorPicker, r, g, b, a)
-      self.Tracker:ApplySetting("scrollBarThumbColor", r, g, b, a)
-    end
-
-    local function OnThumbColorConfirmed(colorPicker, r, g, b, a)
-      self.Tracker:ApplyAndSaveSetting("scrollBarThumbColor", r, g, b, a)
-    end
-
-    local thumbColor = self.Tracker:GetScrollBar():GetThumb():GetNormalColor()
-    local thumbColorPicker = SUI.SettingsColorPicker.Acquire(true, scrollBarSection)
-    thumbColorPicker:SetID(30)
-    thumbColorPicker:SetLabel("Thumb color")
-    thumbColorPicker:SetColor(thumbColor.r, thumbColor.g, thumbColor.b, thumbColor.a)
-    thumbColorPicker:SetUserHandler("OnColorChanged", OnThumbColorChanged)
-    thumbColorPicker:SetUserHandler("OnColorConfirmed", OnThumbColorConfirmed)
-    self.GeneralTabControls.thumbColorPicker = thumbColorPicker
-
-    --- NOTE: The section will be added in the controls list and configured by outside. 
-    return scrollBarSection
-  end
-  -----------------------------------------------------------------------------
-  --                    [General] Danger Zone Section                        --
-  -----------------------------------------------------------------------------
-  function CreateDangerZoneSection(self)
-    local dangerZoneSection = SUI.ExpandableSection.Acquire(false, self)
-    ---------------------------------------------------------------------------
-    --- Danger Zone -> Delete the tracker
-    ---------------------------------------------------------------------------
-    local function OnDeleteTrackerClick(button)
-      DeleteTracker(self.TrackerID)
-    end
-
-    local deleteTracker = SUI.DangerPushButton.Acquire(true, dangerZoneSection)
-    deleteTracker:SetText("Delete the tracker")
-    deleteTracker:SetID(10)
-    deleteTracker:SetUserHandler("OnClick", OnDeleteTrackerClick)
-    Style[deleteTracker].marginLeft = 0.35
-    self.GeneralTabControls.deleteTrackerButton = deleteTracker
-
-    --- NOTE: The section will be added in the controls list and configured by outside. 
-    return dangerZoneSection
-  end
-  -----------------------------------------------------------------------------
   --                 [Contents Tracked] Tab Builder                          --
   -----------------------------------------------------------------------------
   function BuildContentsTrackedTab(self)
     ---------------------------------------------------------------------------
     --- Contents Tracked Section Header 
     ---------------------------------------------------------------------------
-    local contentsTrackedSectionHeader = SUI.SettingsSectionHeader.Acquire(false, self)
-    contentsTrackedSectionHeader:SetID(2)
+    local contentsTrackedSectionHeader = Widgets.SettingsSectionHeader.Acquire(false, self)
+    contentsTrackedSectionHeader:SetID(10)
     contentsTrackedSectionHeader:SetTitle("Contents Tracked")
     self.ContentTabControls.contentsTrackedSectionHeader = contentsTrackedSectionHeader
     ---------------------------------------------------------------------------
@@ -568,20 +201,21 @@ class "SLT.SettingDefinitions.Tracker" (function(_ENV)
     ---------------------------------------------------------------------------
     local function OnContentCheckBoxClick(checkBox)
       local contentID = checkBox:GetUserData("contentID")
-      local isTracked = checkBox:IsChecked() 
-      self.Tracker:ApplyAndSaveSetting("contentTracked", contentID, isTracked)
+      local isTracked = checkBox:IsChecked()
+
+      SetContentTracked(self.Tracker, contentID, isTracked)
     end
 
-    for index, contentType in IterateContentTypes() do 
-      local content = SUI.SettingsCheckBox.Acquire(true, self)
-      content:SetID(3+index)
-      content:SetLabel(contentType.DisplayName)
-      content:SetChecked(self.Tracker:IsContentTracked(contentType.ID))
-      content:SetUserData("contentID", contentType.ID)
-      content:SetUserHandler("OnCheckBoxClick", OnContentCheckBoxClick)
-      Style[content].MarginLeft = 20
-      
-      self.ContentTabControls[content] = content
+    for index, content in List(IterateContents()):Sort("x,y=>x.Name<y.Name"):GetIterator() do
+      local contentCheckBox = Widgets.SettingsCheckBox.Acquire(false, self)
+      contentCheckBox:SetID(20 + index)
+      contentCheckBox:SetLabel(content.FormattedName)
+      contentCheckBox:SetChecked(self.Tracker:IsContentTracked(content.id))
+      contentCheckBox:SetUserData("contentID", content.id)
+      contentCheckBox:SetUserHandler("OnCheckBoxClick", OnContentCheckBoxClick)
+      Style[contentCheckBox].MarginLeft = 20
+
+      self.ContentTabControls[contentCheckBox] = contentCheckBox
     end
   end
   -----------------------------------------------------------------------------
@@ -596,21 +230,18 @@ class "SLT.SettingDefinitions.Tracker" (function(_ENV)
   -----------------------------------------------------------------------------
   --                 [Visibility Rules] Tab Builder                          --
   -----------------------------------------------------------------------------
-  _ENTRIES_CONDTIONS = Array[SUI.EntryData]() 
-  _ENTRIES_CONDTIONS:Insert({ text = "|cffff0000Hidden|r", value = "hidden"})
-  _ENTRIES_CONDTIONS:Insert({ text = "|cff00ff00Show|r", value = "show"})
-
-  --- hidden  -> say explicitely the tracker must be hidden 
-  --- show    -> say explicitely the tracker must be shown 
-  --- default -> say to take the default value.
-  --- ignore  -> say to ignore the condition, and check the next one.
-  _ENTRIES_CONDITIONS_DROPDOWN = Array[SUI.EntryData]()
+  -- hide     -> say explicitely the tracker must be hidden.
+  -- show     -> say explicitely the tracker must be shown.
+  -- default  -> say to take the default value.
+  -- ignore   -> say to ignore this condition, and check the next one.
+  _ENTRIES_CONDITIONS_DROPDOWN = Array[Widgets.EntryData]()
   _ENTRIES_CONDITIONS_DROPDOWN:Insert({ text = "|cffff0000Hide|r", value = "hide"})
   _ENTRIES_CONDITIONS_DROPDOWN:Insert({ text = "|cff00ff00Show|r", value = "show"})
   _ENTRIES_CONDITIONS_DROPDOWN:Insert({ text = "Default", value = "default"})
   _ENTRIES_CONDITIONS_DROPDOWN:Insert({ text = "Ignore", value = "ignore"})
 
-  --- Contains below the info for every instance or group size condition option to build
+  -- Contains below the info for every instance or group size condition option to 
+  -- build 
   _INSTANCE_VISIBILITY_ROWS_INFO = {
     [1] = { label = "Dungeon", setting = "inDungeonVisibility" },
     [2] = { label = "Mythic +", setting = "inKeystoneVisibility"},
@@ -630,103 +261,102 @@ class "SLT.SettingDefinitions.Tracker" (function(_ENV)
       local data    = entry:GetEntryData()
       local setting = dropdown:GetUserData("setting")
 
-      self.Tracker:ApplyAndSaveSetting(setting, data.value)
+      -- self.Tracker:ApplyAndSaveSetting(setting, data.value)
     end
+
     ---------------------------------------------------------------------------
     ---  Default Visibility
     ---------------------------------------------------------------------------
-    local defaultVisibility = SUI.SettingsDropDown.Acquire(false, self)
-    defaultVisibility:SetID(10)
-    defaultVisibility:SetLabel("Default Visibility")
-    defaultVisibility:AddEntry({ text = "|cffff0000Hidden|r", value = "hide"})
-    defaultVisibility:AddEntry({ text = "|cff00ff00Show|r", value = "show"})
-    defaultVisibility:SetUserData("setting", "defaultVisibility")
-    defaultVisibility:SetUserHandler("OnEntrySelected", OnVisibilityEntrySelected)
-    defaultVisibility:SelectByValue(Style[self.Tracker].defaultVisibility)
-    self.VisibilityRulesControls.defaultVisibility = defaultVisibility
+    local defaultVisibilityDropDown = Widgets.SettingsDropDown.Acquire(false, self)
+    defaultVisibilityDropDown:SetID(10)
+    defaultVisibilityDropDown:SetLabel("Default Visibility")
+    defaultVisibilityDropDown:AddEntry({ text = "|cffff0000Hidden|r", value = "hide"})
+    defaultVisibilityDropDown:AddEntry({ text = "|cff00ff00Show|r", value = "show"})
+    defaultVisibilityDropDown:SetUserData("setting", "defaultVisibility")
+    defaultVisibilityDropDown:SelectByValue("show")
+    self.VisibilityRulesControls.defaultVisibilityDropDown = defaultVisibilityDropDown
     ---------------------------------------------------------------------------
     ---  Instance Visibility
     ---------------------------------------------------------------------------
-    local instanceConditionsHeader = SUI.SettingsSectionHeader.Acquire(false, self)
-    instanceConditionsHeader:SetID(100)
-    instanceConditionsHeader:SetTitle("Instance")
-    self.VisibilityRulesControls.instanceConditionsHeader = instanceConditionsHeader
-
+    local instanceConditionHeader = Widgets.SettingsSectionHeader.Acquire(false, self)
+    instanceConditionHeader:SetID(100)
+    instanceConditionHeader:SetTitle("Instance")
+    self.VisibilityRulesControls.instanceConditionHeader = instanceConditionHeader
+    
     for index, info in ipairs(_INSTANCE_VISIBILITY_ROWS_INFO) do 
-      local dropDownControl = SUI.SettingsDropDown.Acquire(false, self)
+      local dropDownControl = Widgets.SettingsDropDown.Acquire(false, self)
       dropDownControl:SetID(100 + 10 * index)
       dropDownControl:SetLabel(info.label)
       dropDownControl:SetEntries(_ENTRIES_CONDITIONS_DROPDOWN)
       dropDownControl:SetUserData("setting", info.setting)
       dropDownControl:SetUserHandler("OnEntrySelected", OnVisibilityEntrySelected)
-      dropDownControl:SelectByValue(Style[self.Tracker][info.setting])
+      -- dropDownControl:SelectByValue(Style[self.Tracker][info.setting])
       Style[dropDownControl].marginLeft = 20
-      self.VisibilityRulesControls[dropDownControl] = dropDownControl
+      self.VisibilityRulesControls[dropDownControl] = dropDownControl    
     end
     ---------------------------------------------------------------------------
     ---  Group Size Visibility
     ---------------------------------------------------------------------------
-    local groupSizeConditionsHeader = SUI.SettingsSectionHeader.Acquire(false, self)
+    local groupSizeConditionsHeader = Widgets.SettingsSectionHeader.Acquire(false, self)
     groupSizeConditionsHeader:SetID(200)
     groupSizeConditionsHeader:SetTitle("Group Size")
     self.VisibilityRulesControls.groupSizeConditionsHeader = groupSizeConditionsHeader
 
     for index, info in ipairs(_GROUP_SIZE_VISIBILITY_ROWS_INFO) do 
-      local dropDownControl = SUI.SettingsDropDown.Acquire(false, self)
+      local dropDownControl = Widgets.SettingsDropDown.Acquire(false, self)
       dropDownControl:SetID(200 + 10 * index)
       dropDownControl:SetLabel(info.label)
       dropDownControl:SetEntries(_ENTRIES_CONDITIONS_DROPDOWN)
       dropDownControl:SetUserData("setting", info.setting)
       dropDownControl:SetUserHandler("OnEntrySelected", OnVisibilityEntrySelected)
-      dropDownControl:SelectByValue(Style[self.Tracker][info.setting])
+      -- dropDownControl:SelectByValue(Style[self.Tracker][info.setting])
       Style[dropDownControl].marginLeft = 20
       self.VisibilityRulesControls[dropDownControl] = dropDownControl
     end
-    ---------------------------------------------------------------------------
+      ---------------------------------------------------------------------------
     ---  Macro Visibility
     ---------------------------------------------------------------------------
-    local macroConditionsHeader = SUI.SettingsSectionHeader.Acquire(false, self)
+    local macroConditionsHeader = Widgets.SettingsSectionHeader.Acquire(false, self)
     macroConditionsHeader:SetID(300)
     macroConditionsHeader:SetTitle("Macro")
     self.VisibilityRulesControls.macroConditionsHeader = macroConditionsHeader
-
     ---------------------------------------------------------------------------
     --- Macro -> Evaluate Macro At First
     ---------------------------------------------------------------------------
     local function OnEvaluateMacroAtFirstCheckBoxClick(checkBox)
       local checked = checkBox:IsChecked()
-      self.Tracker:ApplyAndSaveSetting("evaluateMacroVisibilityAtFirst", checked)
+      -- self.Tracker:ApplyAndSaveSetting("evaluateMacroVisibilityAtFirst", checked)
     end
 
-    local evaluateMacroAtFirst = SUI.SettingsCheckBox.Acquire(false, self)
-    evaluateMacroAtFirst:SetID(310)
-    evaluateMacroAtFirst:SetLabel("Evaluate the macro at first")
-    evaluateMacroAtFirst:SetChecked(Style[self.Tracker].evaluateMacroVisibilityAtFirst)
-    evaluateMacroAtFirst:SetUserHandler("OnCheckBoxClick", OnEvaluateMacroAtFirstCheckBoxClick)
-    Style[evaluateMacroAtFirst].marginLeft = 20
-    self.VisibilityRulesControls.evaluateMacroAtFirst = evaluateMacroAtFirst
+    local evaluateMacroAtFirstCheckBox = Widgets.SettingsCheckBox.Acquire(false, self)
+    evaluateMacroAtFirstCheckBox:SetID(310)
+    evaluateMacroAtFirstCheckBox:SetLabel("Evaluate the macro at first")
+    -- evaluateMacroAtFirstCheckBox:SetChecked(Style[self.Tracker].evaluateMacroVisibilityAtFirst)
+    evaluateMacroAtFirstCheckBox:SetUserHandler("OnCheckBoxClick", OnEvaluateMacroAtFirstCheckBoxClick)
+    Style[evaluateMacroAtFirstCheckBox].marginLeft = 20
+    self.VisibilityRulesControls.evaluateMacroAtFirstCheckBox = evaluateMacroAtFirstCheckBox
     ---------------------------------------------------------------------------
     --- Macro -> Macro Visibility Text
     ---------------------------------------------------------------------------
     local function OnMacroTextEnterPressed(editBox)
       local value = editBox:GetText()
       editBox:ClearFocus()
-      self.Tracker:ApplyAndSaveSetting("macroVisibility", value)
+      -- self.Tracker:ApplyAndSaveSetting("macroVisibility", value)
     end
 
     local function OnMacroTextEscapePressed(editBox)
       editBox:ClearFocus()
     end
 
-    local macroText = SUI.MultiLineEditBox.Acquire(false, self)
-    macroText:SetID(320)
-    macroText:SetInstructions("[combat] hide; show")
-    macroText:SetText(Style[self.Tracker].macroVisibility)
-    macroText:SetUserHandler("OnEnterPressed", OnMacroTextEnterPressed)
-    macroText:SetUserHandler("OnEscapePressed", OnMacroTextEscapePressed)
-    Style[macroText].marginLeft   = 20 
-    Style[macroText].marginRight  = 0
-    self.VisibilityRulesControls.macroText = macroText
+    local macroTextEditBox = Widgets.MultiLineEditBox.Acquire(false, self)
+    macroTextEditBox:SetID(320)
+    macroTextEditBox:SetInstructions("[combat] hide; show")
+    -- macroTextEditBox:SetText(Style[self.Tracker].macroVisibility)
+    macroTextEditBox:SetUserHandler("OnEnterPressed", OnMacroTextEnterPressed)
+    macroTextEditBox:SetUserHandler("OnEscapePressed", OnMacroTextEscapePressed)
+    Style[macroTextEditBox].marginLeft   = 20 
+    Style[macroTextEditBox].marginRight  = 0
+    self.VisibilityRulesControls.macroTextEditBox = macroTextEditBox  
   end
   -----------------------------------------------------------------------------
   --                 [Visibility Rules] Tab Release                          --
@@ -737,15 +367,12 @@ class "SLT.SettingDefinitions.Tracker" (function(_ENV)
       self.VisibilityRulesControls[index] = nil
     end
   end
-  
-
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
   function BuildSettingControls(self)
-    local tabControl = SUI.TabControl.Acquire(false, self)
+    local tabControl = Widgets.TabControl.Acquire(false, self)
     tabControl:SetID(1)
-
     tabControl:AddTabPage({
       name = "General",
       onAcquire = function() self:BuildGeneralTab() end,
@@ -761,7 +388,7 @@ class "SLT.SettingDefinitions.Tracker" (function(_ENV)
     tabControl:AddTabPage({
       name = "Visibility Rules",
       onAcquire = function() self:BuildVisibilityRulesTab() end,
-      onRelease = function() self:ReleaseVisibilityRulesTab() end 
+      onRelease = function() self:ReleaseVisibilityRulesTab() end
     })
 
     tabControl:Refresh()
@@ -794,22 +421,22 @@ class "SLT.SettingDefinitions.Tracker" (function(_ENV)
   -----------------------------------------------------------------------------
   property "SettingControls" {
     set = false,
-    default = function() return Toolset.newtable(false, true) end 
+    default = function() return newtable(false, true) end 
   }
 
   property "GeneralTabControls" {
     set = false, 
-    default = function() return Toolset.newtable(false, true) end 
+    default = function() return newtable(false, true) end
   }
 
   property "ContentTabControls" {
     set = false,
-    default = function() return Toolset.newtable(false, true) end
+    default = function() return newtable(false, true) end
   }
 
   property "VisibilityRulesControls" {
-    set = false, 
-    default = function() return Toolset.newtable(false, true) end 
+    set = false,
+    default = function() return newtable(false, true) end
   }
 
   property "TrackerID" {
@@ -824,18 +451,17 @@ class "SLT.SettingDefinitions.Tracker" (function(_ENV)
   }
 
   property "Tracker" {
-    type = SLT.Tracker
+    type = SylingTracker.Tracker
   }
 end)
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
-  [SLT.SettingDefinitions.CreateTracker] = {
-    paddingBottom = 50,
-    layoutManager = Layout.VerticalLayoutManager(true, true),
-  },
-  [SLT.SettingDefinitions.Tracker] = {
-    layoutManager = Layout.VerticalLayoutManager(true, true),
+  [SettingDefinitions.CreateTracker] = {
+    layoutManager = Layout.VerticalLayoutManager(true, true)
+  };
+  [SettingDefinitions.Tracker] = {
+    layoutManager = Layout.VerticalLayoutManager(true, true)
   }
 })

@@ -6,116 +6,72 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling                    "SylingTracker.Dungeon"                            ""
+Syling                      "SylingTracker.Dungeon"                          ""
 -- ========================================================================= --
-namespace                          "SLT"
+_Active                             = false
 -- ========================================================================= --
-_Active                           = false 
--- ========================================================================= --
-RegisterContentType               = API.RegisterContentType
-RegisterModel                     = API.RegisterModel
--- ========================================================================= --
-CreateAtlasMarkup                   = CreateAtlasMarkup
-IsInInstance                        = IsInInstance
-IsInScenario                        = C_Scenario.IsInScenario
-GetInfo                             = C_Scenario.GetInfo
-GetStepInfo                         = C_Scenario.GetStepInfo
-GetCriteriaInfo                     = C_Scenario.GetCriteriaInfo
-GetActiveKeystoneInfo               = C_ChallengeMode.GetActiveKeystoneInfo
-GetCurrentInstance                  = Utils.Instance.GetCurrentInstance
--- ========================================================================= --
-_DungeonModel = RegisterModel(Model, "dungeon-data")
--- ========================================================================= --
-_DungeonIconMarkupAtlas = CreateAtlasMarkup("Dungeon", 16, 16)
+export {
+  -- Addon API
+  RegisterObservableContent = API.RegisterObservableContent,
 
-RegisterContentType({
-  ID = "dungeon",
-  Name = "Dungeon",
-  DisplayName = _DungeonIconMarkupAtlas.." Dungeon",
-  Description = "Display the dungeon and its objectives",
-  DefaultOrder = 20,
-  DefaultModel = _DungeonModel,
-  DefaultViewClass = DungeonContentView,
-  Events = { "PLAYER_ENTERING_WORLD", "CHALLENGE_MODE_START", "SCENARIO_UPDATE", "ZONE_CHANGE"},
-  Status = function()
-    local inInstance, type = IsInInstance() 
-    return inInstance and (type == "party") and IsInScenario() and GetActiveKeystoneInfo() == 0
-  end 
-})
--- ========================================================================= --
+  IsInScenario                        = C_Scenario.IsInScenario,
+  GetInfo                             = C_Scenario.GetInfo,
+  GetStepInfo                         = C_Scenario.GetStepInfo,
+  GetCriteriaInfo                     = C_Scenario.GetCriteriaInfo,
+  GetActiveKeystoneInfo               = C_ChallengeMode.GetActiveKeystoneInfo
+}
+
+DUNGEON_CONTENT_SUBJECT = RegisterObservableContent("dungeon", DungeonContentSubject)
+
 __ActiveOnEvents__ "PLAYER_ENTERING_WORLD" "CHALLENGE_MODE_START" "SCENARIO_UPDATE" "ZONE_CHANGE"
 function BecomeActiveOn(self)
-  local inInstance, type = IsInInstance() 
-  return inInstance and (type == "party") and IsInScenario() and GetActiveKeystoneInfo() == 0
+  local inInstance, type = IsInInstance()
+  return inInstance and (type == "party") and IsInScenario() and GetActiveKeystoneInfo() == 0  
 end
--- ========================================================================= --
+
 function OnActive(self)
-  Update()
+  self:LoadAndUpdate()
 end
 
 function OnInactive(self)
-  _DungeonModel:ClearData()
+  DUNGEON_CONTENT_SUBJECT.name = nil
 end
 
-__Async__()
-__SystemEvent__ "SCENARIO_CRITERIA_UPDATE" "CRITERIA_COMPLETE" "SCENARIO_UPDATE"
-function Update()
-  local name, _, numObjectives = C_Scenario.GetStepInfo()
+function LoadAndUpdate(self)
+  local name, _, numObjectives = GetStepInfo()
+  DUNGEON_CONTENT_SUBJECT.name = name 
+  DUNGEON_CONTENT_SUBJECT.numObjectives = numObjectives
 
-  local dungeonData = {
-    name = name,
-    numObjectives = numObjectives
-  }
+  local textureFileID
+  local currentMapID = select(8, GetInstanceInfo())
+  if currentMapID then
+    textureFileID = select(4, EJ_GetInstanceInfo(C_EncounterJournal.GetInstanceForGameMap(currentMapID)))
+  end
+
+  DUNGEON_CONTENT_SUBJECT.textureFileID = textureFileID
+  
+
+  DUNGEON_CONTENT_SUBJECT:StartObjectivesCounter()
   if numObjectives > 0 then 
-    local objectivesData = {}
-
     for index = 1, numObjectives do 
       local description, criteriaType, completed, quantity, totalQuantity,
       flags, assetID, quantityString, criteriaID, duration, elapsed,
       failed, isWeightProgress = GetCriteriaInfo(index)
 
-      local data = {
-        text = description,
-        isCompleted = completed
-      }
+      local objectiveData = DUNGEON_CONTENT_SUBJECT:AcquireObjective()
 
-      -- Revert the changes previously done as this cause all the dungeon to get
-      -- a progress bar
-      -- TODO: Need to find a better fix
-      -- if isWeightProgress then 
-      --   data.hasProgressBar = true
-      --   data.progress = quantity
-      --   data.minProgress = 0
-      --   data.maxProgress = totalQuantity
-      --   data.progressText = quantityString
-      -- else 
-      --   data.hasProgressBar = nil 
-      -- end
-
-      objectivesData[index] = data 
+      objectiveData.text = description
+      objectiveData.isCompleted = completed
     end
-    -- NOTE: We use SetData only for objectives to be sure the dungeon 
-    -- doesn't keep the objectives data of previous stage.
-    _DungeonModel:SetData(objectivesData, "dungeon", "objectives")
   end
-  
-  _DungeonModel:AddData(dungeonData, "dungeon")
-  _DungeonModel:Flush()
+  DUNGEON_CONTENT_SUBJECT:StopObjectivesCounter()
 end
 
-__Async__()
-__SystemEvent__ "UPDATE_INSTANCE_INFO"
-function UpdateDungeonIcon(self)
-  local currentInstance = GetCurrentInstance()
-  if currentInstance then 
-    local texture = select(6, EJ_GetInstanceInfo(currentInstance))
-    _DungeonModel:AddData({ icon = texture}, "dungeon")
-    _DungeonModel:Flush()
-  end
+__SystemEvent__ "SCENARIO_CRITERIA_UPDATE" "CRITERIA_COMPLETE" "SCENARIO_UPDATE"
+function DUNGEON_UPDATE()
+  _M:LoadAndUpdate()
 end
 -- ========================================================================= --
 -- Debug Utils Tools
 -- ========================================================================= --
-if ViragDevTool_AddData then 
-  ViragDevTool_AddData(_DungeonModel, "SLT Dungeon Model")
-end
+DebugTools.TrackData(DUNGEON_CONTENT_SUBJECT, "Dungeon Content Subject")

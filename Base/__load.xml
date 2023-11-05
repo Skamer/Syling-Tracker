@@ -1,0 +1,15 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+  <Script file="Data\ObjectiveData.lua" />
+
+  <Script file="UI\Components\ProgressBar.lua" />
+  <Script file="UI\Components\Timer.lua" />
+
+  <Script file="UI\Views\ListView.lua" />
+  <Script file="UI\Views\ObjectiveView.lua" />
+  <Script file="UI\Views\ContentView.lua" />
+
+  <Script file="Features\ContextMenu.lua" />
+  <Script file="Features\HelperWindow.lua" />
+  <Script file="Features\ItemBar.lua" />
+</Ui>

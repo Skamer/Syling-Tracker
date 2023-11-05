@@ -6,577 +6,584 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling                  "SylingTracker.Keystone.ContentView"                 ""
+Syling                 "SylingTracker.Contents.KeystoneContentView"          ""
 -- ========================================================================= --
-namespace                          "SLT"
--- ========================================================================= --
--- Iterator helper for ignoring the children are used for backdrop, and avoiding
--- they are taken as account for their parent height
-IterateFrameChildren  = Utils.IterateFrameChildren
--- ========================================================================= --
-ValidateFlags         = System.Toolset.validateflags
-ResetStyles           = Utils.ResetStyles
--- ========================================================================= --
-GameTooltip           = GameTooltip
--- ========================================================================= --
-__Recyclable__ "SylingTracker_KeyStoneAffix%d"
-class "KeystoneAffix" (function(_ENV)
+export {
+  FromUIProperty                      = Wow.FromUIProperty,
+  GetFrameByType                      = Wow.GetFrameByType,
+}
+
+__UIElement__()
+class "KeystoneAffixe"(function(_ENV)
   inherit "Frame"
-  -----------------------------------------------------------------------------
-  --                               Handlers                                  --
-  -----------------------------------------------------------------------------
-  local function OnSetTexture(self, new)
-    Style[self].Icon.fileID = new
-  end
-
-  local function UpdateTooltip(self, new)
-    if new then 
-      self.OnEnter = function()
-        GameTooltip:SetOwner(self, "ANCHOR_LEFT")
-        GameTooltip:SetText(self.Name, 1, 1, 1, 1, true)
-        GameTooltip:AddLine(new, nil, nil, nil, true)
-        GameTooltip:Show()
-      end
-
-      self.OnLeave = function() GameTooltip:Hide() end 
-    else 
-      self.OnEnter  = nil 
-      self.OnLeave  = nil
-    end
-  end
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
-  property "Name" {
-    type    = String,
+  __Observable__()
+  property "AffixTexture" {
+    type = Any
   }
 
-  property "Desc" {
-    type    = String,
-    handler = UpdateTooltip
+  property "AffixName" {
+    type = String
   }
 
-  property "Texture" {
-    type    = String + Number,
-    handler = OnSetTexture
+  property "AffixDescription" {
+    type = String
   }
   -----------------------------------------------------------------------------
-  --                            Constructors                                 --
+  --                              Constructors                               --
   -----------------------------------------------------------------------------
-  __Template__{
+  __Template__ {
     Icon = Texture
   }
   function __ctor(self) 
-    self:InstantApplyStyle()
-  end
+    self.OnEnter = function()
+      GameTooltip:SetOwner(self, "ANCHOR_LEFT")
+      GameTooltip:SetText(self.AffixName, 1, 1, 1, 1, true)
+      GameTooltip:AddLine(self.AffixDescription, nil, nil, nil, true)
+      GameTooltip:Show()
+    end
 
+    self.OnLeave = function() GameTooltip:Hide() end
+  end
 end)
 
-__Recyclable__ "SylingTracker_KeystoneAffixes%d"
+__UIElement__()
 class "KeystoneAffixes" (function(_ENV)
-  inherit "Frame" 
-  -----------------------------------------------------------------------------
-  --                               Properties                                --
-  -----------------------------------------------------------------------------
-  local function OnAffixesCountChanged(self, new, old)
-    if new > old then 
-      for i = 1, new - old do 
-        local affix = self:AcquireAffix(new)
-      end 
-    end
-        
-    -- Update the anchor
-    local previousAffix
-    local width = 0
-    for i = 1, new do
-      local affix = self:AcquireAffix(i)
-      if i == 1 then
-        affix:SetPoint("TOP")
-        affix:SetPoint("LEFT")
-      else 
-        affix:SetPoint("TOP")
-        affix:SetPoint("LEFT", previousAffix, "RIGHT", self.AffixSpacing, 0)
-      end 
-
-      width = width + affix:GetWidth()
-
-      previousAffix = affix
-    end
-    
-    self:SetWidth(width + math.max(0, new-1) * self.AffixSpacing)
-
-    self:ReleaseUnusedAffixes(new)
-  end
+  inherit "Frame"
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
-  function AcquireAffix(self, index)
-    local affix = self.affixesCache[index]
-    if not affix then 
-      affix = KeystoneAffix.Acquire()
-      affix:SetParent(self)
+  function UpdateFromData(self, affixesData)
+    if affixesData then 
+      self.AffixesCount = #affixesData 
 
-      self.affixesCache[index] = affix 
-    end
-    
-    return affix
-  end
-
-  function ReleaseUnusedAffixes(self, releaseAbove)
-    for index, affix in ipairs(self.affixesCache) do 
-      if index > releaseAbove then 
-        affix:Release()
-        self.affixesCache[index] = nil 
+      for index, affixData in ipairs(affixesData) do
+        local affix = self:GetChild("Affix"..index)
+        affix.AffixName = affixData.name
+        affix.AffixDescription = affixData.description
+        affix.AffixTexture = affixData.texture
       end
-    end 
-  end 
-  -----------------------------------------------------------------------------
-  --                               Methods                                   --
-  -----------------------------------------------------------------------------
-
+    else
+      self.AffixesCount = nil 
+    end
+  end
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
+  __Observable__()
   property "AffixesCount" {
-    type    = Number,
-    default = 0,
-    handler = OnAffixesCountChanged
-  }
-
-  property "AffixSpacing" {
     type = Number,
-    default = 5,
+    default = 0,
   }
   -----------------------------------------------------------------------------
-  --                            Constructors                                 --
+  --                              Constructors                               --
   -----------------------------------------------------------------------------
-  function __ctor(self)
-    self:InstantApplyStyle()
-
-    self.affixesCache = setmetatable({}, { __mode = "v"})
-  end
+  __Template__ {
+    Affix1 = KeystoneAffixe,
+    Affix2 = KeystoneAffixe,
+    Affix3 = KeystoneAffixe,
+  }
+  function __ctor(self) end
 end)
 
-
+__UIElement__()
 class "KeystoneTimer" (function(_ENV)
-  inherit "Frame" extend "ITimer"
+  inherit "Timer"
   -----------------------------------------------------------------------------
   --                               Handlers                                  --
-  -----------------------------------------------------------------------------  
-  local function OnTimeLimitChanged(self, new, old)
-      local timeLimit2Key = new * 0.8
-      local timeLimit3Key = new * 0.6
-
-      local timerText         = self:GetChild("TimerText")
-      local timeLimitPlus2FS  = self:GetChild("TimeLimitPlus2")
-      local timeLimitPlus3FS  = self:GetChild("TimeLimitPlus3")
-
-
-      if self.ShowRemainingTime then 
-        Style[timerText].text = HIGHLIGHT_FONT_COLOR:WrapTextInColorCode(SecondsToClock(self.TimeLimit))
-      else 
-        Style[timerText].text = string.format("%s / %s", 
-        HIGHLIGHT_FONT_COLOR:WrapTextInColorCode(SecondsToClock(0)), 
-        SecondsToClock(self.TimeLimit))
-      end
-
-      Style[timeLimitPlus2FS].text = string.format("[+2] %s", SecondsToClock(timeLimit2Key))
-      Style[timeLimitPlus3FS].text = string.format("[+3] %s", SecondsToClock(timeLimit3Key))
+  -----------------------------------------------------------------------------
+  local function OnTimerBarSizeChangedHandler(self)
+    self:GetParent():UpdateSubTimers()
   end
 
-  local function OnPlusFailedChanged(self, new, old, prop)
-    local color
-    if new then 
-      color = Color(1, 0, 0)
-    else 
-      color = Color(38/255, 127/255, 0)
-    end
-
-    if prop == "Plus2Failed" then 
-      local timeLimitPlus2FS = self:GetChild("TimeLimitPlus2")
-      Style[timeLimitPlus2FS].textColor = color 
-    elseif prop == "Plus3Failed" then 
-      local timeLimitPlus3FS = self:GetChild("TimeLimitPlus3")
-      Style[timeLimitPlus3FS].textColor = color 
-    end 
-  end
-  -----------------------------------------------------------------------------
-  --                               Methods                                   --
-  -----------------------------------------------------------------------------
-  function OnTimerUpdate(self, elapsedTime)
-    local timerBar    = self:GetChild("TimerBar")
-    local timerText   = self:GetChild("TimerText")
-
-    local notTimed = elapsedTime > self.TimeLimit
-    local timeLeft = math.max(0, self.TimeLimit - elapsedTime)
-
-    local CURRENT_FONT_COLOR = HIGHLIGHT_FONT_COLOR
-    if notTimed then 
-      CURRENT_FONT_COLOR = RED_FONT_COLOR
-    end
-    local timeLeft = math.max(0, self.TimeLimit - elapsedTime)
-
-    if self.ShowRemainingTime then 
-      Style[timerText].text = CURRENT_FONT_COLOR:WrapTextInColorCode(SecondsToClock(timeLeft))
-    else 
-      Style[timerText].text = string.format("%s / %s", 
-      CURRENT_FONT_COLOR:WrapTextInColorCode(SecondsToClock(elapsedTime)), 
-      SecondsToClock(self.TimeLimit))
-    end
-
-    timerBar:SetMinMaxValues(0, self.TimeLimit)
-    timerBar:SetValue(timeLeft)
-
-    self.Plus2Failed = elapsedTime > (self.TimeLimit * 0.8)
-    self.Plus3Failed = elapsedTime > (self.TimeLimit * 0.6)
-  end
-  -----------------------------------------------------------------------------
-  --                               Properties                                --
-  -----------------------------------------------------------------------------
-  property "TimeLimit" {
-    type = Number,
-    default = 0,
-    handler = OnTimeLimitChanged
-  }
-  
-  property "ShowRemainingTime" {
-    type = Boolean,
-    default = false 
-  }
-
-  property "Plus2Failed" {
-    type = Boolean,
-    default = false,
-    handler = OnPlusFailedChanged
-  }
-
-  property "Plus3Failed" {
-    type = Boolean,
-    default = false,
-    handler = OnPlusFailedChanged
-  }
-  -----------------------------------------------------------------------------
-  --                            Constructors                                 --
-  -----------------------------------------------------------------------------
-  __Template__{
-    TimerText = SLTFontString,
-    TimerBar = ProgressBar,
-    TimeLimitPlus2 = SLTFontString,
-    TimeLimitPlus3 = SLTFontString
-  }
-  function __ctor(self)
+  local function OnDurationChangedHandler(self)
+    self:UpdateSubTimers()
   end
 
-end)
+  function UpdateSubTimers(self)
+    local timerBar = self:GetChild("TimerBar")
+    local maxWidth = math.floor(timerBar:GetWidth() + 0.5)
 
-__Recyclable__ "SylingTracker_KeystoneContentView%d"
-class "KeystoneContentView" (function(_ENV)
-  inherit "ContentView"
-
-  enum "State" {
-    None      = 0,
-    Progress  = 1,
-    Finished  = 2
-  }
-
-  __Flags__()
-  enum "Flags" {
-    NONE            = 0,
-    HAS_OBJECTIVES  = 1
-  }
-  -----------------------------------------------------------------------------
-  --                               Methods                                   --
-  -----------------------------------------------------------------------------
-  function OnViewUpdate(self, data)
-    local keystoneData = data.keystone 
-    if not keystoneData then 
+    if maxWidth == 0 then 
       return 
     end
 
-    -- Get the elements
-    local contentFrame    = self:GetChild("Content")
-    local headerFrame     = self:GetChild("Header")
-    local topInfoFrame    = contentFrame:GetChild("TopInfo")
-    local dungeonNameFS   = headerFrame:GetChild("DungeonName")
-    local levelFS         = topInfoFrame:GetChild("Level")
-    local deathCountFrame = topInfoFrame:GetChild("DeathCount")
-    local affixesFrame    = topInfoFrame:GetChild("Affixes")
-    local dungeonIcon     = contentFrame:GetChild("DungeonIcon")
-    local timerFrame      = contentFrame:GetChild("Timer")
-
-    -- Determine the state
-    local state = State.Progress
-
-    -- Determine the flags 
-    local flags = Flags.NONE 
-
-    if keystoneData.objectives then 
-      flags = flags + Flags.HAS_OBJECTIVES
-    end
-
-    -- ACQUIRE, RELEASE AND STYLING PART
-    if state ~= self.State or flags ~= self.Flags then 
-      ResetStyles(self)
-      -- REVIEW Probably need adding the elements ???
-
-      local stateStyles
-      if state ~= State.None then 
-        stateStyles = self.StatesStyles and self.StatesStyles[state]
-        if stateStyle then 
-         Style[self] = stateStyles
-        end
-      end
-      
-      if flags ~= self.Flags then
-
-        -- Is the keystone has objectives
-        if ValidateFlags(Flags.HAS_OBJECTIVES, flags) then 
-          self:AcquireObjectives()
-        else
-          self:ReleaseObjectives() 
-        end
+    local twoChestLine = self:GetChild("TwoChestLine")
+    twoChestLine:SetPoint("CENTER", timerBar, "RIGHT", -math.floor(Lerp(0, maxWidth, 0.2) + 0.5), 0)
 
 
-        if flags ~= Flags.NONE then 
-          -- Skin Stuffs for flags 
-          local flagsStyles = self.FlagsStyles and self.FlagsStyles[flags]
-          if flagsStyles then
-            Style[self] = flagsStyles 
-          end
-
-
-          -- Override the flags styles by those of state if exists 
-          flagsStyles = stateStyles and stateStyles.FlagsStyles
-          if flagsStyles then 
-            Style[self] = flagsStyles
-          end
-        end
-      end
-    end
-
-    -- Update the elements with data
-
-    -- Update dungeon Name 
-    if dungeonNameFS then 
-      Style[dungeonNameFS].text = keystoneData.name
-    end 
-
-    -- Update Level
-    local level = keystoneData.level 
-    if level then 
-      Style[levelFS].text = CHALLENGE_MODE_POWER_LEVEL:format(level)
-    end 
-
-    -- Update Death
-    local death = keystoneData.death
-    local timeLost = keystoneData.timeLost or 0
-    if death and death > 0 then 
-      Style[deathCountFrame].visible = true 
-      Style[deathCountFrame].TextFS.text = tostring(death)
-
-      deathCountFrame.OnEnter = function()
-        GameTooltip:SetOwner(deathCountFrame, "ANCHOR_TOPRIGHT")
-        GameTooltip:SetText(CHALLENGE_MODE_DEATH_COUNT_TITLE:format(death), 1, 1, 1)
-        GameTooltip:AddLine(CHALLENGE_MODE_DEATH_COUNT_DESCRIPTION:format(SecondsToClock(timeLost)))
-        GameTooltip:Show()
-      end
-
-      deathCountFrame.OnLeave = function() GameTooltip:Hide() end 
-    else
-      Style[deathCountFrame].visible = false
-      deathCountFrame.OnEnter = nil 
-      deathCountFrame.OnLeave = nil
-    end 
-
-    -- Update Affixes
-    local affixes = keystoneData.affixes 
-    local numAffixes = keystoneData.numAffixes
-    
-    affixesFrame.AffixesCount = numAffixes
-    for affixIndex, affixData in ipairs(affixes) do 
-      local affixFrame = affixesFrame:AcquireAffix(affixIndex)
-      affixFrame.Name = affixData.name 
-      affixFrame.Texture = affixData.texture 
-      affixFrame.Desc = affixData.desc 
-    end
-
-    -- Update Dungeon Icon
-    local dungeonTexture = keystoneData.texture 
-    if dungeonTexture then 
-      Style[dungeonIcon].Icon.fileID = dungeonTexture
-    end
-
-    -- Update Timer
-    local timeLimit = keystoneData.timeLimit 
-    local startTime = keystoneData.startTime
-    local completed = keystoneData.completed
-
-    if timeLimit then 
-      timerFrame.TimeLimit = timeLimit
-    end
-
-    if startTime then
-      timerFrame.StartTime = startTime
-
-      if not completed then 
-        timerFrame:Start()
-      else
-        timerFrame:Stop()
-      end
-    end
-
-
-    -- Update Objectives if exists 
-    local objectivesData = keystoneData.objectives
-    if objectivesData then 
-      local objectivesView = self:AcquireObjectives()
-      objectivesView:UpdateView(objectivesData)
-    end 
-
-    self.Flags = flags 
-    self.State = state 
+    local threeChestLine = self:GetChild("ThreeChestLine")
+    threeChestLine:SetPoint("CENTER", timerBar, "RIGHT", -math.floor(Lerp(0, maxWidth, 0.4) + 0.5), 0)
   end
-
-  function AcquireObjectives(self)
-    local content = self:GetChild("Content")
-    local objectives = content:GetChild("Objectives")
-    
-    if not objectives then 
-      objectives = self.ObjectivesClass.Acquire()
-
-      -- We need to keep the old name when we'll release it
-      self.__PreviousObjectivesName = objectives:GetName()
-
-      objectives:SetParent(content)
-      objectives:SetName("Objectives")
-      objectives:InstantApplyStyle()
-
-      objectives.OnSizeChanged = objectives.OnSizeChanged + self.OnObjectivesSizeChanged
-
-      self:AdjustHeight(true)
-    end
-
-    return objectives
-  end
-
-  function ReleaseObjectives(self)
-    local content = self:GetChild("Content")
-    local objectives = content:GetChild("Objectives")
-
-    if objectives then 
-      -- Give its old name (generated by the recycle system)
-      objectives:SetName(self.__PreviousObjectivesName)
-      self.__PreviousObjectivesName = nil 
-
-      -- Unregister the events 
-      objectives.OnSizeChanged = objectives.OnSizeChanged - self.OnObjectivesSizeChanged
-
-      -- It's better to release after events have been un registered for avoiding
-      -- useless calls
-      objectives:Release()
-
-      self:AdjustHeight(true)
-    end
-  end
-
-  function OnRelease(self)
-    -- First, release the children
-    self:ReleaseObjectives()
-
-    -- Reset the timer 
-    local timer =self:GetChild("Content"):GetChild("Timer")
-    timer:Stop()
-    timer.TimeLimit = nil 
-    timer.ShowRemainingTime = nil 
-    timer.Plus2Failed = nil 
-    timer.Plus3Failed = nil
-
-    -- We call the "Parent" onRelease (see, ContentView)
-    super.OnRelease(self)
-
-    -- Reset the class properties
-    self.Flags = nil
-    self.State = nil
-  end 
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
-  property "Flags" {
-    type    = KeystoneContentView.Flags,
-    default = KeystoneContentView.Flags.NONE 
+  property "ShowSubTimers" {
+    type    = Boolean,
+    default = true
   }
 
-  property "State" {
-    type    = KeystoneContentView.State,
-    default = KeystoneContentView.State.None
-  }
-
-  property "ObjectivesClass" {
-    type    = ClassType,
-    default = ObjectiveListView
-  }
-
-
-  property "FlagsStyles" {
-    type = Table
-  }
-
-  property "StatesStyles" {
-    type = Table
+  property "showSubTimersWithRemainingTime" {
+    type    = Boolean,
+    default = true
   }
   -----------------------------------------------------------------------------
-  --                            Constructors                                 --
+  --                              Constructors                               --
+  -----------------------------------------------------------------------------
+  __Template__ {
+    TimerBar        = ProgressBar,
+    TwoChestLine    = Texture,
+    TwoChestTimer   = FontString,
+    ThreeChestLine  = Texture,
+    ThreeChestTimer = FontString
+  }
+  function __ctor(self) 
+    local timerBar= self:GetChild("TimerBar")
+    timerBar.OnSizeChanged = timerBar.OnSizeChanged + OnTimerBarSizeChangedHandler
+
+    self.OnDurationChanged = self.OnDurationChanged + OnDurationChangedHandler
+  end
+end)
+
+__UIElement__()
+class "KeystoneEnemyForces" (function(_ENV)
+  inherit "Frame"
+
+  enum "EState" {
+    Progress = 1,
+    Completed = 2
+  }
+  -----------------------------------------------------------------------------
+  --                               Properties                                --
+  -----------------------------------------------------------------------------
+  __Observable__()
+  property "EnemyForcesState" {
+    type    = EState,
+    default = EState.Progress
+  }
+
+  __Observable__()
+  property "EnemyForcesPendingQuantity" {
+    type    = Number,
+    default = 0
+  }
+
+  __Observable__()
+  property "EnemyForcesQuantity" {
+    type    = Number,
+    default = 0
+  }
+
+  __Observable__()
+  property "EnemyForcesTotalQuantity" {
+    type    = Number,
+    default = 0
+  }
+  -----------------------------------------------------------------------------
+  --                              Constructors                               --
+  -----------------------------------------------------------------------------
+  __Template__ {
+    Text      = FontString,
+    Progress  = ProgressWithExtraBar
+  }
+  function __ctor(self) end
+end)
+
+
+__UIElement__()
+class "KeystoneContentView" (function(_ENV)
+  inherit "ContentView"
+  -----------------------------------------------------------------------------
+  --                                Methods                                  --
+  -----------------------------------------------------------------------------
+  function OnViewUpdate(self, data, metadata)
+    super.OnViewUpdate(self, data, metadata)
+
+    if data then 
+      self.DungeonName = data.name
+      self.KeystoneLevel = data.level
+      self.DungeonTextureFileID = data.textureFileID
+
+      local objectives = self:GetChild("Content"):GetChild("Objectives")
+      objectives:UpdateView(data.objectives, metadata)
+
+      local affixes = self:GetChild("TopDungeonInfo"):GetChild("Affixes")
+      affixes:UpdateFromData(data.affixes)
+
+      local timer = self:GetChild("Content"):GetChild("TimerInfo")
+      timer.StartTime = data.startTime
+      timer.Duration = data.timeLimit
+
+      local enemyForces = self:GetChild("Content"):GetChild("EnemyForces")
+      enemyForces.EnemyForcesTotalQuantity = data.enemyForcesTotalQuantity
+      enemyForces.EnemyForcesQuantity = data.enemyForcesQuantity
+      enemyForces.EnemyForcesPendingQuantity = data.enemyForcesPendingQuantity
+    else 
+      self.DungeonName = nil 
+      self.DungeonTextureFileID = nil
+    end
+  end
+
+  function OnExpand(self)
+    Style[self].TopDungeonInfo.visible = true
+    Style[self].Objectives.visible = true
+  end
+
+  function OnCollapse(self)
+    Style[self].TopDungeonInfo.visible = false
+    Style[self].Objectives.visible = false
+  end
+  -----------------------------------------------------------------------------
+  --                               Properties                                --
+  -----------------------------------------------------------------------------
+  __Observable__()
+  property "DungeonTextureFileID" {
+    type = Number
+  }
+
+  __Observable__()
+  property "DungeonName" {
+    type = String
+  }
+
+  __Observable__()
+  property "KeystoneLevel" {
+    type = Number,
+    default = 0,
+  }
+  -----------------------------------------------------------------------------
+  --                              Constructors                               --
   -----------------------------------------------------------------------------
   __Template__{
+    TopDungeonInfo  = Frame,
+    Content         = Frame, 
     {
-      Header = {
-        DungeonName = SLTFontString
-      },
       Content = {
-        TopInfo     = Frame, 
-        DungeonIcon = IconBadge,
-        Timer       = KeystoneTimer,
-        {
-          TopInfo = {
-            Level       = SLTFontString,
-            Affixes     = KeystoneAffixes,
-            DeathCount  = Frame,
-            {
-              DeathCount = {
-                IconTex  = Texture,
-                TextFS   = SLTFontString
-              }
-            }
-          }
-        }
-      }
+        TimerInfo   = KeystoneTimer,
+        EnemyForces = KeystoneEnemyForces,
+        Objectives  = ObjectiveListView,
+      },
+      TopDungeonInfo = {
+        Level       = FontString,
+        Affixes     = KeystoneAffixes,
+        DungeonName = FontString,
+        DungeonIcon = Texture
+      },
     }
   }
   function __ctor(self)
-    self.OnObjectivesSizeChanged = function() self:AdjustHeight(true) end
   end
 end)
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
-Style.UpdateSkin("Default", {
-  [KeystoneAffix] = {
-    width   = 24,
-    height  = 24,
+API.UpdateBaseSkin({
+  [KeystoneAffixe] = {
+    height = 16,
+    width  = 16,
 
     Icon = {
       setAllPoints = true,
-      texCoords = RectType(0.07, 0.93, 0.07, 0.93)
+      fileID = FromUIProperty("AffixTexture"),
+      texCoords = { left = 0.07,  right = 0.93, top = 0.07, bottom = 0.93 } ,
     }
   },
 
   [KeystoneTimer] = {
-    height = 64,
+    autoAdjustHeight = true,
 
-    TimerText = {
-      height = 24,
-      textColor = Color(1, 1, 1),
-      sharedMediaFont = FontType("PT Sans Narrow Bold", 21),
+    Text = {
+      text = GetFrameByType(KeystoneTimer, FromUIProperty("ElapsedTime")):Map(function(timer)
+        local clock = timer.ShowRemainingTime 
+                      and SecondsToClock(max(0, timer.Duration - timer.ElapsedTime)) 
+                      or SecondsToClock(timer.ElapsedTime) .. " / " .. SecondsToClock(timer.Duration)
+        
+        if timer.ElapsedTime > timer.Duration then 
+          return Color.RED .. clock 
+        else
+          return clock
+        end
+      end),
+      mediaFont = FontType("PT Sans Narrow Bold", 21),
+    },
+
+    TimerBar = {
+      height = 10,
+      frameStrata = "LOW",
+      value = GetFrameByType(KeystoneTimer, FromUIProperty("ElapsedTime")):Map(function(timer)
+        if timer.ShowRemainingTime then
+          return Lerp(0, 100, max(0, (timer.Duration - timer.ElapsedTime) / timer.Duration))
+        else 
+          return Lerp(100, 0, max(0, (timer.Duration - timer.ElapsedTime) / timer.Duration))
+        end
+      end),
+      statusBarColor = GetFrameByType(KeystoneTimer, FromUIProperty("ElapsedTime")):Map(function(timer)
+        if timer.ElapsedTime > timer.Duration then
+          return Color(0.3, 0.3, 0.3, 0.9)
+        end
+
+        return { r = 0, g = 148/255, b = 1, a = 0.9 }
+      end),    
+    },
+
+    TwoChestLine = {
+      height = 14,
+      width = 2,
+      drawLayer           = "OVERLAY",
+      subLevel            = 2,
+      texelSnappingBias    = 0,
+      snapToPixelGrid     = false,
+      texelSnappingBias    = 0,
+      color = GetFrameByType(KeystoneTimer, FromUIProperty("ElapsedTime")):Map(function(timer)
+        if timer.ElapsedTime > timer.Duration * 0.8 then 
+          return Color.RED 
+        end 
+
+        return Color.GREEN
+      end),
+    },
+    TwoChestTimer = {
+      visible = GetFrameByType(KeystoneTimer, FromUIProperty("ElapsedTime")):Map(function(timer)
+        if timer.showSubTimersWithRemainingTime and timer.ElapsedTime > timer.Duration * 0.8 then 
+          return false
+        else 
+          return true
+        end
+      end),
+      text = GetFrameByType(KeystoneTimer, FromUIProperty("ElapsedTime")):Map(function(timer)
+        if timer.showSubTimersWithRemainingTime then 
+          return SecondsToClock(max(0, timer.Duration * 0.8 - timer.ElapsedTime))
+        else 
+          return SecondsToClock(timer.Duration * 0.8)
+        end
+      end),
+      textColor = GetFrameByType(KeystoneTimer, FromUIProperty("ElapsedTime")):Map(function(timer)
+        if timer.ElapsedTime > timer.Duration * 0.8 then 
+          return Color.RED 
+        end 
+
+        return Color.GREEN
+      end),
+      height = 25,
+      justifyV = "MIDDLE",
+      justifyH = "CENTER",
+    },
+
+    ThreeChestLine = {
+      height = 14,
+      width = 2,
+      drawLayer           = "OVERLAY",
+      subLevel            = 2,
+      texelSnappingBias    = 0,
+      snapToPixelGrid     = false,
+      texelSnappingBias    = 0,
+      color = GetFrameByType(KeystoneTimer, FromUIProperty("ElapsedTime")):Map(function(timer)
+        if timer.ElapsedTime > timer.Duration * 0.6 then 
+          return Color.RED 
+        end 
+
+        return Color.GREEN
+      end),
+    },
+
+    ThreeChestTimer = {
+      visible = GetFrameByType(KeystoneTimer, FromUIProperty("ElapsedTime")):Map(function(timer)
+        if timer.showSubTimersWithRemainingTime and timer.ElapsedTime > timer.Duration * 0.6 then 
+          return false
+        else 
+          return true
+        end
+      end),
+
+      text = GetFrameByType(KeystoneTimer, FromUIProperty("ElapsedTime")):Map(function(timer)
+        if timer.showSubTimersWithRemainingTime then 
+          return SecondsToClock(max(0, timer.Duration * 0.6 - timer.ElapsedTime))
+        else 
+          return SecondsToClock(timer.Duration * 0.6)
+        end
+      end),
+      textColor = GetFrameByType(KeystoneTimer, FromUIProperty("ElapsedTime")):Map(function(timer)
+        if timer.ElapsedTime > timer.Duration * 0.6 then 
+          return Color.RED 
+        end 
+
+        return Color.GREEN
+      end),
+      height = 25,
+      justifyV = "MIDDLE",
+      justifyH = "CENTER",
+    }
+  },
+
+  [KeystoneAffixes] = {
+    height = 24,
+    width = 72,
+  },
+
+  [KeystoneEnemyForces] = {
+    autoAdjustHeight = true,
+    Text = {
+      text = "Enemy Forces",
+      mediaFont = FontType("PT Sans Narrow Bold", 13),
+      textColor = Color(0.9, 0.9, 0.9),
+    },
+
+    Progress = {
+      value = GetFrameByType(KeystoneEnemyForces, FromUIProperty("EnemyForcesQuantity")):Map(function(enemyForces)
+        return enemyForces.EnemyForcesQuantity
+      end),
+
+      minMaxValues = GetFrameByType(KeystoneEnemyForces, FromUIProperty("EnemyForcesTotalQuantity")):Map(function(enemyForces)
+        return MinMax(0, enemyForces.EnemyForcesTotalQuantity)
+      end),
+
+      extraValue = GetFrameByType(KeystoneEnemyForces, FromUIProperty("EnemyForcesPendingQuantity")):Map(function(enemyForces)
+        return min(enemyForces.EnemyForcesPendingQuantity + enemyForces.EnemyForcesQuantity, enemyForces.EnemyForcesTotalQuantity)
+      end),
+
+      Text = {
+        text = GetFrameByType(KeystoneEnemyForces, FromUIProperty("EnemyForcesQuantity", "EnemyForcesTotalQuantity", "EnemyForcesPendingQuantity"))
+              :Next()
+              :Map(function(_, current, total, pending)
+
+                if current and total then 
+                  if pending and pending > 0 then 
+                    return string.format("%i / %i ( %i )", current, total, pending)
+                  end 
+
+                  return string.format("%i / %i", current, total)
+                end
+                
+                return ""
+              end)
+      }
+    }
+  },
+
+  [KeystoneContentView] = {
+    Header = {
+      visible = false
+    },
+
+    TopDungeonInfo = {
+      backdrop = {
+        bgFile = [[Interface\Buttons\WHITE8X8]],
+        edgeFile  = [[Interface\Buttons\WHITE8X8]],
+        edgeSize  = 1
+      },
+      backdropColor       = { r = 0, g = 0, b = 0, a = 0.65}, -- 87
+      backdropBorderColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
+      height = 48,
+
+      DungeonIcon = {
+        fileID = FromUIProperty("DungeonTextureFileID"),
+        texCoords = { left = 0.04,  right = 0.64, top = 0.02, bottom = 0.70 } ,
+        vertexColor = { r = 1, g = 1, b = 1, a = 0.5 },
+        height = 44,
+      },
+
+      Level = {
+        text = FromUIProperty("KeystoneLevel"):Map(function(level)
+          return CHALLENGE_MODE_POWER_LEVEL:format(level)
+        end),
+        justifyV = "TOP",
+        justifyH = "LEFT",
+      },
+      
+      DungeonName = {
+        text = FromUIProperty("DungeonName"),
+        fontObject = Game18Font,
+        textColor = { r = 1, g = 0.914, b = 0.682},
+        justifyV = "MIDDLE",
+        justifyH = "CENTER",
+      }
+    },
+
+    Content = {
+      autoAdjustHeight = true,
+      paddingBottom = 5,
+
+      backdrop = { 
+        bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
+      },
+
+      backdropColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
+
+      Objectives = {
+        autoAdjustHeight = true,
+        height = 32,
+      },
+      
+      EnemyForces = {
+        Progress = {
+          ExtraBarTexture = {
+            vertexColor = { r = 1, g = 193/255, b = 25/255, a = 0.7}
+          }
+        },
+      },
+    }
+  }
+})
+
+API.UpdateDefaultSkin({
+  [KeystoneTimer] = {
+    inherit = "base",
+
+    Text = {
+      location = {
+        Anchor("TOPLEFT"),
+        Anchor("TOPRIGHT")
+      }      
+    },
+
+    TimerBar = {
+      location = {
+        Anchor("TOP", 0, -5, "Text", "BOTTOM"),
+        Anchor("LEFT", 20, 0),
+        Anchor("RIGHT", -20, 0)      
+      }
+    },
+
+    TwoChestTimer = {
+      location = {
+        Anchor("TOP", 0, -2, "TwoChestLine", "BOTTOM")
+      }      
+    },
+
+    ThreeChestTimer = {
+      location = {
+        Anchor("TOP", 0, -2, "ThreeChestLine", "BOTTOM")
+      }      
+    }
+  },
+
+  [KeystoneAffixes] = {
+    inherit = "base",
+
+    Affix1 = {
+      location = {
+        Anchor("LEFT")
+      },
+    },
+    Affix2 = {
+      location = {
+        Anchor("LEFT", 5, 0, "Affix1", "RIGHT")
+      },
+    },
+
+    Affix3 = {
+      location = {
+        Anchor("LEFT", 5, 0, "Affix2", "RIGHT")
+      }
+    }
+  },
+
+  [KeystoneEnemyForces] = {
+    inherit = "base",
+
+    Text = {
       location = {
         Anchor("TOP"),
         Anchor("LEFT"),
@@ -584,160 +591,92 @@ Style.UpdateSkin("Default", {
       }
     },
 
-    TimerBar = {
-      height = 16,
+    Progress = {
       location = {
-        Anchor("TOP", 0, -2, "TimerText", "BOTTOM"),
-        Anchor("LEFT", 10, 0),
-        Anchor("RIGHT", -10, 0)
-      }
-    },
-
-    TimeLimitPlus2 = {
-      height = 16,
-      textColor = Color(38/255, 127/255, 0),
-      sharedMediaFont = FontType("PT Sans Narrow Bold", 14),
-      location = {
-        Anchor("TOPRIGHT", 0, -5, "TimerBar", "BOTTOM"),
-        Anchor("LEFT", 0, 0),
-      }
-    },
-    TimeLimitPlus3 = {
-      height = 16,
-      textColor = Color(38/255, 127/255, 0),
-      sharedMediaFont = FontType("PT Sans Narrow Bold", 14),
-      location = {
-        Anchor("TOPLEFT", 0, -5, "TimerBar", "BOTTOM"),
-        Anchor("RIGHT", 0, 0),
+        Anchor("TOP", 0, -5, "Text", "BOTTOM"),
+        Anchor("LEFT"),
+        Anchor("RIGHT")        
       }
     }
   },
-
+  
   [KeystoneContentView] = {
-    Header = {
-      IconBadge = {
-        Icon = {
-          atlas = AtlasType("Dungeon")
+    inherit = "base",
+
+    TopDungeonInfo = {
+      DungeonIcon = {
+        location = {
+          Anchor("LEFT", 1, 0),
+          Anchor("RIGHT", -1, 0)
+        }        
+      },
+
+      location = {
+        Anchor("TOP"),
+        Anchor("LEFT"),
+        Anchor("RIGHT")
+      },
+
+      Level = {
+        location = {
+          Anchor("TOPLEFT", 5, -5),        
         }
       },
 
-      Label = {
-        text            = "Mythic +",
-        sharedMediaFont = FontType("PT Sans Narrow Bold", 13),
-        justifyV        = "TOP"
+      Affixes = {
+        location = {
+          Anchor("TOPLEFT", 0, -5, "Level", "BOTTOMLEFT"),
+        }        
       },
 
       DungeonName = {
-        sharedMediaFont = FontType("PT Sans Caption Bold", 13),
-        textColor       = Color(1, 233/255, 174/255),
-        justifyV        = "BOTTOM",
-        textTransform   = "UPPERCASE",
-        location        = {
+        location = {
+          Anchor("LEFT", 70, 0),
           Anchor("TOP"),
-          Anchor("LEFT", 0, 0, "IconBadge", "RIGHT"),
-          Anchor("RIGHT"),
-          Anchor("BOTTOM", 0, 2)
-        }
+          Anchor("BOTTOM"),
+          Anchor("RIGHT")
+        }        
       }
     },
 
     Content = {
-      backdrop = {
-        bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
-      },
-      backdropColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
-
-      TopInfo = {
-        height = 28,
-        backdrop = { 
-          bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
-        },
-        backdropColor = { r = 0.1, g = 0.1, b = 0.1, a = 0.7},
+      TimerInfo = {
         location = {
-          Anchor("TOP"),
+          Anchor("TOP", 0, -5),
           Anchor("LEFT"),
           Anchor("RIGHT")
-        },
-
-        Level = {
-          height = 24,
-          sharedMediaFont = FontType("PT Sans Narrow Bold", 13),
-          textTransform   = "UPPERCASE",
-          location = {
-            Anchor("TOP"),
-            Anchor("LEFT", 5, 0),
-          }
-        },
-
-        Affixes = {
-          height = 28,
-          location = {
-            Anchor("TOP", 0, -2)
-          }
-        },
-
-        DeathCount = {
-          height = 24,
-          width = 38,
-          location = {
-            Anchor("TOP"),
-            Anchor("RIGHT", -5, 0),
-          },
-
-          IconTex = {
-            atlas = AtlasType("poi-graveyard-neutral", true),
-            location = {
-              Anchor("LEFT")
-            }
-          },
-
-          TextFS = {
-            sharedMediaFont = FontType("PT Sans Caption Bold", 10),
-            shadowOffset = { x = 0.5, y = 0},
-            shadowColor = Color(0, 0, 0, 1),
-            justifyH = "LEFT",
-            
-            location = {
-              Anchor("TOP"),
-              Anchor("LEFT", 5, 0, "IconTex", "RIGHT"),
-              Anchor("RIGHT"),
-              Anchor("BOTTOM")              
-            }
-          }
-        },
+        }        
       },
 
-      DungeonIcon = {
-        width = 64,
-        height = 64,
+      Objectives = {
         location = {
-          Anchor("TOP", 0, -5, "TopInfo", "BOTTOM"),
-          Anchor("LEFT", 5, 0)
+          Anchor("TOP", 0, -5, "TimerInfo", "BOTTOM"),
+          Anchor("LEFT"),
+          Anchor("RIGHT")
         }
       },
 
-      Timer = {
+      EnemyForces = {
         location = {
-          Anchor("TOP", 0, -5, "TopInfo", "BOTTOM"),
-          Anchor("LEFT", 5, 0, "DungeonIcon", "RIGHT"),
-          Anchor("RIGHT", -5, 0)
-        }
-      }
-    },
+          Anchor("TOP", 0, -5, "Objectives", "BOTTOM"),
+          Anchor("LEFT", 20, 0),
+          Anchor("RIGHT", -20, 0)
+        }        
+      },
 
-    FlagsStyles = {
-      [KeystoneContentView.Flags.HAS_OBJECTIVES] = {
-        Content = {
-          Objectives = {
-            spacing = 5,
-            location = {
-              Anchor("TOP", 0, -10, "DungeonIcon", "BOTTOM"),
-              Anchor("LEFT", 5, 0),
-              Anchor("RIGHT", -5, 0)
-            }
-          }
-        }
+      location = {
+        Anchor("TOP", 0, -5, "TopDungeonInfo", "BOTTOM"),
+        Anchor("LEFT"),
+        Anchor("RIGHT")
       }
     }
   }
 })
+
+API.RegisterSkinTag("keystone", 
+  KeystoneEnemyForces,
+  KeystoneAffixe, 
+  KeystoneAffixes, 
+  KeystoneTimer,
+  KeystoneContentView
+)

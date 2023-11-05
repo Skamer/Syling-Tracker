@@ -5,10 +5,14 @@
 ## Dependencies: SylingTracker
 ## LoadOnDemand: 1
 
+Environment.lua
+WidgetAttribute.lua
+
+
 ### Load the widgets
-Elements\__load.xml
+Widgets\__load.xml
 
 ### Load the setting definitions 
 SettingDefinitions\__load.xml
 
-SylingTracker_Options.lua
+Bootstrap.lua

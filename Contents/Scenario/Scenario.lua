@@ -6,229 +6,155 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling                        "SylingTracker.Scenario"                       ""
+Syling                 "SylingTracker.Contents.Scenario"                     ""
 -- ========================================================================= --
-namespace                           "SLT"
+_Active                             = false
 -- ========================================================================= --
-_Active                           = false 
--- ========================================================================= --
-RegisterContentType               = API.RegisterContentType
-RegisterModel                     = API.RegisterModel
--- ========================================================================= --
-CreateAtlasMarkup                 = CreateAtlasMarkup
-IsInScenario                      = C_Scenario.IsInScenario
-IsInJailersTower                  = IsInJailersTower
-GetInfo                           = C_Scenario.GetInfo
-GetStepInfo                       = C_Scenario.GetStepInfo
-GetCriteriaInfo                   = C_Scenario.GetCriteriaInfo
-GetBonusSteps                     = C_Scenario.GetBonusSteps
-GetCriteriaInfoByStep             = C_Scenario.GetCriteriaInfoByStep
-GetBasicCurrencyInfo              = C_CurrencyInfo.GetBasicCurrencyInfo
-IsInInstance                      = IsInInstance
--- ========================================================================= --
-_ScenarioModel = RegisterModel(Model, "scenario-data")
-NIL_DATA       = Model.NIL_DATA
--- ========================================================================= --
-_ScenarioIconMarkupAtlas = CreateAtlasMarkup("ScenariosIcon", 16, 16)
-RegisterContentType({
-  ID = "scenario",
-  Name = "Scenario",
-  DisplayName = _ScenarioIconMarkupAtlas.." Scenario",
-  Description = "Display the scenario",
-  DefaultOrder = 10,
-  DefaultModel = _ScenarioModel,
-  DefaultViewClass = ScenarioContentView,
-  Events = { "PLAYER_ENTERING_WORLD", "SCENARIO_POI_UPDATE", "SCENARIO_UPDATE"},
-  Status = function()
-    -- Prevent the scenario content to be shown in torghast
-    if IsInJailersTower() then 
-      return false 
-    end
+export {
+  -- Addon API
+  RegisterObservableContent           = API.RegisterObservableContent,
+  
+  -- Wow API & Utils
+  IsInScenario                      = C_Scenario.IsInScenario,
+  IsInJailersTower                  = IsInJailersTower,
+  GetCriteriaInfo                   = C_Scenario.GetCriteriaInfo,
+  GetBonusSteps                     = C_Scenario.GetBonusSteps,
+  GetCriteriaInfoByStep             = C_Scenario.GetCriteriaInfoByStep,
+  IsInInstance                      = IsInInstance,
+  GetScenarioInfo                   = C_ScenarioInfo.GetScenarioInfo,
+  GetScenarioStepInfo               = C_ScenarioInfo.GetScenarioStepInfo
+}
 
-    -- Prevent the scenario content to be shown in dungeon
-    local inInstance, type = IsInInstance()
-    if inInstance and (type == "party") then 
-      return false 
-    end 
-
-    return IsInScenario()
-  end 
-})
-
-
-function OnActive(self)
-  PLAYER_ENTERING_WORLD()
-end
-
-function OnInactive(self)
-  _ScenarioModel:ClearData()
-end
+SCENARIO_CONTENT_SUBJECT = RegisterObservableContent("scenario", ScenarioContentSubject)
 
 __ActiveOnEvents__ "PLAYER_ENTERING_WORLD" "SCENARIO_POI_UPDATE" "SCENARIO_UPDATE"
-function ActiveOn(self)
-    -- Prevent the scenario content to be shown in torghast
-    if IsInJailersTower() then 
-      return false 
-    end
+function BecomeActiveOn(self)
+  -- Prevent the scenario content to be active in torghast
+  if IsInJailersTower() then
+    return false 
+  end
 
-    -- Prevent the scenario content to be shown in dungeon
-    local inInstance, type = IsInInstance()
-    if inInstance and (type == "party") then 
-      return false 
-    end 
+  -- Prevent the scenario content to be active in dungeon
+  local inInstance, type = IsInInstance()
+  if inInstance and (type == "party") then
+    return false 
+  end
 
-    return IsInScenario()
+  return IsInScenario()
 end
 
-__SystemEvent__()
-function PLAYER_ENTERING_WORLD()
-  _M:UpdateScenario()
-  _M:UpdateObjectives()
-  _ScenarioModel:Flush()
+function OnActive(self)
+  self:UpdateScenario()
 end
 
-__SystemEvent__ "SCENARIO_POI_UPDATE" "SCENARIO_CRITERIA_UPDATE" "CRITERIA_COMPLETE" "SCENARIO_COMPLETED"
-function OBJECTIVES_UPDATE()
-  _M:UpdateObjectives()
 
-  _ScenarioModel:Flush()
-end
 
-__SystemEvent__()
-function SCENARIO_UPDATE(...)
-  _M:UpdateScenario(...)
-  _M:UpdateObjectives()
+function UpdateScenario(self)
+  local scenarioInfo = GetScenarioInfo()
+  if not scenarioInfo then 
+    SCENARIO_CONTENT_SUBJECT.scenario = nil
+    return
+  end
 
-  _ScenarioModel:Flush()
-end
+  local scenarioData = SCENARIO_CONTENT_SUBJECT.scenario
 
-function UpdateScenario(self, isNewStage)
-  local title, currentStage, numStages, flags, _, _, _, xp, money, scenarioType = GetInfo()
-  local scenarioData = {
-    title         = title,
-    name          = title,
-    currentStage  = currentStage,
-    numStages     = numStages,
-    flags         = flags,
-    xp            = xp, 
-    money         = money,
-    scenarioType  = scenarioType
-  }
 
-  _ScenarioModel:AddData(scenarioData, "scenario")
-end 
+  scenarioData.scenarioID = scenarioInfo.scenarioID
+  scenarioData.name = scenarioInfo.name 
+  scenarioData.currentStage = scenarioInfo.currentStage
+  scenarioData.numStages = scenarioInfo.numStages
+  scenarioData.flags = scenarioInfo.flags
+  scenarioData.isCompleted = scenarioInfo.isComplete
+  scenarioData.xp = scenarioInfo.xp 
+  scenarioData.money = scenarioInfo.money
+  scenarioData.type = scenarioInfo.type
+  scenarioData.area = scenarioInfo.area
+  scenarioData.uiTextureKit = scenarioInfo.uiTextureKit
 
-function UpdateObjectives(self)
-  local stageName, stageDescription, numObjectives, _, _, _, _, numSpells, spellInfo, weightedProgress, rewardQuestID, widgetSetID = GetStepInfo()
-  local scenarioData = {
-    stageName = stageName,
-    stageDescription = stageDescription,
-    numObjectives = numObjectives,
-    numSpells = numSpells,
-    spellInfo = spellInfo,
-    weightedProgress = weightedProgress,
-    rewardQuestID = rewardQuestID,
-    widgetSetID = widgetSetID
-  }
+  local scenarioStepInfo = GetScenarioStepInfo()
+  if scenarioStepInfo then 
+    scenarioData.stepID = scenarioStepInfo.stepID
+    scenarioData.stepName = scenarioStepInfo.title 
+    scenarioData.stepDescription = scenarioStepInfo.description
+    scenarioData.numCriteria = scenarioStepInfo.numCriteria
+    scenarioData.isStepFailed = scenarioStepInfo.stepFailed 
+    scenarioData.isBonusStep = scenarioStepInfo.isBonusStep
+    scenarioData.isForCurrentStepOnly = scenarioStepInfo.isForCurrentStepOnly
+    scenarioData.shouldShowBonusObjective = scenarioStepInfo.shouldShowBonusObjective
+    scenarioData.spells = scenarioStepInfo.spells
+    scenarioData.rewardQuestID = scenarioStepInfo.rewardQuestID
+    scenarioData.widgetSetID = scenarioStepInfo.widgetSetID
+    scenarioData.stepID = scenarioStepInfo.stepID
 
-  if weightedProgress then 
-    -- NOTE: Some scenario (e.g: 7.2 Broken shode introduction, invasion scenario )
-    -- can have an objective progress even if it say numObjectives == 0 so
-    -- we need checking if te step info has weightedProgress.
-    -- If the stage has a weightedProgress, show only this one even if the
-    -- numObjectives say >= 1
-    scenarioData.objectives = {
-      [1] = {
-        text            = stageDescription,
-        isCompleted     = false,
-        hasProgressBar  = true,
-        progress        = weightedProgress,
-        minProgress     = 0,
-        maxProgress     = 100,
-        progressText    = PERCENTAGE_STRING:format(weightedProgress)
-      }
-    }
-  else
-    if numObjectives > 0 then 
-      local objectivesData = {}
-      for index = 1, numObjectives do
-        local description, criteriaType, completed, quantity, totalQuantity,
-        flags, assetID, quantityString, criteriaID, duration, elapsed,
-        failed, isWeightProgress = GetCriteriaInfo(index)
+    scenarioData:StartObjectivesCounter()
+    if scenarioStepInfo.weightedProgress then 
+      -- NOTE: Some scenario (e.g: 7.2 Broken shore introductoin, invasion scenario)
+      -- can have an objective progress even if it say numCriteria == 0 so 
+      -- we need checking if the step info  has weightedProgress.
+      -- if the stage has a weightedProgress, show only this one even if the 
+      -- numCriteria say > = 1 
+      local objectiveData = scenarioData:AcquireObjective()
+      objectiveData.text = scenarioStepInfo.description
+      objectiveData.hasProgress = true
+      objectiveData.progress = scenarioStepInfo.weightedProgress
+      objectiveData.minProgress = 0
+      objectiveData.maxProgress = 100
+      objectiveData.progressText = PERCENTAGE_STRING:format(weightedProgress)
+    else
+      if scenarioData.numCriteria > 0 then
+        for index = 1, scenarioStepInfo.numCriteria do 
+          local description, criteriaType, completed, quantity, totalQuantity,
+          flags, assetID, quantityString, criteriaID, duration, elapsed,
+          failed, isWeightProgress = GetCriteriaInfo(index)
 
-        if description and not isWeightProgress then 
-          description = string.format("%d/%d %s", quantity, totalQuantity, description);
+          local objectiveData = scenarioData:AcquireObjective()
+
+          if description and not isWeightProgress then 
+            description = string.format("%d/%d %s", quantity, totalQuantity, description)
+          end
+
+          objectiveData.text = description
+          objectiveData.isCompleted = completed
+          objectiveData.isFailed = failed
         end
-
-        local data = {
-          text              = description,
-          criteriaType      = criteriaType,
-          isCompleted       = completed,
-          quantity          = quantity,
-          totalQuantity     = totalQuantity,
-          flags             = flags,
-          assetID           = assetID,
-          quantityString    = quantityString,
-          criteriaID        = criteriaID,
-          duration          = duration,
-          elapsed           = elapsed,
-          failed            = failed,
-          isWeightProgress  = isWeightProgress
-        }
-
-        objectivesData[index] = data 
       end
-      -- NOTE: We use SetData only for objectives to be sure the scenario 
-      -- doesn't keep the objectives data of previous stage.
-      _ScenarioModel:SetData(objectivesData, "scenario", "objectives")
     end
+    scenarioData:StopObjectivesCounter()
 
-    -- Bonus objectives
+
+    -- Bonus objectives bonusObjectives
+    scenarioData:StartBonusObjectivesCounter()
     local tblBonusSteps = GetBonusSteps()
     local numBonusObjectives = #tblBonusSteps
-    if numBonusObjectives > 0 then 
-      local bonusObjectivesData = {}
+    if numBonusObjectives > 0 then
+
       for index = 1, numBonusObjectives do 
         local bonusStepIndex = tblBonusSteps[index]
         local criteriaString, criteriaType, criteriaCompleted, quantity, totalQuantity, 
         flags, assetID, quantityString, criteriaID, duration, elapsed, 
         criteriaFailed = C_Scenario.GetCriteriaInfoByStep(bonusStepIndex, 1)
 
-        local data = {
-          text              = criteriaString,
-          criteriaType      = criteriaType,
-          isCompleted       = criteriaCompleted,
-          quantity          = quantity,
-          totalQuantity     = totalQuantity,
-          flags             = flags,
-          assetID           = assetID,
-          quantityString    = quantityString,
-          criteriaID        = criteriaID,
-          duration          = duration,
-          elapsed           = elapsed,
-          failed            = criteriaFailed,
-          isWeightProgress  = isWeightProgress
-        }
-
-        -- Hide the timer if the criteria has been complated or failed
-        if duration and duration > 0 and not criteriaFailed and not criteriaCompleted then
-          data.hasTimer = true 
-          data.startTime = GetTime() - elapsed
-        end
-
-        bonusObjectivesData[index] = data
+        local bonusObjectiveData = scenarioData:AcquireBonusObjective()
+        bonusObjectiveData.text = criteriaString
+        bonusObjectiveData.isCompleted = criteriaCompleted
+        bonusObjectiveData.isFailed = criteriaFailed
+        bonusObjectiveData.hasTimer = (duration and duration > 0 and not criteriaFailed and not criteriaCompleted)
+        bonusObjectiveData.startTime = elapsed and GetTime() - elapsed
+        bonusObjectiveData.duration = duration
       end
-      -- NOTE: We use SetData only for objectives to be sure the scenario 
-      -- doesn't keep the objectives data of previous stage.
-      _ScenarioModel:SetData(bonusObjectivesData, "scenario", "bonusObjectives")
-    end 
+    end
+    scenarioData:StopBonusObjectivesCounter()
   end
 
-  _ScenarioModel:AddData(scenarioData, "scenario")
+
+end
+
+
+__SystemEvent__ "SCENARIO_UPDATE" "SCENARIO_POI_UPDATE" "SCENARIO_CRITERIA_UPDATE" "CRITERIA_COMPLETE" "SCENARIO_COMPLETED"
+function UPDATE_SCENARIO()
+  _M:UpdateScenario()
 end
 -- ========================================================================= --
 -- Debug Utils Tools
 -- ========================================================================= --
-if ViragDevTool_AddData then 
-  ViragDevTool_AddData(_ScenarioModel, "SLT Scenario Model")
-end
+DebugTools.TrackData(SCENARIO_CONTENT_SUBJECT, "Scenario Content Subject")

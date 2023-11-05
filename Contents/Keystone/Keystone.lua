@@ -6,254 +6,141 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling                    "SylingTracker.Keytone"                            ""
+Syling                      "SylingTracker.Keystone"                         ""
 -- ========================================================================= --
-import                          "SLT"
+_Active                             = false
 -- ========================================================================= --
-_Active                           = false 
--- ========================================================================= --
-RegisterContentType               = API.RegisterContentType
-RegisterModel                     = API.RegisterModel
-TruncateDecimal                   = Utils.Math.TruncateDecimal
--- ========================================================================= --
-CreateAtlasMarkup                 = CreateAtlasMarkup
-GetPowerLevelDamageHealthMod      = C_ChallengeMode.GetPowerLevelDamageHealthMod
-GetActiveKeystoneInfo             = C_ChallengeMode.GetActiveKeystoneInfo
-GetAffixInfo                      = C_ChallengeMode.GetAffixInfo
-GetMapInfo                        = C_ChallengeMode.GetMapUIInfo
-GetActiveChallengeMapID           = C_ChallengeMode.GetActiveChallengeMapID
-GetDeathCount                     = C_ChallengeMode.GetDeathCount
-GetWorldElapsedTimers             = GetWorldElapsedTimers
-GetWorldElapsedTime               = GetWorldElapsedTime
-EJ_GetCurrentInstance             = EJ_GetCurrentInstance
-EJ_GetInstanceInfo                = EJ_GetInstanceInfo
-GetInfo                           = C_Scenario.GetInfo
-GetStepInfo                       = C_Scenario.GetStepInfo
-GetCriteriaInfo                   = C_Scenario.GetCriteriaInfo
--- ========================================================================= --
-_KeystoneModel = RegisterModel(Model, "keystone-data")
--- ========================================================================= --
-_KeystoneIconMarkupAtlas = CreateAtlasMarkup("Dungeon", 16, 16)
+export {
+  -- Addon API 
+  RegisterObservableContent           = API.RegisterObservableContent,
 
-RegisterContentType({
-  ID = "keystone",
-  Name = "Keystone (Mythic +)",
-  DisplayName = _KeystoneIconMarkupAtlas.." Keystone (Mythic +)",
-  DefaultOrder = 30,
-  DefaultModel = _KeystoneModel,
-  DefaultViewClass = KeystoneContentView,
-  Events = { "PLAYER_ENTERING_WORLD", "CHALLENGE_MODE_START" },
-  Status = function()
-    return GetActiveKeystoneInfo() > 0 
-  end
-})
--- ========================================================================= --
+  -- WoW API & Utils
+  GetInfo                             = C_Scenario.GetInfo,
+  GetStepInfo                         = C_Scenario.GetStepInfo,
+  GetCriteriaInfo                     = C_Scenario.GetCriteriaInfo,
+  GetActiveKeystoneInfo               = C_ChallengeMode.GetActiveKeystoneInfo,
+  GetAffixInfo                        = C_ChallengeMode.GetAffixInfo,
+  GetMapUIInfo                        = C_ChallengeMode.GetMapUIInfo,
+  GetActiveChallengeMapID             = C_ChallengeMode.GetActiveChallengeMapID
+}
+
+KEYSTONE_CONTENT_SUBJECT = RegisterObservableContent("keystone", KeystoneContentSubject)
+
 __ActiveOnEvents__ "PLAYER_ENTERING_WORLD" "CHALLENGE_MODE_START"
-function ActiveOn(self)
+function BecomeActiveOn(self)
   return GetActiveKeystoneInfo() > 0
 end
--- ========================================================================= --
+
 function OnActive(self)
   self:UpdateKeystoneInfo()
-  self:UpdateTimer()
-  self:UpdateObjectives()
-  self:UpdateInstanceMap()
-  CHALLENGE_MODE_DEATH_COUNT_UPDATED()
-
-  _KeystoneModel:Flush()
+  self:LoadAndUpdate()
+  -- self:UpdateTimer()
 end
 
-function OnInactive(self)
-  _KeystoneModel:ClearData()
-end
--- ========================================================================= --
--- Helper function for getting the enemy forces percentage
-local function GetPercentageString(current, total)
-  local decimal = 2
+function LoadAndUpdate(self)
+  local name, _, numObjectives = GetStepInfo()
+  KEYSTONE_CONTENT_SUBJECT.name = name
 
-  if decimal == 0 then
-    return format("%i%%", math.floor(current/total*100))
-  elseif decimal == 1 then
-    return format("%.1f%%", TruncateDecimal(current/total*100, 1))
-  elseif decimal == 2 then
-    return format("%.2f%%", TruncateDecimal(current/total*100, 2))
+  local textureFileID
+  local currentMapID = select(8, GetInstanceInfo())
+  if currentMapID then
+    textureFileID = select(4, EJ_GetInstanceInfo(C_EncounterJournal.GetInstanceForGameMap(currentMapID)))
   end
 
-  return format("%i", current/total*100)
+  KEYSTONE_CONTENT_SUBJECT.textureFileID = textureFileID
+
+
+  KEYSTONE_CONTENT_SUBJECT:StartObjectivesCounter()
+  if numObjectives > 0 then 
+    for index = 1, numObjectives do 
+      local description, criteriaType, completed, quantity, totalQuantity,
+      flags, assetID, quantityString, criteriaID, duration, elapsed,
+      failed, isWeightProgress = GetCriteriaInfo(index)
+
+      if not isWeightProgress then 
+        local objectiveData = KEYSTONE_CONTENT_SUBJECT:AcquireObjective()
+        objectiveData.text = description
+        objectiveData.isCompleted = completed
+      else 
+        -- if there is weight progress, we can say this is 'Enemy Forces'
+        local quantity = tonumber(strsub(quantityString, 1, -2))
+        KEYSTONE_CONTENT_SUBJECT.enemyForcesQuantity = quantity
+        KEYSTONE_CONTENT_SUBJECT.enemyForcesTotalQuantity = totalQuantity
+      end
+    end
+  end
+  KEYSTONE_CONTENT_SUBJECT:StopObjectivesCounter()
 end
 
-__SystemEvent__ "SCENARIO_CRITERIA_UPDATE" "CRITERIA_UPDATE" "SCENARIO_UPDATE"
-function UpdateObjectives()
-  local dungeonName, _, numObjectives = GetStepInfo()
-  local completed = select(7, GetInfo())
 
-  local objectivesData = {}
+function UpdateKeystoneInfo()
+  local level, affixes, wasEnergized = GetActiveKeystoneInfo()
+  local challengeMapID = GetActiveChallengeMapID()
 
-  for index = 1, numObjectives do
-       local description, _, completed, c, totalQuantity, _, _, quantityString,
-    _, _, _, _, isWeightProgress = GetCriteriaInfo(index)
+  if not challengeMapID then 
+    return 
+  end
 
-    local data = {
-      text        = description,
-      isCompleted = completed
-    }
+  local _, _, timeLimit = GetMapUIInfo(challengeMapID)
 
-    if isWeightProgress then 
-      -- if there is weight progress, we can say this is 'Enemy Forces'
-      local quantity = tonumber(strsub(quantityString, 1, -2))
-      
-      data.hasProgressBar = true 
-      data.progress = quantity
-      data.minProgress = 0
-      data.maxProgress = totalQuantity
-      -- data.progressText = string.format("%i/%i", quantity, totalQuantity)
-      data.progressText = format("%i/%i (%s)", quantity, totalQuantity, GetPercentageString(quantity, totalQuantity))
-    else 
-      data.hasProgressBar = nil 
-    end
+  KEYSTONE_CONTENT_SUBJECT.level = level
+  KEYSTONE_CONTENT_SUBJECT.timeLimit = timeLimit
 
-    objectivesData[index] = data
+  KEYSTONE_CONTENT_SUBJECT:StartAffixesCounter()
+  for index, affixID in ipairs(affixes) do 
+    local name, description, texture = GetAffixInfo(affixID)
+    local affixData = KEYSTONE_CONTENT_SUBJECT:AcquireAffix()
+    
+    affixData.affixID = affixID
+    affixData.name = name
+    affixData.texture = texture
+    affixData.description = description 
+  end
+  KEYSTONE_CONTENT_SUBJECT:StopAffixesCounter()
+end
+
+--- IMPORTANT !!!
+--- During a reload, elapsed returned by GetWorldElapsedTime(1) don't change even
+--- after some seconds, causing a desync on the timer. 
+--- This problem seems occur on the event triggered before 'LOADING_SCREEN_DISABLED' (itself included)
+--- so 'PLAYER_ENTERING_WORLD' is also affected.
+---
+--- FROM 'UPDATE_INSTANCE_INFO' event, the elpased become correct so this is best 
+--- place for getting the timer after a reload.
+__SystemEvent__()
+function UPDATE_INSTANCE_INFO()
+  local _, elapsed, type = GetWorldElapsedTime(1)
+
+  if not type == LE_WORLD_ELAPSED_TIMER_TYPE_CHALLENGE_MODE then 
+    return 
   end
   
-  local data = {
-    name          = dungeonName,
-    numObjectives = numObjectives,
-    completed     = completed,
-    objectives    = objectivesData
-  }
+  local nextElapsed = elapsed + 1
+  local nextTime 
 
-  _KeystoneModel:AddData(data, "keystone")
-  _KeystoneModel:Flush()
-end
-
-__SystemEvent__()
-function CHALLENGE_MODE_DEATH_COUNT_UPDATED()
-  _M:UpdateDeathCount()
-  _KeystoneModel:Flush()
-end
-
-__Async__()
-function UpdateTimer(self)
-  local _, elapsed, type = GetWorldElapsedTime(1)
-  if type == LE_WORLD_ELAPSED_TIMER_TYPE_CHALLENGE_MODE then 
-    local nextElapsed = elapsed + 1
-    local nextTime
-    
-    while elapsed ~= nextElapsed do
-      _, elapsed = GetWorldElapsedTime(1)
-      nextTime   = GetTime()
-      
-      Next()
-    end 
-
-    _KeystoneModel:AddData({ startTime = nextTime - elapsed}, "keystone")
-    _KeystoneModel:Flush()
+  while elapsed ~= nextElapsed do 
+    _, elapsed = GetWorldElapsedTime(1)
+    nextTime = GetTime()
   end
+
+  KEYSTONE_CONTENT_SUBJECT.startTime = nextTime - elapsed
+end
+
+__SystemEvent__ "SCENARIO_CRITERIA_UPDATE" "CRITERIA_COMPLETE" "SCENARIO_UPDATE"
+function KEYSTONE_UPDATE()
+  _M:LoadAndUpdate()
 end
 
 __SystemEvent__()
 function WORLD_STATE_TIMER_START(timerID)
-  _M:UpdateTimer()
-  _KeystoneModel:Flush()
+  KEYSTONE_CONTENT_SUBJECT.startTime = GetTime()
 end
 
 __SystemEvent__()
-function WORLD_STATE_TIMER_STOP(timerID)
-  _KeystoneModel:AddData({ completed = true }, "keystone")
-  _KeystoneModel:Flush()
-end
-
-function UpdateKeystoneInfo()
-  local level, affixes, wasEnergized = GetActiveKeystoneInfo()
-  local numAffixes = #affixes
-  local affixesData = {}
-
-  for index, affixID in ipairs(affixes) do 
-    local name, desc, texture = GetAffixInfo(affixID)
-
-    affixesData[index] = {
-      name  = name,
-      desc  = desc,
-      texture =  texture,
-      affixID = affixID
-    }
-  end
-
-  _KeystoneModel:AddData({
-    level = level,
-    affixes = affixesData,
-    numAffixes = numAffixes,
-    wasEnergized = wasEnergized
-  }, "keystone")
-end
-
-function UpdateInstanceMap(self)
-  local mapID = GetActiveChallengeMapID()
-  if mapID then
-    local _, _, timeLimit, texture = GetMapInfo(mapID)
-    _KeystoneModel:AddData({
-      timeLimit = timeLimit,
-      texture = texture
-    }, "keystone")
-  end
-end
-
-
-function UpdateDeathCount()
-  local death, timeLost = GetDeathCount()
-  _KeystoneModel:AddData({
-    death = death,
-    timeLost = timeLost,
-  }, "keystone")
+function SylingTracker_ENEMY_PULL_COUNT_CHANGED(total)
+  KEYSTONE_CONTENT_SUBJECT.enemyForcesPendingQuantity = total
 end
 -- ========================================================================= --
 -- Debug Utils Tools
 -- ========================================================================= --
-if ViragDevTool_AddData then 
-  ViragDevTool_AddData(_KeystoneModel, "SLT Keystone Model")
-end
-
------------------------------------------------------------------------------
--- Fixture DATA  --
------------------------------------------------------------------------------
--- function LoadFixtures(self)
---   local affixesData = {}
---   for i = 1, 4 do 
---     local name, desc, texture = GetAffixInfo(i)
---     affixesData[i] = {
---       name = name,
---       desc = desc,
---       texture = texture, 
---       affixID = i 
---     }
---   end 
-
---   local data = {
---     icon = 1411869,
---     name = "L'Arcavia",
---     numObjectives = 5,
---     death = 2,
---     timeLost = 10,
---     level = 14,
---     affixes = affixesData,
---     objectives = {
---       [1] = { isCompleted = false,  text = "Ivanyr vaincu"},
---       [2] = { isCompleted = false,  text = "Corstilax vaincu"},
---       [3] = { isCompleted = false,  text = "General Xakal vaincu"},
---       [4] = { isCompleted = false,  text = "Nal'tira vaincue"},
---       [5] = { isCompleted = false,  text = "Conseiller Vandros vaincu"},
---       [6] = { 
---         isCompleted = false, 
---         text = "Force Enemie", 
---         hasProgressBar = true,
---         progress = 50,
---         minProgress = 0,
---         maxProgress = 250,
---         progressText = "50 / 250"
---       }
---     }
---   }
-
---   _KeystoneModel:AddData(data, "keystone")
---   _KeystoneModel:Flush()
--- end
+DebugTools.TrackData(KEYSTONE_CONTENT_SUBJECT, "Keystone Content Subject")

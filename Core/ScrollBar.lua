@@ -8,6 +8,11 @@
 -- ========================================================================= --
 Syling                   "SylingTracker.Core.ScrollBar"                      ""
 -- ========================================================================= --
+export {
+  RegisterSetting   = API.RegisterSetting,
+  GetSetting        = API.GetSetting
+}
+
 LEFT_BUTTON_NAME = "LeftButton"
 
 SCROLLBAR_THUMB_EDGES_FILE = [[Interface\AddOns\SylingTracker\Media\Textures\MinimalScrollbarProportional]]
@@ -18,8 +23,8 @@ SCROLLBAR_THUMB_TOP_HOVER_COORDS = { left = 0.015625, top = 0.828125, right = 0.
 SCROLLBAR_THUMB_BOTTOM_HOVER_COORDS = { left = 0.3125, top = 0.421875, right = 0.4375, bottom = 0.984375 } 
 SCROLLBAR_THUMB_MIDDLE_HOVER_COORDS = { left = 0.328125, top = 0.0009765625, right = 0.453125, bottom = 0.69921875 }
 
-class "SLT.ScrollBarThumb" (function(_ENV)
-  inherit "Button"
+class "ScrollBarThumb" (function(_ENV)
+  inherit "Scorpio.UI.Button"
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
@@ -121,8 +126,8 @@ class "SLT.ScrollBarThumb" (function(_ENV)
   end
 end)
 
-class "SLT.ScrollBar" (function(_ENV)
-  inherit "Frame"
+class "ScrollBar" (function(_ENV)
+  inherit "Scorpio.UI.Frame"
   -----------------------------------------------------------------------------
   --                               Events                                    --
   -----------------------------------------------------------------------------
@@ -279,7 +284,7 @@ class "SLT.ScrollBar" (function(_ENV)
 
   --- returns the height if the scrollbar is vertical or the width if its 
   --- horizontal
-  __Arguments__ { Frame }
+  __Arguments__ { Scorpio.UI.Frame }
   function GetFrameExtent(self, frame)
     local width, height = frame:GetSize()
     return self.IsHorizontal and width or height
@@ -287,7 +292,7 @@ class "SLT.ScrollBar" (function(_ENV)
 
   --- Sets the height if the scrollbar is vertical or the width if its 
   --- horizontal.
-  __Arguments__ { Frame, Number }
+  __Arguments__ { Scorpio.UI.Frame, Number }
   function SetFrameExtent(self, frame, value)
     if self.IsHorizontal then 
       frame:SetWidth(value)
@@ -428,7 +433,7 @@ class "SLT.ScrollBar" (function(_ENV)
 
   property "WheelExtentPercentage" {
     type = Number,
-    get = function() return SLT.Settings.Get("mouseWheelScrollStep") or 0.1 end,
+    get = function() return GetSetting("mouseWheelScrollStep") or 0.1 end,
     set = false
   }
 
@@ -440,10 +445,10 @@ class "SLT.ScrollBar" (function(_ENV)
   --                            Constructors                                 --
   -----------------------------------------------------------------------------
   __Template__ {
-    Track = Frame,
+    Track = Scorpio.UI.Frame,
     {
       Track = {
-        Thumb = SLT.ScrollBarThumb
+        Thumb = ScrollBarThumb
       }
     }
   }
@@ -466,7 +471,7 @@ end)
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
-  [SLT.ScrollBarThumb] = {
+  [ScrollBarThumb] = {
        width = 6,
         height = 150,
 
@@ -517,7 +522,7 @@ Style.UpdateSkin("Default", {
         }    
   },
 
-  [SLT.ScrollBar] = {
+  [ScrollBar] = {
     size = Size(6, 560),
 
     Track = {
@@ -566,5 +571,5 @@ Style.UpdateSkin("Default", {
 })
 
 function OnLoad(self)
-  SLT.Settings.Register("mouseWheelScrollStep", 0.1)
+  RegisterSetting("mouseWheelScrollStep", 0.1)
 end
