@@ -1,11 +1,15 @@
-name: Package the commits on the alpha, beta or release branches
+name: Package the commits on the development branches
 
 on:
   push:
     branches:
+      - dev
+      - wotlk-dev
       - alpha/*
       - beta/*
       - release/*
+      - hotfix/*
+      - feature/*
 
 jobs:
   build:
