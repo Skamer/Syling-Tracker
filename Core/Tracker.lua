@@ -244,12 +244,20 @@ class "Tracker" (function(_ENV)
     return self.__minimizeButton or self:GetChild("MinimizeButton")
   end
 
-  function SetSetting(self, setting, value, notify)
-    return API.SetTrackerSetting(self, setting, value, notify)
-  end
+  function OnRelease(self)
+    for contentID, tracked in pairs(self.ContentsTracked) do 
+      if tracked then 
+        self:UntrackContent(contentID)
+      end
+    end
 
-  function GetSetting(self, setting)
-    return API.GetTrackerSetting(self, setting)
+    wipe(self.ContentsTracked)
+
+    self.id = nil 
+    self.Enabled = nil 
+    self.Locked = nil 
+    self.Minimized = nil 
+    self.ShowScrollBar = nil 
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
@@ -355,30 +363,29 @@ end)
 --                                   API                                     --
 -------------------------------------------------------------------------------
 TRACKERS = System.Toolset.newtable(false, true)
+TRACKER_SETTINGS  = {}
 
 local function OnTrackerStopMoving(tracker)
   local left = tracker:GetLeft()
   local top = tracker:GetTop()
 
 
-  tracker:SetSetting("position", Position(left, top), false)
-
-  -- tracker:SetSetting("position", Position(left, top), false)
+  SetTrackerSetting(tracker.id, "position", Position(left, top), false)
 end
 
 local function OnTrackerStopResizing(tracker)
   local width   = Round(tracker:GetWidth())
   local height  = Round(tracker:GetHeight())
 
-  tracker:SetSetting("size", Size(width, height), false)
-  -- tracker:SetSetting("size", Size(width, height), false)
+  SetTrackerSetting(tracker.id, "size", Size(width, height), false)
 end
 
-
-local function private__NewTracker(id)
+__Arguments__ { String }
+function private__NewTracker(id)
   local tracker = Tracker.Acquire()
   tracker.id = id
   tracker:SetParent(UIParent)
+  tracker:Show()
 
   -- We set the base path for avoiding to give it every time. 
   SavedVariables.SetBasePath("trackers", id)
@@ -394,7 +401,6 @@ local function private__NewTracker(id)
     local value = SavedVariables.Profile().GetValue(settingID)
     subject:OnNext(value, tracker)
   end
-
 
   -- Important: Don't forget to reset the base path for avoiding unexpected issues
   -- for next operations. 
@@ -418,7 +424,7 @@ end
 --- 
 --- @param id the tracker id to register (note: the id 'main' is reserved)
 __Arguments__ { String }
-__Static__() function API.NewTracker(id)
+function NewTracker(id)
   -- the 'main' id is reserved for the main tracker. 
   if id == "main" then 
     return 
@@ -428,54 +434,49 @@ __Static__() function API.NewTracker(id)
 
   -- Don't forget to add in the tracker list else it won't be persisted for 
   -- the next time.
-  SavedVariables.Path("list", "tracker").SaveValue(id, true)
+  SavedVariables.Path("list", "trackers").SaveValue(id, true)
   
   -- Trigger a system event for notifying the outside
-  Scorpio.FireSystemEvent("SylingTracker_TRACKER_CREATED", tracker)
+  Scorpio.FireSystemEvent("SylingTracker_TRACKER_CREATED", id)
 
   return tracker
 end
 
-local function private__DeleteTracker(tracker)
-  local trackerID = tracker.id
-
-  Scorpio.FireSystemEvent("SylingTracker_TRACKER_DELETED", tracker)
+__Arguments__ { String }
+function private__DeleteTracker(trackerID)
+  local tracker = TRACKERS[trackerID]
+  if not tracker then 
+    return 
+  end
 
   -- Remove handlers 
   tracker.OnStopResizing      = tracker.OnStopResizing - OnTrackerStopResizing
   tracker.OnStopMoving        = tracker.OnStopMoving - OnTrackerStopMoving
-
-  -- Remove the tracker from the list 
-  SavedVariables.Path("list", "tracker").SetValue(trackerID, nil)
-
-  -- Remove the tracker setting for global and all profiles 
-  SavedVariables.Path("trackers").All().SetValue(trackerID, nil)
 
   TRACKERS[trackerID] = nil 
 
   tracker:Release()
 end
 
---- Delete a tracker. 
+--- Delete a tracker
 --- note: the main tracker cannot be deleted.
 ---
---- @param the tracker object or id to delete 
-__Arguments__ { Tracker + String  }
-__Static__() function API.DeleteTracker(trackerOrID)
-  local tracker
-  if type(trackerOrID) == "string" then 
-    tracker = TRACKERS[trackerOrID]
-  else
-    tracker = trackerOrID
-  end
-
-  if not tracker or tracker.id == "main" then 
+--- @param trackerID the id of tracker to delete
+__Arguments__ { String }
+function DeleteTracker(trackerID)
+  if trackerID == "main" then 
     return 
   end
+  
+  private__DeleteTracker(trackerID)
+  
+  -- Remove the tracker from the list 
+  SavedVariables.Path("list", "trackers").SetValue(trackerID, nil)
 
-  if tracker then 
-    private__DeleteTracker(tracker)
-  end
+  -- Remove the tracker setting for global and all profiles 
+  SavedVariables.Path("trackers").All().SetValue(trackerID, nil)
+
+  Scorpio.FireSystemEvent("SylingTracker_TRACKER_DELETED", trackerID)
 end
 
 --- Return an iterafor for the trackers 
@@ -484,22 +485,37 @@ end
 --- @param includeDisabledTrackers if the disabled trackers soulld be included
 __Iterator__()
 __Arguments__ { Boolean/true, Boolean/true }
-__Static__() function API.IterateTrackers(includeMainTracker, includeDisabledTrackers)
+function IterateTrackers(includeMainTracker, includeDisabledTrackers)
   local yield = coroutine.yield
+  local trackersList =  SavedVariables.Profile().Path("list").GetValue("trackers")
+  local trackersSettings = SavedVariables.Profile().GetValue("trackers")
+  
+  if includeMainTracker then
+    local settings = trackersSettings["main"] 
+    local enabled = settings and setting.enabled 
+    local ignored = false 
 
-  for trackerID, tracker in pairs(TRACKERS) do 
-    local isIgnored = false 
-
-    if trackerID == "main" and includeMainTracker == false then 
-      isIgnored = true 
+    if not includeDisabledTrackers and enabled ~= nil and enabled == false then 
+      ignored = true 
     end
 
-    if tracker.Enabled == false and includeDisabledTrackers == false then 
-      isIgnored = true 
+    if not ignored then 
+      yield("main")
     end
+  end
 
-    if not isIgnored then 
-      yield(trackerID, tracker)
+  if trackersList then 
+    for trackerID in pairs(trackersList) do 
+      local settings = trackersSettings[trackerID]
+      local enabled = settings and settings.enabled
+      local ignored = false
+      if not includeDisabledTrackers and enabled ~= nil and enabled == false then 
+        ignored = true 
+      end
+
+      if not ignored then 
+        yield(trackerID)
+      end
     end
   end
 end
@@ -507,17 +523,41 @@ end
 --- Get the tracker 
 ---
 --- @param id the tracker id to return
-__Static__() function API.GetTracker(id)
+__Arguments__ { String }
+function GetTracker(id)
   return TRACKERS[id]
 end
 
---- Create an observable will read a setting value of tracker. 
---- It can be used by the style system. 
+struct "TrackerSettingInfoType" {
+ { name = "id", type = String, require = true },
+ { name = "default", type = Any},
+ { name = "handler", type = Function },
+ { name = "saveHandler", type = Function},
+ { name = "ignoreDefault", type = Boolean, default = false},
+ { name = "getHandler", type = Function}
+}
+
+--- Register a setting for a tracker
 ---
---- @param setting the setting where the value will be fetched. 
---- @param default the default value in case the value is not found.
-__Arguments__ { String, Any/nil }
-__Static__() function API.FromTrackerSetting(setting, default)
+--- @param settingInfo the setting info to register.
+__Arguments__ { TrackerSettingInfoType}
+function RegisterTrackerSetting(settingInfo)
+  if TRACKER_SETTINGS[settingInfo.id] then 
+    return 
+  end
+
+  TRACKER_SETTINGS[settingInfo.id] = settingInfo
+end
+
+--- Create an obsersable will read a setting value of tracker.
+--- it can be used by the style system.
+---
+--- @param setting the setting where the value will be fetched.
+--- @param ... extra args will be pushed to get handler.
+__Arguments__ { String, Any * 0 }
+function FromTrackerSetting(setting, ...)
+  local extraArgs = { ... }
+
   local observable = Observable(function(observer)
     -- The current frame may not be a tracker, so we need to try to get 
     -- the nearest tracker object.
@@ -530,140 +570,192 @@ __Static__() function API.FromTrackerSetting(setting, default)
         subject:Subscribe(observer)
       end
 
-      local value
+      local value = GetTrackerSettingWithDefault(tracker.id, setting, unpack(extraArgs))
+      local trackerID = tracker.id
     
       -- The id may be nil, so we need to check it.
-      if tracker.id and tracker.id ~= "" then
-        value = SavedVariables.Profile().Path("trackers", tracker.id).GetValue(setting)
+      if trackerID and trackerID ~= "" then
+        value = GetTrackerSettingWithDefault(tracker.id, setting, unpack(extraArgs))
+      else
+        value = TRACKER_SETTINGS[setting] and TRACKER_SETTINGS[setting].default
       end
 
       subject:OnNext(value, tracker)
     end
   end)
 
-  if default ~= nil then 
-    return observable:Map(function(v) return v or default end)
-  end
-
   return observable
 end
 
---- Get the setting value for a tracker given 
+--- Get the setting value for a tracker 
 ---
---- @param trackerOrID the tracker object or the tracker id where fetching the setting. 
---- @param setting the setting to get. 
-__Arguments__ { Tracker + String, String }
-__Static__() function API.GetTrackerSetting(trackerOrID, setting)
-  local id = type(trackerOrID) == "string" and trackerOrID or trackerOrID.id 
+--- @param the tracker id where fetching the setting.
+--- @param setting the setting to get.
+--- @param ... extra args will be passed to get handler.
+__Arguments__ { String, String, Any * 0 }
+function GetTrackerSetting(trackerID, setting, ...)
+  local hasDefaultValue = false 
+  local defaultValue 
+  local dbValue 
+  local getHandler
 
-  if id and id ~= "" then 
-    return SavedVariables.Profile().Path("trackers", id).GetValue(setting)
+  local settingInfo = TRACKER_SETTINGS[setting]
+  if settingInfo then 
+    defaultValue = settingInfo.default
+    getHandler = settingInfo.getHandler
+    hasDefaultValue = not settingInfo.ignoreDefault
+  end 
+
+  if trackerID and trackerID ~= "" then 
+    if getHandler then
+      dbValue = getHandler(trackerID, ...)
+    else
+      dbValue = SavedVariables.Profile().Path("trackers", trackerID).GetValue(setting)
+    end
+
+    return dbValue, hasDefaultValue, defaultValue
   end
 end
 
---- Set the setting value for a tracker given 
+--- This is a helper function around GetTrackerSetting
+--- Get the setting value for a tracker, and replace by the default value if there is one.
 ---
---- @param trackerOrID the tracker object or the tracker id where it will be set. 
+--- @param the tracker id where fetching the setting.
+--- @param setting the setting to get.
+--- @param ... extra args will be passed to get handler.
+__Arguments__ { String, String, Any * 0 }
+function GetTrackerSettingWithDefault(trackerOrID, setting, ...)
+  local dbValue, hasDefaultValue, defaultValue = GetTrackerSetting(trackerOrID, setting, ...)
+
+  if dbValue == nil and hasDefaultValue then 
+    return defaultValue
+  end
+
+  return dbValue 
+end
+
+--- Set the setting value for a tracker
+---
+--- @param trackerID the tracker id where the setting will be set
 --- @param setting the setting to set 
---- @param value setting value to set. 
---- @param notify if the observers should be notified. 
-__Arguments__ { Tracker + String, String, Any/nil, Boolean/true }
-__Static__() function API.SetTrackerSetting(trackerOrID, setting, value, notify)
+--- @param value the setting value to set 
+--- @param notify if the observers and setting handler should be notified.
+--- @param ... extra arguments will be passed to different handlers.
+__Arguments__ { String, String, Any/nil, Boolean/true, Any * 0 }
+function SetTrackerSetting(trackerID, setting, value, notify, ...)
+  local default = nil 
+  local ignoreDefault = false 
+  local handler = nil 
+  local saveHandler = nil 
 
-  -- local tracker = type(trackerOrID) == "string" and TRACKERS[trackerOrID] or trackerOrID
-
-  local tracker 
-  if type(trackerOrID) == "string" then 
-    tracker = TRACKERS[trackerOrID]
-  else
-    tracker = trackerOrID
+  local settingInfo = TRACKER_SETTINGS[setting]
+  if settingInfo then 
+    default       = settingInfo.default
+    ignoreDefault = settingInfo.ignoreDefault
+    handler       = settingInfo.handler
+    saveHandler   = settingInfo.saveHandler
   end
 
-  if not tracker then
-    return 
+  if value == nil and not ignoreDefault then 
+    value = default
   end
 
-  if value ~= nil then 
-    SavedVariables.Profile().Path("trackers", tracker.id).SaveValue(setting, value)
-  else
-    -- We prefer to use SetValue for nil value, as this useless to create the path
-    -- if we want to clear the value. 
-    SavedVariables.Profile().Path("trackers", tracker.id).SetValue(setting, value)
+  if saveHandler then 
+    saveHandler(trackerID, value, ...)
+  else 
+    if value == nil or value == default then
+      SavedVariables.Profile().Path("trackers", trackerID).SetValue(setting, nil)
+    else
+      SavedVariables.Profile().Path("trackers", trackerID).SaveValue(setting, value)
+    end
   end
 
-  if notify then 
-    -- We don't want to create a subject if the setting don't have one because this 
-    -- say none is interested to be notified by this setting.
-    local subject = tracker:AcquireSettingSubject(setting, false)
-    if subject then 
-      subject:OnNext(value, tracker)
+  if notify then
+    if handler then 
+      handler(trackerID, value, ...)
+    end
+    
+    local tracker = TRACKERS[trackerID]
+    if tracker then 
+      -- We don't want to create a subject if the setting don't have one because this 
+      -- say none is interested to be notified by this setting.
+      local subject = tracker:AcquireSettingSubject(setting, false)
+      if subject then 
+        subject:OnNext(value, tracker, ...)
+      end
     end
   end
 end
 
---- Set if the content must be tracked for a tracker
----
---- @param trackerOrID the tracker object or the tracker id
---- @param contentID the content id 
---- @param tracked if the content must be tracker
-__Arguments__ { Tracker + String, String, Boolean/nil}
-__Static__() function API.SetContentTracked(trackerOrID, contentID, tracked)
-  if type(trackerOrID) == "string" then
-    trackerID = trackerOrID 
-    tracker = TRACKERS[trackerOrID]
-  else
-    tracker = trackerOrID
-    trackerID = tracker.id
-  end
-
-  local shouldTrack = false
-
-  SavedVariables.Profile().Path("trackers", trackerID, "contents", contentID)
+__Arguments__ { String , Boolean/nil }
+function private__IsContentShouldTracked(trackerID, contentTracked)
+  local tracked, isDefault
   if trackerID == "main" then 
-    if tracked ~= nil and tracked == false then 
-      SavedVariables.SaveValue("tracked", false)
-      shouldTrack = false
+    if contentTracked or contentTracked == nil then
+      tracked = true 
+      isDefault = true 
     else
-      SavedVariables.SaveValue("tracked", nil)
-      shouldTrack = true 
+      tracked = false 
+      isDefault = false 
     end
   else
-    if tracked then 
-      SavedVariables.SaveValue("tracked", true)
-      shouldTrack = true
+    if contentTracked then
+      tracked = true 
+      isDefault = false 
     else
-      SavedVariables.SaveValue("tracked", nil)
-      shouldTrack = false
+      tracked = false 
+      isDefault = true 
     end
   end
 
-  if tracker then 
-    if shouldTrack then 
-      tracker:TrackContent(contentID)
-    else
-      tracker:UntrackContent(contentID)
-    end
-  end
+  return tracked, isDefault
+end
+
+__Arguments__ { String/nil, String/nil }
+function private__GetContentTracked(trackerID, contentID)
+    local tracked = SavedVariables.Profile()
+      .Path("trackers", trackerID, "contents", contentID)
+      .GetValue("tracked")
+
+    return private__IsContentShouldTracked(trackerID, tracked)
 end
 
 --- Reserved only during the loading when the trackers are created.
-local function private__LoadContentsForTracker(tracker)
-  for _, content in API.IterateContents() do 
-    local tracked = SavedVariables.Profile()
-      .Path("trackers", tracker.id, "contents", content.id)
-      .GetValue("tracked")
-
-    if tracker.id == "main" then 
-      if tracked or tracked == nil then 
-        tracker:TrackContent(content.id)
-      end
-    else
-      if tracked then 
-        tracker:TrackContent(content.id)
-      end
+__Arguments__ { Tracker }
+function private__LoadContentsForTracker(tracker)
+  for _, content in API.IterateContents() do
+    local contentID = content.id 
+    local tracked = private__GetContentTracked(tracker.id, contentID)
+    if tracked then 
+      tracker:TrackContent(contentID)
     end
   end
 end
+
+__Arguments__ { String, Boolean }
+function private__SetEnabledTracker(trackerID, enabled)
+  if enabled and TRACKERS[trackerID] then 
+    return 
+  end
+
+  if enabled then
+    local tracker = private__NewTracker(trackerID)
+    private__LoadContentsForTracker(tracker)
+  else
+    private__DeleteTracker(trackerID)
+  end
+end
+
+-- Export the functions in the API
+API.NewTracker = NewTracker
+API.DeleteTracker = DeleteTracker
+API.IterateTrackers = IterateTrackers
+API.GetTracker = GetTracker
+API.RegisterTrackerSetting = RegisterTrackerSetting
+API.GetTrackerSetting = GetTrackerSetting
+API.GetTrackerSettingWithDefault = GetTrackerSettingWithDefault 
+API.SetTrackerSetting = SetTrackerSetting
+API.FromTrackerSetting = FromTrackerSetting
 
 __UIElement__()
 __ChildProperty__(Tracker, "Mover")
@@ -678,6 +770,49 @@ class "TrackerMover" (function(_ENV)
   function __ctor(self) 
    end 
 end)
+-------------------------------------------------------------------------------
+--                              UI Settings                                  --
+-------------------------------------------------------------------------------
+RegisterTrackerSetting({ id = "enabled", default = true, handler = private__SetEnabledTracker })
+RegisterTrackerSetting({ id = "locked", default = false })
+RegisterTrackerSetting({ id = "position"})
+RegisterTrackerSetting({ id = "size", default = Size(300, 325) })
+RegisterTrackerSetting({
+  id = "contentsTracked",
+  ignoreDefault = true, 
+  handler = function(trackerID, contentTracked, contentID)
+    if not contentID then 
+      return 
+    end
+
+    local tracker = TRACKERS[trackerID]
+    if not tracker then 
+      return 
+    end
+
+    local shouldBeTracked = private__IsContentShouldTracked(trackerID, contentTracked)
+    if shouldBeTracked then 
+      tracker:TrackContent(contentID)
+    else
+      tracker:UntrackContent(contentID)
+    end
+  end, 
+  saveHandler = function(trackerID, contentTracked, contentID)
+    if not contentID then 
+      return 
+    end
+
+    local _, isDefault = private__IsContentShouldTracked(trackerID, contentTracked)
+
+    SavedVariables.Profile().Path("trackers", trackerID, "contents", contentID)
+    if isDefault then
+      SavedVariables.SetValue("tracked", nil)
+    else
+      SavedVariables.SaveValue("tracked", contentTracked)
+    end
+  end,
+  getHandler = private__GetContentTracked
+})
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
@@ -729,12 +864,17 @@ Style.UpdateSkin("Default", {
   },
 
   [Tracker] = {
-    locked = API.FromTrackerSetting("locked", false),
+    locked = FromTrackerSetting("locked"),
     clipChildren = false,
     minResize = { width = 100, height = 100},
     visible = FromUIProperty("Minimized"):Map(function(minimized) return not minimized end),
-    size = API.FromTrackerSetting("size", Size(300, 325)),
-    location = API.FromTrackerSetting("position"):Map(function(pos, tracker)
+    -- size = { width = 300, height = 325},
+    size = FromTrackerSetting("size"),
+    -- location = {
+    --   Anchor("CENTER")
+    -- },
+
+    location = FromTrackerSetting("position"):Map(function(pos, tracker)
       if pos then
         return  { Anchor("TOPLEFT", pos.x or 0, pos.y or 0, nil, "BOTTOMLEFT") }
       end
@@ -813,11 +953,16 @@ __Async__() function PLAYER_ENTERING_WORLD(isInitialLogin, isReloadingUI)
     private__LoadContentsForTracker(_MainTracker)
 
     -- Create the custom trackers, and load the contents tracked by them 
-    local trackers = SavedVariables.Path("list").GetValue("tracker")
+    local trackers = SavedVariables.Path("list").GetValue("trackers")
+    local trackersSettings = SavedVariables.Profile().GetValue("trackers")
     if trackers then 
       for trackerID in pairs(trackers) do
-        local tracker = private__NewTracker(trackerID)
-        private__LoadContentsForTracker(tracker)
+        local settings = trackersSettings[trackerID]
+        local enabled = settings and settings.enabled
+        if enabled or enabled == nil then 
+          local tracker = private__NewTracker(trackerID)
+          private__LoadContentsForTracker(tracker)
+        end
       end
     end
   end

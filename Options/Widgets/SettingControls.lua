@@ -14,10 +14,20 @@ namespace               "SylingTracker.Options.Widgets"
 export {
   ResetStyles       = SylingTracker.Utils.ResetStyles,
   TruncateDecimal   = SylingTracker.Utils.TruncateDecimal,
+
+  -- Global setting API
   GetSetting        = SylingTracker.API.GetSetting,
   SetSetting        = SylingTracker.API.SetSetting,
+
+  -- UI setting API
   GetUISetting      = SylingTracker.API.GetUISetting,
   SetUISetting      = SylingTracker.API.SetUISetting,
+
+  -- Tracker setting API
+  SetTrackerSetting = SylingTracker.API.SetTrackerSetting,
+  GetTrackerSetting = SylingTracker.API.GetTrackerSetting,
+
+  -- ItemBar setting API
   GetItemBarSetting = SylingTracker.API.GetItemBarSetting,
   SetItemBarSetting = SylingTracker.API.SetItemBarSetting
 }
@@ -28,6 +38,91 @@ enum "BindSettingType" {
   "tracker",
   "itemBar"
 }
+
+interface "IBindSetting" (function(_ENV)
+  -----------------------------------------------------------------------------
+  --                               Methods                                   --
+  -----------------------------------------------------------------------------
+  __Abstract__() function PrepareFromSetting(self, value, hasDefault, defaultValue) end
+
+  __Arguments__ { String/nil, BindSettingType/"setting", Any * 0}
+  function BindSetting(self, setting, settingType, ...)
+    local value, hasDefault, defaultValue
+
+    wipe(self.SettingExtraArgs)
+    for i = 1, select("#", ...) do 
+      local arg = select(i, ...)
+      tinsert(self.SettingExtraArgs, arg)
+    end
+
+    if setting then 
+      if settingType == "setting" then 
+        value, hasDefault, defaultValue = GetSetting(setting, ...)
+      elseif settingType == "uiSetting" then 
+        value, hasDefault, defaultValue = GetUISetting(setting, ...)
+      elseif settingType == "tracker" then
+        local trackerID = ...
+        value, hasDefault, defaultValue = GetTrackerSetting(trackerID, setting, select(2, ...))
+      elseif settingType == "itemBar" then 
+        value, hasDefault, defaultValue = GetItemBarSetting(setting, ...)
+      end
+    end
+    
+    if value == nil and hasDefault then 
+      value = defaultValue
+    end
+
+    self:PrepareFromSetting(value, hasDefault, defaultValue)
+
+    self.Setting        = setting
+    self.SettingType    = settingType
+    self.Default        = defaultValue
+  end
+
+  function TriggerSetSetting(self, setting, value, notify)
+    local settingType = self.SettingType
+    if settingType == "setting" then 
+      SetSetting(setting, value, nil, unpack(self.SettingExtraArgs))
+    elseif settingType == "uiSetting" then 
+      SetUISetting(setting, value, nil, unpack(self.SettingExtraArgs))
+    elseif settingType == "tracker" then
+      local trackerID = self.SettingExtraArgs[1]
+      SetTrackerSetting(trackerID, setting, value, nil, unpack(self.SettingExtraArgs, 2))
+    elseif settingType == "itemBar" then 
+      SetItemBarSetting(setting, value, nil, unpack(self.SettingExtraArgs))
+    end
+  end
+
+  __Arguments__ { String/nil, Any * 0  }
+  function BindUISetting(self, setting, ... )
+    return self:BindSetting(setting, "uiSetting", ...)
+  end
+
+  __Arguments__ { String/nil, String/nil, Any * 0 }
+  function BindTrackerSetting(self, trackerID, setting, ...)
+    return self:BindSetting(setting, "tracker", trackerID, ...)
+  end
+
+  __Arguments__ { String/nil, Any * 0 }
+  function BindItemBarSetting(self, setting, ... )
+    return self:BindSetting(setting, "itemBar", ...)
+  end
+  -----------------------------------------------------------------------------
+  --                               Properties                                --
+  -----------------------------------------------------------------------------
+  property "Setting" {
+    type    = String
+  }
+
+  property "SettingType" {
+    type    = BindSettingType
+  }
+
+  property "SettingExtraArgs" {
+    set = false,
+    default = function() return {} end
+  }
+end)
 
 __Widget__()
 class "SettingsSectionHeader" (function(_ENV)
@@ -135,7 +230,7 @@ end)
 
 __Widget__()
 class "SettingsCheckBox" (function(_ENV)
-  inherit "Frame"
+  inherit "Frame" extend "IBindSetting"
   -----------------------------------------------------------------------------
   --                               Events                                    --
   -----------------------------------------------------------------------------
@@ -147,16 +242,8 @@ class "SettingsCheckBox" (function(_ENV)
   local function OnCheckBoxClickHandler(self, checkbox)
     local setting = self.Setting
     if setting then
-      local settingType = self.SettingType
       local value = self.InvertSetting and (not self:IsChecked()) or self:IsChecked()
-
-      if settingType == "setting" then 
-        SetSetting(setting, value)
-      elseif settingType == "uiSetting" then 
-        SetUISetting(setting, value)
-      elseif settingType == "itemBar" then 
-        SetItemBarSetting(setting, value)
-      end
+      self:TriggerSetSetting(setting, value)
     end
   end
   -----------------------------------------------------------------------------
@@ -176,44 +263,17 @@ class "SettingsCheckBox" (function(_ENV)
     return self:GetChild("CheckBox"):GetChecked()
   end
 
-  __Arguments__ { String/nil, Boolean/false, BindSettingType/"setting"}
-  function BindSetting(self, setting, invert, settingType)
-    local value, hasDefault, defaultValue
+  __Arguments__ { Boolean/ false}
+  function SetInvertedSetting(self, invert)
+    self.InvertSetting = invert
+  end
 
-    if setting then 
-      if settingType == "setting" then 
-        value, hasDefault, defaultValue = GetSetting(setting)
-      elseif settingType == "uiSetting" then 
-        value, hasDefault, defaultValue = GetUISetting(setting)
-      elseif settingType == "itemBar" then 
-        value, hasDefault, defaultValue = GetItemBarSetting(setting)
-      end
-    end
-
-    if value == nil and hasDefault then 
-      value = defaultValue
-    end
-
-    if invert then 
+  function PrepareFromSetting(self, value, hasDefault, defaultValue)
+    if self.InvertSetting then
       self:SetChecked(not value)
     else 
       self:SetChecked(value )
     end
-
-    self.Setting        = setting
-    self.SettingType    = settingType
-    self.Default        = defaultValue
-    self.InvertSetting  = invert
-  end
-
-  __Arguments__ { String/nil, Boolean/nil}
-  function BindUISetting(self, setting, invert)
-    return self:BindSetting(setting, invert, "uiSetting")
-  end
-
-  __Arguments__ { String/nil, Boolean/nil}
-  function BindItemBarSetting(self, setting, invert)
-    return self:BindSetting(setting, invert, "itemBar")
   end
 
   function OnAcquire(self)
@@ -232,25 +292,16 @@ class "SettingsCheckBox" (function(_ENV)
 
     ResetStyles(self, true)
 
-    self.Setting        = nil
-    self.SettingType    = nil 
-    self.Default        = nil 
     self.InvertSetting  = nil
+
+    self:BindSetting()
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
-  property "Setting" {
-    type    = String
-  }
-
   property "InvertSetting" {
-    type    =   Boolean,
+    type    = Boolean,
     default = false
-  }
-
-  property "SettingType" {
-    type    = BindSettingType
   }
 
   property "Default" {
@@ -272,7 +323,7 @@ end)
 
 __Widget__()
 class "SettingsDropDown" (function(_ENV)
-  inherit "Frame"
+  inherit "Frame" extend "IBindSetting"
   -----------------------------------------------------------------------------
   --                               Events                                    --
   -----------------------------------------------------------------------------
@@ -283,17 +334,9 @@ class "SettingsDropDown" (function(_ENV)
   -----------------------------------------------------------------------------
   local function OnEntrySelectedHandler(self, entry)
     local setting = self.Setting
-    if setting then 
-      local settingType = self.SettingType
+    if setting then
       local data = entry:GetEntryData()
-
-      if settingType == "setting" then 
-        SetSetting(setting, data.value)
-      elseif settingType == "uiSetting" then 
-        SetUISetting(setting, data.value)
-      elseif settingType == "itemBar" then 
-        SetItemBarSetting(setting, data.value)
-      end
+      self:TriggerSetSetting(setting, data.value)
     end
   end
   -----------------------------------------------------------------------------
@@ -328,41 +371,10 @@ class "SettingsDropDown" (function(_ENV)
     self:GetChild("DropDown"):SetMediaType(mediaType)
   end
 
-  __Arguments__ { String/nil, BindSettingType/"setting"}
-  function BindSetting(self, setting, settingType)
-    local value, hasDefault= defaultValue
-
-    if setting then 
-      if settingType == "setting" then 
-        value, hasDefault, defaultValue = GetSetting(setting)
-      elseif settingType == "uiSetting" then 
-        value, hasDefault, defaultValue = GetUISetting(setting)
-      elseif settingType == "itemBar" then 
-        value, hasDefault, defaultValue = GetItemBarSetting(setting)
-      end
-    end
-
-    if value == nil and hasDefault then 
-      value = defaultValue
-    end
-
+  function PrepareFromSetting(self, value, hasDefault, defaultValue)
     if value then 
       self:SelectByValue(value)
     end
-
-    self.Setting      = setting
-    self.SettingType  = settingType
-    self.Default      = defaultValue
-  end
-
-  __Arguments__ { String/nil }
-  function BindUISetting(self, setting)
-    return self:BindSetting(setting, "uiSetting")
-  end
-
-  __Arguments__ { String/nil }
-  function BindItemBarSetting(self, setting)
-    return self:BindSetting(setting, "itemBar")
   end
 
   function OnAcquire(self)
@@ -386,14 +398,6 @@ class "SettingsDropDown" (function(_ENV)
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
-  property "Setting" {
-    type = String 
-  }
-
-  property "SettingType" {
-    type = BindSettingType
-  }
-
   property "Default" {
     type = Any
   }
@@ -411,7 +415,7 @@ end)
 
 __Widget__()
 class "SettingsSlider" (function(_ENV)
-  inherit "Frame"
+  inherit "Frame" extend "IBindSetting"
   -----------------------------------------------------------------------------
   --                               Events                                    --
   -----------------------------------------------------------------------------
@@ -423,14 +427,7 @@ class "SettingsSlider" (function(_ENV)
   local function OnValueChangedHandler(self, value)
     local setting = self.Setting
     if setting then
-      local settingType = self.SettingType
-      if settingType == "setting" then 
-        SetSetting(setting, value)
-      elseif settingType == "uiSetting" then 
-        SetUISetting(setting, value)
-      elseif settingType == "itemBar" then 
-        SetItemBarSetting(setting, value)
-      end
+      self:TriggerSetSetting(setting, value)
     end
   end
   -----------------------------------------------------------------------------
@@ -461,39 +458,12 @@ class "SettingsSlider" (function(_ENV)
     self:GetChild("Slider"):SetLabelFormatter(labelType, value)
   end
 
-  __Arguments__ { String/nil, BindSettingType/"setting"}
-  function BindSetting(self, setting, settingType)
-    local value, hasDefault, defaultValue 
-
-    if setting then 
-      if settingType == "setting" then 
-        value, hasDefault, defaultValue = GetSetting(setting)
-      elseif settingType == "uiSetting" then 
-        value, hasDefault, defaultValue = GetUISetting(setting)
-      elseif settingType == "itemBar" then 
-        value, hasDefault, defaultValue = GetItemBarSetting(setting)
-      end
-    end
-
+  function PrepareFromSetting(self, value, hasDefault, defaultValue)
     if value then 
       self:SetValue(value)
-    elseif hasDefault then 
+    elseif hasDefault then
       self:SetValue(defaultValue)
     end
-
-    self.Setting      = setting
-    self.SettingType  = settingType
-    self.Default      = defaultValue
-  end
-
-  __Arguments__ { String/nil}
-  function BindUISetting(self, setting)
-    return self:BindSetting(setting, "uiSetting")
-  end
-
-  __Arguments__ { String/nil}
-  function BindItemBarSetting(self, setting)
-    return self:BindSetting(setting, "itemBar")
   end
 
   function OnAcquire(self)
@@ -508,10 +478,9 @@ class "SettingsSlider" (function(_ENV)
 
     ResetStyles(self, true)
 
-    self.Setting      = nil
-    self.SettingType  = nil
+    self:BindSetting()
     --- It's important these functions are called after Setting has been set 
-    --- to nil for avoiding the setting vlaue is updated by an incorrect value
+    --- to nil for avoiding the setting value is updated by an incorrect value
     self:SetValue(0)
     self:SetValueStep(1)
     self:SetMinMaxValues(0, 100)
@@ -519,14 +488,6 @@ class "SettingsSlider" (function(_ENV)
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
-  property "Setting" {
-    type = String
-  }
-
-  property "SettingType" {
-    type = BindSettingType 
-  }
-
   property "Default" {
     type = Any
   }
@@ -544,7 +505,7 @@ end)
 
 __Widget__()
 class "SettingsColorPicker" (function(_ENV)
-  inherit "Frame"
+  inherit "Frame" extend "IBindSetting"
   -----------------------------------------------------------------------------
   --                               Events                                    --
   -----------------------------------------------------------------------------
@@ -557,10 +518,10 @@ class "SettingsColorPicker" (function(_ENV)
   --                               Handlers                                  --
   -----------------------------------------------------------------------------
   local function OnColorConfirmedHandler(self, r, g, b, a)
-    if self.UISetting then 
-      SetUISetting(self.UISetting, Color(r, g, b, a))
-    elseif self.Setting then 
-      SetSetting(self.Setting, Color(r, g, b, a))
+    local setting = self.Setting
+    if setting then
+      local color = Color(r, g, b, a)
+      self:TriggerSetSetting(setting, color)
     end
   end
   -----------------------------------------------------------------------------
@@ -583,20 +544,10 @@ class "SettingsColorPicker" (function(_ENV)
     end
   end
 
-  __Arguments__ { String }
-  function BindUISetting(self, uiSetting)
-    local color
-
-    if uiSetting then 
-      color = GetUISetting(uiSetting)
+  function PrepareFromSetting(self, value, hasDefault, defaultValue)
+    if value then 
+      self:SetColor(value.r, value.g, value.b, value.a)
     end
-
-    if color then
-      self:SetColor(color.r, color.g, color.b, color.a)
-    end
-
-    self.UISetting  = uiSetting
-    self.Setting    = nil
   end
 
   function OnAcquire(self)
@@ -611,18 +562,15 @@ class "SettingsColorPicker" (function(_ENV)
 
     ResetStyles(self, true)
 
+    self:BindSetting()
 
     self:SetColor()
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
-  property "UISetting" {
-    type = String 
-  }
-
-  property "Setting" {
-    type = String 
+  property "Default" {
+    type    = Any
   }
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
@@ -638,7 +586,7 @@ end)
 
 __Widget__()
 class "SettingsMediaFont" (function(_ENV)
-  inherit "Frame"
+  inherit "Frame" extend "IBindSetting"
   -----------------------------------------------------------------------------
   --                               Events                                    --
   -----------------------------------------------------------------------------
@@ -695,67 +643,41 @@ class "SettingsMediaFont" (function(_ENV)
       ))
     end
   end
+
+  local function OnFontChangedHandler(self, font)
+    local setting = self.Setting
+    if setting then 
+      self:TriggerSetSetting(setting, font)
+    end
+
+    self.Font.font = font.font
+    self.Font.height = font.height 
+    self.Font.outline = font.outline
+    self.Font.monochrome = font.monochrome
+  end
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
-  __Arguments__ { String/nil }
-  function BindSetting(self, setting)
-    local font 
-    if setting then 
-      font = GetSetting(setting)
-    end
-
-    if font then 
-      if font.font then
-        self:GetChild("FontSetting"):SelectByValue(font.font)
+  function PrepareFromSetting(self, value, hasDefault, defaultValue)
+    if value then 
+      if value.font then
+        self:GetChild("FontSetting"):SelectByValue(value.font)
       end
 
-      if font.height then 
-        self:GetChild("FontHeightSetting"):SetValue(font.height)
+      if value.height then 
+        self:GetChild("FontHeightSetting"):SetValue(value.height)
       end
 
-      if font.outline then 
-        self:GetChild("FontOutlineSetting"):SelectByValue(font.outline)
+      if value.outline then 
+        self:GetChild("FontOutlineSetting"):SelectByValue(value.outline)
       end
 
-      if font.monochrome then 
-        self:GetChild("FontMonochromeSetting"):SetValue(font.monochrome)
+      if value.monochrome then 
+        self:GetChild("FontMonochromeSetting"):SetValue(value.monochrome)
       end
     end
 
-    self.Font       = font 
-    self.Setting    = setting
-    self.UISetting  = nil
-  end
-
-  __Arguments__ { String/nil }
-  function BindUISetting(self, uiSetting)
-    local font 
-    if uiSetting then 
-      font = GetUISetting(uiSetting)
-    end
-
-    if font then 
-      if font.font then
-        self:GetChild("FontSetting"):SelectByValue(font.font)
-      end
-
-      if font.height then 
-        self:GetChild("FontHeightSetting"):SetValue(font.height)
-      end
-
-      if font.outline then 
-        self:GetChild("FontOutlineSetting"):SelectByValue(font.outline)
-      end
-
-      if font.monochrome then 
-        self:GetChild("FontMonochromeSetting"):SetValue(font.monochrome)
-      end
-    end
-
-    self.Font       = font 
-    self.UISetting  = uiSetting
-    self.Setting    = nil
+    self.Font = value
   end
 
   function OnRelease(self)
@@ -764,19 +686,13 @@ class "SettingsMediaFont" (function(_ENV)
 
     self:SetParent(nil)
 
-    self.Setting = nil 
-    self.UISetting = nil 
-    self.Font = nil 
+    self:BindSetting()
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
-  property "Setting" {
-    type = String
-  }
-
-  property "UISetting" {
-    type = String
+  property "Default" {
+    type    = Any
   }
 
   property "Font" {
@@ -830,18 +746,7 @@ class "SettingsMediaFont" (function(_ENV)
       OnFontMonochromeSettingClick(self, ...)
     end
 
-    self.OnFontChanged = self.OnFontChanged + function(_, font)
-      if self.UISetting then
-        SetUISetting(self.UISetting, font)
-      elseif self.Setting then 
-        SetSetting(self.Setting, font)
-      end
-
-      self.Font.font = font.font
-      self.Font.height = font.height 
-      self.Font.outline = font.outline
-      self.Font.monochrome = font.monochrome
-    end
+    self.OnFontChanged = self.OnFontChanged + OnFontChangedHandler
   end
 end)
 
@@ -931,8 +836,6 @@ class "SettingsExpandableSection" (function(_ENV)
   end
 
 end)
-
-
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------

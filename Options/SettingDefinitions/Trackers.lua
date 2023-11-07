@@ -14,7 +14,9 @@ export {
   NewTracker                    = SylingTracker.API.NewTracker,
   DeleteTracker                 = SylingTracker.API.DeleteTracker,
   GetTracker                    = SylingTracker.API.GetTracker,
-  SetContentTracked             = SylingTracker.API.SetContentTracked
+  SetContentTracked             = SylingTracker.API.SetContentTracked,
+  GetTrackerSetting             = SylingTracker.API.GetTrackerSetting,
+  SetTrackerSetting             = SylingTracker.API.SetTrackerSetting
 }
 
 __Widget__()
@@ -76,7 +78,8 @@ class "SettingDefinitions.CreateTracker" (function(_ENV)
         --- create lof of frame.
         Scorpio.Continue(function()
           for contentID, isTracked in pairs(self.ContentsTracked) do
-            SetContentTracked(tracker, contentID, isTracked)
+            -- SetContentTracked(tracker, contentID, isTracked)
+            SetTrackerSetting(trackerName, "contentsTracked", isTracked, nil, contentID)
             Scorpio.Next()
           end
         end)
@@ -135,6 +138,16 @@ class "SettingDefinitions.Tracker" (function(_ENV)
   --                   [General] Tab Builder                                 --
   -----------------------------------------------------------------------------
   function BuildGeneralTab(self)
+    local trackerID = self.TrackerID
+    ---------------------------------------------------------------------------
+    --- Enable Tracker
+    ---------------------------------------------------------------------------
+    local enableTrackerCheckBox = Widgets.SettingsCheckBox.Acquire(false, self)
+    enableTrackerCheckBox:SetID(10)
+    enableTrackerCheckBox:SetLabel("Enable")
+    enableTrackerCheckBox:BindTrackerSetting(trackerID, "enabled")
+    self.GeneralTabControls.enableTrackerCheckBox = enableTrackerCheckBox
+
     ---------------------------------------------------------------------------
     --- Lock Tracker
     ---------------------------------------------------------------------------
@@ -144,16 +157,17 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     end
 
     local lockTrackerCkeckBox = Widgets.SettingsCheckBox.Acquire(false, self)
-    lockTrackerCkeckBox:SetID(10)
+    lockTrackerCkeckBox:SetID(20)
     lockTrackerCkeckBox:SetLabel("Lock")
-    lockTrackerCkeckBox:SetChecked(self.Tracker.Locked)
-    lockTrackerCkeckBox:SetUserHandler("OnCheckBoxClick", OnLockTrackerCheckBoxClick)
+    lockTrackerCkeckBox:BindTrackerSetting(trackerID, "locked")
+    -- lockTrackerCkeckBox:SetChecked(self.Tracker.Locked)
+    -- lockTrackerCkeckBox:SetUserHandler("OnCheckBoxClick", OnLockTrackerCheckBoxClick)
     self.GeneralTabControls.lockTrackerCkeckBox = lockTrackerCkeckBox
     ---------------------------------------------------------------------------
     --- Danger Zone Section
     ---------------------------------------------------------------------------
     --- The "Danger zone" won't appear for main tracker as it's not intended to be deleted.
-    if self.Tracker.id ~= "main" then 
+    if self.TrackerID ~= "main" then
       local dangerZoneSection = Widgets.ExpandableSection.Acquire(false, self)
       dangerZoneSection:SetExpanded(false)
       dangerZoneSection:SetID(999)
@@ -172,7 +186,6 @@ class "SettingDefinitions.Tracker" (function(_ENV)
       deleteTrackerButton:SetUserHandler("OnClick", OnDeleteTrackerClick)
       Style[deleteTrackerButton].marginLeft = 0.35
       self.GeneralTabControls.deleteTrackerButton = deleteTrackerButton
-      
     end
 
   end
@@ -189,6 +202,7 @@ class "SettingDefinitions.Tracker" (function(_ENV)
   --                 [Contents Tracked] Tab Builder                          --
   -----------------------------------------------------------------------------
   function BuildContentsTrackedTab(self)
+    local trackerID = self.TrackerID
     ---------------------------------------------------------------------------
     --- Contents Tracked Section Header 
     ---------------------------------------------------------------------------
@@ -199,20 +213,25 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     ---------------------------------------------------------------------------
     --- Contents Controls 
     ---------------------------------------------------------------------------
-    local function OnContentCheckBoxClick(checkBox)
-      local contentID = checkBox:GetUserData("contentID")
-      local isTracked = checkBox:IsChecked()
+    -- local function OnContentCheckBoxClick(checkBox)
+    --   local contentID = checkBox:GetUserData("contentID")
+    --   local isTracked = checkBox:IsChecked()
 
-      SetContentTracked(self.Tracker, contentID, isTracked)
-    end
+    --   -- SetContentTracked(self.Tracker, contentID, isTracked)
+    --   SetTrackerSetting(self.TrackerID, "contentsTracked", contentID, nil, isTracked)
+    -- end
 
     for index, content in List(IterateContents()):Sort("x,y=>x.Name<y.Name"):GetIterator() do
+      local contentID = content.id
+      local contentTracked = GetTrackerSetting(self.TrackerID, "contentsTracked", contentID)
+
       local contentCheckBox = Widgets.SettingsCheckBox.Acquire(false, self)
       contentCheckBox:SetID(20 + index)
       contentCheckBox:SetLabel(content.FormattedName)
-      contentCheckBox:SetChecked(self.Tracker:IsContentTracked(content.id))
-      contentCheckBox:SetUserData("contentID", content.id)
-      contentCheckBox:SetUserHandler("OnCheckBoxClick", OnContentCheckBoxClick)
+      contentCheckBox:BindTrackerSetting(trackerID, "contentsTracked", contentID)
+      -- contentCheckBox:SetChecked(contentTracked)
+      -- contentCheckBox:SetUserData("contentID", contentID)
+      -- contentCheckBox:SetUserHandler("OnCheckBoxClick", OnContentCheckBoxClick)
       Style[contentCheckBox].MarginLeft = 20
 
       self.ContentTabControls[contentCheckBox] = contentCheckBox

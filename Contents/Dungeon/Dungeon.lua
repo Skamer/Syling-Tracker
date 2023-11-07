@@ -18,7 +18,8 @@ export {
   GetInfo                             = C_Scenario.GetInfo,
   GetStepInfo                         = C_Scenario.GetStepInfo,
   GetCriteriaInfo                     = C_Scenario.GetCriteriaInfo,
-  GetActiveKeystoneInfo               = C_ChallengeMode.GetActiveKeystoneInfo
+  GetActiveKeystoneInfo               = C_ChallengeMode.GetActiveKeystoneInfo,
+  GetInstanceTextureFileID            = Utils.GetInstanceTextureFileID
 }
 
 DUNGEON_CONTENT_SUBJECT = RegisterObservableContent("dungeon", DungeonContentSubject)
@@ -45,7 +46,7 @@ function LoadAndUpdate(self)
   local textureFileID
   local currentMapID = select(8, GetInstanceInfo())
   if currentMapID then
-    textureFileID = select(4, EJ_GetInstanceInfo(C_EncounterJournal.GetInstanceForGameMap(currentMapID)))
+    textureFileID = GetInstanceTextureFileID(currentMapID)
   end
 
   DUNGEON_CONTENT_SUBJECT.textureFileID = textureFileID

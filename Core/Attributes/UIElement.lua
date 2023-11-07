@@ -48,8 +48,9 @@ interface "IChildPropertyHookRelease" (function(_ENV)
   local function OnParentChanged(self, parent, oparent)
     -- if the metatable of parent isn't not a class, this says this is the 
     -- Scorpio Recycle holdar, saying the frame has been released.
-    if not Class.Validate(getmetatable(parent)) then
-      self:Release(true)
+    -- We skip if the frame has been acquired by the __UIElement__ system.
+    if not self:IsAcquired() and not Class.Validate(getmetatable(parent)) then
+      self:Release(true, self:IsAcquired() )
     end
   end
 
@@ -127,6 +128,10 @@ class "__UIElement__" (function(_ENV)
           end
 
           return true 
+        end
+
+        function IsAcquired(self)
+          return ACQUIRED_ELEMENTS[self]
         end
 
         --- Register the System Event for the frame 

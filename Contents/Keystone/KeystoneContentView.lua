@@ -469,19 +469,16 @@ API.UpdateBaseSkin({
 
     TopDungeonInfo = {
       backdrop = {
-        bgFile = [[Interface\Buttons\WHITE8X8]],
         edgeFile  = [[Interface\Buttons\WHITE8X8]],
         edgeSize  = 1
       },
-      backdropColor       = { r = 0, g = 0, b = 0, a = 0.65}, -- 87
+      
       backdropBorderColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
       height = 48,
 
       DungeonIcon = {
         fileID = FromUIProperty("DungeonTextureFileID"),
-        texCoords = { left = 0.04,  right = 0.64, top = 0.02, bottom = 0.70 } ,
-        vertexColor = { r = 1, g = 1, b = 1, a = 0.5 },
-        height = 44,
+        setAllPoints = true
       },
 
       Level = {

@@ -72,24 +72,12 @@ end)
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
   [DungeonContentView] = {
-    -- height = 450,
-    -- backdrop = {
-    --   bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
-    --   edgeFile  = [[Interface\Buttons\WHITE8X8]],
-    --   edgeSize  = 1
-    -- },
-
-    -- backdropColor       = { r = 1, g = 20/255, b = 23/255, a = 0.87}, -- 87
-    -- backdropBorderColor = { r = 0, g = 0, b = 0, a = 1},
-
-
     TopDungeonInfo = {
       backdrop = {
-        bgFile = [[Interface\Buttons\WHITE8X8]],
         edgeFile  = [[Interface\Buttons\WHITE8X8]],
         edgeSize  = 1
       },
-      backdropColor       = { r = 0, g = 0, b = 0, a = 0.65}, -- 87
+      
       backdropBorderColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
       height = 48,
 
@@ -101,68 +89,14 @@ Style.UpdateSkin("Default", {
 
       DungeonIcon = {
         fileID = FromUIProperty("DungeonTextureFileID"),
-        --fileID = 4742929, [<<--- used ]
-        -- texCoords = { left = 0.07,  right = 0.7, top = 0.08, bottom = 0.52 } ,
-        texCoords = { left = 0.04,  right = 0.64, top = 0.02, bottom = 0.70 } ,
-        vertexColor = { r = 1, g = 1, b = 1, a = 0.5 },
-        -- snapToPixelGrid     = false,
-        -- texelSnappingBias    = 0,
-        -- fileID = 4742929,
-        -- fileID = 4746641,
-        -- fileID = 4742826,
-        height = 44,
-        -- width = 445,
-        -- setAllPoints = true,
-        location = {
-          Anchor("LEFT", 1, 0),
-          Anchor("RIGHT", -1, 0)
-        }
-
-        -- location = {
-        --   Anchor("TOPLEFT", 1, -1),
-        --   -- Anchor("LEFT"),
-        --   -- Anchor("RIGHT"),
-        --   -- Anchor("BOTTOM", 0, 2)
-        -- }
+        setAllPoints = true,
       },
-      -- DungeonIcon = {
-      --   fileID = 4742929,
-      --   -- texCoords = { left = 0.07,  right = 0.7, top = 0.08, bottom = 0.52 } ,
-      --   texCoords = { left = 0.04,  right = 0.64, top = 0.02, bottom = 0.70 } ,
-      --   vertexColor = { r = 1, g = 1, b = 1, a = 0.5 },
-      --   -- snapToPixelGrid     = false,
-      --   -- texelSnappingBias    = 0,
-      --   -- fileID = 4742929,
-      --   -- fileID = 4746641,
-      --   -- fileID = 4742826,
-      --   height = 64,
-      --   width = 64,
-      --   -- setAllPoints = true,
-      --   location = {
-      --     Anchor("LEFT", 2, 0),
-      --     -- Anchor("RIGHT", -2, 0)
-      --   }
-
-      --   -- location = {
-      --   --   Anchor("TOPLEFT", 1, -1),
-      --   --   -- Anchor("LEFT"),
-      --   --   -- Anchor("RIGHT"),
-      --   --   -- Anchor("BOTTOM", 0, 2)
-      --   -- }
-      -- },
 
       DungeonName = {
-        -- text = "Académie d'Algeth'ar",
         text = FromUIProperty("DungeonName"),
         fontObject = Game18Font,
         textColor = { r = 1, g = 0.914, b = 0.682},
 
-        -- location = {
-        --   Anchor("LEFT", 5, 0),
-        --   Anchor("TOP"),
-        --   Anchor("BOTTOM"),
-        --   Anchor("RIGHT")
-        -- }
         location = {
           Anchor("LEFT", 5, 0),
           Anchor("TOP"),
@@ -188,9 +122,3 @@ Style.UpdateSkin("Default", {
     }
   }
 })
-
--- function OnLoad(self)
---   local currentMapID = select(8, GetInstanceInfo())
---   C_EncounterJournal.GetInstanceForGameMap(currentMapID)
--- EJ_GetInstanceInfo()
--- end

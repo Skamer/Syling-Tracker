@@ -21,7 +21,8 @@ export {
   GetActiveKeystoneInfo               = C_ChallengeMode.GetActiveKeystoneInfo,
   GetAffixInfo                        = C_ChallengeMode.GetAffixInfo,
   GetMapUIInfo                        = C_ChallengeMode.GetMapUIInfo,
-  GetActiveChallengeMapID             = C_ChallengeMode.GetActiveChallengeMapID
+  GetActiveChallengeMapID             = C_ChallengeMode.GetActiveChallengeMapID,
+  GetInstanceTextureFileID            = Utils.GetInstanceTextureFileID
 }
 
 KEYSTONE_CONTENT_SUBJECT = RegisterObservableContent("keystone", KeystoneContentSubject)
@@ -44,7 +45,7 @@ function LoadAndUpdate(self)
   local textureFileID
   local currentMapID = select(8, GetInstanceInfo())
   if currentMapID then
-    textureFileID = select(4, EJ_GetInstanceInfo(C_EncounterJournal.GetInstanceForGameMap(currentMapID)))
+    textureFileID = GetInstanceTextureFileID(currentMapID)
   end
 
   KEYSTONE_CONTENT_SUBJECT.textureFileID = textureFileID

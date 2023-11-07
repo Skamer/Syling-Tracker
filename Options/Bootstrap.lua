@@ -88,7 +88,7 @@ function CreateTrackerEntries(self, panel)
     end
   }, "trackers")
 
-  for trackerID, tracker in IterateTrackers(false) do 
+  for trackerID in IterateTrackers(false) do
     panel:AddCategoryEntry({
       text = trackerID:gsub("^%l", string.upper),
       id = trackerID,
@@ -110,17 +110,17 @@ function CreateTrackerEntries(self, panel)
 end
 
 __SystemEvent__()
-function SylingTracker_TRACKER_CREATED(tracker)
+function SylingTracker_TRACKER_CREATED(trackerID)
   SETTINGS_PANEL:ClearEntries("trackers")
   _M:CreateTrackerEntries(SETTINGS_PANEL)
   SETTINGS_PANEL:Refresh()
-  SETTINGS_PANEL:SelectEntryById("trackers", tracker.id)
+  SETTINGS_PANEL:SelectEntryById("trackers", trackerID)
 end
 
 
 __SystemEvent__()
-function SylingTracker_TRACKER_DELETED(tracker)
-  SETTINGS_PANEL:RemoveEntryById(tracker.id)
+function SylingTracker_TRACKER_DELETED(trackerID)
+  SETTINGS_PANEL:RemoveEntryById(trackerID)
   SETTINGS_PANEL:SelectEntry("general", 1)
   SETTINGS_PANEL:Refresh("trackers")
 end
