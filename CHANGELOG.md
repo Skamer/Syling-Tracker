@@ -1,4 +1,10 @@
-# 1.2.8
+# 1.2.9
+
+- bumped the toc version for 10.2.0
+
+---
+
+## 1.2.8
 
 **FIXES**
 
