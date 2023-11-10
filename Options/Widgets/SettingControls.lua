@@ -846,10 +846,11 @@ Style.UpdateSkin("Default", {
 
     Title = {
       justifyH = "LEFT",
-      justifyV = "TOP",
+      justifyV = "MIDDLE",
       fontObject = GameFontHighlightLarge,
       location = {
-        Anchor("TOPLEFT", 7, -16)
+        Anchor("LEFT"),
+        Anchor("RIGHT")
       }
     }
   },

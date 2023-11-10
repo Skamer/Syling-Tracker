@@ -13,6 +13,9 @@ export {
   GetNearestFrameForType  = Utils.GetNearestFrameForType,
   FromUIProperty          = Wow.FromUIProperty,
 
+  IsInInstance          = IsInInstance,
+  GetActiveKeystoneInfo = C_ChallengeMode.GetActiveKeystoneInfo,
+  SecureCmdOptionParse  = SecureCmdOptionParse
 }
 
 __UIElement__()
@@ -26,9 +29,26 @@ class "TrackerMinimizeButton" (function(_ENV)
   }
 end)
 
+struct "VisibilityRulesType" {
+  { name = "defaultVisibility",               type = String,  default = "show"},
+  { name = "hideWhenEmpty",                   type = Boolean, default = true },
+  { name = "enableAdvancedRules",             type = Boolean, default = false},
+  { name = "inDungeonVisibility",             type = String,  default = "show"},
+  { name = "inKeystoneVisibility",            type = String,  default = "show"},
+  { name = "inRaidVisibility",                type = String,  default = "show"},
+  { name = "inScenarioVisibility",            type = String,  default = "show"},
+  { name = "inArenaVisibility",               type = String,  default = "show"},
+  { name = "inBattlegroundVisibility",        type = String,  default = "show"},
+  { name = "inPartyVisibility",               type = String,  default = "show"},
+  { name = "inRaidGroupVisibility",           type = String,  default = "show"},
+  { name = "macroVisibility",                 type = String;  default = "" },
+  { name = "evaluateMacroVisibilityAtFirst",  type = Boolean, default = false}
+}
+
 __UIElement__()
 class "Tracker" (function(_ENV)
   inherit "Frame" extend "IQueueLayout" "IQueueAdjustHeight"
+
   -----------------------------------------------------------------------------
   --                               Events                                    --
   -----------------------------------------------------------------------------
@@ -75,6 +95,7 @@ class "Tracker" (function(_ENV)
       Style[self].Mover.visible   = true
     end
   end
+
 
   __Async__()
   function StopMovingOrSizing(self)
@@ -137,6 +158,8 @@ class "Tracker" (function(_ENV)
 
     self:OnLayout()
     self:OnAdjustHeight()
+
+    self.Empty = self.Views.Count == 0
   end
 
   __Arguments__ { IView }
@@ -155,6 +178,8 @@ class "Tracker" (function(_ENV)
 
     -- NOTE: We don't call the "Release" method of view because it will be done 
     -- by the content type
+
+    self.Empty = self.Views.Count == 0
   end  
 
   __Iterator__()
@@ -277,6 +302,11 @@ class "Tracker" (function(_ENV)
     handler   = OnLockedChanged
   }
 
+  property "Empty" {
+    type = Boolean,
+    default = true
+  }
+
   __Observable__()
   property "Minimized" {
     type      = Boolean,
@@ -296,6 +326,18 @@ class "Tracker" (function(_ENV)
   property "ContentsTracked" {
     set = false, 
     default = function() return {} end
+  }
+
+  property "VisibilityRules" {
+    set = false,
+    type = VisibilityRulesType,
+    default = function() return VisibilityRulesType() end
+  }
+
+  __Observable__()
+  property "VisibilityRulesShown" {
+    type = Boolean,
+    default = true
   }
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
@@ -534,7 +576,9 @@ struct "TrackerSettingInfoType" {
  { name = "handler", type = Function },
  { name = "saveHandler", type = Function},
  { name = "ignoreDefault", type = Boolean, default = false},
- { name = "getHandler", type = Function}
+ { name = "getHandler", type = Function},
+ { name = "defaultHandler", type = Function},
+ { name = "structType", type = StructType },
 }
 
 --- Register a setting for a tracker
@@ -601,14 +645,32 @@ function GetTrackerSetting(trackerID, setting, ...)
 
   local settingInfo = TRACKER_SETTINGS[setting]
   if settingInfo then 
-    defaultValue = settingInfo.default
-    getHandler = settingInfo.getHandler
+    defaultHandler  = settingInfo.defaultHandler
+    structType      = settingInfo.structType
+    getHandler      = settingInfo.getHandler
     hasDefaultValue = not settingInfo.ignoreDefault
+
+    if defaultHandler then 
+      defaultValue = defaultHandler(trackerID, ...)
+    elseif structType then
+      local subSetting = ...
+      local structMember = Struct.GetMember(structType, subSetting)
+      defaultValue = structMember and structMember:GetDefault()
+    else
+      defaultValue = settingInfo.default
+    end
   end 
 
   if trackerID and trackerID ~= "" then 
     if getHandler then
       dbValue = getHandler(trackerID, ...)
+    elseif structType then 
+      local subSetting = ...
+      if subSetting then
+        dbValue = SavedVariables.Profile().Path("trackers", trackerID, setting).GetValue(subSetting)
+      else 
+        dbValue = SavedVariables.Profile().Path("trackers", trackerID).GetValue(setting)
+      end
     else
       dbValue = SavedVariables.Profile().Path("trackers", trackerID).GetValue(setting)
     end
@@ -646,30 +708,57 @@ function SetTrackerSetting(trackerID, setting, value, notify, ...)
   local default = nil 
   local ignoreDefault = false 
   local handler = nil 
-  local saveHandler = nil 
+  local saveHandler = nil
+  local structType = nil 
 
   local settingInfo = TRACKER_SETTINGS[setting]
   if settingInfo then 
-    default       = settingInfo.default
-    ignoreDefault = settingInfo.ignoreDefault
-    handler       = settingInfo.handler
-    saveHandler   = settingInfo.saveHandler
+    ignoreDefault   = settingInfo.ignoreDefault
+    defaultHandler  = settingInfo.defaultHandler
+    handler         = settingInfo.handler
+    saveHandler     = settingInfo.saveHandler
+    structType      = settingInfo.structType
+  
+    
+    if defaultHandler then 
+      default = defaultHandler(trackerID, ...)
+    elseif structType then
+      local subSetting = ...
+      local structMember = Struct.GetMember(structType, subSetting)
+      default = structMember and structMember:GetDefault()
+    else
+      default = settingInfo.default
+    end
   end
 
-  if value == nil and not ignoreDefault then 
-    value = default
-  end
-
-  if saveHandler then 
-    saveHandler(trackerID, value, ...)
-  else 
-    if value == nil or value == default then
+  if value == nil or value == default then
+    if saveHandler then 
+      saveHandler(trackerID, nil, ...)
+    elseif structType then 
+      local subSetting = ...
+      if subSetting then 
+        SavedVariables.Profile().Path("trackers", trackerID, setting).SetValue(subSetting, nil)
+      end
+    else
       SavedVariables.Profile().Path("trackers", trackerID).SetValue(setting, nil)
+    end
+  else
+    if saveHandler then 
+      saveHandler(trackerID, value, ...)
+    elseif structType then
+      local subSetting = ...
+      if subSetting then 
+        SavedVariables.Profile().Path("trackers", trackerID, setting).SaveValue(subSetting, value)
+      end
     else
       SavedVariables.Profile().Path("trackers", trackerID).SaveValue(setting, value)
     end
   end
-
+  
+  if value == nil and not ignoreDefault then 
+    value = default
+  end
+  
   if notify then
     if handler then 
       handler(trackerID, value, ...)
@@ -741,9 +830,221 @@ function private__SetEnabledTracker(trackerID, enabled)
   if enabled then
     local tracker = private__NewTracker(trackerID)
     private__LoadContentsForTracker(tracker)
+    LoadVisibilityRulesForTracker(tracker)
   else
     private__DeleteTracker(trackerID)
   end
+end
+
+TRACKERS_AUTO_VISIBILITY_REGISTERED       = List()
+AUTO_VISIBILITY_EVENTS_HANDLER_REGISTERED = false
+AUTO_VISIBILITY_EVENTS                    = {
+  "MODIFIER_STATE_CHANGED", "ACTIONBAR_PAGE_CHANGED", "UPDATE_BONUS_ACTIONBAR",
+  "PLAYER_ENTERING_WORLD", "UPDATE_SHAPESHIFT_FORM", "UPDATE_STEALTH", "PLAYER_TARGET_CHANGED",
+  "PLAYER_FOCUS_CHANGED", "PLAYER_REGEN_DISABLED", "PLAYER_REGEN_ENABLED", "UNIT_PET", 
+  "GROUP_ROSTER_UPDATE", "CHALLENGE_MODE_START"
+}
+TRACKERS_MACRO_TICKER_REGISTERED          = List() 
+MACRO_TICKER_ENABLED                      = false
+
+
+__Async__() function VISIBILITY_MACRO_TICKER()
+  if not MACRO_TICKER_ENABLED then 
+    return 
+  end
+
+  while MACRO_TICKER_ENABLED do 
+    for _, tracker in TRACKERS_MACRO_TICKER_REGISTERED:GetIterator() do
+      tracker.VisibilityRulesShown = GetRulesVisibilityShownForTracker(tracker)
+    end
+
+    Delay(0.2)
+  end
+end
+
+__Arguments__ { Tracker }
+function RegisterTrackerForMacroTicker(tracker)
+  if TRACKERS_MACRO_TICKER_REGISTERED:Contains(tracker) then 
+    return 
+  end
+
+  TRACKERS_MACRO_TICKER_REGISTERED:Insert(tracker)
+  
+  if TRACKERS_MACRO_TICKER_REGISTERED.Count > 0 and not MACRO_TICKER_ENABLED then 
+    MACRO_TICKER_ENABLED = true 
+    VISIBILITY_MACRO_TICKER()
+  end
+end
+
+__Arguments__ { Tracker }
+function UnregisterTrackerForMacroTicker(tracker)
+  if not TRACKERS_MACRO_TICKER_REGISTERED:Contains(tracker) then 
+    return 
+  end
+  
+  TRACKERS_MACRO_TICKER_REGISTERED:Remove(tracker)
+  
+  if TRACKERS_MACRO_TICKER_REGISTERED.Count == 0 and MACRO_TICKER_ENABLED then 
+    MACRO_TICKER_ENABLED = false 
+  end
+end
+
+function UPDATE_VISIBILITY_ON_EVENTS()
+  for _, tracker in TRACKERS_AUTO_VISIBILITY_REGISTERED:GetIterator() do
+    tracker.VisibilityRulesShown = GetRulesVisibilityShownForTracker(tracker)
+  end
+end
+
+__Arguments__ { Tracker}
+function RegisterTrackerForAutoVisibility(tracker)
+  if TRACKERS_AUTO_VISIBILITY_REGISTERED:Contains(tracker) then 
+    return 
+  end
+
+  TRACKERS_AUTO_VISIBILITY_REGISTERED:Insert(tracker)
+
+  if not AUTO_VISIBILITY_EVENTS_HANDLER_REGISTERED then 
+    for _, event in ipairs(AUTO_VISIBILITY_EVENTS) do
+      _M:RegisterEvent(event, UPDATE_VISIBILITY_ON_EVENTS)
+    end
+
+    AUTO_VISIBILITY_EVENTS_HANDLER_REGISTERED = true
+  end
+
+  if tracker.VisibilityRules.macroVisibility ~= "" then 
+    RegisterTrackerForMacroTicker(tracker)
+  end
+end
+
+__Arguments__ { Tracker }
+function UnregisterTrackerForAutoVisibility(tracker)
+  if not TRACKERS_AUTO_VISIBILITY_REGISTERED:Contains(tracker) then 
+    return 
+  end
+  
+  TRACKERS_AUTO_VISIBILITY_REGISTERED:Remove(tracker)
+
+  if TRACKERS_AUTO_VISIBILITY_REGISTERED.Count == 0 then 
+    for _, event in ipairs(AUTO_VISIBILITY_EVENTS) do
+      _M:UnregisterEvent(event)
+    end
+
+    AUTO_VISIBILITY_EVENTS_HANDLER_REGISTERED = false
+  end
+
+  if tracker.VisibilityRules.macroVisibility ~= "" then 
+    UnregisterTrackerForMacroTicker(tracker)
+  end
+end
+
+__Arguments__ { Tracker }
+function LoadVisibilityRulesForTracker(tracker)
+  local rules = GetTrackerSetting(tracker.id, "visibilityRules")
+  local trackerVisibilityRules = tracker.VisibilityRules
+
+  for _, prop in Struct.GetMembers(VisibilityRulesType) do
+    local propName = prop:GetName()
+    trackerVisibilityRules[propName] = rules and rules[propName] or prop:GetDefault()
+  end
+
+  tracker.HideWhenEmpty = trackerVisibilityRules.hideWhenEmpty
+  tracker.DefaultVisibility = trackerVisibilityRules.defaultVisibility
+  
+  if trackerVisibilityRules.enableAdvancedRules then
+    RegisterTrackerForAutoVisibility(tracker)
+  end
+
+  tracker.VisibilityRulesShown = GetRulesVisibilityShownForTracker(tracker)
+end
+
+function UpdateTrackersVisibility()
+  for _, tracker in TRACKERS_AUTO_VISIBILITY_REGISTERED:GetIterator() do
+    tracker.VisibilityRulesShown = GetRulesVisibilityShownForTracker(tracker)
+  end
+end
+
+__Arguments__ { Tracker }
+function GetRulesVisibilityShownForTracker(tracker)
+  local rules = tracker.VisibilityRules
+
+  if tracker.Empty and rules.hideWhenEmpty then
+    return false 
+  end
+
+  if rules.enableAdvancedRules then 
+    local result = EvaluateVisibilityAdvancedRules(rules)
+    if result == "show" then 
+      return true 
+    elseif result == "hide" then 
+      return false 
+    end
+  end
+
+  if rules.defaultVisibility == "hide" then 
+    return false 
+  end
+
+  return true
+end
+
+__Arguments__ { VisibilityRulesType }
+function EvaluateVisibilityAdvancedRules(rules)
+  local trackerVisibility
+
+  if not rules then 
+    return trackerVisibility
+  end
+
+  local macroText = rules.macroVisibility
+  
+  if rules.evaluateMacroVisibilityAtFirst and macroText and macroText ~= "" then
+    trackerVisibility = SecureCmdOptionParse(macroText)
+  end
+
+  if trackerVisibility and trackerVisibility ~= "ignore" then
+    return trackerVisibility
+  end
+
+  local inInstance, instanceType = IsInInstance() 
+  local isInKeystone = GetActiveKeystoneInfo() > 0
+
+  if isInKeystone then 
+    trackerVisibility = rules.inKeystoneVisibility
+  elseif instanceType == "party" then
+    trackerVisibility = rules.inDungeonVisibility
+  elseif instanceType == "raid" then 
+    trackerVisibility = rules.inRaidVisibility
+  elseif instanceType == "scenario" then 
+    trackerVisibility = rules.inScenarioVisibility  
+  elseif instanceType == "arena" then 
+    trackerVisibility = rules.inArenaVisibility
+  elseif instanceType == "pvp" then 
+    trackerVisibility = rules.inBattlegroundVisibility
+  else
+    trackerVisibility = "ignore"
+  end
+
+  if trackerVisibility and trackerVisibility ~= "ignore" then 
+    return trackerVisibility
+  end
+
+  if IsInRaid()  then 
+    trackerVisibility = tracker.inRaidGroupVisibility
+  elseif IsInGroup() then 
+    trackerVisibility = tracker.inPartyVisibility
+  else 
+    trackerVisibility = "ignore"
+  end
+
+  if not trackerVisibility or trackerVisibility ~= "ignore" then 
+    return trackerVisibility
+  end
+
+  if not rules.evaluateMacroAtFirstCheckBox and macroText and macroText ~= "" then 
+    trackerVisibility = SecureCmdOptionParse(macroText)
+  end
+
+  return trackerVisibility
 end
 
 -- Export the functions in the API
@@ -777,6 +1078,7 @@ RegisterTrackerSetting({ id = "enabled", default = true, handler = private__SetE
 RegisterTrackerSetting({ id = "locked", default = false })
 RegisterTrackerSetting({ id = "position"})
 RegisterTrackerSetting({ id = "size", default = Size(300, 325) })
+
 RegisterTrackerSetting({
   id = "contentsTracked",
   ignoreDefault = true, 
@@ -796,6 +1098,8 @@ RegisterTrackerSetting({
     else
       tracker:UntrackContent(contentID)
     end
+
+    tracker.VisibilityRulesShown = GetRulesVisibilityShownForTracker(tracker)
   end, 
   saveHandler = function(trackerID, contentTracked, contentID)
     if not contentID then 
@@ -812,6 +1116,35 @@ RegisterTrackerSetting({
     end
   end,
   getHandler = private__GetContentTracked
+})
+
+RegisterTrackerSetting({
+  id = "visibilityRules",
+  structType = VisibilityRulesType,
+  handler = function(trackerID, value, subSetting)
+    local tracker = TRACKERS[trackerID]
+    if not tracker and not subSetting then 
+      return 
+    end
+
+    tracker.VisibilityRules[subSetting] = value
+
+    if subSetting == "enableAdvancedRules" then
+      if value then  
+        RegisterTrackerForAutoVisibility(tracker)
+      else
+        UnregisterTrackerForAutoVisibility(tracker)
+      end
+    elseif subSetting == "macroVisibility" then
+      if value ~= "" then 
+        RegisterTrackerForMacroTicker(tracker)
+      else 
+        UnregisterTrackerForMacroTicker(tracker)
+      end
+    end
+
+    tracker.VisibilityRulesShown = GetRulesVisibilityShownForTracker(tracker)
+  end
 })
 -------------------------------------------------------------------------------
 --                                Styles                                     --
@@ -864,16 +1197,17 @@ Style.UpdateSkin("Default", {
   },
 
   [Tracker] = {
+    visible = FromUIProperty("Minimized", "VisibilityRulesShown"):Map(function(minimized, visibilityRulesShown)
+      if minimized then 
+        return false 
+      end
+
+      return visibilityRulesShown
+    end),
     locked = FromTrackerSetting("locked"),
     clipChildren = false,
     minResize = { width = 100, height = 100},
-    visible = FromUIProperty("Minimized"):Map(function(minimized) return not minimized end),
-    -- size = { width = 300, height = 325},
     size = FromTrackerSetting("size"),
-    -- location = {
-    --   Anchor("CENTER")
-    -- },
-
     location = FromTrackerSetting("position"):Map(function(pos, tracker)
       if pos then
         return  { Anchor("TOPLEFT", pos.x or 0, pos.y or 0, nil, "BOTTOMLEFT") }
@@ -951,6 +1285,7 @@ __Async__() function PLAYER_ENTERING_WORLD(isInitialLogin, isReloadingUI)
 
     -- Load the contents tracked for the main tracker 
     private__LoadContentsForTracker(_MainTracker)
+    LoadVisibilityRulesForTracker(_MainTracker)
 
     -- Create the custom trackers, and load the contents tracked by them 
     local trackers = SavedVariables.Path("list").GetValue("trackers")
@@ -962,6 +1297,7 @@ __Async__() function PLAYER_ENTERING_WORLD(isInitialLogin, isReloadingUI)
         if enabled or enabled == nil then 
           local tracker = private__NewTracker(trackerID)
           private__LoadContentsForTracker(tracker)
+          LoadVisibilityRulesForTracker(tracker)
         end
       end
     end

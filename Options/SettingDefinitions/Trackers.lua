@@ -16,6 +16,7 @@ export {
   GetTracker                    = SylingTracker.API.GetTracker,
   SetContentTracked             = SylingTracker.API.SetContentTracked,
   GetTrackerSetting             = SylingTracker.API.GetTrackerSetting,
+  GetTrackerSettingWithDefault  = SylingTracker.API.GetTrackerSettingWithDefault,
   SetTrackerSetting             = SylingTracker.API.SetTrackerSetting
 }
 
@@ -151,17 +152,10 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     ---------------------------------------------------------------------------
     --- Lock Tracker
     ---------------------------------------------------------------------------
-    local function OnLockTrackerCheckBoxClick(checkBox)
-      local isLocked = checkBox:IsChecked()
-      self.Tracker:SetSetting("locked", isLocked)
-    end
-
     local lockTrackerCkeckBox = Widgets.SettingsCheckBox.Acquire(false, self)
     lockTrackerCkeckBox:SetID(20)
     lockTrackerCkeckBox:SetLabel("Lock")
     lockTrackerCkeckBox:BindTrackerSetting(trackerID, "locked")
-    -- lockTrackerCkeckBox:SetChecked(self.Tracker.Locked)
-    -- lockTrackerCkeckBox:SetUserHandler("OnCheckBoxClick", OnLockTrackerCheckBoxClick)
     self.GeneralTabControls.lockTrackerCkeckBox = lockTrackerCkeckBox
     ---------------------------------------------------------------------------
     --- Danger Zone Section
@@ -213,14 +207,6 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     ---------------------------------------------------------------------------
     --- Contents Controls 
     ---------------------------------------------------------------------------
-    -- local function OnContentCheckBoxClick(checkBox)
-    --   local contentID = checkBox:GetUserData("contentID")
-    --   local isTracked = checkBox:IsChecked()
-
-    --   -- SetContentTracked(self.Tracker, contentID, isTracked)
-    --   SetTrackerSetting(self.TrackerID, "contentsTracked", contentID, nil, isTracked)
-    -- end
-
     for index, content in List(IterateContents()):Sort("x,y=>x.Name<y.Name"):GetIterator() do
       local contentID = content.id
       local contentTracked = GetTrackerSetting(self.TrackerID, "contentsTracked", contentID)
@@ -229,9 +215,6 @@ class "SettingDefinitions.Tracker" (function(_ENV)
       contentCheckBox:SetID(20 + index)
       contentCheckBox:SetLabel(content.FormattedName)
       contentCheckBox:BindTrackerSetting(trackerID, "contentsTracked", contentID)
-      -- contentCheckBox:SetChecked(contentTracked)
-      -- contentCheckBox:SetUserData("contentID", contentID)
-      -- contentCheckBox:SetUserHandler("OnCheckBoxClick", OnContentCheckBoxClick)
       Style[contentCheckBox].MarginLeft = 20
 
       self.ContentTabControls[contentCheckBox] = contentCheckBox
@@ -276,13 +259,7 @@ class "SettingDefinitions.Tracker" (function(_ENV)
   }
 
   function BuildVisibilityRulesTab(self)
-    local function OnVisibilityEntrySelected(dropdown, entry)
-      local data    = entry:GetEntryData()
-      local setting = dropdown:GetUserData("setting")
-
-      -- self.Tracker:ApplyAndSaveSetting(setting, data.value)
-    end
-
+    local trackerID = self.TrackerID
     ---------------------------------------------------------------------------
     ---  Default Visibility
     ---------------------------------------------------------------------------
@@ -291,67 +268,79 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     defaultVisibilityDropDown:SetLabel("Default Visibility")
     defaultVisibilityDropDown:AddEntry({ text = "|cffff0000Hidden|r", value = "hide"})
     defaultVisibilityDropDown:AddEntry({ text = "|cff00ff00Show|r", value = "show"})
-    defaultVisibilityDropDown:SetUserData("setting", "defaultVisibility")
-    defaultVisibilityDropDown:SelectByValue("show")
+    defaultVisibilityDropDown:BindTrackerSetting(trackerID, "visibilityRules", "defaultVisibility")
     self.VisibilityRulesControls.defaultVisibilityDropDown = defaultVisibilityDropDown
+    ---------------------------------------------------------------------------
+    ---  Hide when empty
+    ---------------------------------------------------------------------------
+    local hideWhenEmptyCheckBox = Widgets.SettingsCheckBox.Acquire(false, self)
+    hideWhenEmptyCheckBox:SetID(20)
+    hideWhenEmptyCheckBox:SetLabel("Hide when empty")
+    hideWhenEmptyCheckBox:BindTrackerSetting(trackerID, "visibilityRules", "hideWhenEmpty")
+    self.VisibilityRulesControls.hideWhenEmptyCheckBox = hideWhenEmptyCheckBox
+    ---------------------------------------------------------------------------
+    ---  Advanced Rules
+    ---------------------------------------------------------------------------
+    local advancedRulesSection = Widgets.SettingsExpandableSection.Acquire(false, self)
+    advancedRulesSection:SetID(30)
+    advancedRulesSection:SetTitle("Advanced Rules")
+    self.VisibilityRulesControls.advancedRulesSection = advancedRulesSection
+    ---------------------------------------------------------------------------
+    ---  Enable Advanced Rules
+    ---------------------------------------------------------------------------
+    local enableAdvancedRulesCheckBox = Widgets.SettingsCheckBox.Acquire(false, advancedRulesSection)
+    enableAdvancedRulesCheckBox:SetID(10)
+    enableAdvancedRulesCheckBox:SetLabel("Enable")
+    enableAdvancedRulesCheckBox:BindTrackerSetting(trackerID, "visibilityRules", "enableAdvancedRules")
+    self.VisibilityRulesControls.enableAdvancedRulesCheckBox = enableAdvancedRulesCheckBox
     ---------------------------------------------------------------------------
     ---  Instance Visibility
     ---------------------------------------------------------------------------
-    local instanceConditionHeader = Widgets.SettingsSectionHeader.Acquire(false, self)
+    local instanceConditionHeader = Widgets.SettingsSectionHeader.Acquire(false, advancedRulesSection)
     instanceConditionHeader:SetID(100)
     instanceConditionHeader:SetTitle("Instance")
     self.VisibilityRulesControls.instanceConditionHeader = instanceConditionHeader
     
     for index, info in ipairs(_INSTANCE_VISIBILITY_ROWS_INFO) do 
-      local dropDownControl = Widgets.SettingsDropDown.Acquire(false, self)
+      local dropDownControl = Widgets.SettingsDropDown.Acquire(false, advancedRulesSection)
       dropDownControl:SetID(100 + 10 * index)
       dropDownControl:SetLabel(info.label)
       dropDownControl:SetEntries(_ENTRIES_CONDITIONS_DROPDOWN)
-      dropDownControl:SetUserData("setting", info.setting)
-      dropDownControl:SetUserHandler("OnEntrySelected", OnVisibilityEntrySelected)
-      -- dropDownControl:SelectByValue(Style[self.Tracker][info.setting])
+      dropDownControl:BindTrackerSetting(trackerID, "visibilityRules", info.setting)
       Style[dropDownControl].marginLeft = 20
       self.VisibilityRulesControls[dropDownControl] = dropDownControl    
     end
     ---------------------------------------------------------------------------
     ---  Group Size Visibility
     ---------------------------------------------------------------------------
-    local groupSizeConditionsHeader = Widgets.SettingsSectionHeader.Acquire(false, self)
+    local groupSizeConditionsHeader = Widgets.SettingsSectionHeader.Acquire(false, advancedRulesSection)
     groupSizeConditionsHeader:SetID(200)
     groupSizeConditionsHeader:SetTitle("Group Size")
     self.VisibilityRulesControls.groupSizeConditionsHeader = groupSizeConditionsHeader
 
     for index, info in ipairs(_GROUP_SIZE_VISIBILITY_ROWS_INFO) do 
-      local dropDownControl = Widgets.SettingsDropDown.Acquire(false, self)
+      local dropDownControl = Widgets.SettingsDropDown.Acquire(false, advancedRulesSection)
       dropDownControl:SetID(200 + 10 * index)
       dropDownControl:SetLabel(info.label)
       dropDownControl:SetEntries(_ENTRIES_CONDITIONS_DROPDOWN)
-      dropDownControl:SetUserData("setting", info.setting)
-      dropDownControl:SetUserHandler("OnEntrySelected", OnVisibilityEntrySelected)
-      -- dropDownControl:SelectByValue(Style[self.Tracker][info.setting])
+      dropDownControl:BindTrackerSetting(trackerID, "visibilityRules", info.setting)
       Style[dropDownControl].marginLeft = 20
       self.VisibilityRulesControls[dropDownControl] = dropDownControl
     end
-      ---------------------------------------------------------------------------
+    ---------------------------------------------------------------------------
     ---  Macro Visibility
     ---------------------------------------------------------------------------
-    local macroConditionsHeader = Widgets.SettingsSectionHeader.Acquire(false, self)
+    local macroConditionsHeader = Widgets.SettingsSectionHeader.Acquire(false, advancedRulesSection)
     macroConditionsHeader:SetID(300)
     macroConditionsHeader:SetTitle("Macro")
     self.VisibilityRulesControls.macroConditionsHeader = macroConditionsHeader
     ---------------------------------------------------------------------------
     --- Macro -> Evaluate Macro At First
     ---------------------------------------------------------------------------
-    local function OnEvaluateMacroAtFirstCheckBoxClick(checkBox)
-      local checked = checkBox:IsChecked()
-      -- self.Tracker:ApplyAndSaveSetting("evaluateMacroVisibilityAtFirst", checked)
-    end
-
-    local evaluateMacroAtFirstCheckBox = Widgets.SettingsCheckBox.Acquire(false, self)
+    local evaluateMacroAtFirstCheckBox = Widgets.SettingsCheckBox.Acquire(false, advancedRulesSection)
     evaluateMacroAtFirstCheckBox:SetID(310)
     evaluateMacroAtFirstCheckBox:SetLabel("Evaluate the macro at first")
-    -- evaluateMacroAtFirstCheckBox:SetChecked(Style[self.Tracker].evaluateMacroVisibilityAtFirst)
-    evaluateMacroAtFirstCheckBox:SetUserHandler("OnCheckBoxClick", OnEvaluateMacroAtFirstCheckBoxClick)
+    evaluateMacroAtFirstCheckBox:BindTrackerSetting(trackerID, "visibilityRules", "evaluateMacroVisibilityAtFirst")
     Style[evaluateMacroAtFirstCheckBox].marginLeft = 20
     self.VisibilityRulesControls.evaluateMacroAtFirstCheckBox = evaluateMacroAtFirstCheckBox
     ---------------------------------------------------------------------------
@@ -360,17 +349,17 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     local function OnMacroTextEnterPressed(editBox)
       local value = editBox:GetText()
       editBox:ClearFocus()
-      -- self.Tracker:ApplyAndSaveSetting("macroVisibility", value)
+      SetTrackerSetting(trackerID, "visibilityRules", value, nil, "macroVisibility")
     end
 
     local function OnMacroTextEscapePressed(editBox)
       editBox:ClearFocus()
     end
 
-    local macroTextEditBox = Widgets.MultiLineEditBox.Acquire(false, self)
+    local macroTextEditBox = Widgets.MultiLineEditBox.Acquire(false, advancedRulesSection)
     macroTextEditBox:SetID(320)
     macroTextEditBox:SetInstructions("[combat] hide; show")
-    -- macroTextEditBox:SetText(Style[self.Tracker].macroVisibility)
+    macroTextEditBox:SetText(GetTrackerSettingWithDefault(trackerID, "visibilityRules", "macroVisibility"))
     macroTextEditBox:SetUserHandler("OnEnterPressed", OnMacroTextEnterPressed)
     macroTextEditBox:SetUserHandler("OnEscapePressed", OnMacroTextEscapePressed)
     Style[macroTextEditBox].marginLeft   = 20 
@@ -459,18 +448,7 @@ class "SettingDefinitions.Tracker" (function(_ENV)
   }
 
   property "TrackerID" {
-    type = String,
-    handler = function(self, new)
-      if new ~= nil then 
-        self.Tracker = GetTracker(new)
-      else
-        self.Tracker = nil 
-      end
-    end
-  }
-
-  property "Tracker" {
-    type = SylingTracker.Tracker
+    type = String
   }
 end)
 -------------------------------------------------------------------------------
