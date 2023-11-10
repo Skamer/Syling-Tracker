@@ -9,7 +9,7 @@
 Syling                      "SylingTracker.Core.Media"                       ""
 -- ========================================================================= --
 export {
-  LibSharedMedia     = LibStub("LibSharedMedia-3.0")
+  LibSharedMedia     = LibStub("LibSharedMedia-3.0", true)
 }
 -------------------------------------------------------------------------------
 --                                   API                                     --

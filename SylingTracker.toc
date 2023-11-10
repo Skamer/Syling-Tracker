@@ -4,7 +4,7 @@
 ## Author: Skamer
 ## SavedVariables: SylingTrackerDB
 ## Dependencies: Scorpio
-## OptionalDeps: ViragDevTool
+## OptionalDeps: LibSharedMedia-3.0, ViragDevTool
 
 ## X-Curse-Project-ID: 398177
 
