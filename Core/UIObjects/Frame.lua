@@ -111,17 +111,26 @@ class "Frame" (function(_ENV)
     end
   end
 
+  POINTS = { "TOP", "TOPLEFT", "TOPRIGHT"}
   function IsIgnoredForAdjustment(self, child)
     if not child:IsShown() then
       return true 
     end
-
-    local prop = child:GetChildPropertyName() 
-    if prop and prop:match("^backdrop") then 
+  
+    if child:GetHeight(true) == 0 then 
       return true 
     end
-
-    return false
+  
+    local prop = child:GetChildPropertyName()
+    if prop and prop:match("^backdrop") then
+      return true 
+    end
+  
+    for _, point in ipairs(POINTS) do
+      return false 
+    end
+  
+    return true
   end
 
   function OnAdjustHeight(self)
@@ -152,16 +161,15 @@ class "Frame" (function(_ENV)
     local maxChild
     local top = self:GetTop()
     local _, minHeight = self:GetResizeBounds()
-
+    
     -- As top may be nil, we need to check it. In case where it's nil, we 
     -- return the minHeight. minHeight is by default '0'
-    if top == nil then 
+    if top == nil and minHeight > 0 then
       return minHeight
     end
-
+    
     for _, child in self:GetChildrenForAdjustment() do 
       local outerBottom = child:GetBottom()
-
       if outerBottom then 
         if not maxOuterBottom or maxOuterBottom > outerBottom then 
           maxOuterBottom = outerBottom

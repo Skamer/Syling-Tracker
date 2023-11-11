@@ -27,6 +27,12 @@ class "TrackerMinimizeButton" (function(_ENV)
     type = Boolean,
     default = false
   }
+
+  __Observable__()
+  property "Enabled" {
+    type = Boolean,
+    default = true
+  }
 end)
 
 struct "VisibilityRulesType" {
@@ -157,7 +163,7 @@ class "Tracker" (function(_ENV)
     -- view.OnShouldBeDisplayedChanged = view.OnShouldBeDisplayedChanged + self.OnShouldBeDisplayedChanged
 
     self:OnLayout()
-    self:OnAdjustHeight()
+    self:AdjustHeight()
 
     self.Empty = self.Views.Count == 0
   end
@@ -174,7 +180,7 @@ class "Tracker" (function(_ENV)
     -- We call an instant layout and adjust height for avoiding a 
     -- flashy behavior when the content has been removed.
     self:OnLayout()
-    self:OnAdjustHeight()
+    self:AdjustHeight()
 
     -- NOTE: We don't call the "Release" method of view because it will be done 
     -- by the content type
@@ -198,7 +204,7 @@ class "Tracker" (function(_ENV)
   function OnLayout(self)
     local content = self:GetScrollContent()
     local previousView 
-
+    
     for index, view in self:IterateViews() do
       if index > 1 then 
         view:SetPoint("TOP", previousView, "BOTTOM", 0, -10)
@@ -220,7 +226,7 @@ class "Tracker" (function(_ENV)
     local height = 1
     local count = 0
     local content = self:GetScrollContent()
-    for _, view in self:IterateViews() do 
+    for _, view in self:IterateViews() do
       count = count + 1
       height = height + view:GetHeight()
     end
@@ -271,7 +277,7 @@ class "Tracker" (function(_ENV)
 
   function OnRelease(self)
     for contentID, tracked in pairs(self.ContentsTracked) do 
-      if tracked then 
+      if tracked then
         self:UntrackContent(contentID)
       end
     end
@@ -282,7 +288,12 @@ class "Tracker" (function(_ENV)
     self.Enabled = nil 
     self.Locked = nil 
     self.Minimized = nil 
-    self.ShowScrollBar = nil 
+    self.ShowScrollBar = nil
+
+    self:GetMinimizeButton().Enabled = false
+
+    self:GetScrollFrame():SetVerticalScroll(0)
+    self:GetScrollBar():SetScrollPercentage(0)
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
@@ -355,7 +366,7 @@ class "Tracker" (function(_ENV)
   }    
   function __ctor(self)
     local scrollFrame =self:GetScrollFrame()
-    scrollFrame:SetClipsChildren(true)
+    -- scrollFrame:SetClipsChildren(true)
 
     scrollFrame.OnScrollRangeChanged = scrollFrame.OnScrollRangeChanged + function(_, xRange, yRange)
       OnScrollRangeChanged(self, xRange, yRange)
@@ -458,6 +469,8 @@ function private__NewTracker(id)
   tracker.OnStopMoving    = tracker.OnStopMoving + OnTrackerStopMoving
 
   TRACKERS[id] = tracker
+
+  DebugTools.TrackData(tracker, tracker.id)
 
   return tracker
 end
@@ -598,37 +611,38 @@ end
 ---
 --- @param setting the setting where the value will be fetched.
 --- @param ... extra args will be pushed to get handler.
+__AutoCache__()
 __Arguments__ { String, Any * 0 }
 function FromTrackerSetting(setting, ...)
   local extraArgs = { ... }
-
-  local observable = Observable(function(observer)
+  return Observable(function(observer)
     -- The current frame may not be a tracker, so we need to try to get 
     -- the nearest tracker object.
-    local tracker = GetNearestFrameForType(GetCurrentTarget(), Tracker)
-
+    local tracker = GetNearestFrameForType(GetCurrentTarget(), Tracker)    
     if tracker then 
-      local subject, isNew = tracker:AcquireSettingSubject(setting)
+      local trackerID       = tracker.id
+      local subject, isNew  = tracker:AcquireSettingSubject(setting)
+      
+      -- if isNew then
+      --   subject:Subscribe(observer)
+      -- end
 
       if isNew then 
-        subject:Subscribe(observer)
-      end
+        local value
+        
+        -- The id may be nil, so we need to check it.
+        if trackerID and trackerID ~= "" then 
+          value = GetTrackerSettingWithDefault(trackerID, setting, unpack(extraArgs))
+        else
+          value = TRACKER_SETTINGS[setting] and TRACKER_SETTINGS[setting].default
+        end
 
-      local value = GetTrackerSettingWithDefault(tracker.id, setting, unpack(extraArgs))
-      local trackerID = tracker.id
-    
-      -- The id may be nil, so we need to check it.
-      if trackerID and trackerID ~= "" then
-        value = GetTrackerSettingWithDefault(tracker.id, setting, unpack(extraArgs))
-      else
-        value = TRACKER_SETTINGS[setting] and TRACKER_SETTINGS[setting].default
+        subject:OnNext(value, tracker)
       end
-
-      subject:OnNext(value, tracker)
+      
+      subject:Subscribe(observer)
     end
   end)
-
-  return observable
 end
 
 --- Get the setting value for a tracker 
@@ -769,7 +783,7 @@ function SetTrackerSetting(trackerID, setting, value, notify, ...)
       -- We don't want to create a subject if the setting don't have one because this 
       -- say none is interested to be notified by this setting.
       local subject = tracker:AcquireSettingSubject(setting, false)
-      if subject then 
+      if subject then
         subject:OnNext(value, tracker, ...)
       end
     end
@@ -800,6 +814,23 @@ function private__IsContentShouldTracked(trackerID, contentTracked)
   return tracked, isDefault
 end
 
+__Arguments__ { Tracker }
+__Async__() function LoadTracker(tracker)
+  local trackerBottom = tracker:GetBottom()
+  -- Important ! We have to delay a little until the tracker returning a valid 
+  -- "GetBottom". This indicate all is ready for elements are able to compute
+  -- their height.
+  while not trackerBottom do
+    trackerBottom = tracker:GetBottom()
+    Next()
+  end
+
+  tracker:GetMinimizeButton().Enabled = true
+
+  private__LoadContentsForTracker(tracker)
+  LoadVisibilityRulesForTracker(tracker)
+end
+
 __Arguments__ { String/nil, String/nil }
 function private__GetContentTracked(trackerID, contentID)
     local tracked = SavedVariables.Profile()
@@ -821,7 +852,7 @@ function private__LoadContentsForTracker(tracker)
   end
 end
 
-__Arguments__ { String, Boolean }
+__Arguments__ { String, Boolean/true }
 function private__SetEnabledTracker(trackerID, enabled)
   if enabled and TRACKERS[trackerID] then 
     return 
@@ -829,8 +860,7 @@ function private__SetEnabledTracker(trackerID, enabled)
 
   if enabled then
     local tracker = private__NewTracker(trackerID)
-    private__LoadContentsForTracker(tracker)
-    LoadVisibilityRulesForTracker(tracker)
+    LoadTracker(tracker)
   else
     private__DeleteTracker(trackerID)
   end
@@ -1147,6 +1177,40 @@ RegisterTrackerSetting({
   end
 })
 -------------------------------------------------------------------------------
+--                              Observables                                  --
+-------------------------------------------------------------------------------
+function FromVisible()
+  return FromUIProperty("Minimized", "VisibilityRulesShown"):Map(function(minimized, visibilityRulesShown)
+    if minimized then 
+      return false 
+    end
+    
+    return visibilityRulesShown
+  end)
+end
+
+function FromLocation()
+  return FromTrackerSetting("position"):Map(function(pos, tracker)
+    if pos then
+      return  { Anchor("TOPLEFT", pos.x or 0, pos.y or 0, nil, "BOTTOMLEFT") }
+    end
+    
+    return tracker.id == "main" and { Anchor("RIGHT", -40, 0) } or { Anchor("CENTER") }
+  end)
+end
+
+__Arguments__ { Boolean/true}
+function FromMinizeButtonAtlas(normal)
+  return FromUIProperty("Minimized"):Map(function(minimized)
+    if minimized then 
+      return normal and AtlasType("common-button-dropdown-closed", false) or AtlasType("common-button-dropdown-closedpressed", false)
+
+    else
+      return normal and AtlasType("common-button-dropdown-open", false) or AtlasType("common-button-dropdown-closedpressed", false)
+    end
+  end)
+end
+-------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
@@ -1167,26 +1231,15 @@ Style.UpdateSkin("Default", {
   [TrackerMinimizeButton] = {
     size = { width = 24, height = 24 },
     registerForClicks = { "AnyUp"},
+    visible = FromUIProperty("Enabled"),
 
     NormalTexture = {
       setAllPoints = true,
-      atlas = FromUIProperty("Minimized"):Map(function(minimized)
-        if minimized then 
-          return AtlasType("common-button-dropdown-closed", false)
-        else
-          return AtlasType("common-button-dropdown-open", false)
-        end
-      end)
+      atlas = FromMinizeButtonAtlas()
     },
     PushedTexture = {
       setAllPoints = true,
-      atlas = FromUIProperty("Minimized"):Map(function(minimized)
-        if minimized then 
-          return AtlasType("common-button-dropdown-closedpressed", false)
-        else
-          return AtlasType("common-button-dropdown-openpressed", false)
-        end
-      end)
+      atlas = FromMinizeButtonAtlas(false)
     },
 
     HighlightTexture        = {
@@ -1197,32 +1250,20 @@ Style.UpdateSkin("Default", {
   },
 
   [Tracker] = {
-    visible = FromUIProperty("Minimized", "VisibilityRulesShown"):Map(function(minimized, visibilityRulesShown)
-      if minimized then 
-        return false 
-      end
-
-      return visibilityRulesShown
-    end),
-    locked = FromTrackerSetting("locked"),
-    clipChildren = false,
-    minResize = { width = 100, height = 100},
-    size = FromTrackerSetting("size"),
-    location = FromTrackerSetting("position"):Map(function(pos, tracker)
-      if pos then
-        return  { Anchor("TOPLEFT", pos.x or 0, pos.y or 0, nil, "BOTTOMLEFT") }
-      end
-      
-      return tracker.id == "main" and { Anchor("RIGHT", -40, 0) } or { Anchor("CENTER") }
-    end),
-    resizable = true,
-    movable  = true,
+    visible                           = FromVisible(),
+    locked                            = FromTrackerSetting("locked"),
+    clipChildren                      = false,
+    minResize                         = { width = 100, height = 100},
+    size                              = FromTrackerSetting("size"),
+    location                          = FromLocation(),
+    resizable                         = true,
+    movable                           = true,
 
     ScrollFrame = {
-      location = {
+      location  = {
         Anchor("TOPLEFT"),
         Anchor("BOTTOMRIGHT")
-      }
+      },
     },
 
     MinimizeButton = {
@@ -1263,41 +1304,31 @@ Style.UpdateSkin("Default", {
 -------------------------------------------------------------------------------
 --                                Module                                     --
 -------------------------------------------------------------------------------
-function OnEnable(self)
-  -- Create the main tracker 
-  _MainTracker = private__NewTracker("main")
-  _MainTracker.Locked = false
-end
-
 __SystemEvent__()
 __Async__() function PLAYER_ENTERING_WORLD(isInitialLogin, isReloadingUI)
   if isInitialLogin or isReloadingUI then 
-    local trackerBottom = _MainTracker:GetBottom()
-    -- Important ! We have to delay the tracking of content type after an
-    -- initial and a reloading ui for they getting a valid "GetBottom" is
-    -- important to compute the height of their frame.
-    -- So we delay util the tracker "GetBottom" return a no nil value, saying 
-    -- GetBottom now return valid value
-    while not trackerBottom do 
-      trackerBottom = _MainTracker:GetBottom()
-      Next()
-    end
-
-    -- Load the contents tracked for the main tracker 
-    private__LoadContentsForTracker(_MainTracker)
-    LoadVisibilityRulesForTracker(_MainTracker)
-
-    -- Create the custom trackers, and load the contents tracked by them 
     local trackers = SavedVariables.Path("list").GetValue("trackers")
     local trackersSettings = SavedVariables.Profile().GetValue("trackers")
-    if trackers then 
-      for trackerID in pairs(trackers) do
-        local settings = trackersSettings[trackerID]
-        local enabled = settings and settings.enabled
-        if enabled or enabled == nil then 
-          local tracker = private__NewTracker(trackerID)
-          private__LoadContentsForTracker(tracker)
-          LoadVisibilityRulesForTracker(tracker)
+
+    if trackersSettings then 
+      -- Create the main tracker if enabled
+      local settings = trackersSettings["main"]
+      local enabled = settings and settings.enabled
+
+      if enabled == nil or enabled then 
+        local tracker = private__NewTracker("main")
+        LoadTracker(tracker)
+      end
+
+      -- Create the custtom trackers if enabled
+      if trackers then 
+        for trackerID in pairs(trackers) do 
+          settings = trackersSettings[trackerID]
+          enabled = settings and settings.enabled or true 
+          if enabled then 
+            local tracker = private__NewTracker(trackerID)
+            LoadTracker(tracker)
+          end         
         end
       end
     end
