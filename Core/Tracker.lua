@@ -458,9 +458,6 @@ function private__NewTracker(id)
   tracker:SetParent(UIParent)
   tracker:Show()
 
-  -- We set the base path for avoiding to give it every time. 
-  SavedVariables.SetBasePath("trackers", id)
-
   -- NOTE: As there a delay between the skin process, the subjects may not be 
   -- yet created, so this iteration is not run. This case is covered by 
   -- API.FromTrackerSetting function. 
@@ -473,22 +470,12 @@ function private__NewTracker(id)
     subject:OnNext(value, tracker)
   end
 
-  -- Important: Don't forget to reset the base path for avoiding unexpected issues
-  -- for next operations. 
-  SavedVariables.SetBasePath()
-
-  -- NOTE: The context tracker will be handled later. 
-
-  -- @TODO: Bind handlers
-  -- tracker.OnTrackerMoved = tracker.OnTrackerMoved + OnTrackerStopMoving
-  -- tracker.OnTrackerResized = tracker.OnTrackerResized + OnTrackerStopResized
+  -- NOTE: The contents tracked will be handled later. 
 
   tracker.OnStopResizing  = tracker.OnStopResizing + OnTrackerStopResizing
   tracker.OnStopMoving    = tracker.OnStopMoving + OnTrackerStopMoving
 
   TRACKERS[id] = tracker
-
-  DebugTools.TrackData(tracker, tracker.id)
 
   return tracker
 end
