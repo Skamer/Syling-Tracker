@@ -468,7 +468,7 @@ function private__NewTracker(id)
   -- Call InstantApplyTracker on the tracker before will run this iterator but 
   -- this is not needed, and this iterator is here for cover thise case where 
   -- an instant apply style is called. 
-  for settingID, subject in tracker:IterateSettingSubjects() do
+  for setting, subject in tracker:IterateSettingSubjects() do
     local value = GetTrackerSettingWithDefault(id, setting)
     subject:OnNext(value, tracker)
   end
@@ -1373,12 +1373,12 @@ __SystemEvent__()
 __Async__() function PLAYER_ENTERING_WORLD(isInitialLogin, isReloadingUI)
   if isInitialLogin or isReloadingUI then 
     local trackers = SavedVariables.Path("list").GetValue("trackers")
-    local trackersSettings = SavedVariables.Profile().GetValue("trackers")
+    local trackersSettings = SavedVariables.Profile().GetValue("trackers") or {}
 
     if trackersSettings then 
       -- Create the main tracker if enabled
       local settings = trackersSettings["main"]
-      local enabled = settings and settings.enabled
+      local enabled = settings and settings.enabled or true
 
       if enabled == nil or enabled then 
         local tracker = private__NewTracker("main")
