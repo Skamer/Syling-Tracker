@@ -9,13 +9,16 @@
 Syling                      "SylingTracker.Core.Tracker"                     ""
 -- ========================================================================= --
 export {
-  GetCurrentTarget        = Scorpio.UI.Style.GetCurrentTarget,
-  GetNearestFrameForType  = Utils.GetNearestFrameForType,
-  FromUIProperty          = Wow.FromUIProperty,
+  GetCurrentTarget                    = Scorpio.UI.Style.GetCurrentTarget,
+  GetNearestFrameForType              = Utils.GetNearestFrameForType,
+  FromUIProperty                      = Wow.FromUIProperty,
+  GetFrameByType                      = Wow.GetFrameByType,
+  GetFrame                            = Wow.GetFrame,
 
-  IsInInstance          = IsInInstance,
-  GetActiveKeystoneInfo = C_ChallengeMode.GetActiveKeystoneInfo,
-  SecureCmdOptionParse  = SecureCmdOptionParse
+  -- Wow API
+  IsInInstance                        = IsInInstance,
+  GetActiveKeystoneInfo               = C_ChallengeMode.GetActiveKeystoneInfo,
+  SecureCmdOptionParse                = SecureCmdOptionParse
 }
 
 __UIElement__()
@@ -99,6 +102,17 @@ class "Tracker" (function(_ENV)
       Style[self].movable         = true 
       Style[self].resizable       = true
       Style[self].Mover.visible   = true
+    end
+  end
+
+  local function OnShowScrollBarChanged(self, value)
+    -- We show the scroll bar only if there is a scrollable content
+    local scrollBar = self:GetScrollBar()
+
+    if value and scrollBar:HasScrollableExtent() then 
+      Style[scrollBar].visible = true
+    else 
+      Style[scrollBar].visible = false
     end
   end
 
@@ -327,6 +341,7 @@ class "Tracker" (function(_ENV)
   property "ShowScrollBar" {
     type = Boolean,
     default = true,
+    handler = OnShowScrollBarChanged,
   }
 
   property "Views" {
@@ -395,10 +410,13 @@ class "Tracker" (function(_ENV)
     minimizeButton.OnClick = minimizeButton.OnClick + function()
       local minimized = not self.Minimized
       if minimized then 
+        -- We rename the name for avoiding conflict with the other minimize buttons name 
+        minimizeButton:SetName("SylingTracker_"..self.id.."MinimizeButton")
         minimizeButton:SetParent(UIParent)
         self.__minimizeButton = minimizeButton
       else
         minimizeButton:SetParent(self)
+        minimizeButton:SetName("MinimizeButton")
         self.__minimizeButton = nil
       end
 
@@ -451,7 +469,7 @@ function private__NewTracker(id)
   -- this is not needed, and this iterator is here for cover thise case where 
   -- an instant apply style is called. 
   for settingID, subject in tracker:IterateSettingSubjects() do
-    local value = SavedVariables.Profile().GetValue(settingID)
+    local value = GetTrackerSettingWithDefault(id, setting)
     subject:OnNext(value, tracker)
   end
 
@@ -618,15 +636,11 @@ function FromTrackerSetting(setting, ...)
   return Observable(function(observer)
     -- The current frame may not be a tracker, so we need to try to get 
     -- the nearest tracker object.
-    local tracker = GetNearestFrameForType(GetCurrentTarget(), Tracker)    
+    local tracker = GetNearestFrameForType(GetCurrentTarget(), Tracker)
     if tracker then 
       local trackerID       = tracker.id
       local subject, isNew  = tracker:AcquireSettingSubject(setting)
       
-      -- if isNew then
-      --   subject:Subscribe(observer)
-      -- end
-
       if isNew then 
         local value
         
@@ -1108,6 +1122,14 @@ RegisterTrackerSetting({ id = "enabled", default = true, handler = private__SetE
 RegisterTrackerSetting({ id = "locked", default = false })
 RegisterTrackerSetting({ id = "position"})
 RegisterTrackerSetting({ id = "size", default = Size(300, 325) })
+RegisterTrackerSetting({ id = "showBackground", default = false})
+RegisterTrackerSetting({ id = "showBorder", default = false})
+RegisterTrackerSetting({ id = "backgroundColor", default = Color.BLACK})
+RegisterTrackerSetting({ id = "borderColor", default = Color.BLACK})
+RegisterTrackerSetting({ id = "borderSize", default = 1})
+RegisterTrackerSetting({ id = "showScrollBar", default = true})
+RegisterTrackerSetting({ id = "scrollBarPosition", default = "RIGHT"})
+RegisterTrackerSetting({ id = "scrollBarThumbColor", default =  ColorType(1, 199/255, 0, 0.75)})
 
 RegisterTrackerSetting({
   id = "contentsTracked",
@@ -1199,6 +1221,30 @@ function FromLocation()
   end)
 end
 
+function FromBackdrop()
+ return Wow.GetFrame("OnBackdropChanged")
+    :Next()
+    :Map(function(tracker, value, _, prop)
+      local showBackground = tracker.ShowBackground
+      local showBorder = tracker.ShowBorder
+      if not showBackground and not showBorder then 
+        return nil 
+      end
+
+      local backdrop = {}
+      if showBackground then 
+        backdrop.bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]]
+      end
+
+      if showBorder then 
+        backdrop.edgeFile = [[Interface\Buttons\WHITE8X8]]
+        backdrop.edgeSize = tracker.BorderSize
+      end
+
+      return backdrop
+    end)
+end
+
 __Arguments__ { Boolean/true}
 function FromMinizeButtonAtlas(normal)
   return FromUIProperty("Minimized"):Map(function(minimized)
@@ -1210,6 +1256,38 @@ function FromMinizeButtonAtlas(normal)
     end
   end)
 end
+
+function FromScrollFrameLocation()
+  return GetFrame("OnBackdropChanged"):Map(function(tracker)
+    local showBorder = tracker.ShowBorder
+    
+    if showBorder then 
+      local borderSize = tracker.BorderSize
+      return {
+        Anchor("TOPLEFT", borderSize, -borderSize),
+        Anchor("BOTTOMRIGHT", -borderSize, borderSize)
+      }
+    end
+
+    return { Anchor("TOPLEFT"), Anchor("BOTTOMRIGHT") }
+  end)
+end
+
+function FromScrollBarLocation()
+  return FromTrackerSetting("scrollBarPosition"):Map(function(position)
+    if position == "LEFT" then
+      return { Anchor("RIGHT", -15, 0, nil, "LEFT") }
+    end
+    
+    return { Anchor("LEFT", 15, 0, nil, "RIGHT") }
+  end)
+end
+
+function FromScrollBarThumbColor()
+  return FromTrackerSetting("scrollBarThumbColor"):Map(function(color)
+    return color
+  end)
+end
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
@@ -1219,33 +1297,33 @@ Style.UpdateSkin("Default", {
       bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]]
     },
 
-    backdropColor = { r = 0, g = 1, b = 0, a = 0.3},
-    location = NIL,
+    backdropColor                     = { r = 0, g = 1, b = 0, a = 0.3},
+    location                          = NIL,
     Text = {
-      text = "Click here to move the tracker",
-      setAllPoints = true,
-      mediaFont = FontType("PT Sans Narrow Bold", 13)
+      text                            = "Click here to move the tracker",
+      setAllPoints                    = true,
+      mediaFont                       = FontType("PT Sans Narrow Bold", 13)
     },
   },
 
   [TrackerMinimizeButton] = {
-    size = { width = 24, height = 24 },
-    registerForClicks = { "AnyUp"},
-    visible = FromUIProperty("Enabled"),
+    size                              = { width = 24, height = 24 },
+    registerForClicks                 = { "AnyUp"},
+    visible                           = FromUIProperty("Enabled"),
 
     NormalTexture = {
-      setAllPoints = true,
-      atlas = FromMinizeButtonAtlas()
+      setAllPoints                    = true,
+      atlas                           = FromMinizeButtonAtlas()
     },
     PushedTexture = {
-      setAllPoints = true,
-      atlas = FromMinizeButtonAtlas(false)
+      setAllPoints                    = true,
+      atlas                           = FromMinizeButtonAtlas(false)
     },
 
     HighlightTexture        = {
-      atlas = AtlasType("common-iconmask", false),
-      setAllPoints = true,
-      vertexColor = { r = 1, g = 1, b = 1, a = 0.05}
+      atlas                           = AtlasType("common-iconmask", false),
+      setAllPoints                    = true,
+      vertexColor                     = { r = 1, g = 1, b = 1, a = 0.05}
     }
   },
 
@@ -1258,40 +1336,27 @@ Style.UpdateSkin("Default", {
     location                          = FromLocation(),
     resizable                         = true,
     movable                           = true,
+    backdrop                          = FromBackdrop(),
+    showBackground                    = FromTrackerSetting("showBackground"),
+    showBorder                        = FromTrackerSetting("showBorder"),
+    backdropColor                     = FromTrackerSetting("backgroundColor"),
+    backdropBorderColor               = FromTrackerSetting("borderColor"),
+    borderSize                        = FromTrackerSetting("borderSize"),
+    showScrollBar                     = FromTrackerSetting("showScrollBar"),
 
     ScrollFrame = {
-      location  = {
-        Anchor("TOPLEFT"),
-        Anchor("BOTTOMRIGHT")
-      },
+      location                        = FromScrollFrameLocation()
     },
 
     MinimizeButton = {
-      location = {
-        Anchor("BOTTOMLEFT", 5, 0, nil, "TOPRIGHT")
-      }
+      location                        = { Anchor("BOTTOMLEFT", 5, 0, nil, "TOPRIGHT") }
     },
 
     ScrollBar = {
-      -- width = 6,
-      -- location = {
-      --   Anchor("TOPLEFT", 3, 20, nil, "TOPRIGHT"),
-      --   Anchor("BOTTOMLEFT", 3, -20, nil, "BOTTOMRIGHT")
-      -- }
-      size = Size(6, 244),
-      location = {
-        Anchor("LEFT", 15, 0, nil, "RIGHT")
-      }
+      size                            = Size(6, 244),
+      location                        = FromScrollBarLocation(),
+      thumbColor                      = FromScrollBarThumbColor()
     },
-    
-    -- BackgroundTexture = {
-    --   visible = true,
-    --   file = "Interface\\Buttons\\WHITE8X8",
-    --   drawLayer = "BACKGROUND",
-    --   vertexColor = Color.BLACK,
-    --   setAllPoints = true,
-    -- },
-
 
     [TrackerMover] = {
       location = {

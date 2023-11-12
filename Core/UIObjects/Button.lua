@@ -186,6 +186,24 @@ class "Button" (function(_ENV)
     default = false, 
     handler = AdjustHeightHandler
   }
+  
+  property "ShowBackground" {
+    type = Boolean,
+    default = false,
+    event = "OnBackdropChanged"
+  }
+
+  property "ShowBorder" {
+    type = Boolean,
+    default = false,
+    event = "OnBackdropChanged"
+  }
+
+  property "BorderSize" {
+    type = Number,
+    default = 1,
+    event = "OnBackdropChanged"
+  }
 end)
 
 UI.Property         {

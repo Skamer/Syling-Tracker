@@ -116,13 +116,13 @@ __Static__() function Utils.GetNearestFrameForType(frame, cls)
     return frame 
   end
 
-  local frame = frame:GetParent()
-  while parent do 
-    if IsObjectType(parent, cls) then 
-      return parent 
+  frame = frame:GetParent()
+  while frame do 
+    if IsObjectType(frame, cls) then 
+      return frame 
     end
 
-    parent = parent:GetParent()
+    frame = frame:GetParent()
   end
 end
 

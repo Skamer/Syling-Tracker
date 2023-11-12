@@ -158,6 +158,83 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     lockTrackerCkeckBox:BindTrackerSetting(trackerID, "locked")
     self.GeneralTabControls.lockTrackerCkeckBox = lockTrackerCkeckBox
     ---------------------------------------------------------------------------
+    --- Background Section
+    ---------------------------------------------------------------------------
+    local backgroundSection = Widgets.ExpandableSection.Acquire(false, self)
+    backgroundSection:SetExpanded(false)
+    backgroundSection:SetID(30)
+    backgroundSection:SetTitle("Background")
+    Style[backgroundSection].marginTop = 10
+    self.GeneralTabControls.backgroundSection = backgroundSection
+
+    local showBackgroundCheckBox = Widgets.SettingsCheckBox.Acquire(false, backgroundSection)
+    showBackgroundCheckBox:SetID(10)
+    showBackgroundCheckBox:SetLabel("Show")
+    showBackgroundCheckBox:BindTrackerSetting(trackerID, "showBackground")
+    self.GeneralTabControls.showBackgroundCheckBox = showBackgroundCheckBox
+
+    local backgroundColorPicker = Widgets.SettingsColorPicker.Acquire(false, backgroundSection)
+    backgroundColorPicker:SetID(20)
+    backgroundColorPicker:SetLabel("Color")
+    backgroundColorPicker:BindTrackerSetting(trackerID, "backgroundColor")
+    self.GeneralTabControls.backgroundColorPicker = backgroundColorPicker
+    ---------------------------------------------------------------------------
+    --- Border Section
+    ---------------------------------------------------------------------------
+    local borderSection = Widgets.ExpandableSection.Acquire(false, self)
+    borderSection:SetExpanded(false)
+    borderSection:SetID(40)
+    borderSection:SetTitle("Border")
+    self.GeneralTabControls.borderSection = borderSection
+
+    local showBorderCheckBox = Widgets.SettingsCheckBox.Acquire(false, borderSection)
+    showBorderCheckBox:SetID(10)
+    showBorderCheckBox:SetLabel("Show")
+    showBorderCheckBox:BindTrackerSetting(trackerID, "showBorder")
+    self.GeneralTabControls.showBorderCheckBox = showBorderCheckBox
+
+    local borderColorPicker = Widgets.SettingsColorPicker.Acquire(false, borderSection)
+    borderColorPicker:SetID(20)
+    borderColorPicker:SetLabel("Color")
+    borderColorPicker:BindTrackerSetting(trackerID, "borderColor")
+    self.GeneralTabControls.borderColorPicker = borderColorPicker
+
+    local borderSizeSlider = Widgets.SettingsSlider.Acquire(false, borderSection)
+    borderSizeSlider:SetID(30)
+    borderSizeSlider:SetLabel("Size")
+    borderSizeSlider:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
+    borderSizeSlider:BindTrackerSetting(trackerID, "borderSize")
+    borderSizeSlider:SetMinMaxValues(1, 10)
+    self.GeneralTabControls.borderSizeSlider = borderSizeSlider
+    ---------------------------------------------------------------------------
+    --- Scroll Bar Section
+    ---------------------------------------------------------------------------
+    local scrollBarSection = Widgets.ExpandableSection.Acquire(false, self)
+    scrollBarSection:SetExpanded(false)
+    scrollBarSection:SetID(50)
+    scrollBarSection:SetTitle("Scroll Bar")
+    self.GeneralTabControls.scrollBarSection = scrollBarSection
+
+    local showScrollBarCheckBox = Widgets.SettingsCheckBox.Acquire(false, scrollBarSection)
+    showScrollBarCheckBox:SetID(10)
+    showScrollBarCheckBox:SetLabel("Show")
+    showScrollBarCheckBox:BindTrackerSetting(trackerID, "showScrollBar")
+    self.GeneralTabControls.showScrollBarCheckBox = showScrollBarCheckBox
+
+    local scrollBarPositionDropDown = Widgets.SettingsDropDown.Acquire(true, scrollBarSection)
+    scrollBarPositionDropDown:SetID(20)
+    scrollBarPositionDropDown:SetLabel("Position")
+    scrollBarPositionDropDown:AddEntry({ text = "Left", value = "LEFT"})
+    scrollBarPositionDropDown:AddEntry({ text = "Right", value = "RIGHT"})
+    scrollBarPositionDropDown:BindTrackerSetting(trackerID, "scrollBarPosition")
+    self.GeneralTabControls.scrollBarPositionDropDown = scrollBarPositionDropDown
+
+    local scrollBarThumbColorPicker = Widgets.SettingsColorPicker.Acquire(false, scrollBarSection)
+    scrollBarThumbColorPicker:SetID(30)
+    scrollBarThumbColorPicker:SetLabel("Thumb Color")
+    scrollBarThumbColorPicker:BindTrackerSetting(trackerID, "scrollBarThumbColor")
+    self.GeneralTabControls.scrollBarThumbColorPicker = scrollBarThumbColorPicker
+    ---------------------------------------------------------------------------
     --- Danger Zone Section
     ---------------------------------------------------------------------------
     --- The "Danger zone" won't appear for main tracker as it's not intended to be deleted.

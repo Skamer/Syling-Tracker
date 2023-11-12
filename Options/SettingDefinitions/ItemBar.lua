@@ -38,7 +38,7 @@ class "SettingDefinitions.ItemBar" (function(_ENV)
     lockCheckBox:SetID(20)
     lockCheckBox:SetLabel("Lock")
     lockCheckBox:BindItemBarSetting("locked")
-    self.GeneralTabControls.lockCheckBox = enableCheckBox
+    self.GeneralTabControls.lockCheckBox = lockCheckBox
     ---------------------------------------------------------------------------
     --- Column Count
     ---------------------------------------------------------------------------
@@ -210,6 +210,11 @@ class "SettingDefinitions.ItemBar" (function(_ENV)
     self.SettingControls.tabControl = tabControl
   end
 
+  function ReleaseSettingControls(self)
+    self.SettingControls.tabControl:Release()
+    self.SettingControls.tabControl = nil
+  end
+
   function OnBuildSettings(self)
     self:BuildSettingControls()
   end
@@ -219,6 +224,8 @@ class "SettingDefinitions.ItemBar" (function(_ENV)
     self:SetParent()
     self:ClearAllPoints()
     self:Hide()
+
+    self:ReleaseSettingControls()
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
