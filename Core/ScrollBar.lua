@@ -441,6 +441,14 @@ class "ScrollBar" (function(_ENV)
     type = Number,
     default = 1
   }
+
+  property "ThumbColor" {
+    type = ColorType,
+    default = ColorType(1, 199/255, 0, 0.75),
+    handler = function(self, color)
+      self:GetThumb():SetNormalColor(color)
+    end
+  }
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
   -----------------------------------------------------------------------------
