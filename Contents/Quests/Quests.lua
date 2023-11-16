@@ -41,9 +41,11 @@ export {
   GetTimeAllowed                      = C_QuestLog.GetTimeAllowed,
   IsDungeonQuest                      = Utils.IsDungeonQuest,
   IsFailed                            = C_QuestLog.IsFailed,
+  IsImportantQuest                    = C_QuestLog.IsImportantQuest,
   IsLegendaryQuest                    = C_QuestLog.IsLegendaryQuest,
   IsOnMap                             = C_QuestLog.IsOnMap,
   IsQuestBounty                       = C_QuestLog.IsQuestBounty,
+  IsQuestCalling                      = C_QuestLog.IsQuestCalling,
   IsQuestComplete                     = C_QuestLog.IsComplete,
   IsQuestTask                         = C_QuestLog.IsQuestTask,
   IsQuestTrivial                      = C_QuestLog.IsQuestTrivial,
@@ -187,6 +189,8 @@ function UpdateQuest(self, questID)
   local isLegendary = IsLegendaryQuest(questID)
   local tag = GetQuestTagInfo(questID)
   local campaignID = GetCampaignID(questID)
+  local isImportant =  IsImportantQuest(questID)
+  local isCalling = IsQuestCalling(questID)
 
   if not distance then 
     distance = 99999
@@ -229,6 +233,8 @@ function UpdateQuest(self, questID)
   questData.isDungeon = isDungeon
   questData.isRaid = isRaid
   questData.isLegendary = isLegendary
+  questData.isImportant = isImportant
+  questData.isCalling = isCalling
 
   -- Is the quest has an item quest ?
   local itemLink, itemTexture
@@ -394,7 +400,7 @@ function UpdateQuest(self, questID)
   -- end
 end
 
-__SystemEvent__ "QUEST_LOG_UPDATE"
+__SystemEvent__ "QUEST_LOG_UPDATE" "SUPER_TRACKING_CHANGED"
 function QUESTS_UPDATE()
   for questID in pairs(QUESTS_CACHE) do
     _M:UpdateQuest(questID)

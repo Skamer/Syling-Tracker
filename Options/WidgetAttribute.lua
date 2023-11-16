@@ -12,7 +12,9 @@ export {
   newtable = Toolset.newtable
 }
 
-EVENTS = {}
+EVENTS                              = {}
+RECYCLER_HOLDER                     = CreateFrame("Frame") 
+RECYCLER_HOLDER:Hide()
 
 local function RegisterWidgetForSystemEvent(widget, event)
   local t = EVENTS[event]
@@ -76,7 +78,13 @@ class "__Widget__" (function(_ENV)
           end
 
           obj:SetName(obj.__factoryName)
-          obj.__isReleased = true 
+          
+          obj:SetParent(RECYCLER_HOLDER)
+          if obj.ClearAllPoints then obj:ClearAllPoints() end
+          obj:SetID(0)
+          
+          obj.__isReleased = true
+
 
           RECYCLER(obj)
         end

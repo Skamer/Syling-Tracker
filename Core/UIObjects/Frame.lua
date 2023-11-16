@@ -56,38 +56,40 @@ class "Frame" (function(_ENV)
   end
 
   local function OnChildChanged(self, child, isAdd, noAdjust)
-    if self.AdjustHeight then 
-      if isAdd then
+    if isAdd then
 
-        if child.OnSizeChanged then 
-          child.OnSizeChanged = child.OnSizeChanged + OnStateChanged
-        end
-
-        if child.OnTextHeightChanged then 
-          child.OnTextHeightChanged = child.OnTextHeightChanged + OnStateChanged
-        end
-
-        if child.OnStyleApplied then 
-          child.OnStyleApplied = child.OnStyleApplied + OnStateChanged
-        end
-        
-        child.OnShow        = child.OnShow + OnStateChanged
-        child.OnHide        = child.OnHide + OnStateChanged
-      else
-
-        if child.OnSizeChanged then 
-          child.OnSizeChanged = child.OnSizeChanged - OnStateChanged
-        end
-
-        if child.OnTextHeightChanged then 
-          child.OnTextHeightChanged = child.OnTextHeightChanged - OnStateChanged 
-        end
-
-        child.OnShow        = child.OnShow  - OnStateChanged
-        child.OnHide        = child.OnHide  - OnStateChanged
+      if child.OnSizeChanged then 
+        child.OnSizeChanged = child.OnSizeChanged + OnStateChanged
       end
-    end
 
+      if child.OnTextHeightChanged then 
+        child.OnTextHeightChanged = child.OnTextHeightChanged + OnStateChanged
+      end
+
+      if child.OnStyleApplied then 
+        child.OnStyleApplied = child.OnStyleApplied + OnStateChanged
+      end
+      
+      child.OnShow        = child.OnShow + OnStateChanged
+      child.OnHide        = child.OnHide + OnStateChanged
+    else
+
+      if child.OnSizeChanged then 
+        child.OnSizeChanged = child.OnSizeChanged - OnStateChanged
+      end
+
+      if child.OnTextHeightChanged then 
+        child.OnTextHeightChanged = child.OnTextHeightChanged - OnStateChanged 
+      end
+
+      if child.OnStyleApplied then 
+        child.OnStyleApplied = child.OnStyleApplied - OnStateChanged
+      end
+
+      child.OnShow        = child.OnShow  - OnStateChanged
+      child.OnHide        = child.OnHide  - OnStateChanged
+    end
+    
     return not noAdjust and self:AdjustHeight()
   end
 
@@ -96,8 +98,10 @@ class "Frame" (function(_ENV)
       self.OnChildChanged = self.OnChildChanged + OnChildChanged
       self.OnStyleApplied = self.OnStyleApplied + OnStyleAppliedHandler
 
-      for name, child in self:GetChildrenForAdjustment() do 
-        OnChildChanged(self, child, true, true)
+      for name, child in self:GetChildrenForAdjustment() do
+        if self:ShouldSubscribeForAdjustment(child) then
+          OnChildChanged(self, child, true, true)
+        end
       end
 
       self:AdjustHeight()
@@ -105,8 +109,10 @@ class "Frame" (function(_ENV)
       self.OnChildChanged = self.OnChildChanged - OnChildChanged
       self.OnStyleApplied = self.OnStyleApplied - OnStyleAppliedHandler
 
-      for name, child in self:GetChildrenForAdjustment() do 
-        OnChildChanged(self, child, false)
+      for name, child in self:GetChilds() do
+        if self:ShouldSubscribeForAdjustment(child) then
+          OnChildChanged(self, child, false)
+        end
       end
     end
   end
@@ -116,11 +122,7 @@ class "Frame" (function(_ENV)
     if not child:IsShown() then
       return true 
     end
-  
-    if child:GetHeight(true) == 0 then 
-      return true 
-    end
-  
+
     local prop = child:GetChildPropertyName()
     if prop and prop:match("^backdrop") then
       return true 
@@ -129,8 +131,17 @@ class "Frame" (function(_ENV)
     for _, point in ipairs(POINTS) do
       return false 
     end
-  
+
     return true
+  end
+
+  function ShouldSubscribeForAdjustment(self, child)
+    local prop = child:GetChildPropertyName()
+    if prop and prop:match("^backdrop") then
+      return false  
+    end
+
+    return true 
   end
 
   function OnAdjustHeight(self)

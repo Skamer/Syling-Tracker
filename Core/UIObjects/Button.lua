@@ -15,28 +15,6 @@ export {
 class "Button" (function(_ENV)
   inherit "Scorpio.UI.Button" extend "IQueueAdjustHeight"
   -----------------------------------------------------------------------------
-  --                            Helper functions                             --
-  -----------------------------------------------------------------------------
-  local function RegisterHandlersToChild(parent, child, handler)
-    if child.OnSizeChanged then 
-      child.OnSizeChanged = child.OnSizeChanged + handler
-    end 
-
-    if child.OnTextHeightChanged then 
-      child.OnTextHeightChanged = child.OnTextHeightChanged + handler
-    end
-  end
-
-  local function UnregisterHandlersFromChild(parent, child, handler)
-    if child.OnSizeChanged then 
-      child.OnSizeChanged = child.OnSizeChanged - handler
-    end
-
-    if child.OnTextHeightChanged then 
-      child.OnTextHeightChanged = child.OnTextHeightChanged - handler
-    end   
-  end
-  -----------------------------------------------------------------------------
   --                               Handlers                                  --
   -----------------------------------------------------------------------------
   local function OnStateChanged(self)
@@ -49,52 +27,70 @@ class "Button" (function(_ENV)
     end
   end
 
-  local function OnChildChanged(self, child, isAdd, noAdjust)
+  local function OnStyleAppliedHandler(self)
     if self.AdjustHeight then 
-      if isAdd then
-
-        if child.OnSizeChanged then 
-          child.OnSizeChanged = child.OnSizeChanged + OnStateChanged
-        end
-
-        if child.OnTextHeightChanged then 
-          child.OnTextHeightChanged = child.OnTextHeightChanged + OnStateChanged
-        end
-
-        child.OnShow        = child.OnShow + OnStateChanged
-        child.OnHide        = child.OnHide + OnStateChanged
-      else
-
-        if child.OnSizeChanged then 
-          child.OnSizeChanged = child.OnSizeChanged - OnStateChanged
-        end
-
-        if child.OnTextHeightChanged then 
-          child.OnTextHeightChanged = child.OnTextHeightChanged - OnStateChanged 
-        end
-
-        child.OnShow        = child.OnShow  - OnStateChanged
-        child.OnHide        = child.OnHide  - OnStateChanged
-      end
+      self:AdjustHeight()
     end
+  end
 
+  local function OnChildChanged(self, child, isAdd, noAdjust)
+    if isAdd then
+
+      if child.OnSizeChanged then 
+        child.OnSizeChanged = child.OnSizeChanged + OnStateChanged
+      end
+
+      if child.OnTextHeightChanged then 
+        child.OnTextHeightChanged = child.OnTextHeightChanged + OnStateChanged
+      end
+
+      if child.OnStyleApplied then 
+        child.OnStyleApplied = child.OnStyleApplied + OnStateChanged
+      end
+      
+      child.OnShow        = child.OnShow + OnStateChanged
+      child.OnHide        = child.OnHide + OnStateChanged
+    else
+
+      if child.OnSizeChanged then 
+        child.OnSizeChanged = child.OnSizeChanged - OnStateChanged
+      end
+
+      if child.OnTextHeightChanged then 
+        child.OnTextHeightChanged = child.OnTextHeightChanged - OnStateChanged 
+      end
+
+      if child.OnStyleApplied then 
+        child.OnStyleApplied = child.OnStyleApplied - OnStateChanged
+      end
+
+      child.OnShow        = child.OnShow  - OnStateChanged
+      child.OnHide        = child.OnHide  - OnStateChanged
+    end
+    
     return not noAdjust and self:AdjustHeight()
   end
 
   local function AdjustHeightHandler(self, new)
     if new then
       self.OnChildChanged = self.OnChildChanged + OnChildChanged
+      self.OnStyleApplied = self.OnStyleApplied + OnStyleAppliedHandler
 
-      for name, child in self:GetChildrenForAdjustment() do 
-        OnChildChanged(self, child, true, true)
+      for name, child in self:GetChildrenForAdjustment() do
+        if self:ShouldSubscribeForAdjustment(child) then
+          OnChildChanged(self, child, true, true)
+        end
       end
 
       self:AdjustHeight()
     else
       self.OnChildChanged = self.OnChildChanged - OnChildChanged
+      self.OnStyleApplied = self.OnStyleApplied - OnStyleAppliedHandler
 
-      for name, child in self:GetChildrenForAdjustment() do 
-        OnChildChanged(self, child, false)
+      for name, child in self:GetChilds() do
+        if self:ShouldSubscribeForAdjustment(child) then
+          OnChildChanged(self, child, false)
+        end
       end
     end
   end
@@ -104,11 +100,7 @@ class "Button" (function(_ENV)
     if not child:IsShown() then
       return true 
     end
-  
-    if child:GetHeight(true) == 0 then 
-      return true 
-    end
-  
+
     local prop = child:GetChildPropertyName()
     if prop and prop:match("^backdrop") then
       return true 
@@ -117,8 +109,17 @@ class "Button" (function(_ENV)
     for _, point in ipairs(POINTS) do
       return false 
     end
-  
+
     return true
+  end
+
+  function ShouldSubscribeForAdjustment(self, child)
+    local prop = child:GetChildPropertyName()
+    if prop and prop:match("^backdrop") then
+      return false  
+    end
+
+    return true 
   end
 
   function OnAdjustHeight(self)
@@ -212,8 +213,20 @@ UI.Property         {
     require         = Button,
     nilable         = true,
     childtype       = Texture,
-    clear           = Button.ClearNormalTexture and function(self) self:ClearNormalTexture() end,
+    -- We need to use Scorpio.UI.Button to check the function exists.
+    clear           = Scorpio.UI.Button.ClearNormalTexture and function(self) self:ClearNormalTexture() end,
     set             = function(self, val) self:SetNormalTexture(val) end,
+}
+
+UI.Property         {
+    name            = "PushedTexture",
+    type            = Texture,
+    require         = Button,
+    nilable         = true,
+    childtype       = Texture,
+    -- We need to use Scorpio.UI.Button to check the function exists.
+    clear           = Scorpio.UI.Button.ClearPushedTexture and function(self) self:ClearPushedTexture() end,
+    set             = function(self, val) self:SetPushedTexture(val) end,
 }
 
 Style.UpdateSkin("Default", {
@@ -223,4 +236,3 @@ Style.UpdateSkin("Default", {
     clipChildren = true,
   }
 })
-

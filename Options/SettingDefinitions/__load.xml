@@ -5,4 +5,5 @@
   <Script file="Objective.lua" />
   <Script file="Trackers.lua" />
   <Script file="ItemBar.lua" />
+  <Script file="Quests.lua" />
 </Ui>

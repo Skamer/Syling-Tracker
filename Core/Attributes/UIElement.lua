@@ -16,6 +16,8 @@ Syling                  "SylingTracker.Core.UIElement"                       ""
 -- The "OnAcquired" method will be called when the object will be acuiqred.
 --
 EVENTS                              = {}
+RECYCLER_HOLDER                     = CreateFrame("Frame") 
+RECYCLER_HOLDER:Hide()
 
 local function RegisterFrameForSystemEvent(frame, event)
   local t = EVENTS[event]
@@ -73,7 +75,7 @@ class "__UIElement__" (function(_ENV)
     Attribute.IndependentCall(function()
       class(target)(function(_ENV)
         local recycleName = Namespace.GetNamespaceName(target):gsub("%.", "_") .. "%d"
-        RECYCLER = Recycle(target, recycleName)
+        RECYCLER = Recycle(target, recycleName, RECYCLER_HOLDER)
 
         __Arguments__ { Boolean/false }
         function Release(obj, isChildProperty)
@@ -91,16 +93,18 @@ class "__UIElement__" (function(_ENV)
             return 
           end
 
-          obj:SetID(0)
-          obj:Hide()
-          obj:ClearAllPoints()
-          obj:SetParent()
+          -- obj:SetID(0)
+          -- obj:Hide()
+          -- obj:ClearAllPoints()
+          -- obj:SetParent()
+          obj:SetParent(RECYCLER_HOLDER)
+          if obj.ClearAllPoints then obj:ClearAllPoints() end
 
           -- We restore the factory name in case where it has been modified 
           obj:SetName(FACTORY_NAME[obj])
 
           -- We remove the element from the list of element acquired 
-          ACQUIRED_ELEMENTS[obj] = nil 
+          ACQUIRED_ELEMENTS[obj] = nil
 
           RECYCLER(obj)
         end

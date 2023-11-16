@@ -534,7 +534,7 @@ end)
 Style.UpdateSkin("Default", {
   [SettingDefinitions.CreateTracker] = {
     layoutManager = Layout.VerticalLayoutManager(true, true)
-  };
+  },
   [SettingDefinitions.Tracker] = {
     layoutManager = Layout.VerticalLayoutManager(true, true)
   }

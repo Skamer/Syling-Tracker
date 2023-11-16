@@ -21,15 +21,19 @@ export {
   QuestLogPopupDetailFrame_Show       = QuestLogPopupDetailFrame_Show,
   GetQuestLink                        = GetQuestLink,
   LFGListUtil_FindQuestGroup          = LFGListUtil_FindQuestGroup,
+  RemoveQuestWatch                    = C_QuestLog.RemoveQuestWatch,
   QuestMapQuestOptions_AbandonQuest   = QuestMapQuestOptions_AbandonQuest,
+
+  -- Achievement
+   GetAchievementLink                 = GetAchievementLink,
 
   -- Helper 
   ShowHelperWindow                    = API.ShowHelperWindow
 }
 -------------------------------------------------------------------------------
---                   Quests Context Menu Pattern                             --
+--                    Quest Context Menu Pattern                             --
 -------------------------------------------------------------------------------
-RegisterContextMenuPattern("quests", {
+RegisterContextMenuPattern("quest", {
   {
     id = "supertrackQuest",
     text = "Supertrack",
@@ -110,5 +114,63 @@ RegisterContextMenuPattern("quests", {
     order = 70,
     icon  =  { atlas = AtlasType("QuestTurnin") },
     handler = function(questID) ShowHelperWindow("quest", questID) end,
+  }
+})
+-------------------------------------------------------------------------------
+--                   Achievement Context Menu Pattern                       --
+-------------------------------------------------------------------------------
+RegisterContextMenuPattern("achievement", {
+  {
+    id = "linkAchievementToChat",
+    text = "Link to chat",
+    order = 10,
+    icon = { atlas = AtlasType("communities-icon-chat")},
+    handler = function(achievementID)
+      local achievementLink = GetAchievementLink(achievementID)
+      if achievementLink then 
+        ChatFrame_OpenChat(achievementLink)
+      end
+    end
+  },
+  {
+    id = "showAchievementDetails",
+    text = "Show details",
+    order = 20,
+    icon = { atlas = AtlasType("adventureguide-icon-whatsnew")},
+    handler = function(achievementID)
+      if not AchievementFrame then
+        AchievementFrame_LoadUI()
+      end
+      if not AchievementFrame:IsShown() then
+        AchievementFrame_ToggleAchievementFrame()
+      end
+      AchievementFrame_SelectAchievement(achievementID)
+    end
+  },
+  {
+    order = 25,
+    type = "separator"
+  },
+  {
+    id = "stopWatchingAchievement",
+    text = "Stop watching",
+    order = 30,
+    icon = { atlas = AtlasType("transmog-icon-hidden")},
+    handler = function(achievementID)
+      C_ContentTracking.StopTracking(_G.Enum.ContentTrackingType.Achievement, achievementID, _G.Enum.ContentTrackingStopType.Manual)
+    end
+  },
+  {
+    order = 35,
+    type = "separator"
+  },
+  {
+    id = "helpAchievement",
+    text = "Help",
+    order = 40,
+    icon = { atlas = AtlasType("QuestTurnin")},
+    handler = function(achievementID)
+      ShowHelperWindow("achievement", achievementID)
+    end
   }
 })

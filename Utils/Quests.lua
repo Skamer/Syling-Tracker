@@ -66,3 +66,11 @@ __Static__() function Utils.HasTasks(self)
   
   return false
 end
+
+
+__Arguments__ { Number }
+function GetQuestPOINumber(questID)
+  local poiButton = ObjectiveTrackerFrame.BlocksFrame:FindButtonByQuestID(questID) or QuestScrollFrame.Contents:FindButtonByQuestID(questID)
+  return  poiButton and poiButton.index
+end
+Utils.GetQuestPOINumber = GetQuestPOINumber

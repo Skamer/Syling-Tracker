@@ -125,4 +125,3 @@ __Static__() function Utils.GetNearestFrameForType(frame, cls)
     frame = frame:GetParent()
   end
 end
-

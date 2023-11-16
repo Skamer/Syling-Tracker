@@ -100,9 +100,9 @@ class "UISetting" (function(_ENV)
 
     local resolvedValue, resolvedSetting 
 
-    if value then 
+    if value ~= nil then 
       resolvedValue, resolvedSetting = value, self 
-    elseif self.Default then 
+    elseif self.Default then
       resolvedValue, resolvedSetting = self.Default, self 
     elseif self.Parent then 
       resolvedValue, resolvedSetting = self.Parent:GetValue()
@@ -124,7 +124,7 @@ class "UISetting" (function(_ENV)
 
     -- We notify the observers if needed.
     local subject = UI_SETTING_SUBJECTS[id]
-    if subject then 
+    if subject then
       subject:OnNext(resolvedValue)
     end
   end

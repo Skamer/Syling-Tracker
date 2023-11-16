@@ -45,6 +45,8 @@ __DataProperties__ {
   { name = "distance", type = Number },
   { name = "isRaid", type = Boolean },
   { name = "isLegendary", type = Boolean },
+  { name = "isImportant", type = Boolean},
+  { name = "isCalling", type = Boolean},
   { name = "objectives", type = ObjectiveData, isArray = true, singularName = "objective"},
   { name = "item", type = QuestItemData }
 }

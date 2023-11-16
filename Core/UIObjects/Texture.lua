@@ -39,6 +39,11 @@ class "Texture" (function(_ENV)
 
     if mediaTexture.atlas and not mediaTexture.isMediaAtlas then
       Style[self].atlas = mediaTexture.atlas 
+
+      if mediaTexture.size then 
+        Style[self].size = mediaTexture.size 
+      end
+      
     elseif mediaTexture.atlas then
       local atlasInfo = GetMediaAtlas(mediaTexture.atlas.atlas)
       if atlasInfo then 
@@ -55,7 +60,15 @@ class "Texture" (function(_ENV)
     elseif mediaTexture.file then
       Style[self].atlas = nil
       Style[self].color = nil
-      Style[self].file = mediaTexture.file 
+      Style[self].file = mediaTexture.file
+
+      if mediaTexture.size then 
+        Style[self].size = mediaTexture.size 
+      end
+
+      if mediaTexture.texCoords then 
+        Style[self].texCoords = mediaTexture.texCoords
+      end
     elseif mediaTexture.color then 
       Style[self].atlas = nil
       Style[self].file = nil
@@ -67,6 +80,8 @@ class "Texture" (function(_ENV)
   -----------------------------------------------------------------------------
   property "MediaTexture" {
     type = MediaTextureType,
-    handler = function(self, mediaTexture) self:SetMediaTexture(mediaTexture) end 
+    handler = function(self, mediaTexture) 
+      self:SetMediaTexture(mediaTexture) 
+    end 
   }
 end)

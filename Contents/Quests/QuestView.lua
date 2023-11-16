@@ -9,37 +9,122 @@
 Syling                 "SylingTracker.Contents.QuestView"                    ""
 -- ========================================================================= --
 export {
-  FromUIProperty                  = Wow.FromUIProperty,
-  GetQuestDifficultyColor         = GetQuestDifficultyColor,
-  TryToComputeHeightFromChildren  = Utils.Frame_TryToComputeHeightFromChildren,
-  ContextMenu_Show                = API.ContextMenu_Show
+  FromUIProperty                        = Wow.FromUIProperty,
+  GetQuestDifficultyColor               = GetQuestDifficultyColor,
+  TryToComputeHeightFromChildren        = Utils.Frame_TryToComputeHeightFromChildren,
+  ContextMenu_Show                      = API.ContextMenu_Show,
+  RegisterUISetting                     = API.RegisterUISetting,
+  FromUISetting                         = API.FromUISetting,
+  FromUISettings                        = API.FromUISettings,
+  GetFrame                              = Wow.GetFrame,
+
+  -- Wow API & Utils
+  GetSuperTrackedQuestID                = C_SuperTrack.GetSuperTrackedQuestID,
+  GetNextWaypoint                       = C_QuestLog.GetNextWaypoint,
+  GetQuestPOINumber                     = Utils.GetQuestPOINumber,
+  ShouldQuestIconsUseCampaignAppearance = QuestUtil.ShouldQuestIconsUseCampaignAppearance
 }
+
+__UIElement__()
+class "QuestItemIcon" (function(_ENV)
+  inherit "Frame"
+  -----------------------------------------------------------------------------
+  --                               Handlers                                  --
+  -----------------------------------------------------------------------------
+  local function OnLeaveHandler(self)
+    GameTooltip:Hide()
+  end
+
+  local function OnEnterHandler(self)
+    local itemLink = self.ItemLink
+    if itemLink then 
+      GameTooltip:SetOwner(self)
+      GameTooltip:SetHyperlink(itemLink)
+      GameTooltip:Show()
+    end
+  end
+  -----------------------------------------------------------------------------
+  --                               Methods                                   --
+  -----------------------------------------------------------------------------
+  function OnSystemEvent(self, event)
+    local questID = self.id
+
+    if not event == "BAG_UPDATE_COOLDOWN" or not questID or questID <= 0 then 
+      return 
+    end
+
+    local questLogIndex = C_QuestLog.GetLogIndexForQuestID(questID)
+
+    if questLogIndex then 
+      local start, duration, enable = GetQuestLogSpecialItemCooldown(questLogIndex)
+
+      CooldownFrame_Set(self.__cooldown, start, duration, enable)
+
+      if duration and duration > 0 and enable and enable == 0 then 
+        self.ItemUsable = false
+      else
+        self.ItemUsable = true
+      end
+    end
+  end
+  -----------------------------------------------------------------------------
+  --                               Properties                                --
+  -----------------------------------------------------------------------------
+  __Observable__()
+  property "ItemLink" {
+    type = Any
+  }
+
+  __Observable__()
+  property "ItemTexture" {
+    type = Any
+  }
+
+  __Observable__()
+  property "ItemUsable" {
+    type = Boolean,
+    default = true
+  }
+
+  property "id" {
+    type = Number
+  }
+  -----------------------------------------------------------------------------
+  --                            Constructors                                 --
+  -----------------------------------------------------------------------------
+  __Template__ {
+    Texture = Texture
+  }
+  function __ctor(self, name)
+    super(self, name)
+
+    local cooldown = CreateFrame("Cooldown", name.."Cooldown", self, "CooldownFrameTemplate")
+  end
+end)
+
+
+__UIElement__()
+class "QuestViewContent"(function(_ENV)
+  inherit "Frame"
+  -----------------------------------------------------------------------------
+  --                              Constructors                               --
+  -----------------------------------------------------------------------------
+  __Template__ {
+    Header = Frame,
+    {
+      Header = {
+        Tag   = Texture,
+        Name  = FontString,
+        Level = FontString
+      }
+    }
+  }
+  function __ctor(self) end
+end)
 
 __UIElement__()
 class "QuestView" (function(_ENV)
   inherit "Button" extend "IView" 
-  -----------------------------------------------------------------------------
-  --                            Helper functions                             --
-  -----------------------------------------------------------------------------
-  local function RegisterHandlersToChild(parent, child, handler)
-    if child.OnSizeChanged then 
-      child.OnSizeChanged = child.OnSizeChanged + handler
-    end 
-
-    if child.OnTextHeightChanged then 
-      child.OnTextHeightChanged = child.OnTextHeightChanged + handler
-    end
-  end
-
-  local function UnregisterHandlersFromChild(parent, child, handler)
-    if child.OnSizeChanged then 
-      child.OnSizeChanged = child.OnSizeChanged - handler
-    end
-
-    if child.OnTextHeightChanged then 
-      child.OnTextHeightChanged = child.OnTextHeightChanged - handler
-    end   
-  end
   -----------------------------------------------------------------------------
   --                               Handlers                                  --
   -----------------------------------------------------------------------------
@@ -58,21 +143,69 @@ class "QuestView" (function(_ENV)
   --                               Methods                                   --
   -----------------------------------------------------------------------------
   function OnViewUpdate(self, data, ...)
+    local questID = data.questID
+    local isWaypoint = data.isWaypoint -- TODO: Check and add isWaypoint
+    local isComplete = data.isComplete
+    local isSuperTracked = questID == GetSuperTrackedQuestID()
+    local hasLocalPOI = data.hasLocalPOI
+
+
     if data.objectives then
-      Style[self].Objectives.visible = true
-      local child = self:GetPropertyChild("Objectives")
+      Style[self].Content.Objectives.visible = true
+      local child = self:GetChild("Content"):GetPropertyChild("Objectives")
 
       -- child:InstantApplyStyle()
       child:UpdateView(data.objectives, ...)
     end
 
+    -- Update POI
+    local showPOI = false 
+    if isComplete then 
+      showPOI = true 
+    elseif hasLocalPOI or (isSuperTracked and GetNextWaypoint(questID) ~= nil) then 
+      showPOI = true 
+    end
+
+    local poiButton = self:GetChild("POI")
+    if showPOI then
+      Style[self].POI.visible = true
+      local poiButton = self:GetPropertyChild("POI")
+      if isWaypoint then
+        poiButton:SetStyle(POIButton.Style.Waypoint)
+      elseif isComplete then 
+        poiButton:SetStyle(POIButton.Style.QuestComplete)
+      else
+        poiButton:SetStyle(POIButton.Style.Numeric)
+        local poiNumber = GetQuestPOINumber(questID)
+        if poiNumber then 
+          poiButton:SetNumber(poiNumber)
+        end
+      end
+
+
+      if ShouldQuestIconsUseCampaignAppearance(questID) then
+        poiButton:SetQuestType(POIButton.QuestType.Campaign)
+      elseif data.isCalling then 
+        poiButton:SetQuestType(POIButton.QuestType.Calling)
+      elseif data.isImportant then 
+        poiButton:SetQuestType(POIButton.QuestType.Important)
+      else
+        poiButton:SetQuestType(POIButton.QuestType.Normal)
+      end
+
+      poiButton:SetSelected(isSuperTracked)
+      poiButton:SetQuestID(questID)
+    else 
+      Style[self].POI = NIL
+    end
+
     if data.hasTimer then 
-      Style[self].Timer.visible     = true 
-      Style[self].Timer.startTime   = data.startTime
-      Style[self].Timer.duration    = data.totalTime
+      Style[self].Content.Timer.visible     = true 
+      Style[self].Content.Timer.startTime   = data.startTime
+      Style[self].Content.Timer.duration    = data.totalTime
       self.ObjectiveHasTimer        = true 
     else
-      Style[self].Timer             = NIL
+      Style[self].Content.Timer     = NIL
       self.ObjectiveHasTimer        = false 
     end
 
@@ -112,43 +245,29 @@ class "QuestView" (function(_ENV)
   }
 
   property "ContextMenuPattern" {
-    type = String
+    type = String,
+    default = "quest"
   }
   -----------------------------------------------------------------------------
   --                              Constructors                               --
   -----------------------------------------------------------------------------
   __Template__ {
-    Header = Frame, 
-    {
-      Header = {
-        Tag     = Texture, 
-        Name    = FontString, 
-        Level   = FontString
-      }
-    }
+    Content = QuestViewContent
   }
-  function __ctor(self) 
-    local header = self:GetChild("Header")
-    local name = header:GetChild("Name")
-    local level = header:GetChild("Level")
-
-    self.AdjustHeaderHeight = function()
-      self:OnAdjustHeaderHeight(header)
-    end
-
-    self:SetClipsChildren(true)
-
+  function __ctor(self)
     self.OnClick = self.OnClick + OnClickHandler
-    self.ContextMenuPattern = "quests"
   end   
 end)
 
 -- Optional Children for QuestView 
-__ChildProperty__(QuestView, "Objectives")
+__ChildProperty__(QuestViewContent, "Objectives")
 class(tostring(QuestView) .. ".Objectives") { ObjectiveListView }
 
-__ChildProperty__(QuestView, "Timer")
+__ChildProperty__(QuestViewContent, "Timer")
 class(tostring(QuestView) .. ".Timer") { SylingTracker.Timer }
+
+__ChildProperty__(QuestView, "POI")
+class(tostring(QuestView) .. ".POI") { SylingTracker.POIButton }
 
 __UIElement__()
 class "RaidQuestView" { QuestView }
@@ -162,76 +281,133 @@ class "LegendaryQuestView" { QuestView }
 __UIElement__()
 class "QuestListView" { ListView }
 -------------------------------------------------------------------------------
+--                              UI Settings                                  --
+-------------------------------------------------------------------------------
+RegisterUISetting("quest.showBackground", true)
+RegisterUISetting("quest.showBorder", true)
+RegisterUISetting("quest.backgroundColor", Color(35/255, 40/255, 46/255, 0.73))
+RegisterUISetting("quest.borderColor", Color(0, 0, 0, 0.4))
+RegisterUISetting("quest.borderSize", 1)
+RegisterUISetting("quest.name.mediaFont", FontType("DejaVuSansCondensed Bold", 10))
+RegisterUISetting("quest.name.textTransform", "NONE")
+RegisterUISetting("quest.level.mediaFont", FontType("PT Sans Caption Bold", 10))
+-------------------------------------------------------------------------------
+--                              Observables                                  --
+-------------------------------------------------------------------------------
+function FromBackdrop()
+ return GetFrame("OnBackdropChanged")
+    :Next()
+    :Map(function(tracker, value, _, prop)
+      local showBackground = tracker.ShowBackground
+      local showBorder = tracker.ShowBorder
+      if not showBackground and not showBorder then 
+        return nil 
+      end
+
+      local backdrop = {}
+      if showBackground then 
+        backdrop.bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]]
+      end
+
+      if showBorder then 
+        backdrop.edgeFile = [[Interface\Buttons\WHITE8X8]]
+        backdrop.edgeSize = tracker.BorderSize
+      end
+
+      return backdrop
+    end)
+end
+-------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
   [QuestView] = {
-    height = 24,
-    minResize = { width = 0, height = 24},
-    width = 250,
-    autoAdjustHeight = true,
-    registerForClicks = { "LeftButtonDown", "RightButtonDown" },
+    height                            = 24,
+    minResize                         = { width = 0, height = 24},
+    autoAdjustHeight                  = true,
+    registerForClicks                 = { "LeftButtonDown", "RightButtonDown" },
 
-    backdrop = { 
-      bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
-    },
-    backdropColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
+    Content = {
+      height                          = 24,
+      minResize                       = { width = 0, height = 24},
+      autoAdjustHeight                = true,
+      backdrop                        = FromBackdrop(),
+      showBackground                  = FromUISetting("quest.showBackground"),
+      showBorder                      = FromUISetting("quest.showBorder"),
+      backdropColor                   = FromUISetting("quest.backgroundColor"),
+      backdropBorderColor             = FromUISetting("quest.borderColor"),
+      borderSize                      = FromUISetting("quest.borderSize"),
 
-    Header = {
-      height = 24,
-
-      Tag = {
-        -- atlas = AtlasType("questlog-questtypeicon-dungeon"),
-        atlas = FromUIProperty("QuestTagID"):Map(function(tagID)
-          if not tagID then 
-            return 
-          end
-
-          return { atlas = QUEST_TAG_ATLAS[tagID] }
-        end),
-        height = 18,
-        width = 18,
+      Header = {
+        height                        = 24,
+  
+        Tag = {
+          -- atlas = AtlasType("questlog-questtypeicon-dungeon"),
+          atlas = FromUIProperty("QuestTagID"):Map(function(tagID)
+            if not tagID then 
+              return 
+            end
+  
+            return { atlas = QUEST_TAG_ATLAS[tagID] }
+          end),
+          height = 18,
+          width = 18,
+          location = {
+            Anchor("LEFT", 3, 0)
+          }        
+        },
+  
+        Name = {
+          text = FromUIProperty("QuestName"),
+          justifyV = "MIDDLE",
+          mediaFont = FromUISetting("quest.name.mediaFont"),
+          textTransform = FromUISetting("quest.name.textTransform"),
+          location = {
+            Anchor("LEFT", 0, 0, "Tag", "RIGHT"),
+            Anchor("RIGHT", 0, 0, "Level", "LEFT"),
+            Anchor("TOP"),
+            Anchor("BOTTOM")
+          }
+        },
+  
+        Level = {
+          text = Wow.FromUIProperty("QuestLevel"):Map(function(level)
+             local difficultyColor = GetQuestDifficultyColor(level)
+             if difficultyColor then 
+              return Color(difficultyColor.r, difficultyColor.g, difficultyColor.b, 1) .. level
+             else
+              return level 
+             end
+          end),
+          width = 18,
+          justifyV = "MIDDLE",
+          justifyH = "RIGHT",
+          
+          mediaFont = FromUISetting("quest.level.mediaFont"),
+          location = {
+            Anchor("TOP"),
+            Anchor("RIGHT", -5, 0),
+            Anchor("BOTTOM")
+          }
+        },
+  
         location = {
-          Anchor("LEFT", 3, 0)
-        }        
-      },
-
-      Name = {
-        text = FromUIProperty("QuestName"),
-        justifyV = "MIDDLE",
-        mediaFont = FontType("DejaVuSansCondensed Bold", 10),
-        location = {
-          Anchor("LEFT", 0, 0, "Tag", "RIGHT"),
-          Anchor("RIGHT", 0, 0, "Level", "LEFT"),
-          Anchor("TOP"),
-          Anchor("BOTTOM")
+          Anchor("TOPLEFT"),
+          Anchor("TOPRIGHT")
         }
       },
-
-      Level = {
-        text = Wow.FromUIProperty("QuestLevel"):Map(function(level)
-           local difficultyColor = GetQuestDifficultyColor(level)
-           if difficultyColor then 
-            return Color(difficultyColor.r, difficultyColor.g, difficultyColor.b, 1) .. level
-           else
-            return level 
-           end
-        end),
-        width = 18,
-        justifyV = "MIDDLE",
-        justifyH = "RIGHT",
-        mediaFont = FontType("PT Sans Caption Bold", 10),
-        location = {
-          Anchor("TOP"),
-          Anchor("RIGHT", -5, 0),
-          Anchor("BOTTOM")
-        }
-      },
-
+  
       location = {
-        Anchor("TOPLEFT"),
-        Anchor("TOPRIGHT")
+          Anchor("TOPLEFT", 26, 0),
+          Anchor("TOPRIGHT")
       }
+    },
+
+  },
+
+  [QuestView.POI] = {
+    location = {
+      Anchor("LEFT")
     }
   },
 
@@ -239,8 +415,9 @@ Style.UpdateSkin("Default", {
     spacing = 5,
 
     location = {
-      Anchor("TOPLEFT", 0, 0, "Header", "BOTTOMLEFT"),
-      Anchor("TOPRIGHT", 0, 0, "Header", "BOTTOMRIGHT"),
+      Anchor("TOP", 0, -5, "Header", "BOTTOM"),
+      Anchor("LEFT"),
+      Anchor("RIGHT")
     }
   },
 
@@ -252,14 +429,20 @@ Style.UpdateSkin("Default", {
   },
 
   [LegendaryQuestView] = {
-    backdropColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
+    Content = {
+      backdropColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
+    }
   },
 
   [RaidQuestView] = {
-    backdropColor = { r = 0, g = 84/255, b = 2/255, a = 0.73}
+    Content = {
+      backdropColor = { r = 0, g = 84/255, b = 2/255, a = 0.73}
+    }
   },
   [DungeonQuestView] = {
-    backdropColor = { r = 0, g = 72/255, b = 124/255, a = 0.73 }
+    Content = {
+      backdropColor = { r = 0, g = 72/255, b = 124/255, a = 0.73 }
+    }
   },
 
   [QuestListView] = {

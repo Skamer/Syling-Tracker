@@ -9,12 +9,13 @@
 Syling                 "SylingTracker.Contents.AchievementView"              ""
 -- ========================================================================= --
 export {
-  FromUIProperty  = Wow.FromUIProperty,
+  FromUIProperty                      = Wow.FromUIProperty,
+  ContextMenu_Show                    = API.ContextMenu_Show
 }
 
 __UIElement__()
 class "AchievementView" (function(_ENV)
-  inherit "Frame" extend "IView"
+  inherit "Button" extend "IView"
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
@@ -26,9 +27,23 @@ class "AchievementView" (function(_ENV)
       objectivesView:UpdateView(data.objectives, ...)
     end
 
-    self.AchievementName = data.name
-    self.AchievementDesc = data.description
-    self.AchievementIconFileID = data.icon
+    self.AchievementID          = data.achievementID
+    self.AchievementName        = data.name
+    self.AchievementDesc        = data.description
+    self.AchievementIconFileID  = data.icon
+  end
+  -----------------------------------------------------------------------------
+  --                               Handlers                                  --
+  -----------------------------------------------------------------------------
+  local function OnClickHandler(self, mouseButton)
+    local achievementID = self.AchievementID
+    local contextMenuPattern = self.ContextMenuPattern
+
+    if mouseButton == "RightButton" then 
+      if achievementID and contextMenuPattern then 
+        ContextMenu_Show(contextMenuPattern, self, achievementID)
+      end
+    end
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
@@ -49,6 +64,15 @@ class "AchievementView" (function(_ENV)
   property "AchievementIconFileID" {
     type = Number
   }
+
+  property "QuestID" {
+    type = Number
+  }
+
+  property "ContextMenuPattern" {
+    type = String,
+    default = "achievement"
+  }
   -----------------------------------------------------------------------------
   --                              Constructors                               --
   -----------------------------------------------------------------------------
@@ -63,7 +87,9 @@ class "AchievementView" (function(_ENV)
     }
 
   }
-  function __ctor(self) end
+  function __ctor(self) 
+    self.OnClick = self.OnClick + OnClickHandler
+  end
 end)
 
 -- Optional Children for QuestView 
@@ -80,6 +106,7 @@ Style.UpdateSkin("Default", {
     height = 24,
     minResize = { width = 0, height = 24},
     autoAdjustHeight = true,
+    registerForClicks = { "LeftButtonDown", "RightButtonDown" },
 
     backdrop = { 
       bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],

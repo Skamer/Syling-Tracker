@@ -33,27 +33,32 @@ __Async__() function SylingTracker_OPEN_OPTIONS()
     panel:CreateCategory("general", "General")
     panel:CreateCategory("trackers", "My Trackers")
     panel:CreateCategory("contents", "Contents")
+    -- panel:CreateCategory("advanced", "Advanced")
     -- panel:CreateCategory("userContents", "My Contents")
 
     panel:AddCategoryEntry({ text = "Settings", value = SettingDefinitions.General }, "general")
-    panel:AddCategoryEntry({ text = "Media"}, "general")
+    -- panel:AddCategoryEntry({ text = "|cffabababMedia (NYI)|r"}, "general")
     panel:AddCategoryEntry({ text = "Item Bar", value = SettingDefinitions.ItemBar }, "general")
-    panel:AddCategoryEntry({ text = "Context Menu"}, "general")
+    -- panel:AddCategoryEntry({ text = "|cffabababContext Menu (NYI)|r"}, "general")
     panel:AddCategoryEntry({ text = "Objective", value = SettingDefinitions.Objective}, "general")
 
     -- My Trackers entries 
     _M:CreateTrackerEntries(panel)
 
     -- Contents entries
-    panel:AddCategoryEntry({ text = "Quests"}, "contents")
-    panel:AddCategoryEntry({ text = "World Quests"}, "contents")
-    panel:AddCategoryEntry({ text = "Bonus objectives"}, "contents")
-    panel:AddCategoryEntry({ text = "Scenario"}, "contents")
-    panel:AddCategoryEntry({ text = "Mythic +"}, "contents")
-    panel:AddCategoryEntry({ text = "Dungeon"}, "contents")
-    panel:AddCategoryEntry({ text = "Achievements"}, "contents")
-    panel:AddCategoryEntry({ text = "Torghast"}, "contents")
-    panel:AddCategoryEntry({ text = "Quests"}, "contents")
+    panel:AddCategoryEntry({ text = "Quests", value = SettingDefinitions.Quests}, "contents")
+    -- panel:AddCategoryEntry({ text = "World Quests"}, "contents")
+    -- panel:AddCategoryEntry({ text = "Bonus objectives"}, "contents")
+    -- panel:AddCategoryEntry({ text = "Scenario"}, "contents")
+    -- panel:AddCategoryEntry({ text = "Mythic +"}, "contents")
+    -- panel:AddCategoryEntry({ text = "Dungeon"}, "contents")
+    -- panel:AddCategoryEntry({ text = "Achievements"}, "contents")
+    -- panel:AddCategoryEntry({ text = "Torghast"}, "contents")
+    -- panel:AddCategoryEntry({ text = "Quests"}, "contents")
+
+    -- Advanced entries 
+    -- panel:AddCategoryEntry({ text = "|cffabababSkin (NYI)|r"}, "advanced")
+    -- panel:AddCategoryEntry({ text = "|cffabababUI Settings (NYI)|r"}, "advanced")
     
     -- Refresh the panel for creating entries
     panel:Refresh()
