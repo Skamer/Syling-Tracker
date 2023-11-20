@@ -14,7 +14,7 @@ ENEMIES_PULL_COUNT                    = 0
 ENEMIES_PULL                          = {}
 
 __Arguments__ { Number }
-__Static__() function Utils.GetEnemyCount(npcID)
+function GetEnemyCount(npcID)
   if not MDT then 
     return 0
   end
@@ -24,7 +24,7 @@ __Static__() function Utils.GetEnemyCount(npcID)
   return count or 0
 end
 
-__Static__() function Utils.GetEnemyPullCount()
+function GetEnemyPullCount()
   return ENEMIES_PULL_COUNT
 end
 
@@ -46,13 +46,20 @@ function CalculatePullCount()
   end
 end
 
+-- Export Utils functions 
+Utils.GetEnemyCount                   = GetEnemyCount
+Utils.GetEnemyPullCount               = GetEnemyPullCount
+-------------------------------------------------------------------------------
+--                                Module                                     --
+-------------------------------------------------------------------------------
 __SystemEvent__()
-function COMBAT_LOG_EVENT_UNFILTERED(...)
-  local _, subEvent, _, _, _, _, _, destGUID = ...
+function COMBAT_LOG_EVENT_UNFILTERED()
+  local _, subEvent, _, _, _, _, _, destGUID = CombatLogGetCurrentEventInfo()
 
-  if subEvent == "UNIT_DIED" then 
+  if subEvent == "UNIT_DIED" then
     if destGUID and ENEMIES_PULL[destGUID] then 
       ENEMIES_PULL[destGUID] = "DEAD"
+      CalculatePullCount()
     end
   end
 end
@@ -70,7 +77,7 @@ function UNIT_THREAT_LIST_UPDATE(...)
           local enemyCount = Utils.GetEnemyCount(tonumber(npcID))
           ENEMIES_PULL[guid] = enemyCount
 
-          _M:CalculatePullCount()
+          CalculatePullCount()
         end
       end
     end
@@ -83,5 +90,5 @@ function ResetEnemiesPull()
     ENEMIES_PULL[key] = nil
   end
 
-  _M:CalculatePullCount()
+  CalculatePullCount()
 end

@@ -9,10 +9,10 @@
 Syling                 "SylingTracker.UI.Timer"                              ""
 -- ========================================================================= --
 export {
-  RegisterUISetting = API.RegisterUISetting,
-  FromUISetting     = API.FromUISetting,
-  GetFrameByType    = Wow.GetFrameByType,
-  FromUIProperty    = Wow.FromUIProperty
+  RegisterUISetting                   = API.RegisterUISetting,
+  FromUISetting                       = API.FromUISetting,
+  GetFrameByType                      = Wow.GetFrameByType,
+  FromUIProperty                      = Wow.FromUIProperty
 }
 
 __UIElement__()
@@ -21,25 +21,54 @@ class "Timer" (function(_ENV)
   -----------------------------------------------------------------------------
   --                               Handlers                                  --
   -----------------------------------------------------------------------------
-  local function OnUpdateHandler(self)
-    self.ElapsedTime = GetTime() - self.StartTime
+  local function OnUpdateHandler(self, elapsed)
+    if not self.Paused then 
+      self.ElapsedTime = GetTime() - self.StartTime - self.PausedElapsedTime
+    else
+      self.PausedElapsedTime = self.PausedElapsedTime + elapsed 
+    end
   end
 
-  local function OnTimeSettingsHandler(self, new, old, prop)
-    if (prop == "StartTime") and (new > 0 and self.Duration) then 
+  local function OnTimeSettingsChangedHandler(self, new, old, prop)
+    -- If the timer is not started or no full timer info, don't continue
+    if self.Started and self.StartTime > 0 and self.Duration > 0 then
       self.OnUpdate = OnUpdateHandler
-    elseif (prop == "Duration") and (new > 0 and self.StartTime) then 
-      self.OnUpdate = OnUpdateHandler
-    else 
-      self.OnUpdate = nil 
+    else
+      self.OnUpdate = nil
     end
+  end
+  -----------------------------------------------------------------------------
+  --                                Methods                                  --
+  -----------------------------------------------------------------------------
+  function Start(self)
+    self.Started = true 
+  end
+
+  function Stop(self)
+    self.Started = false 
+  end
+
+  function Pause(self)
+    self.Paused = true 
+  end
+
+  function Resume(self)
+    self.Paused = false
+  end
+
+  function Reset(self)
+    self.Duration = nil
+    self.StartTime = nil
+    self.Started = nil 
+    self.Paused = nil 
+    self.PausedElapsedTime = nil
+    self.ElapsedTime = nil
   end
 
   function OnRelease(self)
     super.OnRelease(self)
 
-    self.Duration = nil
-    self.StartTime = nil
+    self:Reset()
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
@@ -47,13 +76,13 @@ class "Timer" (function(_ENV)
   property "StartTime" {
     type = Number,
     default = 0,
-    handler = OnTimeSettingsHandler,
+    handler = OnTimeSettingsChangedHandler,
   }
 
   property "Duration" {
     type = Number,
     default = 10,
-    handler = OnTimeSettingsHandler,
+    handler = OnTimeSettingsChangedHandler,
     event = "OnDurationChanged"
   }
 
@@ -62,10 +91,29 @@ class "Timer" (function(_ENV)
     default = false, 
   }
 
+  property "Started" {
+    type = Boolean,
+    handler = OnTimeSettingsChangedHandler,
+    default = false
+  }
+
+  property "Paused" {
+    type = Boolean,
+    default = false
+  }
+
+  --- Contains the time elapsed while the timer is paused, will be used to compute
+  --- the true elapsed time.
+  property "PausedElapsedTime" {
+    type = Number,
+    default = 0
+  }
+
   __Observable__()
   property "ElapsedTime" {
     type = Number,
     default = 0,
+    event = "OnElapsedTimeChanged"
   }
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
@@ -80,23 +128,10 @@ end)
 -------------------------------------------------------------------------------
 RegisterUISetting("timer.showRemainingTime", false)
 -------------------------------------------------------------------------------
---                                Styles                                     --
+--                              Observables                                  --
 -------------------------------------------------------------------------------
-Style.UpdateSkin("Default", {
-  [Timer] = {
-    height = 25,
-    showRemainingTime = FromUISetting("timer.showRemainingTime"),
-
-    -- backdrop = { 
-    --   bgFile              = [[Interface\Buttons\WHITE8X8]],
-    --   edgeFile            = [[Interface\Buttons\WHITE8X8]],
-    --   edgeSize            = 1
-    -- },
-    -- backdropColor         = { r = 1, g = 0, b = 0, a = 0},
-    -- backdropBorderColor   = { r = 0.5, g = 0, b = 0, a = 1 },
-  
-    Text = {
-      text = GetFrameByType(Timer, FromUIProperty("ElapsedTime")):Map(function(timer)
+function FromText()
+  return GetFrameByType(Timer, FromUIProperty("ElapsedTime")):Map(function(timer)
         local clock = timer.ShowRemainingTime 
                       and SecondsToClock(max(0, timer.Duration - timer.ElapsedTime)) 
                       or SecondsToClock(timer.ElapsedTime)
@@ -114,9 +149,21 @@ Style.UpdateSkin("Default", {
 
         local greenOffset = remainingTimePercent / redPercentStart
         return Color(1, greenOffset, 0) .. clock         
-      end),
-      textColor = Color.WHITE,
-      setAllPoints = true
+      end)
+end
+-------------------------------------------------------------------------------
+--                                Styles                                     --
+-------------------------------------------------------------------------------
+Style.UpdateSkin("Default", {
+  [Timer] = {
+    height                            = 25,
+    showRemainingTime                 = FromUISetting("timer.showRemainingTime"),
+  
+    Text = {
+      text                            = FromText(),
+      textColor                       = Color.WHITE,
+      setAllPoints                    = true
     }
   }
 })
+

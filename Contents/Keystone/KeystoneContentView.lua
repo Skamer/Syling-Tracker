@@ -13,6 +13,53 @@ export {
   GetFrameByType                      = Wow.GetFrameByType,
 }
 
+-- Enemy Forces Text Format
+-- Pull percent text Format
+
+-- ONLY_PERCENT
+-- ONLY_ABSOLUTE
+-- ABSOLUTE_AND_PERCENT
+
+-- ABSOLUTE
+-- PERCENT
+-- ABSOLUTE_AND_PERCENT
+
+
+-- 50.7 (pull)
+
+-- Enemy Forces 
+-- -> 99.23 
+
+-- 50.7%
+-- 198 / 240
+-- 198 / 240 - 82%58
+
+
+-- OnlyPercent
+-- OnlyAbsolute
+-- AbsoluteAndPercent
+-- Custom 
+
+-- OnlyFinalPercent
+-- OnlyFinalCount
+-- OnlyAdditivePercent
+-- OnlyAdditiveCount
+-- Custom
+enum "KeystoneEnemyForcesFormatType" {
+  "OnlyPercent",
+  "OnlyAbsolute",
+  "AbsoluteAndPercent",
+  "Custom"
+}
+
+enum "KeystoneCurrentPullFormatType" {
+  "OnlyFinalPercent",
+  "OnlyFinalCount",
+  "OnlyAdditivePercent",
+  "OnlyAdditiveCount",
+  "Custom"
+}
+
 __UIElement__()
 class "KeystoneAffixe"(function(_ENV)
   inherit "Frame"
@@ -59,11 +106,17 @@ class "KeystoneAffixes" (function(_ENV)
     if affixesData then 
       self.AffixesCount = #affixesData 
 
-      for index, affixData in ipairs(affixesData) do
-        local affix = self:GetChild("Affix"..index)
-        affix.AffixName = affixData.name
-        affix.AffixDescription = affixData.description
-        affix.AffixTexture = affixData.texture
+      for i = 1, 3 do 
+        local affixData = affixesData[i]
+        local affix = self:GetChild("Affix"..i)
+        if affixData then 
+          affix.AffixName = affixData.name
+          affix.AffixDescription = affixData.description
+          affix.AffixTexture = affixData.texture
+          affix:Show()
+        else 
+          affix:Hide()
+        end
       end
     else
       self.AffixesCount = nil 
@@ -117,17 +170,33 @@ class "KeystoneTimer" (function(_ENV)
     local threeChestLine = self:GetChild("ThreeChestLine")
     threeChestLine:SetPoint("CENTER", timerBar, "RIGHT", -math.floor(Lerp(0, maxWidth, 0.4) + 0.5), 0)
   end
+
+  local function OnElapsedTimeChanged(self, new)
+    local duration = self.Duration
+
+    self.TwoChestElapsed = (new > duration * 0.8)
+    self.ThreeChestElapsed = (new > duration * 0.6)
+    self.TimerElapsed = (new > duration)
+  end
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
-  property "ShowSubTimers" {
-    type    = Boolean,
-    default = true
+  __Observable__()
+  property "TwoChestElapsed" {
+    type = Boolean,
+    default = false 
   }
 
-  property "showSubTimersWithRemainingTime" {
-    type    = Boolean,
-    default = true
+  __Observable__()
+  property "ThreeChestElapsed" {
+    type = Boolean,
+    default = false 
+  }
+
+  __Observable__()
+  property "TimerElapsed" {
+    type = Boolean,
+    default = false
   }
   -----------------------------------------------------------------------------
   --                              Constructors                               --
@@ -144,6 +213,7 @@ class "KeystoneTimer" (function(_ENV)
     timerBar.OnSizeChanged = timerBar.OnSizeChanged + OnTimerBarSizeChangedHandler
 
     self.OnDurationChanged = self.OnDurationChanged + OnDurationChangedHandler
+    self.OnElapsedTimeChanged = self.OnElapsedTimeChanged + OnElapsedTimeChanged
   end
 end)
 
@@ -181,6 +251,56 @@ class "KeystoneEnemyForces" (function(_ENV)
     type    = Number,
     default = 0
   }
+
+  property "FormatType" {
+    type = KeystoneEnemyForcesFormatType,
+    default = KeystoneEnemyForcesFormatType.OnlyPercent
+  }
+
+  property "CurrentPullFormatType" {
+    type = KeystoneCurrentPullFormatType,
+    default = KeystoneCurrentPullFormatType.OnlyAdditivePercent
+  }
+  
+  property "CustomFormat" {
+    type = String,
+    handler = function(self, new)
+      if new ~= nil or new ~= "" then
+        local ok, result = Utils.GetFunctionFromString(new)
+        if ok then 
+          self.CustomFormatFunction = result 
+        else
+          self.CustomFormatFunction = nil
+        end
+      else 
+        self.CustomFormatFunction = nil
+      end 
+    end
+  }
+
+  property "CustomFormatFunction" {
+    type = Function
+  }
+
+  property "CustomPullFormat" {
+    type = String,
+    handler = function(self, new)
+      if new ~= nil or new ~= "" then
+        local ok, result = Utils.GetFunctionFromString(new)
+        if ok then 
+          self.CustomPullFormatFunction = result 
+        else
+          self.CustomPullFormatFunction = nil
+        end
+      else 
+        self.CustomPullFormatFunction = nil
+      end 
+    end
+  }
+
+  property "CustomPullFormatFunction" {
+    type = Function
+  }
   -----------------------------------------------------------------------------
   --                              Constructors                               --
   -----------------------------------------------------------------------------
@@ -191,6 +311,9 @@ class "KeystoneEnemyForces" (function(_ENV)
   function __ctor(self) end
 end)
 
+
+-- TwoChestElapsed
+-- ThreeChestElapsed
 
 __UIElement__()
 class "KeystoneContentView" (function(_ENV)
@@ -204,7 +327,9 @@ class "KeystoneContentView" (function(_ENV)
     if data then 
       self.DungeonName = data.name
       self.KeystoneLevel = data.level
+      self.KeystoneStarted = data.started
       self.DungeonTextureFileID = data.textureFileID
+      self.KeystoneDuration = data.timeLimit
 
       local objectives = self:GetChild("Content"):GetChild("Objectives")
       objectives:UpdateView(data.objectives, metadata)
@@ -223,6 +348,8 @@ class "KeystoneContentView" (function(_ENV)
     else 
       self.DungeonName = nil 
       self.DungeonTextureFileID = nil
+      self.KeystoneLevel = nil
+      self.KeystoneStarted = nil
     end
   end
 
@@ -234,6 +361,16 @@ class "KeystoneContentView" (function(_ENV)
   function OnCollapse(self)
     Style[self].TopDungeonInfo.visible = false
     Style[self].Objectives.visible = false
+  end
+  
+  function OnRelease(self)
+    self:GetChild("Content"):GetChild("TimerInfo"):Reset()
+    
+    self.DungeonName = nil 
+    self.DungeonTextureFileID = nil
+    self.KeystoneLevel = nil
+    self.KeystoneStarted = nil
+    self.KeystoneDuration = nil
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
@@ -252,6 +389,18 @@ class "KeystoneContentView" (function(_ENV)
   property "KeystoneLevel" {
     type = Number,
     default = 0,
+  }
+
+  __Observable__()
+  property "KeystoneStarted" {
+    type = Boolean,
+    default = false
+  }
+
+  __Observable__()
+  property "KeystoneDuration" {
+    type = Number,
+    default = 0
   }
   -----------------------------------------------------------------------------
   --                              Constructors                               --
@@ -277,143 +426,271 @@ class "KeystoneContentView" (function(_ENV)
   end
 end)
 -------------------------------------------------------------------------------
+--                              Observables                                  --
+-------------------------------------------------------------------------------
+function FromKeystoneStarted()
+  return FromUIProperty("KeystoneStarted")
+end
+
+function FromKeystoneDuration()
+  return FromUIProperty("KeystoneDuration")
+end
+
+function FromTimerDuration()
+  return FromUIProperty("KeystoneDuration")
+end
+
+--[[
+  
+
+
+---]]
+
+function FromTimerText()
+  return GetFrameByType(KeystoneTimer, FromUIProperty("ElapsedTime"))
+    :CombineLatest(FromKeystoneDuration())
+    :Map(function(timer)
+        local showRemainingTime = timer.ShowRemainingTime
+        local duration          = timer.Duration
+        local elapsedTime       = timer.ElapsedTime
+
+        local clock = showRemainingTime
+                      and SecondsToClock(max(0, duration - elapsedTime)) 
+                      or SecondsToClock(elapsedTime) .. " / " .. SecondsToClock(duration)
+        
+        if elapsedTime > duration then 
+          return Color.RED .. clock
+        end 
+
+        return clock
+    end)
+end
+
+function FromTimerBarValue()
+  return GetFrameByType(KeystoneTimer, FromUIProperty("ElapsedTime")):Map(function(timer)
+      local duration          = timer.Duration
+      local elapsedTime       = timer.ElapsedTime
+      local showRemainingTime = timer.ShowRemainingTime
+
+      if showRemainingTime then
+        if duration > 0 then 
+          return Lerp(0, 100, max(0, (duration - elapsedTime) / duration))
+        else
+          return 100
+        end
+      else
+        if duration > 0 then  
+          return Lerp(100, 0, max(0, (duration - elapsedTime) / duration))
+        else
+          return 0
+        end
+      end
+  end)
+end
+
+function FromTimerBarStatusBarColor()
+  return FromUIProperty("TimerElapsed"):Map(function(timerElapsed)
+    return timerElapsed and Color(0.3, 0.3, 0.3, 0.9) or Color(0, 148/255, 1, 0.9)
+  end)
+end
+
+function FromTwoChestTimerText()
+  return GetFrameByType(KeystoneTimer, FromUIProperty("ElapsedTime")):Map(function(timer)
+    return SecondsToClock(max(0, timer.Duration * 0.8 - timer.ElapsedTime))
+  end)
+end
+
+function FromThreeChestTimerText()
+  return GetFrameByType(KeystoneTimer, FromUIProperty("ElapsedTime")):Map(function(timer)
+    return SecondsToClock(max(0, timer.Duration * 0.6 - timer.ElapsedTime))
+  end)
+end
+
+function FromEnemyForcesProgressExtraValue()
+  return GetFrameByType(KeystoneEnemyForces, FromUIProperty("EnemyForcesPendingQuantity"))
+    :Map(function(enemyForces)
+      return min(enemyForces.EnemyForcesPendingQuantity + enemyForces.EnemyForcesQuantity, enemyForces.EnemyForcesTotalQuantity)
+    end)
+end
+
+function FromEnemyForcesTextColor()
+  return GetFrameByType(KeystoneEnemyForces, FromUIProperty("EnemyForcesQuantity", "EnemyForcesTotalQuantity", "EnemyForcesPendingQuantity"))
+    :Next()
+    :Map(function(enemyForces)
+      local current = enemyForces.EnemyForcesQuantity
+      local total = enemyForces.EnemyForcesTotalQuantity
+      local pending = enemyForces.EnemyForcesPendingQuantity
+
+      if total > 0 and current >= total then 
+        return Color.GREEN
+      end
+
+      return Color(0.9, 0.9, 0.9)
+    end)
+end
+
+function FromEnemyForcesText()
+  return GetFrameByType(KeystoneEnemyForces, FromUIProperty("EnemyForcesQuantity", "EnemyForcesTotalQuantity", "EnemyForcesPendingQuantity"))
+    :Next()
+    :Map(function(enemyForces)
+      local enemyForcesTextFormatType = enemyForces.TextFormatType
+      local pullTextFormatType        = enemyForces.PullTextFormatType
+      local current                   = enemyForces.EnemyForcesQuantity
+      local total                     = enemyForces.EnemyForcesTotalQuantity
+      local pending                   = enemyForces.EnemyForcesPendingQuantity
+      local formatType                = enemyForces.FormatType
+      local currentPullFormatType     = enemyForces.CurrentPullFormatType
+
+
+      if total == 0 then 
+        return ""
+      end
+
+      -- Enemy Forces
+      local enemyForcesText = ""
+      if formatType == "OnlyPercent" then 
+        enemyForcesText = format("%.2f%%", Utils.TruncateDecimal(current / total * 100, 2))
+      elseif formatType == "OnlyAbsolute" then 
+        enemyForcesText = format("%i / %i", current, total)
+      elseif formatType == "AbsoluteAndPercent" then
+        enemyForcesText = format("%i / %i - %.2f%%", current, total, Utils.TruncateDecimal(current / total * 100, 2))
+      elseif formatType == "Custom" then 
+        local customFormatFunction = enemyForces.CustomFormatFunction
+        if customFormatFunction then
+          enemyForcesText = customFormatFunction(current, total, pending)
+        end 
+      end
+
+      -- Current Pull 
+      if pending > 0 then 
+        local pullText = ""
+        if currentPullFormatType == "OnlyAdditivePercent" then
+          pullText = format("( +%.2f%% )", Utils.TruncateDecimal(pending / total * 100, 2))
+        elseif currentPullFormatType == "OnlyAdditiveCount" then 
+          pullText = "( +"..pending .. " )"
+        elseif currentPullFormatType == "OnlyFinalPercent" then 
+          pullText = format("-> %.2f%%", Utils.TruncateDecimal((current + pending) / total * 100, 2))
+        elseif currentPullFormatType == "OnlyFinalCount" then 
+          pullText = "-> " .. current + pending
+        elseif currentPullFormatType == "Custom" then 
+          local customPullFormatFunction = enemyForces.CustomPullFormatFunction
+          if customPullFormatFunction then 
+            pullText = customPullFormatFunction(current, pull, pending)
+          end
+        end
+
+        if current + pending >= total then 
+          return enemyForcesText .. " " .. Color.GREEN .. pullText
+        else
+          return enemyForcesText .. " " .. pullText
+        end
+      end
+
+      return enemyForcesText
+
+
+
+      -- -- Enemy Forces
+      -- local enemyForcesText = ""
+      -- if not enemyForcesTextFormatType or enemyForcesTextFormatType == "ONLY_PERCENT" then 
+      --   enemyForcesText = format("%.2f%%", Utils.TruncateDecimal(current / total * 100, 2))
+      -- end
+
+      -- -- Current Pull Textzq
+      -- if pending > 0 then 
+      --   local pullText = ""
+      --   if not pullTextFormatType or pullTextFormatType == "ONLY_ADDITION_PERCENT" then 
+      --     pullText = format("+%.2f%%", Utils.TruncateDecimal(pending / total * 100, 2))
+      --   end
+
+      --   if current + pending >= total then
+      --     return enemyForcesText .. Color.GREEN .. format(" ( %s )", pullText)
+      --   else
+      --     return format("%s ( %s )", enemyForcesText, pullText)
+      --   end
+      -- end
+
+      -- return enemyForcesText
+
+    end)
+end
+
+-- keystoneDuration
+
+-- function FromKeystoneTimerText()
+--   return GetFrameByType()
+-- end
+
+
+-------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 API.UpdateBaseSkin({
   [KeystoneAffixe] = {
-    height = 16,
-    width  = 16,
+    height                            = 16,
+    width                             = 16,
 
     Icon = {
-      setAllPoints = true,
-      fileID = FromUIProperty("AffixTexture"),
-      texCoords = { left = 0.07,  right = 0.93, top = 0.07, bottom = 0.93 } ,
+      setAllPoints                    = true,
+      fileID                          = FromUIProperty("AffixTexture"),
+      texCoords                       = { left = 0.07,  right = 0.93, top = 0.07, bottom = 0.93 } ,
     }
   },
 
   [KeystoneTimer] = {
-    autoAdjustHeight = true,
+    autoAdjustHeight                  = true,
+    started                           = FromUIProperty("KeystoneStarted"),
+    duration                          = FromUIProperty("KeystoneDuration"),
 
     Text = {
-      text = GetFrameByType(KeystoneTimer, FromUIProperty("ElapsedTime")):Map(function(timer)
-        local clock = timer.ShowRemainingTime 
-                      and SecondsToClock(max(0, timer.Duration - timer.ElapsedTime)) 
-                      or SecondsToClock(timer.ElapsedTime) .. " / " .. SecondsToClock(timer.Duration)
-        
-        if timer.ElapsedTime > timer.Duration then 
-          return Color.RED .. clock 
-        else
-          return clock
-        end
-      end),
-      mediaFont = FontType("PT Sans Narrow Bold", 21),
+      text                            = FromTimerText(),
+      mediaFont                       = FontType("PT Sans Narrow Bold", 21),
     },
 
     TimerBar = {
-      height = 10,
-      frameStrata = "LOW",
-      value = GetFrameByType(KeystoneTimer, FromUIProperty("ElapsedTime")):Map(function(timer)
-        if timer.ShowRemainingTime then
-          return Lerp(0, 100, max(0, (timer.Duration - timer.ElapsedTime) / timer.Duration))
-        else 
-          return Lerp(100, 0, max(0, (timer.Duration - timer.ElapsedTime) / timer.Duration))
-        end
-      end),
-      statusBarColor = GetFrameByType(KeystoneTimer, FromUIProperty("ElapsedTime")):Map(function(timer)
-        if timer.ElapsedTime > timer.Duration then
-          return Color(0.3, 0.3, 0.3, 0.9)
-        end
-
-        return { r = 0, g = 148/255, b = 1, a = 0.9 }
-      end),    
+      height                          = 10,
+      frameStrata                     = "LOW",
+      value                           = FromTimerBarValue(),
+      statusBarColor                  = FromTimerBarStatusBarColor()
     },
 
     TwoChestLine = {
-      height = 14,
-      width = 2,
-      drawLayer           = "OVERLAY",
-      subLevel            = 2,
-      texelSnappingBias    = 0,
-      snapToPixelGrid     = false,
-      texelSnappingBias    = 0,
-      color = GetFrameByType(KeystoneTimer, FromUIProperty("ElapsedTime")):Map(function(timer)
-        if timer.ElapsedTime > timer.Duration * 0.8 then 
-          return Color.RED 
-        end 
-
-        return Color.GREEN
-      end),
+      height                          = 14,
+      width                           = 2,
+      drawLayer                       = "OVERLAY",
+      subLevel                        = 2,
+      texelSnappingBias               = 0,
+      snapToPixelGrid                 = false,
+      texelSnappingBias               = 0,
+      color                           = FromUIProperty("TwoChestElapsed"):Map(function(elapsed) return elapsed and Color.RED or Color.GREEN end)
     },
     TwoChestTimer = {
-      visible = GetFrameByType(KeystoneTimer, FromUIProperty("ElapsedTime")):Map(function(timer)
-        if timer.showSubTimersWithRemainingTime and timer.ElapsedTime > timer.Duration * 0.8 then 
-          return false
-        else 
-          return true
-        end
-      end),
-      text = GetFrameByType(KeystoneTimer, FromUIProperty("ElapsedTime")):Map(function(timer)
-        if timer.showSubTimersWithRemainingTime then 
-          return SecondsToClock(max(0, timer.Duration * 0.8 - timer.ElapsedTime))
-        else 
-          return SecondsToClock(timer.Duration * 0.8)
-        end
-      end),
-      textColor = GetFrameByType(KeystoneTimer, FromUIProperty("ElapsedTime")):Map(function(timer)
-        if timer.ElapsedTime > timer.Duration * 0.8 then 
-          return Color.RED 
-        end 
-
-        return Color.GREEN
-      end),
-      height = 25,
-      justifyV = "MIDDLE",
-      justifyH = "CENTER",
+      height                          = 25,
+      visible                         = FromUIProperty("TwoChestElapsed"):Map(function(elapsed) return not elapsed end),
+      text                            = FromTwoChestTimerText(),
+      textColor                       = Color.GREEN,
+      justifyV                        = "MIDDLE",
+      justifyH                        = "CENTER",
     },
 
     ThreeChestLine = {
-      height = 14,
-      width = 2,
-      drawLayer           = "OVERLAY",
-      subLevel            = 2,
-      texelSnappingBias    = 0,
-      snapToPixelGrid     = false,
-      texelSnappingBias    = 0,
-      color = GetFrameByType(KeystoneTimer, FromUIProperty("ElapsedTime")):Map(function(timer)
-        if timer.ElapsedTime > timer.Duration * 0.6 then 
-          return Color.RED 
-        end 
-
-        return Color.GREEN
-      end),
+      height                          = 14,
+      width                           = 2,
+      drawLayer                       = "OVERLAY",
+      subLevel                        = 2,
+      texelSnappingBias               = 0,
+      snapToPixelGrid                 = false,
+      texelSnappingBias               = 0,
+      color                           = FromUIProperty("ThreeChestElapsed"):Map(function(elapsed) return elapsed and Color.RED or Color.GREEN end)
     },
 
     ThreeChestTimer = {
-      visible = GetFrameByType(KeystoneTimer, FromUIProperty("ElapsedTime")):Map(function(timer)
-        if timer.showSubTimersWithRemainingTime and timer.ElapsedTime > timer.Duration * 0.6 then 
-          return false
-        else 
-          return true
-        end
-      end),
-
-      text = GetFrameByType(KeystoneTimer, FromUIProperty("ElapsedTime")):Map(function(timer)
-        if timer.showSubTimersWithRemainingTime then 
-          return SecondsToClock(max(0, timer.Duration * 0.6 - timer.ElapsedTime))
-        else 
-          return SecondsToClock(timer.Duration * 0.6)
-        end
-      end),
-      textColor = GetFrameByType(KeystoneTimer, FromUIProperty("ElapsedTime")):Map(function(timer)
-        if timer.ElapsedTime > timer.Duration * 0.6 then 
-          return Color.RED 
-        end 
-
-        return Color.GREEN
-      end),
-      height = 25,
-      justifyV = "MIDDLE",
-      justifyH = "CENTER",
+      height                          = 25,
+      visible                         = FromUIProperty("ThreeChestElapsed"):Map(function(elapsed) return not elapsed end),
+      text                            = FromThreeChestTimerText(),
+      textColor                       = Color.GREEN,
+      justifyV                        = "MIDDLE",
+      justifyH                        = "CENTER",
     }
   },
 
@@ -423,100 +700,77 @@ API.UpdateBaseSkin({
   },
 
   [KeystoneEnemyForces] = {
-    autoAdjustHeight = true,
+    autoAdjustHeight                  = true,
     Text = {
-      text = "Enemy Forces",
-      mediaFont = FontType("PT Sans Narrow Bold", 13),
-      textColor = Color(0.9, 0.9, 0.9),
+      text                            = "Enemy Forces",
+      mediaFont                       = FontType("PT Sans Narrow Bold", 13),
+      textColor                       = FromEnemyForcesTextColor(),
     },
 
     Progress = {
-      value = GetFrameByType(KeystoneEnemyForces, FromUIProperty("EnemyForcesQuantity")):Map(function(enemyForces)
-        return enemyForces.EnemyForcesQuantity
-      end),
-
-      minMaxValues = GetFrameByType(KeystoneEnemyForces, FromUIProperty("EnemyForcesTotalQuantity")):Map(function(enemyForces)
-        return MinMax(0, enemyForces.EnemyForcesTotalQuantity)
-      end),
-
-      extraValue = GetFrameByType(KeystoneEnemyForces, FromUIProperty("EnemyForcesPendingQuantity")):Map(function(enemyForces)
-        return min(enemyForces.EnemyForcesPendingQuantity + enemyForces.EnemyForcesQuantity, enemyForces.EnemyForcesTotalQuantity)
-      end),
+      value                           = FromUIProperty("EnemyForcesQuantity"),
+      minMaxValues                    = FromUIProperty("EnemyForcesTotalQuantity"):Map(function(total) return MinMax(0, total) end),
+      extraValue                      = FromEnemyForcesProgressExtraValue(),
 
       Text = {
-        text = GetFrameByType(KeystoneEnemyForces, FromUIProperty("EnemyForcesQuantity", "EnemyForcesTotalQuantity", "EnemyForcesPendingQuantity"))
-              :Next()
-              :Map(function(_, current, total, pending)
-
-                if current and total then 
-                  if pending and pending > 0 then 
-                    return string.format("%i / %i ( %i )", current, total, pending)
-                  end 
-
-                  return string.format("%i / %i", current, total)
-                end
-                
-                return ""
-              end)
+        text                          = FromEnemyForcesText()
       }
     }
   },
 
   [KeystoneContentView] = {
     Header = {
-      visible = false
+      visible                         = false
     },
 
     TopDungeonInfo = {
-      backdrop = {
-        edgeFile  = [[Interface\Buttons\WHITE8X8]],
-        edgeSize  = 1
-      },
-      
-      backdropBorderColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
-      height = 48,
+
+      backdrop                        = { edgeFile  = [[Interface\Buttons\WHITE8X8]], edgeSize  = 1 },
+      backdropBorderColor             = Color(35/255, 40/255, 46/255, 0.73),
+      height                          = 48,
 
       DungeonIcon = {
-        fileID = FromUIProperty("DungeonTextureFileID"),
-        setAllPoints = true
+        fileID                        = FromUIProperty("DungeonTextureFileID"),
+        setAllPoints                  = true
       },
 
       Level = {
-        text = FromUIProperty("KeystoneLevel"):Map(function(level)
-          return CHALLENGE_MODE_POWER_LEVEL:format(level)
-        end),
-        justifyV = "TOP",
-        justifyH = "LEFT",
+        text                          = FromUIProperty("KeystoneLevel"):Map(function(level)return CHALLENGE_MODE_POWER_LEVEL:format(level) end),
+        justifyV                      = "TOP",
+        justifyH                      = "LEFT",
       },
       
       DungeonName = {
-        text = FromUIProperty("DungeonName"),
-        fontObject = Game18Font,
-        textColor = { r = 1, g = 0.914, b = 0.682},
-        justifyV = "MIDDLE",
-        justifyH = "CENTER",
+        text                          = FromUIProperty("DungeonName"),
+        fontObject                    = Game18Font,
+        textColor                     = { r = 1, g = 0.914, b = 0.682},
+        justifyV                      = "MIDDLE",
+        justifyH                      = "CENTER",
       }
     },
 
     Content = {
-      autoAdjustHeight = true,
-      paddingBottom = 5,
+      autoAdjustHeight                = true,
+      paddingBottom                   = 5,
 
       backdrop = { 
         bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
+        edgeFile  = [[Interface\Buttons\WHITE8X8]],
+        edgeSize  = 1
       },
 
-      backdropColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
+      backdropColor                   = Color(35/255, 40/255, 46/255, 0.73),
+      backdropBorderColor             = Color(0, 0, 0, 0.4),
 
       Objectives = {
-        autoAdjustHeight = true,
-        height = 32,
+        autoAdjustHeight              = true,
+        height                        = 32,
       },
       
       EnemyForces = {
         Progress = {
           ExtraBarTexture = {
-            vertexColor = { r = 1, g = 193/255, b = 25/255, a = 0.7}
+            vertexColor               = { r = 1, g = 193/255, b = 25/255, a = 0.7}
           }
         },
       },

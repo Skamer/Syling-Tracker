@@ -166,9 +166,9 @@ end)
 --                              Observables                                  --
 -------------------------------------------------------------------------------
 function FromDisplayMediaTexture()
-  return Wow.FromUIProperty("Style", "QuestType", "Number", "QuestID")
+  return Wow.FromUIProperty("Style", "QuestType", "Number", "QuestID", "Selected")
     :Next()
-    :Map(function(style, questType, number, questID)
+    :Map(function(style, questType, number, questID, selected)
       if style == POIButton.Style.Numeric then
         local color = selected and POIButtonColorBlackCoord or POIButtonColorYellowCoord
         local texLeft, texRight, texTop, texBottom = POIButton_CalculateNumericTexCoords(number, color)
@@ -198,15 +198,15 @@ function FromDisplayMediaTexture()
           atlas = AtlasType("UI-QuestIcon-TurnIn-Normal"),
           size = { width = 24, height = 24}
         }
-      end
+      end 
 
-     -- if questType == POIButton.QuestType.Campaign then 
-      --   return { atlas = AtlasType("UI-QuestPoiCampaign-QuestBangTurnIn")}
-      -- elseif questType == POIButton.QuestType.Calling then 
-      --   return { atlas = AtlasType("UI-DailyQuestPoiCampaign-QuestBangTurnIn")}
-      -- elseif questType == POIButton.QuestType.Important then 
-      --   return { atlas = AtlasType("UI-QuestPoiImportant-QuestBangTurnIn")}
-      -- end
+     if questType == POIButton.QuestType.Campaign then 
+        return { atlas = AtlasType("UI-QuestPoiCampaign-QuestBangTurnIn"), size = { width = 32, height = 32 }}
+      elseif questType == POIButton.QuestType.Calling then 
+        return { atlas = AtlasType("UI-DailyQuestPoiCampaign-QuestBangTurnIn"), size = { width = 32, height = 32}}
+      elseif questType == POIButton.QuestType.Important then 
+        return { atlas = AtlasType("UI-QuestPoiImportant-QuestBangTurnIn"), size = { width = 32, height = 36}}
+      end
 
       -- return { file = [[Interface/WorldMap/UI-QuestPoi-NumberIcons]] }
     end)
@@ -234,7 +234,7 @@ function FromNormalMediaTexture()
       elseif questType == POIButton.QuestType.Important then 
         return selected and IMPORTANT_NORMAL_SELECTED_MEDIA_TEXTURE or IMPORTANT_NORMAL_MEDIA_TEXTURE
       else 
-        return selected and CAMPAIGN_NORMAL_SELECTED_MEDIA_TEXTURE or CAMPAIGN_NORMAL_SELECTED_MEDIA_TEXTURE
+        return selected and CAMPAIGN_NORMAL_SELECTED_MEDIA_TEXTURE or CAMPAIGN_NORMAL_MEDIA_TEXTURE
       end
     end)
 end

@@ -121,6 +121,7 @@ INSTANCE_TEXTURE_FILES_ID = {
   [1763] = 1778894, -- Ataldazar
   [1771] = 2179227, -- Tol Dagor
   [1822] = 2179223, -- Siege of Boralus
+  [1862] = 2179233, -- Waycrest Manor
   [1864] = 2179222, -- Shrine of the Storm
   [1877] = 2179224, -- Temple of Sethraliss
   [2097] = 3025284, -- Operation: Mechagon

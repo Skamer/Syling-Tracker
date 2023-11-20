@@ -50,7 +50,9 @@ class "ScrollBox" (function(_ENV)
     scrollBar:SetVisibleExtentPercentage(visibleHeight / contentHeight)
 
     --- We ajusted the percentage with the new range
-    scrollBar:SetScrollPercentage(self:GetVerticalScroll() / yRange)
+    if yRange > 0 then 
+      scrollBar:SetScrollPercentage(self:GetVerticalScroll() / yRange)
+    end
 
     -- REVIEW: Should translate this feature directly in the ScrollBar class ?
     if scrollBar:HasScrollableExtent() then 

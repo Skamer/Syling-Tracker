@@ -34,22 +34,13 @@ end
 
 function OnActive(self)
   self:UpdateKeystoneInfo()
-  self:LoadAndUpdate()
-  -- self:UpdateTimer()
+  self:UpdateDungeonTexture()
+  self:UpdateObjectives()
 end
 
-function LoadAndUpdate(self)
+function UpdateObjectives(self)
   local name, _, numObjectives = GetStepInfo()
   KEYSTONE_CONTENT_SUBJECT.name = name
-
-  local textureFileID
-  local currentMapID = select(8, GetInstanceInfo())
-  if currentMapID then
-    textureFileID = GetInstanceTextureFileID(currentMapID)
-  end
-
-  KEYSTONE_CONTENT_SUBJECT.textureFileID = textureFileID
-
 
   KEYSTONE_CONTENT_SUBJECT:StartObjectivesCounter()
   if numObjectives > 0 then 
@@ -71,6 +62,16 @@ function LoadAndUpdate(self)
     end
   end
   KEYSTONE_CONTENT_SUBJECT:StopObjectivesCounter()
+end
+
+function UpdateDungeonTexture()
+  local textureFileID
+  local currentMapID = select(8, GetInstanceInfo())
+  if currentMapID then
+    textureFileID = GetInstanceTextureFileID(currentMapID)
+  end
+
+  KEYSTONE_CONTENT_SUBJECT.textureFileID = textureFileID
 end
 
 
@@ -124,17 +125,44 @@ function UPDATE_INSTANCE_INFO()
     nextTime = GetTime()
   end
 
-  KEYSTONE_CONTENT_SUBJECT.startTime = nextTime - elapsed
+  KEYSTONE_CONTENT_SUBJECT.started    = true
+  KEYSTONE_CONTENT_SUBJECT.startTime  = nextTime - elapsed
 end
 
 __SystemEvent__ "SCENARIO_CRITERIA_UPDATE" "CRITERIA_COMPLETE" "SCENARIO_UPDATE"
 function KEYSTONE_UPDATE()
-  _M:LoadAndUpdate()
+  _M:UpdateDungeonTexture()
+  _M:UpdateObjectives()
 end
 
 __SystemEvent__()
+function CHALLENGE_MODE_START()
+  KEYSTONE_CONTENT_SUBJECT.startTime = GetTime() + 10
+  KEYSTONE_CONTENT_SUBJECT.started = false
+end
+
+
+__SystemEvent__()
 function WORLD_STATE_TIMER_START(timerID)
-  KEYSTONE_CONTENT_SUBJECT.startTime = GetTime()
+  -- For unknow reasons, 'WORLD_STATE_TIMER_START' is triggered when someone die
+  -- causing the timer to reset. This is why we need to check if the run is started.
+  if not KEYSTONE_CONTENT_SUBJECT.started then 
+    KEYSTONE_CONTENT_SUBJECT.startTime = GetTime()
+    KEYSTONE_CONTENT_SUBJECT.started = true
+  end
+end
+
+__SystemEvent__()
+function WORLD_STATE_TIMER_STOP(timerID)
+  KEYSTONE_CONTENT_SUBJECT.completed = true
+  KEYSTONE_CONTENT_SUBJECT.started = false
+end
+
+__SystemEvent__()
+function CHALLENGE_MODE_DEATH_COUNT_UPDATED()
+  local _, elapsed, type = GetWorldElapsedTime(1)
+  -- We reduce the start time for advancing the timer of '5' seconds.
+  KEYSTONE_CONTENT_SUBJECT.startTime = KEYSTONE_CONTENT_SUBJECT.startTime - 5
 end
 
 __SystemEvent__()
