@@ -18,7 +18,7 @@ class "QuestsContentView"(function(_ENV)
     super.OnViewUpdate(self, data, metadata)
 
     
-    local showCategories = false
+    local showCategories = self.ShowCategories
     
     if data and data.quests then
       
@@ -56,6 +56,11 @@ class "QuestsContentView"(function(_ENV)
       Style[self].Categories.visible = false
     end
   end
+
+  property "ShowCategories" {
+    type = Boolean,
+    default = true
+  }
 end)
 
 __ChildProperty__(QuestsContentView, "Quests")

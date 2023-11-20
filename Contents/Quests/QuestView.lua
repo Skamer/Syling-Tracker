@@ -67,6 +67,14 @@ class "QuestItemIcon" (function(_ENV)
       end
     end
   end
+
+  function OnAcquire(self)
+    self:RegisterSystemEvent("BAG_UPDATE_COOLDOWN")
+  end
+
+  function OnRelease(self)
+    self:UnregisterSystemEvent("BAG_UPDATE_COOLDOWN")
+  end
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
@@ -93,12 +101,15 @@ class "QuestItemIcon" (function(_ENV)
   --                            Constructors                                 --
   -----------------------------------------------------------------------------
   __Template__ {
-    Texture = Texture
+    Icon = Texture
   }
   function __ctor(self, name)
-    super(self, name)
-
     local cooldown = CreateFrame("Cooldown", name.."Cooldown", self, "CooldownFrameTemplate")
+    cooldown:SetAllPoints()
+    self.__cooldown = cooldown
+
+    self.OnEnter = self.OnEnter + OnEnterHandler
+    self.OnLeave = self.OnLeave + OnLeaveHandler
   end
 end)
 
@@ -156,6 +167,20 @@ class "QuestView" (function(_ENV)
 
       -- child:InstantApplyStyle()
       child:UpdateView(data.objectives, ...)
+    end
+
+    if data.item then 
+      Style[self].Content.Item.visible = true
+      local itemIcon = self:GetChild("Content"):GetPropertyChild("Item")
+      itemIcon.ItemTexture = data.item.texture 
+      itemIcon.ItemLink = data.item.link
+      itemIcon.id = questID
+
+      self.QuestHasItem = true
+    else 
+      Style[self].Content.Item = NIL
+
+      self.QuestHasItem = false
     end
 
     -- Update POI
@@ -236,6 +261,12 @@ class "QuestView" (function(_ENV)
   }
 
   __Observable__()
+  property "QuestHasItem" {
+    type = Boolean,
+    default = false
+  }
+
+  __Observable__()
   property "QuestTagID" {
     type = Number
   }
@@ -266,6 +297,9 @@ class(tostring(QuestView) .. ".Objectives") { ObjectiveListView }
 __ChildProperty__(QuestViewContent, "Timer")
 class(tostring(QuestView) .. ".Timer") { SylingTracker.Timer }
 
+__ChildProperty__(QuestViewContent, "Item")
+class(tostring(QuestView) .. ".Item") { SylingTracker.QuestItemIcon }
+
 __ChildProperty__(QuestView, "POI")
 class(tostring(QuestView) .. ".POI") { SylingTracker.POIButton }
 
@@ -278,8 +312,43 @@ class "DungeonQuestView" { QuestView }
 __UIElement__()
 class "LegendaryQuestView" { QuestView }
 
+-- __UIElement__()
+-- class "QuestListView" { ListView }
 __UIElement__()
-class "QuestListView" { ListView }
+class "QuestListView" (function(_ENV)
+  inherit "ListView"
+
+  __Iterator__()
+  function IterateData(self, data, metadata)
+    local yield = coroutine.yield 
+
+    wipe(self.QuestsOrder)
+
+    for _, questData in pairs(data) do 
+      tinsert(self.QuestsOrder, questData)
+    end
+
+    table.sort(self.QuestsOrder, function(a, b)
+      local aDistance, bDistance = a.distance, b.distance
+      if aDistance and bDistance then 
+        return aDistance < bDistance
+      end
+
+      return a.questID < b.questID
+    end)
+    
+    for index, questData in ipairs(self.QuestsOrder) do 
+      yield(questData.questID, questData, metadata)
+    end
+  end
+  -----------------------------------------------------------------------------
+  --                               Properties                                --
+  -----------------------------------------------------------------------------
+  property "QuestsOrder" {
+    set = false,
+    default = function() return {} end
+  }
+end)
 -------------------------------------------------------------------------------
 --                              UI Settings                                  --
 -------------------------------------------------------------------------------
@@ -317,10 +386,43 @@ function FromBackdrop()
       return backdrop
     end)
 end
+
+function FromObjectivesLocation()
+  return FromUIProperty("QuestHasItem"):Map(function(hasItem)
+    return {
+      Anchor("TOP", 0, -5, "Header", "BOTTOM"),
+      Anchor("LEFT"),
+      Anchor("RIGHT", hasItem and -37 or 0, 0)
+    }
+  end)
+end
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
+  [QuestItemIcon] = {
+    height = 32,
+    width = 32,
+    backdrop = FromBackdrop(),
+    showBackground = false,
+    showBorder = true, 
+    backdropBorderColor = Color(0, 0, 0, 0.4),
+    borderSize = 1,
+    
+    Icon = {
+      file = FromUIProperty("ItemTexture"),
+      setAllPoints = true,
+      texCoords = { left = 0.07, right = 0.93, top = 0.07, bottom = 0.93 },
+      vertexColor = FromUIProperty("ItemUsable"):Map(function(usable)
+        if usable then 
+          return { r = 1, g = 1, b = 1 }
+        end 
+
+        return { r = 0.4, g = 0.4, b = 0.4}
+      end)
+    }
+  },
+
   [QuestView] = {
     height                            = 24,
     minResize                         = { width = 0, height = 24},
@@ -414,10 +516,18 @@ Style.UpdateSkin("Default", {
   [QuestView.Objectives] = {
     spacing = 5,
 
+    -- location = {
+    --   Anchor("TOP", 0, -5, "Header", "BOTTOM"),
+    --   Anchor("LEFT"),
+    --   Anchor("RIGHT")
+    -- }
+    location = FromObjectivesLocation()
+  },
+
+  [QuestView.Item] = {
     location = {
       Anchor("TOP", 0, -5, "Header", "BOTTOM"),
-      Anchor("LEFT"),
-      Anchor("RIGHT")
+      Anchor("RIGHT", -5, 0)
     }
   },
 

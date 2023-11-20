@@ -94,7 +94,7 @@ class "ItemButton"(function(_ENV)
   }
 
   function __ctor(self, name)
-    local cooldown = CreateFrame("Cooldown", name.."Cooldown", self,  "CooldownFrameTemplate")
+    local cooldown = CreateFrame("Cooldown", name.."Cooldown", self, "CooldownFrameTemplate")
     cooldown:SetAllPoints()
     self.__cooldown = cooldown
 
@@ -526,10 +526,10 @@ Style.UpdateSkin("Default", {
      marginRight = FromItemBarSetting("marginRight"),
      marginTop = FromItemBarSetting("marginTop"),
      marginBottom = FromItemBarSetting("marginBottom"),
-     backdrop = { 
-      bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
-    },
-    backdropColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
+    --  backdrop = { 
+    --   bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
+    -- },
+    -- backdropColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
 
     location = FromItemBarSetting("position"):Map(function(position)
       if position then 

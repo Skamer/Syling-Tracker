@@ -11,7 +11,8 @@ Syling                     "SylingTracker.UI.POIButton"                      ""
 export {
   IsLegendaryQuest                    = C_QuestLog.IsLegendaryQuest,
   GetThreatPOIIcon                    = QuestUtil.GetThreatPOIIcon,
-  SetSuperTrackedQuestID              = C_SuperTrack.SetSuperTrackedQuestID
+  SetSuperTrackedQuestID              = C_SuperTrack.SetSuperTrackedQuestID,
+  GetSuperTrackedQuestID              = C_SuperTrack.GetSuperTrackedQuestID,
 }
 
 -- POI text colors (offsets into texture)
@@ -90,7 +91,7 @@ class "POIButton" (function(_ENV)
   -----------------------------------------------------------------------------
   local function OnClickHandler(self)
     local questID = self.QuestID 
-    if questID then 
+    if questID then
       SetSuperTrackedQuestID(questID)
     end
   end
@@ -120,6 +121,21 @@ class "POIButton" (function(_ENV)
   __Arguments__ { Boolean}
   function SetSelected(self, selected)
     self.Selected = selected
+  end
+
+  function OnSystemEvent(self, event, questID)
+    local questID = self.QuestID
+    if questID then 
+      self:SetSelected(questID == GetSuperTrackedQuestID())
+    end
+  end
+
+  function OnAcquire(self)
+    self:RegisterSystemEvent("SUPER_TRACKING_CHANGED")
+  end
+
+  function OnRelease(self)
+    self:UnregisterSystemEvent("SUPER_TRACKING_CHANGED")
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
