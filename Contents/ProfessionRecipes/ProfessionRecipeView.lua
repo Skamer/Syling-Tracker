@@ -9,7 +9,8 @@
 Syling               "SylingTracker.Contents.ProfessionRecipeView"           ""
 -- ========================================================================= --
 export {
-  FromUIProperty            = Wow.FromUIProperty,  
+  FromUIProperty                      = Wow.FromUIProperty,  
+  FromBackdrop                        = Frame.FromBackdrop
 }
 
 __UIElement__()
@@ -56,38 +57,37 @@ class "ProfessionRecipeListView" { ListView }
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
   [ProfessionRecipeView] = {
-    height = 1,
-    -- clipChildren = true,
-    autoAdjustHeight = true, 
-
-    backdrop = { 
-      bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
-    },
-    backdropColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
+    height                            = 1,
+    autoAdjustHeight                  = true, 
+    backdrop                          = FromBackdrop(),
+    showBackground                    = true,
+    showBorder                        = true,
+    backdropColor                     =  Color(35/255, 40/255, 46/255, 0.73),
+    backdropBorderColor               = Color(0, 0, 0, 0.4),
+    borderSize                        = 1,
     
     Name = {
-      text = FromUIProperty("RecipeName"),
-      justifyV = "MIDDLE",
-      mediaFont = FontType("DejaVuSansCondensed Bold", 10),
-      location = {
-        Anchor("TOP"),
-        Anchor("LEFT"),
-        Anchor("RIGHT")
-      }
+      text                            = FromUIProperty("RecipeName"),
+      justifyV                        = "MIDDLE",
+      mediaFont                       = FontType("DejaVuSansCondensed Bold", 10),
+      location                        = {
+                                        Anchor("TOP"),
+                                        Anchor("LEFT"),
+                                        Anchor("RIGHT")
+                                      }
     },
 
     [ProfessionRecipeView.Objectives] = {
       spacing = 5,
-
-      location = {
-        Anchor("TOPLEFT", 0, -5, "Name", "BOTTOMLEFT"),
-        Anchor("TOPRIGHT", 0, -5, "Name", "BOTTOMRIGHT")
-      }
+      location                        = {
+                                        Anchor("TOPLEFT", 0, -5, "Name", "BOTTOMLEFT"),
+                                        Anchor("TOPRIGHT", 0, -5, "Name", "BOTTOMRIGHT")
+                                      }
     }
   },
 
   [ProfessionRecipeListView] = {
-    viewClass = ProfessionRecipeView,
-    indexed = false
+    viewClass                         = ProfessionRecipeView,
+    indexed                           = false
   }
 })

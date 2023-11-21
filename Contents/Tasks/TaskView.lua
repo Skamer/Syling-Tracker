@@ -9,12 +9,27 @@
 Syling               "SylingTracker.Contents.TaskView"                       ""
 -- ========================================================================= --
 export {
-  FromUIProperty            = Wow.FromUIProperty,  
+  FromUIProperty            = Wow.FromUIProperty,
+  FromBackdrop              = Frame.FromBackdrop,
+  ContextMenu_Show          = API.ContextMenu_Show,
 }
 
 __UIElement__()
 class "TaskView" (function(_ENV)
-  inherit "Frame" extend "IView"
+  inherit "Button" extend "IView"
+  -----------------------------------------------------------------------------
+  --                               Handlers                                  --
+  -----------------------------------------------------------------------------
+  local function OnClickHandler(self, mouseButton)
+    local questID             = self.QuestID
+    local contextMenuPattern  = self.ContextMenuPattern
+
+    if mouseButton == "RightButton" then 
+      if questID and contextMenuPattern then 
+        ContextMenu_Show(contextMenuPattern, self, questID)
+      end
+    end
+  end
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
@@ -27,6 +42,7 @@ class "TaskView" (function(_ENV)
     end
 
     self.TaskName = data.name
+    self.QuestID = data.questID
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
@@ -35,6 +51,15 @@ class "TaskView" (function(_ENV)
   property "TaskName" {
     type = String,
     default = ""
+  }
+
+  property "QuestID" {
+    type = Number
+  }
+
+  property "ContextMenuPattern" {
+    type = String,
+    default = "quest"
   }
   -----------------------------------------------------------------------------
   --                              Constructors                               --
@@ -47,7 +72,9 @@ class "TaskView" (function(_ENV)
       }
     }
   }
-  function __ctor(self) end
+  function __ctor(self) 
+    self.OnClick = self.OnClick + OnClickHandler
+  end
 end)
 
 -- Optional Children for QuestView 
@@ -61,50 +88,48 @@ class "TaskListView" { ListView }
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
   [TaskView] = {
-    height = 24,
-    minResize = { width = 0, height = 24},
-    autoAdjustHeight = true, 
-
-    backdrop = { 
-      bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
-    },
-    backdropColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
+    height                            = 24,
+    minResize                         = { width = 0, height = 24},
+    autoAdjustHeight                  = true,
+    registerForClicks                 = { "LeftButtonDown", "RightButtonDown" },
+    backdrop                          = FromBackdrop(),
+    showBackground                    = true,
+    showBorder                        = true,
+    backdropColor                     =  Color(35/255, 40/255, 46/255, 0.73),
+    backdropBorderColor               = Color(0, 0, 0, 0.4),
+    borderSize                        = 1,
 
     Header = {
-      height = 24,
+      height                          = 24,
 
       Name = {
-        text = FromUIProperty("TaskName"),
-        justifyV = "MIDDLE",
-        mediaFont = FontType("DejaVuSansCondensed Bold", 10),
-        textColor = { r = 1, g = 106/255, b = 0 },
-        location = {
-          Anchor("TOP"),
-          Anchor("LEFT"),
-          Anchor("RIGHT"),
-          Anchor("BOTTOM")
-        }
+        text                          = FromUIProperty("TaskName"),
+        justifyV                      = "MIDDLE",
+        mediaFont                     = FontType("DejaVuSansCondensed Bold", 10),
+        textColor                     =  { r = 1, g = 106/255, b = 0 },
+        location                      = {
+                                        Anchor("TOP"),
+                                        Anchor("LEFT"),
+                                        Anchor("RIGHT"),
+                                        Anchor("BOTTOM")
+                                      }
       },
 
-      location = {
-        Anchor("TOPLEFT"),
-        Anchor("TOPRIGHT")
-      }
+      location                        = { Anchor("TOPLEFT"), Anchor("TOPRIGHT") }
     },
 
     [TaskView.Objectives] = {
-      spacing = 5,
-
-      location = {
-        Anchor("TOPLEFT", 0, -5, "Header", "BOTTOMLEFT"),
-        Anchor("TOPRIGHT", 0, -5, "Header", "BOTTOMRIGHT")
-      }
+      spacing                         = 5,
+      location                        = {
+                                        Anchor("TOPLEFT", 0, -5, "Header", "BOTTOMLEFT"),
+                                        Anchor("TOPRIGHT", 0, -5, "Header", "BOTTOMRIGHT")
+                                      }
     }
   },
 
   [TaskListView] = {
-    viewClass = TaskView,
-    indexed = false
+    viewClass                         = TaskView,
+    indexed                           = false
   }
 })
 

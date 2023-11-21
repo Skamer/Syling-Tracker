@@ -191,7 +191,7 @@ class "TabControl" (function(_ENV)
       previousPageInfo.onRelease(self)
     end
 
-    if pageInfo.onAcquire then 
+    if pageInfo and pageInfo.onAcquire then 
       pageInfo.onAcquire(self)
     end
 

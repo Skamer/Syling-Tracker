@@ -54,6 +54,7 @@ function UpdateWorldQuest(self, questID)
   local isInArea, isOnMap, numObjectives, questName, displayAsObjective = GetTaskInfo(questID)
 
   local worldQuestData = WORLD_QUESTS_CONTENT_SUBJECT:AcquireQuest(questID)
+  worldQuestData.questID = questID
   worldQuestData.title = questName
   worldQuestData.name = questName
   worldQuestData.numObjectives = numObjectives
@@ -67,6 +68,21 @@ function UpdateWorldQuest(self, questID)
       objectiveData.text = text 
       objectiveData.type = oType
       objectiveData.isCompleted = finished
+
+      if oType == "progressbar" then 
+        local progress = GetQuestProgressBarPercent(questID)
+        objectiveData.hasProgress = true 
+        objectiveData.progress = progress
+        objectiveData.minProgress = 0
+        objectiveData.maxProgress = 100
+        objectiveData.progressText = PERCENTAGE_STRING:format(progress)
+      else
+        objectiveData.hasProgress = nil 
+        objectiveData.progress = nil 
+        objectiveData.minProgress = nil
+        objectiveData.maxProgress = nil
+        objectiveData.progressText = nil        
+      end
     end
   end
   worldQuestData:StopObjectivesCounter()

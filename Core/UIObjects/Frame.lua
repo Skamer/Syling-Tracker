@@ -10,6 +10,7 @@ Syling                     "SylingTracker.Core.Frame"                        ""
 -- ========================================================================= --
 export {
   Round = Round,
+  GetFrame = Wow.GetFrame,
 }
 
 class "Frame" (function(_ENV)
@@ -201,6 +202,35 @@ class "Frame" (function(_ENV)
       end
     end
   end
+-------------------------------------------------------------------------------
+--                              Observables                                  --
+-------------------------------------------------------------------------------
+function FromBackdrop()
+ return GetFrame("OnBackdropChanged")
+    :Next()
+    :Map(function(frame, value, _, prop)
+      local showBackground = frame.ShowBackground
+      local showBorder = frame.ShowBorder
+      if not showBackground and not showBorder then 
+        return nil 
+      end
+
+      local backdrop = {}
+      if showBackground then 
+        backdrop.bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]]
+      end
+
+      if showBorder then 
+        backdrop.edgeFile = [[Interface\Buttons\WHITE8X8]]
+        backdrop.edgeSize = frame.BorderSize
+      end
+
+      return backdrop
+    end)
+end
+
+Frame.FromBackdrop = FromBackdrop
+
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------

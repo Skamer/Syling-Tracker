@@ -10,7 +10,8 @@ Syling                 "SylingTracker.Contents.AchievementView"              ""
 -- ========================================================================= --
 export {
   FromUIProperty                      = Wow.FromUIProperty,
-  ContextMenu_Show                    = API.ContextMenu_Show
+  ContextMenu_Show                    = API.ContextMenu_Show,
+  FromBackdrop                        = Frame.FromBackdrop
 }
 
 __UIElement__()
@@ -103,73 +104,69 @@ class "AchievementListView" { ListView }
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
   [AchievementView] = {
-    height = 24,
-    minResize = { width = 0, height = 24},
-    autoAdjustHeight = true,
-    registerForClicks = { "LeftButtonDown", "RightButtonDown" },
-
-    backdrop = { 
-      bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
-    },
-    backdropColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
+    height                            = 24,
+    minResize                         = { width = 0, height = 24},
+    autoAdjustHeight                  = true,
+    registerForClicks                 = { "LeftButtonDown", "RightButtonDown" },
+    backdrop                          = FromBackdrop(),
+    showBackground                    = true,
+    showBorder                        = true,
+    backdropColor                     =  Color(35/255, 40/255, 46/255, 0.73),
+    backdropBorderColor               = Color(0, 0, 0, 0.4),
+    borderSize                        = 1,
 
     Header = {
-      height = 1,
-      autoAdjustHeight = true,
-      paddingBottom = 5,
+      height                          = 24,
+      autoAdjustHeight                = true,
+      paddingBottom                   = 5,
       Name = {
-        text = FromUIProperty("AchievementName"),
-        justifyV = "MIDDLE",
-        height = 24,
-        mediaFont = FontType("DejaVuSansCondensed Bold", 10),
-        location = {
-          Anchor("TOP", 0, -5),
-          Anchor("LEFT"),
-          Anchor("RIGHT"),
-        }
+        height                        = 24,
+        text                          = FromUIProperty("AchievementName"),
+        justifyV                      = "MIDDLE",
+        mediaFont                     = FontType("DejaVuSansCondensed Bold", 10),
+        location                      = {
+                                        Anchor("TOP", 0, -5),
+                                        Anchor("LEFT"),
+                                        Anchor("RIGHT"),
+                                      }
       },
 
       Description = {
-        text = FromUIProperty("AchievementDesc"),
-        mediaFont = FontType("PT Sans Bold", 11),
-        textColor = Color.WHITE,
-        justifyH = "LEFT",
-        justifyV = "TOP",
-        location = {
-          Anchor("TOP", 0, -5, "Name", "BOTTOM"),
-          Anchor("LEFT", 5, 0, "Icon", "RIGHT"),
-          Anchor("RIGHT")
-        }
+        text                          = FromUIProperty("AchievementDesc"),
+        mediaFont                     = FontType("PT Sans Bold", 11),
+        textColor                     = Color.WHITE,
+        justifyH                      = "LEFT",
+        justifyV                      = "TOP",
+        location                      = {
+                                        Anchor("TOP", 0, -5, "Name", "BOTTOM"),
+                                        Anchor("LEFT", 5, 0, "Icon", "RIGHT"),
+                                        Anchor("RIGHT")
+                                      }
       },
 
       Icon = {
-        fileID = FromUIProperty("AchievementIconFileID"),
-        width = 32,
-        height = 32,
-        texCoords = { left = 0.07,  right = 0.93, top = 0.07, bottom = 0.93 } ,
-        location = {
-          Anchor("TOPLEFT", 5, -5, "Name", "BOTTOMLEFT")
-        }
+        fileID                        = FromUIProperty("AchievementIconFileID"),
+        width                         = 32,
+        height                        = 32,
+        texCoords                     = { left = 0.07,  right = 0.93, top = 0.07, bottom = 0.93 } ,
+        location                      = { Anchor("TOPLEFT", 5, -5, "Name", "BOTTOMLEFT") }
       },
 
-      location = {
-        Anchor("TOPLEFT"),
-        Anchor("TOPRIGHT")
-      }
+      location                        = { Anchor("TOPLEFT"), Anchor("TOPRIGHT") }
     },
 
     [AchievementView.Objectives] = {
-      spacing = 5,
+      spacing                         = 5,
 
-      location = {
-        Anchor("TOPLEFT", 0, -5, "Header", "BOTTOMLEFT"),
-        Anchor("TOPRIGHT", 0, -5, "Header", "BOTTOMRIGHT")
-      }
+      location                        = {
+                                        Anchor("TOPLEFT", 0, -5, "Header", "BOTTOMLEFT"),
+                                        Anchor("TOPRIGHT", 0, -5, "Header", "BOTTOMRIGHT")
+                                      }
     }
   },
 
   [AchievementListView] = {
-    viewClass = AchievementView,
-    indexed = false
+    viewClass                         = AchievementView,
+    indexed                           = false
   }
 })

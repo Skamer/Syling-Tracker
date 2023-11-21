@@ -54,9 +54,11 @@ class "FontString" (function(_ENV)
         end
       end
 
-      local mediaFont = GetMedia("font", font.font) 
+      local mediaFont = GetMedia("font", font.font)
 
-      return self:SetFontObject(FetchFontObject(mediaFont, font.height or 10, flags))
+      if mediaFont then 
+        return self:SetFontObject(FetchFontObject(mediaFont, font.height or 10, flags))
+      end
     end
 
     return self:SetFontObject(nil)

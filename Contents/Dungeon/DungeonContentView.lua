@@ -9,7 +9,7 @@
 Syling                 "SylingTracker.Contents.DungeonContentView"           ""
 -- ========================================================================= --
 export {
-  FromUIProperty = Wow.FromUIProperty
+  FromUIProperty                      = Wow.FromUIProperty
 }
 
 __UIElement__()
@@ -22,25 +22,25 @@ class "DungeonContentView" (function(_ENV)
     super.OnViewUpdate(self, data, metadata)
 
     if data then 
-      self.DungeonName = data.name
+      self.DungeonName          = data.name
       self.DungeonTextureFileID = data.textureFileID
 
       local objectives = self:GetChild("Objectives")
       objectives:UpdateView(data.objectives, metadata)
     else 
-      self.DungeonName = nil 
+      self.DungeonName          = nil 
       self.DungeonTextureFileID = nil
     end
   end
 
   function OnExpand(self)
-    Style[self].TopDungeonInfo.visible = true
-    Style[self].Objectives.visible = true
+    Style[self].TopDungeonInfo.visible  = true
+    Style[self].Objectives.visible      = true
   end
 
   function OnCollapse(self)
-    Style[self].TopDungeonInfo.visible = false
-    Style[self].Objectives.visible = false
+    Style[self].TopDungeonInfo.visible  = false
+    Style[self].Objectives.visible      = false
   end
 
   __Observable__()
@@ -55,13 +55,13 @@ class "DungeonContentView" (function(_ENV)
 
 
   __Template__{
-    TopDungeonInfo = Frame,
-    Objectives = ObjectiveListView,
+    TopDungeonInfo  = Frame,
+    Objectives      = ObjectiveListView,
     {
       TopDungeonInfo = {
-        DungeonName = FontString,
-        DungeonIcon = Texture,
-
+        DungeonName       = FontString,
+        DungeonIcon       = Texture,
+        DungeonObjectIcon = Texture,
       }
     }
   }
@@ -72,53 +72,56 @@ end)
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
   [DungeonContentView] = {
-    TopDungeonInfo = {
-      backdrop = {
-        edgeFile  = [[Interface\Buttons\WHITE8X8]],
-        edgeSize  = 1
-      },
-      
-      backdropBorderColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
-      height = 48,
+    Header = {
+      visible                         = false
+    },
 
-      location = {
-        Anchor("TOP", 0, 0, "Header", "BOTTOM"),
-        Anchor("LEFT"),
-        Anchor("RIGHT")
+    TopDungeonInfo = {
+      backdrop                        = { edgeFile  = [[Interface\Buttons\WHITE8X8]], edgeSize  = 1 },
+      backdropBorderColor             = Color(35/255, 40/255, 46/255, 0.73),
+      height                          = 48,
+      location                        = { Anchor("TOP"), Anchor("LEFT"), Anchor("RIGHT") },
+
+      DungeonObjectIcon = {
+        atlas                         = AtlasType("Dungeon", true),
+        location                      = { Anchor("TOPLEFT", 5, -5) }
       },
 
       DungeonIcon = {
-        fileID = FromUIProperty("DungeonTextureFileID"),
-        setAllPoints = true,
+        fileID                        = FromUIProperty("DungeonTextureFileID"),
+        setAllPoints                  = true,
       },
 
       DungeonName = {
-        text = FromUIProperty("DungeonName"),
-        fontObject = Game18Font,
-        textColor = { r = 1, g = 0.914, b = 0.682},
+        text                          = FromUIProperty("DungeonName"),
+        fontObject                    = Game18Font,
+        textColor                     = { r = 1, g = 0.914, b = 0.682},
 
-        location = {
-          Anchor("LEFT", 5, 0),
-          Anchor("TOP"),
-          Anchor("BOTTOM"),
-          Anchor("RIGHT")
-        }
+        location                      = {
+                                        Anchor("LEFT", 5, 0),
+                                        Anchor("TOP"),
+                                        Anchor("BOTTOM"),
+                                        Anchor("RIGHT")
+                                      }
       }
     },
 
     Objectives = {
-      autoAdjustHeight = true,
-      height = 32,
-      backdrop = { 
-        bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
-      },
-      backdropColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
+      autoAdjustHeight                = true,
+      backdrop                        = { 
+                                        bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
+                                        edgeFile  = [[Interface\Buttons\WHITE8X8]],
+                                        edgeSize  = 1
+                                      },
 
-      location = {
-        Anchor("TOP", 0, 0, "TopDungeonInfo", "BOTTOM"),
-        Anchor("LEFT"),
-        Anchor("RIGHT")
-      }
+      backdropColor                   = Color(35/255, 40/255, 46/255, 0.73),
+      backdropBorderColor             = Color(0, 0, 0, 0.4),
+
+      location                        = {
+                                        Anchor("TOP", 0, -5, "TopDungeonInfo", "BOTTOM"),
+                                        Anchor("LEFT"),
+                                        Anchor("RIGHT")
+                                      }
     }
   }
 })

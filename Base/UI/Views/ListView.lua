@@ -25,6 +25,8 @@ class "ListView" (function(_ENV)
 
     if data and self.ViewClass then 
       local previousView
+      local paddingLeft = Style[self].PaddingLeft or 0
+      local paddingTop = Style[self].PaddingTop or 0
 
       for key, itemData, itemMetadata in self:IterateData(data) do
         local classType = self:GetViewClass(itemData, metadata)
@@ -36,10 +38,10 @@ class "ListView" (function(_ENV)
           if previousView then 
             view:SetPoint("TOP", previousView, "BOTTOM", 0, -self.Spacing)
           else
-            view:SetPoint("TOP")
+            view:SetPoint("TOP", 0, -paddingTop)
           end
           
-          view:SetPoint("LEFT", self.PaddingLeft, 0)
+          view:SetPoint("LEFT", paddingLeft, 0)
           view:SetPoint("RIGHT")
 
           -- Update the view with the data 
@@ -96,6 +98,8 @@ class "ListView" (function(_ENV)
   function OnAdjustHeight(self)
     local height = 0
     local count = 0
+    local paddingTop = Style[self].PaddingTop or 0
+    local paddingBottom = Style[self].PaddingBottom or 0
 
     for childName, child in pairs(self.Views) do 
       height = height + child:GetHeight()
@@ -103,7 +107,7 @@ class "ListView" (function(_ENV)
       count = count + 1
     end
 
-    height = height + self.Spacing * math.max(0, count - 1) + self.PaddingBottom
+    height = height + self.Spacing * math.max(0, count - 1) + paddingBottom + paddingTop
 
     self:SetHeight(height)
   end
@@ -155,15 +159,20 @@ class "ListView" (function(_ENV)
     handler = function(self) self:RefreshView() end
   }
 
-  property "PaddingBottom" {
-    type = Number,
-    default = 5
-  }
+  -- property "PaddingBottom" {
+  --   type = Number,
+  --   default = 5
+  -- }
 
-  property "PaddingLeft" {
-    type = Number,
-    default = 5
-  }
+  -- property "PaddingLeft" {
+  --   type = Number,
+  --   default = 5
+  -- }
+
+  -- property "PaddingTop" {
+  --   type = Number,
+  --   default = 0,
+  -- }
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
   -----------------------------------------------------------------------------
@@ -181,5 +190,8 @@ end)
 Style.UpdateSkin("Default", {
   [ListView] = {
     autoAdjustHeight = true,
+    paddingLeft = 5,
+    paddingBottom = 5,
+    paddingTop = 5,
   }
 })

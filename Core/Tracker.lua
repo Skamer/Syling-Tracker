@@ -1060,9 +1060,9 @@ function EvaluateVisibilityAdvancedRules(rules)
   end
 
   if IsInRaid()  then 
-    trackerVisibility = tracker.inRaidGroupVisibility
+    trackerVisibility = rules.inRaidGroupVisibility
   elseif IsInGroup() then 
-    trackerVisibility = tracker.inPartyVisibility
+    trackerVisibility = rules.inPartyVisibility
   else 
     trackerVisibility = "ignore"
   end

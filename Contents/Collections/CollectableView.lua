@@ -9,7 +9,8 @@
 Syling                 "SylingTracker.Contents.CollectableView"              ""
 -- ========================================================================= --
 export {
-  FromUIProperty            = Wow.FromUIProperty,  
+  FromUIProperty                      = Wow.FromUIProperty,
+  FromBackdrop                        = Frame.FromBackdrop
 }
 
 __UIElement__()
@@ -56,36 +57,36 @@ class "CollectableListView" { ListView }
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
   [CollectableView] = {
-    autoAdjustHeight = true, 
-
-    backdrop = { 
-      bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
-    },
-    backdropColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
+    autoAdjustHeight                  = true, 
+    backdrop                          = FromBackdrop(),
+    showBackground                    = true,
+    showBorder                        = true,
+    backdropColor                     = Color(35/255, 40/255, 46/255, 0.73),
+    backdropBorderColor               = Color(0, 0, 0, 0.4),
+    borderSize                        = 1,
     
     Name = {
-      text = FromUIProperty("CollectableName"),
-      justifyV = "MIDDLE",
-      mediaFont = FontType("DejaVuSansCondensed Bold", 10),
-      location = {
-        Anchor("TOP"),
-        Anchor("LEFT"),
-        Anchor("RIGHT")
-      }
+      text                            = FromUIProperty("CollectableName"),
+      justifyV                        = "MIDDLE",
+      mediaFont                       = FontType("DejaVuSansCondensed Bold", 10),
+      location                        = {
+                                        Anchor("TOP", 0, -5),
+                                        Anchor("LEFT"),
+                                        Anchor("RIGHT")
+                                      }
     },
 
     [CollectableView.Objectives] = {
-      spacing = 5,
-
-      location = {
-        Anchor("TOPLEFT", 0, -5, "Name", "BOTTOMLEFT"),
-        Anchor("TOPRIGHT", 0, -5, "Name", "BOTTOMRIGHT")
-      }
+      spacing                         = 5,
+      location                        = {
+                                        Anchor("TOPLEFT", 0, -5, "Name", "BOTTOMLEFT"),
+                                        Anchor("TOPRIGHT", 0, -5, "Name", "BOTTOMRIGHT")
+                                      }
     }
   },
 
   [CollectableListView] = {
-    viewClass = CollectableView,
-    indexed = false
+    viewClass                         = CollectableView,
+    indexed                           = false
   }
 })
