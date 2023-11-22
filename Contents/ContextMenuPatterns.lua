@@ -27,6 +27,16 @@ export {
   -- Achievement
    GetAchievementLink                 = GetAchievementLink,
 
+   -- Recipe Tracker
+  SetRecipeTracked                    = C_TradeSkillUI.SetRecipeTracked,
+
+  -- Activity
+  RemoveTrackedPerksActivity          = C_PerksActivities.RemoveTrackedPerksActivity,
+
+  -- Collections
+  EContentTrackingType                = _G.Enum.ContentTrackingType,
+  EContentTrackingStopType            = _G.Enum.ContentTrackingStopType,
+
   -- Helper 
   ShowHelperWindow                    = API.ShowHelperWindow
 }
@@ -171,6 +181,67 @@ RegisterContextMenuPattern("achievement", {
     icon = { atlas = AtlasType("QuestTurnin")},
     handler = function(achievementID)
       ShowHelperWindow("achievement", achievementID)
+    end
+  }
+})
+-------------------------------------------------------------------------------
+--                   Profession Recipe Context Menu Pattern                  --
+-------------------------------------------------------------------------------
+RegisterContextMenuPattern("recipe", {
+  {
+    id = "stopTrackingRecipe",
+    text = "Stop tracking",
+    order = 10,
+    icon = { atlas = AtlasType("transmog-icon-hidden") },
+    handler = function(recipeID, isRecraft)
+      SetRecipeTracked(recipeID, false, isRecraft)
+    end
+  }
+})
+-------------------------------------------------------------------------------
+--                     Activity Context Menu Pattern                         --
+-------------------------------------------------------------------------------
+RegisterContextMenuPattern("activity", {
+  {
+    id = "showDetails",
+    text = "Show details",
+    order = 10,
+    icon = { atlas = AtlasType("adventureguide-icon-whatsnew") },
+    handler = function(activityID)
+      MonthlyActivitiesObjectiveTracker_OpenFrameToActivity(activityID)
+    end
+  },
+  {
+    id = "stopTrackingActivity",
+    text = "Stop tracking",
+    order = 20,
+    icon = { atlas = AtlasType("transmog-icon-hidden") },
+    handler = function(activityID)
+      RemoveTrackedPerksActivity(activityID)
+    end
+  }
+})
+-------------------------------------------------------------------------------
+--                   Collection Context Menu Pattern                         --
+-------------------------------------------------------------------------------
+RegisterContextMenuPattern("collection", {
+  {
+    id = "openCollection",
+    text = "Open Collections",
+    order = 10,
+    icon = { atlas = AtlasType("adventureguide-icon-whatsnew") },
+    isShown = function(collectableID, collectableType) return collectableType == EContentTrackingType.Appearance end,
+    handler = function(collectableID, collectableType)
+      TransmogUtil.OpenCollectionToItem(collectableID)
+    end
+  },
+  {
+    id = "stopTrackingCollectable",
+    text = "Stop tracking",
+    order = 20,
+    icon = { atlas = AtlasType("transmog-icon-hidden") },
+    handler = function(collectableID, collectableType)
+      C_ContentTracking.StopTracking(collectableType, collectableID, EContentTrackingStopType.Manual)
     end
   }
 })

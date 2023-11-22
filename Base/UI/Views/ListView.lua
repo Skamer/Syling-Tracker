@@ -27,6 +27,7 @@ class "ListView" (function(_ENV)
       local previousView
       local paddingLeft = Style[self].PaddingLeft or 0
       local paddingTop = Style[self].PaddingTop or 0
+      local paddingRight = Style[self].paddingRight or 0
 
       for key, itemData, itemMetadata in self:IterateData(data) do
         local classType = self:GetViewClass(itemData, metadata)
@@ -42,7 +43,7 @@ class "ListView" (function(_ENV)
           end
           
           view:SetPoint("LEFT", paddingLeft, 0)
-          view:SetPoint("RIGHT")
+          view:SetPoint("RIGHT", -paddingRight, 0)
 
           -- Update the view with the data 
           view:UpdateView(itemData, itemMetadata)
@@ -158,21 +159,6 @@ class "ListView" (function(_ENV)
     default = 10,
     handler = function(self) self:RefreshView() end
   }
-
-  -- property "PaddingBottom" {
-  --   type = Number,
-  --   default = 5
-  -- }
-
-  -- property "PaddingLeft" {
-  --   type = Number,
-  --   default = 5
-  -- }
-
-  -- property "PaddingTop" {
-  --   type = Number,
-  --   default = 0,
-  -- }
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
   -----------------------------------------------------------------------------
@@ -193,5 +179,6 @@ Style.UpdateSkin("Default", {
     paddingLeft = 5,
     paddingBottom = 5,
     paddingTop = 5,
+    paddingRight = 5,
   }
 })

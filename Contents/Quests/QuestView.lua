@@ -556,6 +556,8 @@ Style.UpdateSkin("Default", {
   },
 
   [QuestListView] = {
+    paddingLeft   = 0,
+    paddingRight  = 5,
     viewClass = function(data)
       if data then 
         if data.isLegendary then 

@@ -59,7 +59,7 @@ function UpdateActivity(self, activityID)
   end
 
   local activityData = ACTIVITIES_CONTENT_SUBJECT:AcquireActivity(activityID)
-  activityData.activityData = activityID
+  activityData.activityID = activityID
   activityData.name = activityInfo.activityName
   activityData.isCompleted = activityInfo.completed
   activityData.description = activityInfo.description

@@ -122,6 +122,11 @@ function TRACKED_RECIPE_UPDATE(recipeID, tracked)
     _M:LoadProfessionRecipes()
   end
 end
+
+__SystemEvent__ "CURRENCY_DISPLAY_UPDATE" "BAG_UPDATE_DELAYED"
+function UPDATE_RECIPES()
+  _M:LoadProfessionRecipes()
+end
 -- ========================================================================= --
 -- Debug Utils Tools
 -- ========================================================================= --

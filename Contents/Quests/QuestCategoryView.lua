@@ -122,7 +122,7 @@ Style.UpdateSkin("Default", {
 
     Name = {
       text = FromUIProperty("CategoryName"),
-      mediaFont =  FontType("PT Sans Narrow Bold", 12),
+      mediaFont =  FontType("PT Sans Narrow Bold", 12, "NORMAL"),
       textColor = Color(1, 0.39, 0),
       textTransform = "UPPERCASE", 
       justifyH = "LEFT",

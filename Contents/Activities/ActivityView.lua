@@ -10,12 +10,26 @@ Syling                 "SylingTracker.Contents.ActivityView"                 ""
 -- ========================================================================= --
 export {
   FromUIProperty                      = Wow.FromUIProperty,
-  FromBackdrop                        = Frame.FromBackdrop
+  FromBackdrop                        = Frame.FromBackdrop,
+  ContextMenu_Show                    = API.ContextMenu_Show
 }
 
 __UIElement__()
 class "ActivityView" (function(_ENV)
-  inherit "Frame" extend "IView"
+  inherit "Button" extend "IView"
+  -----------------------------------------------------------------------------
+  --                               Handlers                                  --
+  -----------------------------------------------------------------------------
+  local function OnClickHandler(self, mouseButton)
+    local contextMenuPattern  = self.ContextMenuPattern
+    local activityID          = self.ActivityID
+
+    if mouseButton == "RightButton" then
+      if contextMenuPattern and activityID then
+        ContextMenu_Show(contextMenuPattern, self, activityID)
+      end
+    end
+  end
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
@@ -27,8 +41,10 @@ class "ActivityView" (function(_ENV)
       objectivesView:UpdateView(data.objectives, ...)
     end
 
+    self.ActivityID   = data.activityID
     self.ActivityName = data.name
   end
+
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
@@ -37,13 +53,24 @@ class "ActivityView" (function(_ENV)
     type = String,
     default = ""
   }
+
+  property "ActivityID" {
+    type = Number
+  }
+
+  property "ContextMenuPattern" {
+    type = String,
+    default = "activity"
+  }
   -----------------------------------------------------------------------------
   --                              Constructors                               --
   -----------------------------------------------------------------------------
   __Template__ {
     Name = FontString
   }
-  function __ctor(self) end
+  function __ctor(self) 
+    self.OnClick = self.OnClick + OnClickHandler
+  end
 end)
 
 -- Optional Children for QuestView 
@@ -59,6 +86,7 @@ class "ActivityListView" { ListView }
 Style.UpdateSkin("Default", {
   [ActivityView] = {
     autoAdjustHeight                  = true, 
+    registerForClicks                 = { "LeftButtonDown", "RightButtonDown" },
     backdrop                          = FromBackdrop(),
     showBackground                    = true,
     showBorder                        = true,
