@@ -30,6 +30,17 @@ RegisterContent({
   statusFunc = function(data) return (data and data.autoQuests) and true or false end,
 })
 -------------------------------------------------------------------------------
+--                             Widgets                                       --
+-------------------------------------------------------------------------------
+RegisterContent({
+  id = "widgets",
+  name = "Widgets",
+  description = "WIDGETS_PH_DESC",
+  order = 15,
+  viewClass = WidgetsContentView,
+  statusFunc = function() return false end,
+})
+-------------------------------------------------------------------------------
 --                              Scenario                                     --
 -------------------------------------------------------------------------------
 RegisterContent({

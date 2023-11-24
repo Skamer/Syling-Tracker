@@ -53,6 +53,8 @@
   <Script file="Keystone\KeystoneData.lua" />
   <Script file="Keystone\KeystoneContentView.lua" />
   <Script file="Keystone\Keystone.lua" />
+  <!-- UI Widgets -->
+  <Script file="Widgets\WidgetsContentView.lua"/>
   <!-- Contents Loading -->
   <Script file="Contents.lua" />
 </Ui>

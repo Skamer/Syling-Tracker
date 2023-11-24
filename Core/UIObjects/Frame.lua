@@ -176,8 +176,8 @@ class "Frame" (function(_ENV)
     
     -- As top may be nil, we need to check it. In case where it's nil, we 
     -- return the minHeight. minHeight is by default '0'
-    if top == nil and minHeight > 0 then
-      return minHeight
+    if top == nil then
+      return minHeight > 0 and minHeight
     end
     
     for _, child in self:GetChildrenForAdjustment() do 
@@ -200,6 +200,14 @@ class "Frame" (function(_ENV)
       else
         return Round(self:GetTop() - maxOuterBottom) + paddingBottom, maxChild
       end
+    end
+  end
+
+  function SetPoint(self, ...)
+    super.SetPoint(self, ...)
+
+    if self.AutoAdjustHeight then 
+      self:AdjustHeight()
     end
   end
 -------------------------------------------------------------------------------
