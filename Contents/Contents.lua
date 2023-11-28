@@ -13,6 +13,8 @@ export {
   RegisterObservableContent   = API.RegisterObservableContent,
   GetObservableContent        = API.GetObservableContent,
   CreateAtlasMarkup           = CreateAtlasMarkup,
+
+  HasObjectiveWidgets         = Utils.HasObjectiveWidgets
 }
 
 --- TODO: Add Widgets (e.g, Fishing tracking for knowing the fish amount)
@@ -38,7 +40,8 @@ RegisterContent({
   description = "WIDGETS_PH_DESC",
   order = 15,
   viewClass = WidgetsContentView,
-  statusFunc = function() return false end,
+  events = { "UPDATE_ALL_UI_WIDGETS", "UPDATE_UI_WIDGET", "ZONE_CHANGED_NEW_AREA"},
+  statusFunc = function() return HasObjectiveWidgets() end,
 })
 -------------------------------------------------------------------------------
 --                              Scenario                                     --

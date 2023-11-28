@@ -239,6 +239,19 @@ class "QuestView" (function(_ENV)
     self.QuestLevel = data.level
     self.QuestTagID = data.tag and data.tag.tagID
   end
+
+  function OnRelease(self)
+    self.QuestName = nil 
+    self.QuestLevel = nil 
+    self.QuestHasTimer = nil 
+    self.QuestHasItem = nil
+    self.QuestTagID = nil 
+    self.QuestID = nil
+
+    Style[self].POI = NIL
+    Style[self].Content.Timer = NIL
+    Style[self].Content.Item = NIL
+  end
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------   

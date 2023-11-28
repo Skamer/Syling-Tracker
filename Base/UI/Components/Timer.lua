@@ -66,8 +66,6 @@ class "Timer" (function(_ENV)
   end
 
   function OnRelease(self)
-    super.OnRelease(self)
-
     self:Reset()
   end
   -----------------------------------------------------------------------------

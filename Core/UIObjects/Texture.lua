@@ -30,8 +30,7 @@ class "Texture" (function(_ENV)
   -----------------------------------------------------------------------------
   function SetMediaTexture(self, mediaTexture)
     if not mediaTexture then 
-      Style[self].file = nil 
-      Style[self].size = nil 
+      Style[self].file = nil
       Style[self].texCoords = nil 
       Style[self].size = nil 
       return 
@@ -58,8 +57,6 @@ class "Texture" (function(_ENV)
         Style[self].texCoords = atlasInfo.texCoords 
       end
     elseif mediaTexture.file then
-      Style[self].atlas = nil
-      Style[self].color = nil
       Style[self].file = mediaTexture.file
 
       if mediaTexture.size then 
@@ -70,8 +67,6 @@ class "Texture" (function(_ENV)
         Style[self].texCoords = mediaTexture.texCoords
       end
     elseif mediaTexture.color then 
-      Style[self].atlas = nil
-      Style[self].file = nil
       Style[self].color = mediaTexture.color 
     end
   end

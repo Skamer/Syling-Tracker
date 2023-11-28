@@ -20,7 +20,9 @@ export {
   IsWorldQuest                        = QuestUtils_IsQuestWorldQuest,
   GetTaskInfo                         = GetTaskInfo,
   GetQuestObjectiveInfo               = GetQuestObjectiveInfo,
+  GetQuestProgressBarPercent          = GetQuestProgressBarPercent,
   RequestLoadQuestByID                = C_QuestLog.RequestLoadQuestByID,
+  SetSelectedQuest                    = C_QuestLog.SetSelectedQuest
 }
 
 TASKS_CONTENT_SUBJECT = RegisterObservableContent("tasks", TasksContentSubject)
@@ -72,6 +74,21 @@ function UpdateTask(self, questID)
       objectiveData.text = text 
       objectiveData.type = oType
       objectiveData.isCompleted = finished
+
+      if oType == "progressbar" then 
+        local progress = GetQuestProgressBarPercent(questID)
+        objectiveData.hasProgress = true 
+        objectiveData.progress = progress 
+        objectiveData.minProgress = 0
+        objectiveData.maxProgress = 100
+        objectiveData.progressText = PERCENTAGE_STRING:format(progress)
+      else
+        objectiveData.hasProgress = nil 
+        objectiveData.progress = nil 
+        objectiveData.minProgress = nil
+        objectiveData.maxProgress = nil
+        objectiveData.progressText = nil
+      end
     end
   else 
     SetSelectedQuest(questID)

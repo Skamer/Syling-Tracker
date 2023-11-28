@@ -22,8 +22,8 @@ local function RegisterEventForContent(event, content)
 
     _Module:RegisterEvent(event, function(...)
       for content in pairs(contentsRegistered) do
-        -- 
-        -- TODO: Run Status / Update Function
+        -- content.Enabled = content.StatusFunc(event, ...)
+        content:ProcessUpdate(true, nil, event, ...)
       end
     end)
 
@@ -392,8 +392,20 @@ __Static__() function API.RegisterContent(config)
   content.ViewClass = config.viewClass
   content.Order = config.order 
   content.StatusFunc = config.statusFunc
-  content.Events = config.events 
   content.Observable = config.data
+  
+  local events = config.events
+  content.Events = events
+  if config.statusFunc then 
+    local t = type(events)
+    if t == "string" then 
+      RegisterEventForContent(events, content)
+    elseif t == "table" then 
+      for _, evt in ipairs(events) do 
+        RegisterEventForContent(evt, content)
+      end
+    end
+  end
 
   CONTENTS[config.id] = content
 end

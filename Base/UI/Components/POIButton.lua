@@ -133,8 +133,15 @@ class "POIButton" (function(_ENV)
   function OnAcquire(self)
     self:RegisterSystemEvent("SUPER_TRACKING_CHANGED")
   end
-
+  
   function OnRelease(self)
+    self.Style = nil 
+    self.QuestType = nil
+    self.Selected = nil
+    self.Number = nil
+    self.QuestID = nil
+
+
     self:UnregisterSystemEvent("SUPER_TRACKING_CHANGED")
   end
   -----------------------------------------------------------------------------
@@ -193,7 +200,7 @@ function FromDisplayMediaTexture()
           texCoords = { left = texLeft, right = texRight, top = texTop, bottom = texBottom},
           size = { width = 32, height = 32}
         }
-      elseif style == POIButton.Style.ContentTracking then 
+      elseif style == POIButton.Style.ContentTracking then
         return
       elseif style == POIButton.Style.Waypoint then
         return { atlas = AtlasType("poi-traveldirections-arrow"), size = { width = 13, height = 17 } } 
@@ -223,7 +230,6 @@ function FromDisplayMediaTexture()
       elseif questType == POIButton.QuestType.Important then 
         return { atlas = AtlasType("UI-QuestPoiImportant-QuestBangTurnIn"), size = { width = 32, height = 36}}
       end
-
       -- return { file = [[Interface/WorldMap/UI-QuestPoi-NumberIcons]] }
     end)
 end

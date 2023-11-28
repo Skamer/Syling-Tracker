@@ -8,6 +8,11 @@
 -- ========================================================================= --
 Syling                 "SylingTracker.Contents.QuestsContentView"            ""
 -- ========================================================================= -
+export {
+  RegisterUISetting = API.RegisterUISetting,
+  FromUISetting = API.FromUISetting
+}
+
 __UIElement__()
 class "QuestsContentView"(function(_ENV)
   inherit "ContentView"
@@ -26,10 +31,12 @@ class "QuestsContentView"(function(_ENV)
         Style[self].Categories.visible = self.Expanded
         local categoriesListView = self:GetPropertyChild("Categories")
         categoriesListView:UpdateView(data.quests, metadata)
+        Style[self].Quests = NIL
       else
         Style[self].Quests.visible = self.Expanded
         local questListView = self:GetPropertyChild("Quests")
         questListView:UpdateView(data.quests, metadata)
+        Style[self].Categories = NIL
       end
     else
       Style[self].Quests = NIL
@@ -57,9 +64,29 @@ class "QuestsContentView"(function(_ENV)
     end
   end
 
+  function SetCategoriesShown(self, show)
+    local data = self.Data
+    local questsData = data and data.quests
+    if questsData then 
+      if show then 
+        Style[self].Categories.visible = self.Expanded
+        local categoriesListView = self:GetPropertyChild("Categories")
+        categoriesListView:UpdateView(questsData, self.Metadata)
+        Style[self].Quests = NIL     
+      else 
+        Style[self].Quests.visible = self.Expanded
+        local questListView = self:GetPropertyChild("Quests")
+        questListView:UpdateView(data.quests, metadata)
+        Style[self].Categories = NIL
+      end
+    end
+  end
+
+
   property "ShowCategories" {
     type = Boolean,
-    default = true
+    default = false,
+    handler = function(self, new) self:SetCategoriesShown(new) end
   }
 end)
 
@@ -71,10 +98,16 @@ __ChildProperty__(QuestsContentView, "Categories")
 __UIElement__()
 class(tostring(QuestsContentView) .. ".Categories") { QuestCategoryListView }
 -------------------------------------------------------------------------------
+--                              UI Settings                                  --
+-------------------------------------------------------------------------------
+RegisterUISetting("quests.showCategories", false)
+-------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
   [QuestsContentView] = {
+    showCategories = FromUISetting("quests.showCategories"),
+
     [QuestsContentView.Quests] = {
       location = {
         Anchor("TOP", 0, -10, "Header", "BOTTOM"),

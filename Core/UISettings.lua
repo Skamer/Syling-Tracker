@@ -147,7 +147,7 @@ class "UISetting" (function(_ENV)
     -- local value = UI_SETTINGS_DB[self.id]
     -- print("Finished", GetTime() - START_TIME)
     -- print("Get Value", self.id)
-    if value then
+    if value ~= nil then
       if useCacheResolution and not self.ResolvedSetting then 
         self.ResolvedSetting = self 
       end

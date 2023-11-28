@@ -9,4 +9,5 @@
   <Script file="Achievement.lua" />
   <Script file="Instance.lua" />
   <Script file="Keystone.lua" />
+  <Script file="UIWidgets.lua" />
 </Ui>

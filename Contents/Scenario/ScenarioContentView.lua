@@ -25,8 +25,15 @@ class "ScenarioContentView" (function(_ENV)
 
     if scenarioData then 
       self.ScenarioName = scenarioData.name
+      self.StageName = scenarioData.stepName
+      self.CurrentStage = scenarioData.currentStage
+      self.NumStages = scenarioData.numStages
+      self.WidgetSetID = scenarioData.widgetSetID
+
       local objectives = self:GetChild("Objectives")
       objectives:UpdateView(scenarioData.objectives, metadata)
+
+
     else 
       self.ScenarioName = nil
     end
@@ -37,15 +44,39 @@ class "ScenarioContentView" (function(_ENV)
     type = String
   }
 
+  __Observable__()
+  property "StageName" {
+    type = String
+  }
+
+  __Observable__()
+  property "NumStages" {
+    type = Number,
+    default = 0
+  }
+
+  __Observable__()
+  property "CurrentStage" {
+    type = Number,
+    default = 0
+  }
+
+  __Observable__()
+  property "WidgetSetID" {
+    type = Number
+  }
+
+
   __Template__ {
     TopScenarioInfo = Frame,
+    Widgets = UIWidgets,
     Objectives = ObjectiveListView,
     {
       TopScenarioInfo = {
         ScenarioName = FontString,
         ScenarioIcon = Texture,
         StageName = FontString,
-        StageCouter = FontString,
+        StageCounter = FontString,
       }
     }
   }
@@ -56,31 +87,28 @@ end)
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
   [ScenarioContentView] = {
+    Header = {
+      visible = false
+    },
+
     TopScenarioInfo = {
-      backdrop = {
-        bgFile = [[Interface\Buttons\WHITE8X8]],
-        edgeFile  = [[Interface\Buttons\WHITE8X8]],
-        edgeSize  = 1
-      },
-      backdropColor       = { r = 0, g = 0, b = 0, a = 0.65}, -- 87
-      backdropBorderColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
+      backdrop                        = { edgeFile  = [[Interface\Buttons\WHITE8X8]], edgeSize  = 1 },
+      backdropBorderColor             = Color(35/255, 40/255, 46/255, 0.73),
       height = 54,
       
-      location = {
-        Anchor("TOP", 0, 0, "Header", "BOTTOM"),
-        Anchor("LEFT"),
-        Anchor("RIGHT")
-      },
+      location                        = { Anchor("TOP"), Anchor("LEFT"), Anchor("RIGHT") },
 
       ScenarioIcon = {
-        atlas = AtlasType("groupfinder-background-scenarios"),
+        atlas = AtlasType("groupfinder-background-scenarios"), -- 615222
+        -- fileID = 615222,
         texCoords = { left = 0.1,  right = 0.9, top = 0.1, bottom = 0.9 } ,
-        vertexColor = { r = 1, g = 1, b = 1, a = 0.5 },
-        height = 48,
-        location = {
-          Anchor("LEFT", 1, 0),
-          Anchor("RIGHT", -1, 0)
-        }
+        setAllPoints = true,
+        -- vertexColor = { r = 1, g = 1, b = 1, a = 0.5 },
+        -- height = 48,
+        -- location = {
+        --   Anchor("LEFT", 1, 0),
+        --   Anchor("RIGHT", -1, 0)
+        -- }
       },
 
       ScenarioName = {
@@ -95,8 +123,9 @@ Style.UpdateSkin("Default", {
         }
       },
 
-      StageCouter = {
-        text = "1/4",
+      StageCounter = {
+        -- text = "1/4",
+        text = FromUIProperty("CurrentStage", "NumStages"):Map(function(currentStage, numStages) return currentStage .. "/" .. numStages end),
         justifyH = "RIGHT",
         location = {
           Anchor("TOP"),
@@ -106,7 +135,7 @@ Style.UpdateSkin("Default", {
       },
 
       StageName = {
-        text = "PH_STAGE_NAME",
+        text = FromUIProperty("StageName"),
         justifyH = "CENTER",
         fontObject = GameFontNormal,
         location = {
@@ -130,6 +159,15 @@ Style.UpdateSkin("Default", {
         Anchor("LEFT"),
         Anchor("RIGHT")
       }      
+    },
+
+    Widgets = {
+      widgetSetID = FromUIProperty("WidgetSetID"),
+      location = {
+        Anchor("TOP", 0, 0, "Objectives", "BOTTOM"),
+        Anchor("LEFT"),
+        Anchor("RIGHT")        
+      }
     }
   }
 })
