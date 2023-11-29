@@ -37,13 +37,13 @@ class "SettingDefinitions.Quests" (function(_ENV)
 
     local showBackgroundCheckBox = Widgets.SettingsCheckBox.Acquire(false, backgroundSection)
     showBackgroundCheckBox:SetID(10)
-    showBackgroundCheckBox:SetLabel("Show")
+    showBackgroundCheckBox:SetLabel("Show Background")
     -- showBackgroundCheckBox:BindTrackerSetting(trackerID, "showBackground")
     self.GeneralTabControls.showBackgroundCheckBox = showBackgroundCheckBox
 
     local backgroundColorPicker = Widgets.SettingsColorPicker.Acquire(false, backgroundSection)
     backgroundColorPicker:SetID(20)
-    backgroundColorPicker:SetLabel("Color")
+    backgroundColorPicker:SetLabel("Background Color")
     -- backgroundColorPicker:BindTrackerSetting(trackerID, "backgroundColor")
     self.GeneralTabControls.backgroundColorPicker = backgroundColorPicker
     ---------------------------------------------------------------------------
@@ -57,19 +57,19 @@ class "SettingDefinitions.Quests" (function(_ENV)
 
     local showBorderCheckBox = Widgets.SettingsCheckBox.Acquire(false, borderSection)
     showBorderCheckBox:SetID(10)
-    showBorderCheckBox:SetLabel("Show")
+    showBorderCheckBox:SetLabel("Show Border")
     -- showBorderCheckBox:BindTrackerSetting(trackerID, "showBorder")
     self.GeneralTabControls.showBorderCheckBox = showBorderCheckBox
 
     local borderColorPicker = Widgets.SettingsColorPicker.Acquire(false, borderSection)
     borderColorPicker:SetID(20)
-    borderColorPicker:SetLabel("Color")
+    borderColorPicker:SetLabel("Border Color")
     -- borderColorPicker:BindTrackerSetting(trackerID, "borderColor")
     self.GeneralTabControls.borderColorPicker = borderColorPicker
 
     local borderSizeSlider = Widgets.SettingsSlider.Acquire(false, borderSection)
     borderSizeSlider:SetID(30)
-    borderSizeSlider:SetLabel("Size")
+    borderSizeSlider:SetLabel("Border Size")
     borderSizeSlider:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
     -- borderSizeSlider:BindTrackerSetting(trackerID, "borderSize")
     borderSizeSlider:SetMinMaxValues(1, 10)
@@ -128,19 +128,19 @@ class "SettingDefinitions.Quests" (function(_ENV)
 
     local showBorderCheckBox = Widgets.SettingsCheckBox.Acquire(false, borderSection)
     showBorderCheckBox:SetID(10)
-    showBorderCheckBox:SetLabel("Show")
+    showBorderCheckBox:SetLabel("Show Border")
     -- showBorderCheckBox:BindTrackerSetting(trackerID, "showBorder")
     self.HeaderTabControls.showBorderCheckBox = showBorderCheckBox
 
     local borderColorPicker = Widgets.SettingsColorPicker.Acquire(false, borderSection)
     borderColorPicker:SetID(20)
-    borderColorPicker:SetLabel("Color")
+    borderColorPicker:SetLabel("Border Color")
     -- borderColorPicker:BindTrackerSetting(trackerID, "borderColor")
     self.HeaderTabControls.borderColorPicker = borderColorPicker
 
     local borderSizeSlider = Widgets.SettingsSlider.Acquire(false, borderSection)
     borderSizeSlider:SetID(30)
-    borderSizeSlider:SetLabel("Size")
+    borderSizeSlider:SetLabel("Border Size")
     borderSizeSlider:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
     -- borderSizeSlider:BindTrackerSetting(trackerID, "borderSize")
     borderSizeSlider:SetMinMaxValues(1, 10)
@@ -167,11 +167,12 @@ class "SettingDefinitions.Quests" (function(_ENV)
   --                     [Category] Tab Builder                              --
   -----------------------------------------------------------------------------
   function BuildCategoryTab(self)
-    local showHeaderCheckBox = Widgets.SettingsCheckBox.Acquire(false, self)
-    showHeaderCheckBox:SetID(10)
-    showHeaderCheckBox:SetLabel("Enable the category")
+    local showCategories = Widgets.SettingsCheckBox.Acquire(false, self)
+    showCategories:SetID(10)
+    showCategories:SetLabel("Show the quests by category (need /reload after change)")
+    showCategories:BindUISetting("quests.showCategories")
     -- enableTrackerCheckBox:BindTrackerSetting(trackerID, "enabled")
-    self.CategoryTabControls.showHeaderCheckBox = showHeaderCheckBox
+    self.CategoryTabControls.showCategories = showCategories
     ---------------------------------------------------------------------------
     --- Title Section
     ---------------------------------------------------------------------------
@@ -180,6 +181,32 @@ class "SettingDefinitions.Quests" (function(_ENV)
     titleSection:SetID(60)
     titleSection:SetTitle("Title")
     self.CategoryTabControls.titleSection = titleSection
+
+    local titleFont = Widgets.SettingsMediaFont.Acquire(false, titleSection)
+    titleFont:SetID(10)
+    titleFont:BindUISetting("questCategory.name.font")
+    self.CategoryTabControls.titleFont = titleFont
+
+    local textColorPicker = Widgets.SettingsColorPicker.Acquire(false, titleSection)
+    textColorPicker:SetID(20)
+    textColorPicker:SetLabel("Text Color")
+    textColorPicker:BindUISetting("questCategory.name.textColor")
+    self.CategoryTabControls.textColorPicker = textColorPicker
+
+    local textTransform = Widgets.SettingsDropDown.Acquire(false, titleSection)
+    textTransform:SetID(30)
+    textTransform:SetLabel("Text Transform")
+    self.CategoryTabControls.textTransform = textTransform
+
+    local textJustifyV = Widgets.SettingsDropDown.Acquire(false, titleSection)
+    textJustifyV:SetID(40)
+    textJustifyV:SetLabel("Text Justify V")
+    self.CategoryTabControls.textJustifyV = textJustifyV
+
+    local textJustifyH = Widgets.SettingsDropDown.Acquire(false, titleSection)
+    textJustifyH:SetID(50)
+    textJustifyH:SetLabel("Text Justify H")
+    self.CategoryTabControls.textJustifyH = textJustifyH
   end
   -----------------------------------------------------------------------------
   --                     [Category] Release Builder                          --

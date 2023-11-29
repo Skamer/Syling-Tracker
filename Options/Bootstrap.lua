@@ -9,7 +9,8 @@
 Syling                "SylingTracker_Options.Bootstrap"                      ""
 -- ========================================================================= --
 export {
-  IterateTrackers               = SylingTracker.API.IterateTrackers
+  IterateTrackers               = SylingTracker.API.IterateTrackers,
+  GetAddonVersion               = SylingTracker.Utils.GetAddonVersion
 }
 
 LOGO_WHITE = [[Interface\AddOns\SylingTracker_Options\Media\logo_white]]
@@ -25,7 +26,7 @@ __Async__() function SylingTracker_OPEN_OPTIONS()
     panel:SetFrameStrata("HIGH")
     panel:SetTitle("Syling Tracker Options")
     panel:EnableMouse(true)
-    panel:SetAddonVersion("2.0.0")
+    panel:SetAddonVersion(GetAddonVersion())
     panel:SetAddonLogo(LOGO_WHITE)
     panel:InstantApplyStyle()
     

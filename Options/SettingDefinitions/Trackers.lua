@@ -158,11 +158,22 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     lockTrackerCkeckBox:BindTrackerSetting(trackerID, "locked")
     self.GeneralTabControls.lockTrackerCkeckBox = lockTrackerCkeckBox
     ---------------------------------------------------------------------------
+    --- Scale Tracker
+    ---------------------------------------------------------------------------
+    local scaleSlider = Widgets.SettingsSlider.Acquire(false, self)
+    scaleSlider:SetID(40)
+    scaleSlider:SetLabel("Scale")
+    scaleSlider:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
+    scaleSlider:BindTrackerSetting(trackerID, "scale")
+    scaleSlider:SetValueStep(0.01)
+    scaleSlider:SetMinMaxValues(0.4, 10)
+    self.GeneralTabControls.scaleSlider = scaleSlider
+    ---------------------------------------------------------------------------
     --- Background Section
     ---------------------------------------------------------------------------
     local backgroundSection = Widgets.ExpandableSection.Acquire(false, self)
     backgroundSection:SetExpanded(false)
-    backgroundSection:SetID(30)
+    backgroundSection:SetID(50)
     backgroundSection:SetTitle("Background")
     Style[backgroundSection].marginTop = 10
     self.GeneralTabControls.backgroundSection = backgroundSection
@@ -183,7 +194,7 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     ---------------------------------------------------------------------------
     local borderSection = Widgets.ExpandableSection.Acquire(false, self)
     borderSection:SetExpanded(false)
-    borderSection:SetID(40)
+    borderSection:SetID(60)
     borderSection:SetTitle("Border")
     self.GeneralTabControls.borderSection = borderSection
 
@@ -211,7 +222,7 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     ---------------------------------------------------------------------------
     local scrollBarSection = Widgets.ExpandableSection.Acquire(false, self)
     scrollBarSection:SetExpanded(false)
-    scrollBarSection:SetID(50)
+    scrollBarSection:SetID(70)
     scrollBarSection:SetTitle("Scroll Bar")
     self.GeneralTabControls.scrollBarSection = scrollBarSection
 

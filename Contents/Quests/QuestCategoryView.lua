@@ -9,8 +9,10 @@
 Syling                 "SylingTracker.Contents.QuestCategoryView"            ""
 -- ========================================================================= -
 export {
-  newtable = System.Toolset.newtable,
-  FromUIProperty = Wow.FromUIProperty,
+  newtable                            = System.Toolset.newtable,
+  FromUIProperty                      = Wow.FromUIProperty,
+  RegisterUISetting                   = API.RegisterUISetting,
+  FromUISetting                       = API.FromUISetting
 }
 
 __UIElement__()
@@ -109,45 +111,43 @@ class "QuestCategoryListView" (function(_ENV)
     default = function() return {} end
   }
 end)
-
+-------------------------------------------------------------------------------
+--                              UI Settings                                  --
+-------------------------------------------------------------------------------
+RegisterUISetting("questCategory.name.font", FontType("PT Sans Narrow Bold", 12, "NORMAL"))
+RegisterUISetting("questCategory.name.textColor", Color(1, 0.39, 0))
+RegisterUISetting("questCategory.name.textTransform", "UPPERCASE")
+RegisterUISetting("questCategory.name.justifyH", "LEFT")
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
   [QuestCategoryView] = {
-    -- height = 32,
-    -- minResize = { width = 0, height = 32},
-    clipChildren = true,
     autoAdjustHeight = true,
 
     Name = {
-      text = FromUIProperty("CategoryName"),
-      mediaFont =  FontType("PT Sans Narrow Bold", 12, "NORMAL"),
-      textColor = Color(1, 0.39, 0),
-      textTransform = "UPPERCASE", 
-      justifyH = "LEFT",
-      location = {
-        Anchor("TOP"),
-        Anchor("LEFT", 10, 8),
-        Anchor("RIGHT")
-      }
+      text                            = FromUIProperty("CategoryName"),
+      mediaFont                       = FromUISetting("questCategory.name.font"),
+      textColor                       = FromUISetting("questCategory.name.textColor"),
+      textTransform                   = FromUISetting("questCategory.name.textTransform"),
+      justifyH                        = FromUISetting("questCategory.name.justifyH"),
+      location                        = {
+                                      Anchor("TOP"),
+                                      Anchor("LEFT", 10, 8),
+                                      Anchor("RIGHT")
+                                      }
     },
 
     [QuestCategoryView.Quests] = {
-      location = {
-        Anchor("TOP", 0, -13, "Name", "BOTTOM"),
-        Anchor("LEFT"),
-        Anchor("RIGHT")
-      }
+      location                        = {
+                                      Anchor("TOP", 0, -13, "Name", "BOTTOM"),
+                                      Anchor("LEFT"),
+                                      Anchor("RIGHT")
+                                      }
     }
   },
 
   [QuestCategoryListView] = {
-    viewClass = QuestCategoryView,
+    viewClass                         = QuestCategoryView,
   }
 })
-
-function OnLoad(self)
-  local object = QuestCategoryView("testCategory", UIParent)
-  object:SetPoint("CENTER")
-end

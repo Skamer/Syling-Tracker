@@ -414,13 +414,13 @@ end
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
   [QuestItemIcon] = {
-    height = 32,
-    width = 32,
-    backdrop = FromBackdrop(),
-    showBackground = false,
-    showBorder = true, 
-    backdropBorderColor = Color(0, 0, 0, 0.4),
-    borderSize = 1,
+    height                            = 32,
+    width                             = 32,
+    backdrop                          = FromBackdrop(),
+    showBackground                    = false,
+    showBorder                        = true, 
+    backdropBorderColor               = Color(0, 0, 0, 0.4),
+    borderSize                        = 1,
     
     Icon = {
       file = FromUIProperty("ItemTexture"),
@@ -457,7 +457,6 @@ Style.UpdateSkin("Default", {
         height                        = 24,
   
         Tag = {
-          -- atlas = AtlasType("questlog-questtypeicon-dungeon"),
           atlas = FromUIProperty("QuestTagID"):Map(function(tagID)
             if not tagID then 
               return 
