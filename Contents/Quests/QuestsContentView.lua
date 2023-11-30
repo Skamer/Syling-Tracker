@@ -10,7 +10,8 @@ Syling                 "SylingTracker.Contents.QuestsContentView"            ""
 -- ========================================================================= -
 export {
   RegisterUISetting = API.RegisterUISetting,
-  FromUISetting = API.FromUISetting
+  FromUISetting = API.FromUISetting,
+  GenerateUISettings = API.GenerateUISettings,
 }
 
 __UIElement__()
@@ -101,27 +102,60 @@ class(tostring(QuestsContentView) .. ".Categories") { QuestCategoryListView }
 --                              UI Settings                                  --
 -------------------------------------------------------------------------------
 RegisterUISetting("quests.showCategories", false)
+
+GenerateUISettings("quests", "content")
+-------------------------------------------------------------------------------
+--                              Observables                                  --
+-------------------------------------------------------------------------------
+function FromQuestsAndCategoriesLocation()
+  return FromUISetting("quests.showHeader"):Map(function(visible)
+    if visible then 
+      return {
+        Anchor("TOP", 0, -10, "Header", "BOTTOM"),
+        Anchor("LEFT"),
+        Anchor("RIGHT")        
+      }
+    end
+
+    return {
+        Anchor("TOP"),
+        Anchor("LEFT"),
+        Anchor("RIGHT")
+    }
+  end)
+end
+
+QuestsContentView.FromQuestsAndCategoriesLocation = FromQuestsAndCategoriesLocation
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
   [QuestsContentView] = {
-    showCategories = FromUISetting("quests.showCategories"),
+    showCategories                    = FromUISetting("quests.showCategories"),
 
-    [QuestsContentView.Quests] = {
-      location = {
-        Anchor("TOP", 0, -10, "Header", "BOTTOM"),
-        Anchor("LEFT"),
-        Anchor("RIGHT")
+    Header = {
+      visible                         = FromUISetting("quests.showHeader"),
+      showBackground                  = FromUISetting("quests.header.showBackground"),
+      showBorder                      = FromUISetting("quests.header.showBorder"),
+      backdropColor                   = FromUISetting("quests.header.backgroundColor"),
+      backdropBorderColor             = FromUISetting("quests.header.borderColor"),
+      borderSize                      = FromUISetting("quests.header.borderSize"),
+
+      Label = {
+        mediaFont                     = FromUISetting("quests.header.label.mediaFont"),
+        textColor                     = FromUISetting("quests.header.label.textColor"),
+        justifyH                      = FromUISetting("quests.header.label.justifyH"),
+        justifyV                      = FromUISetting("quests.header.label.justifyV"),
+        textTransform                 = FromUISetting("quests.header.label.textTransform"),
       }
     },
 
+    [QuestsContentView.Quests] = {
+      location                        = FromQuestsAndCategoriesLocation()
+    },
+
     [QuestsContentView.Categories] = {
-      location = {
-        Anchor("TOP", 0, -10, "Header", "BOTTOM"),
-        Anchor("LEFT"),
-        Anchor("RIGHT")
-      }
+      location                        = FromQuestsAndCategoriesLocation()
     },
   }
 })

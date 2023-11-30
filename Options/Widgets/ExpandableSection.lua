@@ -113,6 +113,7 @@ Style.UpdateSkin("Default", {
     paddingLeft = 20,
     paddingRight = 0,
     marginRight = 0,
+    clipChildren = true,
 
     Button = {
       height = 30,

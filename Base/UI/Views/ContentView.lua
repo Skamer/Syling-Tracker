@@ -10,11 +10,14 @@ Syling                  "SylingTracker.UI.ContentView"                       ""
 -- ========================================================================= --
 export {
   TryToComputeHeightFromChildren = Utils.Frame_TryToComputeHeightFromChildren,
-  FromUIProperty = Wow.FromUIProperty
+  FromUIProperty = Wow.FromUIProperty,
+  RegisterUISetting = API.RegisterUISetting,
+  FromUISetting = API.FromUISetting,
+  FromBackdrop = Frame.FromBackdrop,
 }
 
 __UIElement__()
-class "ContentView" (function(_ENV)
+__Sealed__() class "ContentView" (function(_ENV)
   inherit "Frame" extend "IView" "IQueueAdjustHeight" "ISizeAnimation"
 
   local function OnExpandedHandler(self, new, old)
@@ -85,83 +88,67 @@ class "ContentView" (function(_ENV)
   end
 end)
 -------------------------------------------------------------------------------
+--                              UI Settings                                  --
+-------------------------------------------------------------------------------
+RegisterUISetting("content.showHeader", true)
+RegisterUISetting("content.header.showBackground", true)
+RegisterUISetting("content.header.showBorder", true)
+RegisterUISetting("content.header.backgroundColor", Color(18/255, 20/255, 23/255, 0.87))
+RegisterUISetting("content.header.borderColor", Color.BLACK)
+RegisterUISetting("content.header.borderSize", 1)
+RegisterUISetting("content.header.label.mediaFont", FontType("PT Sans Narrow Bold", 15))
+RegisterUISetting("content.header.label.textColor", Color(0.18, 0.71, 1))
+RegisterUISetting("content.header.label.justifyH", "CENTER")
+RegisterUISetting("content.header.label.justifyV", "MIDDLE")
+RegisterUISetting("content.header.label.textTransform", "NONE")
+RegisterUISetting("content.header.showMinimizeButton", true)
+-------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
   [ContentView] = {
-    height = 32,
-    minResize = { width = 0, height = 32},
-    clipChildren = true,
-    autoAdjustHeight = true,
-
-    -- backdrop = {
-    --   bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
-    --   edgeFile  = [[Interface\Buttons\WHITE8X8]],
-    --   edgeSize  = 1
-    -- },
-
-    -- backdropColor       = { r = 1, g = 20/255, b = 23/255, a = 0.87}, -- 87
-    -- backdropBorderColor = { r = 0, g = 0, b = 0, a = 1},
+    height                            = 32,
+    minResize                         = { width = 0, height = 32},
+    clipChildren                      = true,
+    autoAdjustHeight                  = true,
 
     Header = {
-      height = 32,
-      backdrop = {
-        bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
-        edgeFile  = [[Interface\Buttons\WHITE8X8]],
-        edgeSize  = 1
-      },
-
-      backdropColor       = { r = 18/255, g = 20/255, b = 23/255, a = 0.87}, -- 87
-      backdropBorderColor = { r = 0, g = 0, b = 0, a = 1},
-
-
-      location = {
-        Anchor("TOP"),
-        Anchor("LEFT"),
-        Anchor("RIGHT")
-      },
+      visible                         = FromUISetting("content.showHeader"),
+      height                          = 32,
+      backdrop                        = FromBackdrop(),
+      showBackground                  = FromUISetting("content.header.showBackground"),
+      showBorder                      = FromUISetting("content.header.showBorder"),
+      backdropColor                   = FromUISetting("content.header.backgroundColor"),
+      backdropBorderColor             = FromUISetting("content.header.borderColor"),
+      borderSize                      = FromUISetting("content.header.borderSize"),
+      location                        = {
+                                      Anchor("TOP"),
+                                      Anchor("LEFT"),
+                                      Anchor("RIGHT")
+                                      },
 
       Icon = {
-        -- height = 16,
-        -- width = 16,
-        -- atlas = AtlasType("poi-majorcity"),
-        height = 20,
-        width = 20,
-        drawLayer = "ARTWORK",
-
-        -- atlas = AtlasType("Dungeon"),
-        mediaTexture = FromUIProperty("ContentIcon"),
-        location = {
-          Anchor("LEFT", 6, 0)
-        }
-
-        -- maskTexture = {
-        --   hWrapMode = "CLAMPTOBLACKADDITIVE",
-        --   vWrapMode = "CLAMPTOBLACKADDITIVE",
-        --   file = [[Interface\CHARACTERFRAME\TempPortraitAlphaMask]]
-        -- }
+        height                        = 20,
+        width                         = 20,
+        drawLayer                     = "ARTWORK",
+        mediaTexture                  = FromUIProperty("ContentIcon"),
+        location                      = { Anchor("LEFT", 6, 0) }
       },
 
       Label = {
-        text = FromUIProperty("ContentName"),
-        mediaFont = FontType("PT Sans Narrow Bold", 15),
-        textColor = Color(0.18, 0.71, 1),
-        justifyH  = "CENTER",
-        justifyV  = "MIDDLE",
-        textTransform = "NONE",
-        location = {
-          -- Anchor("TOP"),
-          -- Anchor("LEFT", 6, 0, "Icon", "RIGHT"),
-          -- Anchor("RIGHT"),
-          -- Anchor("BOTTOM")
-          Anchor("TOPLEFT"),
-          Anchor("BOTTOMRIGHT")
-        }
+        text                          = FromUIProperty("ContentName"),
+        mediaFont                     = FromUISetting("content.header.label.mediaFont"),
+        textColor                     = FromUISetting("content.header.label.textColor"),
+        justifyH                      = FromUISetting("content.header.label.justifyH"),
+        justifyV                      = FromUISetting("content.header.label.justifyV"),
+        textTransform                 = FromUISetting("content.header.label.textTransform"),
+        location                      = { Anchor("TOPLEFT"), Anchor("BOTTOMRIGHT") }
       },
 
       Minimize = {
-        height = 11,
-        width = 16,
+        visible                       = FromUISetting("content.header.showMinimizeButton"),
+        height                        = 11,
+        width                         = 16,
 
         normalTexture = {
           setAllPoints = true, 
@@ -172,7 +159,6 @@ Style.UpdateSkin("Default", {
 
             return { atlas = AtlasType("UI-HUD-Minimap-Zoom-In") }
           end)
-          -- mediaTexture = { atlas = AtlasType("UI-HUD-Minimap-Zoom-In") } , -- UI-HUD-Minimap-Zoom-Out
         }, 
         location = {
           Anchor("RIGHT", -6, 0)

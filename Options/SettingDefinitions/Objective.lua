@@ -64,20 +64,20 @@ class "SettingDefinitions.Objective" (function(_ENV)
     textColorFailedColorPicker:BindUISetting("objective.failed.text.textColor")
     self.TabSettingControls.textColorFailedColorPicker = textColorFailedColorPicker
 
-    local textTransform = Widgets.SettingsDropDown.Acquire(false, self)
-    textTransform:SetID(30)
-    textTransform:SetLabel("Text Transform")
-    self.TabSettingControls.textTransform = textTransform
+    -- local textTransform = Widgets.SettingsDropDown.Acquire(false, self)
+    -- textTransform:SetID(30)
+    -- textTransform:SetLabel("Text Transform")
+    -- self.TabSettingControls.textTransform = textTransform
 
-    local textJustifyV = Widgets.SettingsDropDown.Acquire(false, self)
-    textJustifyV:SetID(40)
-    textJustifyV:SetLabel("Text Justify V")
-    self.TabSettingControls.textJustifyV = textJustifyV
+    -- local textJustifyV = Widgets.SettingsDropDown.Acquire(false, self)
+    -- textJustifyV:SetID(40)
+    -- textJustifyV:SetLabel("Text Justify V")
+    -- self.TabSettingControls.textJustifyV = textJustifyV
 
-    local textJustifyH = Widgets.SettingsDropDown.Acquire(false, self)
-    textJustifyH:SetID(50)
-    textJustifyH:SetLabel("Text Justify H")
-    self.TabSettingControls.textJustifyH = textJustifyH
+    -- local textJustifyH = Widgets.SettingsDropDown.Acquire(false, self)
+    -- textJustifyH:SetID(50)
+    -- textJustifyH:SetLabel("Text Justify H")
+    -- self.TabSettingControls.textJustifyH = textJustifyH
   end
 
   -----------------------------------------------------------------------------
@@ -87,11 +87,11 @@ class "SettingDefinitions.Objective" (function(_ENV)
     local tabControl = Widgets.TabControl.Acquire(false, self)
     tabControl:SetID(1)
 
-    tabControl:AddTabPage({
-      name = "General",
-      onAcquire = function() end,
-      onRelease = function() end, 
-    })
+    -- tabControl:AddTabPage({
+    --   name = "General",
+    --   onAcquire = function() end,
+    --   onRelease = function() end, 
+    -- })
 
     tabControl:AddTabPage({
       name = "Text",
@@ -99,23 +99,23 @@ class "SettingDefinitions.Objective" (function(_ENV)
       onRelease = function() self:ReleaseTabSettingControls() end, 
     })
 
-    tabControl:AddTabPage({
-      name = "Icon",
-      onAcquire = function() end,
-      onRelease = function() end, 
-    })
+    -- tabControl:AddTabPage({
+    --   name = "Icon",
+    --   onAcquire = function() end,
+    --   onRelease = function() end, 
+    -- })
 
-    tabControl:AddTabPage({
-      name = "Progress Bar",
-      onAcquire = function() end,
-      onRelease = function() end, 
-    })
+    -- tabControl:AddTabPage({
+    --   name = "Progress Bar",
+    --   onAcquire = function() end,
+    --   onRelease = function() end, 
+    -- })
 
-    tabControl:AddTabPage({
-      name = "Timer",
-      onAcquire = function() end,
-      onRelease = function() end, 
-    })
+    -- tabControl:AddTabPage({
+    --   name = "Timer",
+    --   onAcquire = function() end,
+    --   onRelease = function() end, 
+    -- })
 
     tabControl:Refresh()
     tabControl:SelectTab(1)

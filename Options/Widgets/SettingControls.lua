@@ -139,12 +139,12 @@ class "SettingsSectionHeader" (function(_ENV)
     self:InstantApplyStyle()
   end
 
-  function OnRelease(self)
-    self:SetID(0)
-    self:Hide()
-    self:ClearAllPoints()
-    self:SetParent(nil)
-  end
+  -- function OnRelease(self)
+  --   self:SetID(0)
+  --   self:Hide()
+  --   self:ClearAllPoints()
+  --   self:SetParent(nil)
+  -- end
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
   -----------------------------------------------------------------------------
@@ -170,10 +170,10 @@ class "SettingsText" (function(_ENV)
   end
 
   function OnRelease(self)
-    self:SetID(0)
-    self:Hide()
-    self:ClearAllPoints()
-    self:SetParent(nil)
+    -- self:SetID(0)
+    -- self:Hide()
+    -- self:ClearAllPoints()
+    -- self:SetParent(nil)
 
     ResetStyles(self, true)
   end
@@ -211,10 +211,10 @@ class "SettingsEditBox" (function(_ENV)
   end
 
   function OnRelease(self)
-    self:SetID(0)
-    self:Hide()
-    self:ClearAllPoints()
-    self:SetParent(nil)
+    -- self:SetID(0)
+    -- self:Hide()
+    -- self:ClearAllPoints()
+    -- self:SetParent(nil)
 
     ResetStyles(self, true)
   end
@@ -281,10 +281,10 @@ class "SettingsCheckBox" (function(_ENV)
   end
 
   function OnRelease(self)
-    self:SetID(0)
-    self:Hide()
-    self:ClearAllPoints()
-    self:SetParent(nil)
+    -- self:SetID(0)
+    -- self:Hide()
+    -- self:ClearAllPoints()
+    -- self:SetParent(nil)
 
     for name, v in Style.GetCustomStyles(self) do 
       Style[self][name] = CLEAR
@@ -382,10 +382,10 @@ class "SettingsDropDown" (function(_ENV)
   end
 
   function OnRelease(self)
-    self:SetID(0)
-    self:Hide()
-    self:ClearAllPoints()
-    self:SetParent(nil)
+    -- self:SetID(0)
+    -- self:Hide()
+    -- self:ClearAllPoints()
+    -- self:SetParent(nil)
 
     self:GetChild("DropDown"):ClearEntries()
 
@@ -471,10 +471,10 @@ class "SettingsSlider" (function(_ENV)
   end
 
   function OnRelease(self)
-    self:SetID(0)
-    self:Hide()
-    self:ClearAllPoints()
-    self:SetParent(nil)
+    -- self:SetID(0)
+    -- self:Hide()
+    -- self:ClearAllPoints()
+    -- self:SetParent(nil)
 
     ResetStyles(self, true)
 
@@ -681,11 +681,6 @@ class "SettingsMediaFont" (function(_ENV)
   end
 
   function OnRelease(self)
-    self:SetID(0)
-    self:Hide()
-
-    self:SetParent(nil)
-
     self:BindSetting()
   end
   -----------------------------------------------------------------------------
@@ -709,25 +704,20 @@ class "SettingsMediaFont" (function(_ENV)
   }
   function __ctor(self)
     local fontSetting = self:GetChild("FontSetting")
-    fontSetting:SetLabel("Font")
     fontSetting:SetMediaType("font")
 
     local fontHeightSetting = self:GetChild("FontHeightSetting")
     fontHeightSetting:InstantApplyStyle()
-    fontHeightSetting:SetLabel("Font Size")
     fontHeightSetting:SetMinMaxValues(6, 48)
     fontHeightSetting:SetValueStep(1)
     fontHeightSetting:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
 
     local fontOutlineSetting = self:GetChild("FontOutlineSetting")
-    fontOutlineSetting:SetLabel("Font Outline")
     fontOutlineSetting:AddEntry({ text = "NONE", value = "NONE"})
     fontOutlineSetting:AddEntry({ text = "NORMAL", value = "NORMAL"})
     fontOutlineSetting:AddEntry({ text = "THICK", value = "THICK"})
 
     local fontMonochromeSetting = self:GetChild("FontMonochromeSetting")
-    fontMonochromeSetting:SetLabel("Font Monochrome")
-
 
     -- bind handlers 
     fontSetting.OnEntrySelected = fontSetting.OnEntrySelected + function(...)
@@ -983,6 +973,7 @@ Style.UpdateSkin("Default", {
     marginRight = 0,
 
     FontSetting = {
+      Label = { text = "Font"},
       location = {
         Anchor("TOP"),
         Anchor("LEFT"),
@@ -991,6 +982,7 @@ Style.UpdateSkin("Default", {
     },
 
     FontHeightSetting = {
+      Label = { text = "Font Size"},
       location = {
         Anchor("TOPLEFT", 0, 0, "FontSetting", "BOTTOMLEFT"),
         Anchor("TOPRIGHT", 0, 0, "FontSetting", "BOTTOMRIGHT")
@@ -998,6 +990,7 @@ Style.UpdateSkin("Default", {
     },
 
     FontOutlineSetting = {
+      Label = { text = "Font Outline"},
       location = {
         Anchor("TOPLEFT", 0, 0, "FontHeightSetting", "BOTTOMLEFT"),
         Anchor("TOPRIGHT", 0, 0, "FontHeightSetting", "BOTTOMRIGHT")
@@ -1005,6 +998,7 @@ Style.UpdateSkin("Default", {
     },
 
     FontMonochromeSetting = {
+      Label = { text = "Font Monochrome"},
       location = {
         Anchor("TOPLEFT", 0, 0, "FontOutlineSetting", "BOTTOMLEFT"),
         Anchor("TOPRIGHT", 0, 0, "FontOutlineSetting", "BOTTOMRIGHT")

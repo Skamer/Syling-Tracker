@@ -1107,6 +1107,7 @@ end)
 -------------------------------------------------------------------------------
 RegisterTrackerSetting({ id = "enabled", default = true, handler = private__SetEnabledTracker })
 RegisterTrackerSetting({ id = "locked", default = false })
+RegisterTrackerSetting({ id = "scale", default = 1})
 RegisterTrackerSetting({ id = "position"})
 RegisterTrackerSetting({ id = "size", default = Size(300, 325) })
 RegisterTrackerSetting({ id = "showBackground", default = false})
@@ -1317,6 +1318,7 @@ Style.UpdateSkin("Default", {
   [Tracker] = {
     visible                           = FromVisible(),
     locked                            = FromTrackerSetting("locked"),
+    scale                             = FromTrackerSetting("scale"),
     clipChildren                      = false,
     minResize                         = { width = 100, height = 100},
     size                              = FromTrackerSetting("size"),

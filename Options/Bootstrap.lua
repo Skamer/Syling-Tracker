@@ -130,3 +130,21 @@ function SylingTracker_TRACKER_DELETED(trackerID)
   SETTINGS_PANEL:SelectEntry("general", 1)
   SETTINGS_PANEL:Refresh("trackers")
 end
+
+TEXT_TRANSFORM_ENTRIES = Array[Widgets.EntryData]()
+TEXT_TRANSFORM_ENTRIES:Insert({ text = "NONE", value = "NONE"})
+TEXT_TRANSFORM_ENTRIES:Insert({ text = "UPPERCASE", value = "UPPERCASE"})
+TEXT_TRANSFORM_ENTRIES:Insert({ text = "lowercase", value = "LOWERCASE"})
+_Parent.TEXT_TRANSFORM_ENTRIES = TEXT_TRANSFORM_ENTRIES
+
+TEXT_JUSTIFY_H_ENTRIES = Array[Widgets.EntryData]()
+TEXT_JUSTIFY_H_ENTRIES:Insert({ text = "LEFT", value = "LEFT"})
+TEXT_JUSTIFY_H_ENTRIES:Insert({ text = "CENTER", value = "CENTER"})
+TEXT_JUSTIFY_H_ENTRIES:Insert({ text = "RIGHT", value = "RIGHT"})
+_Parent.TEXT_JUSTIFY_H_ENTRIES = TEXT_JUSTIFY_H_ENTRIES
+
+TEXT_JUSTIFY_V_ENTRIES = Array[Widgets.EntryData]()
+TEXT_JUSTIFY_V_ENTRIES:Insert({ text = "TOP", value = "TOP"})
+TEXT_JUSTIFY_V_ENTRIES:Insert({ text = "MIDDLE", value = "MIDDLE"})
+TEXT_JUSTIFY_V_ENTRIES:Insert({ text = "BOTTOM", value = "BOTTOM"})
+_Parent.TEXT_JUSTIFY_V_ENTRIES = TEXT_JUSTIFY_V_ENTRIES

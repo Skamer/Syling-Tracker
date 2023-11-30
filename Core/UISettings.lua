@@ -155,7 +155,7 @@ class "UISetting" (function(_ENV)
       return value, useCacheResolution and self.ResolvedSetting
     end
 
-    if includeDefault and self.Default then
+    if includeDefault and self.Default ~= nil then
       if useCacheResolution and not self.ResolvedSetting then 
         self.ResolvedSetting = self 
       end
