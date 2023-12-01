@@ -12,6 +12,8 @@ namespace               "SylingTracker.Options.Widgets"
 -- ========================================================================= --
 
 export {
+  FromUIProperty  = Wow.FromUIProperty,
+
   GetDecimalCount = SylingTracker.Utils.GetDecimalCount,
   TruncateDecimal = SylingTracker.Utils.TruncateDecimal
 }
@@ -75,15 +77,8 @@ class "Slider" (function(_ENV)
     self:OnValueChanged(new)
   end
 
-
-  local function OnMinMaxValuesChangedHandler(self, new)
-    Style[self].Slider.minMaxValues = new
-  end
-
-
   local function OnValueStepChangedHandler(self, new)
     self.DecimalCount = GetDecimalCount(new)
-    Style[self].Slider.valueStep = new
   end
   -----------------------------------------------------------------------------
   --                               Methods                                   --
@@ -156,11 +151,6 @@ class "Slider" (function(_ENV)
   end
 
   function OnRelease(self)
-    self:SetID(0)
-    self:Hide()
-    self:ClearAllPoints()
-    self:SetParent(nil)
-
     -- Reset the properties 
     self.Value = nil
     self.MinMaxValues = nil
@@ -177,12 +167,13 @@ class "Slider" (function(_ENV)
   }
 
 
+  __Observable__()
   property "MinMaxValues" {
     type = MinMax,
     default = MinMax(0, 100),
-    handler = OnMinMaxValuesChangedHandler
   }
 
+  __Observable__()
   property "ValueStep" {
     type    = Number,
     default = 1,
@@ -229,12 +220,6 @@ class "Slider" (function(_ENV)
     end
 
     slider.OnValueChanged = slider.OnValueChanged + self.OnSliderValueChanged
-
-    --- HACK: We call these handlers manually to avoid issues if the min & max 
-    --- values and value step are not correctly init . there is probably a better
-    --- solution to do it.
-    OnMinMaxValuesChangedHandler(self, self.MinMaxValues, self.MinMaxValues, "MinMaxValues")
-    OnValueStepChangedHandler(self, self.ValueStep, self.ValueStep, "ValueStep")
   end 
 end)
 -------------------------------------------------------------------------------
@@ -279,6 +264,10 @@ Style.UpdateSkin("Default", {
     height  = 40,
 
     Slider = {
+      minMaxValues = FromUIProperty("MinMaxValues"),
+      valueStep = FromUIProperty("ValueStep"),
+
+
       location = {
         Anchor("TOPLEFT", 19, 0),
         Anchor("BOTTOMRIGHT", -19, 0)

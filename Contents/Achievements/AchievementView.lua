@@ -11,7 +11,9 @@ Syling                 "SylingTracker.Contents.AchievementView"              ""
 export {
   FromUIProperty                      = Wow.FromUIProperty,
   ContextMenu_Show                    = API.ContextMenu_Show,
-  FromBackdrop                        = Frame.FromBackdrop
+  FromBackdrop                        = Frame.FromBackdrop,
+  RegisterUISetting                   = API.RegisterUISetting,
+  FromUISetting                       = API.FromUISetting,
 }
 
 __UIElement__()
@@ -100,6 +102,16 @@ class(tostring(AchievementView) .. ".Objectives") { ObjectiveListView }
 __UIElement__()
 class "AchievementListView" { ListView }
 -------------------------------------------------------------------------------
+--                              UI Settings                                  --
+-------------------------------------------------------------------------------
+RegisterUISetting("achievement.showBackground", true)
+RegisterUISetting("achievement.showBorder", true)
+RegisterUISetting("achievement.backgroundColor", Color(35/255, 40/255, 46/255, 0.73))
+RegisterUISetting("achievement.borderColor", Color(0, 0, 0, 0.4))
+RegisterUISetting("achievement.borderSize", 1)
+RegisterUISetting("achievement.name.mediaFont", FontType("DejaVuSansCondensed Bold", 10))
+RegisterUISetting("achievement.name.textTransform", "NONE")
+-------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
@@ -108,13 +120,13 @@ Style.UpdateSkin("Default", {
     minResize                         = { width = 0, height = 24},
     autoAdjustHeight                  = true,
     registerForClicks                 = { "LeftButtonDown", "RightButtonDown" },
-    backdrop                          = FromBackdrop(),
-    showBackground                    = true,
-    showBorder                        = true,
-    backdropColor                     =  Color(35/255, 40/255, 46/255, 0.73),
-    backdropBorderColor               = Color(0, 0, 0, 0.4),
-    borderSize                        = 1,
-
+    backdrop                        = FromBackdrop(),
+    showBackground                  = FromUISetting("achievement.showBackground"),
+    showBorder                      = FromUISetting("achievement.showBorder"),
+    backdropColor                   = FromUISetting("achievement.backgroundColor"),
+    backdropBorderColor             = FromUISetting("achievement.borderColor"),
+    borderSize                      = FromUISetting("achievement.borderSize"),
+    
     Header = {
       height                          = 24,
       autoAdjustHeight                = true,
@@ -123,7 +135,8 @@ Style.UpdateSkin("Default", {
         height                        = 24,
         text                          = FromUIProperty("AchievementName"),
         justifyV                      = "MIDDLE",
-        mediaFont                     = FontType("DejaVuSansCondensed Bold", 10),
+        mediaFont                     = FromUISetting("achievement.name.mediaFont"),
+        textTransform                 = FromUISetting("achievement.name.textTransform"),
         location                      = {
                                         Anchor("TOP", 0, -5),
                                         Anchor("LEFT"),

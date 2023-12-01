@@ -8,6 +8,11 @@
 -- ========================================================================= --
 Syling             "SylingTracker.Contents.ActivitiesContentView"            ""
 -- ========================================================================= -
+export {
+  FromUISetting                       = API.FromUISetting,
+  GenerateUISettings                  = API.GenerateUISettings,
+}
+
 __UIElement__()
 class "ActivitiesContentView" (function(_ENV)
   inherit "ContentView"
@@ -42,16 +47,53 @@ end)
 __ChildProperty__(ActivitiesContentView, "Activities")
 __UIElement__() class(tostring(ActivitiesContentView) .. ".Activities") { ActivityListView }
 -------------------------------------------------------------------------------
+--                              UI Settings                                  --
+-------------------------------------------------------------------------------
+GenerateUISettings("activities", "content")
+-------------------------------------------------------------------------------
+--                              Observables                                  --
+-------------------------------------------------------------------------------
+function FromRecipesLocation()
+  return FromUISetting("activities.showHeader"):Map(function(visible)
+    if visible then 
+      return {
+        Anchor("TOP", 0, -10, "Header", "BOTTOM"),
+        Anchor("LEFT"),
+        Anchor("RIGHT")        
+      }
+    end
+
+    return {
+        Anchor("TOP"),
+        Anchor("LEFT"),
+        Anchor("RIGHT")
+    }
+  end)
+end
+-------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
   [ActivitiesContentView] = {
-    [ActivitiesContentView.Activities] = {
-      location = {
-        Anchor("TOP", 0, -10, "Header", "BOTTOM"),
-        Anchor("LEFT"),
-        Anchor("RIGHT")
+    Header = {
+      visible                         = FromUISetting("activities.showHeader"),
+      showBackground                  = FromUISetting("activities.header.showBackground"),
+      showBorder                      = FromUISetting("activities.header.showBorder"),
+      backdropColor                   = FromUISetting("activities.header.backgroundColor"),
+      backdropBorderColor             = FromUISetting("activities.header.borderColor"),
+      borderSize                      = FromUISetting("activities.header.borderSize"),
+
+      Label = {
+        mediaFont                     = FromUISetting("activities.header.label.mediaFont"),
+        textColor                     = FromUISetting("activities.header.label.textColor"),
+        justifyH                      = FromUISetting("activities.header.label.justifyH"),
+        justifyV                      = FromUISetting("activities.header.label.justifyV"),
+        textTransform                 = FromUISetting("activities.header.label.textTransform"),
       }
+    },
+
+    [ActivitiesContentView.Activities] = {
+      location                        = FromRecipesLocation()
     }
   }
 })

@@ -11,7 +11,9 @@ Syling               "SylingTracker.Contents.ProfessionRecipeView"           ""
 export {
   FromUIProperty                      = Wow.FromUIProperty,
   FromBackdrop                        = Frame.FromBackdrop,
-  ContextMenu_Show                    = API.ContextMenu_Show
+  ContextMenu_Show                    = API.ContextMenu_Show,
+  RegisterUISetting                   = API.RegisterUISetting,
+  FromUISetting                       = API.FromUISetting,
 }
 
 __UIElement__()
@@ -86,6 +88,16 @@ class(tostring(ProfessionRecipeView) .. ".Objectives") { ObjectiveListView }
 __UIElement__()
 class "ProfessionRecipeListView" { ListView }
 -------------------------------------------------------------------------------
+--                              UI Settings                                  --
+-------------------------------------------------------------------------------
+RegisterUISetting("professionRecipe.showBackground", true)
+RegisterUISetting("professionRecipe.showBorder", true)
+RegisterUISetting("professionRecipe.backgroundColor", Color(35/255, 40/255, 46/255, 0.73))
+RegisterUISetting("professionRecipe.borderColor", Color(0, 0, 0, 0.4))
+RegisterUISetting("professionRecipe.borderSize", 1)
+RegisterUISetting("professionRecipe.name.mediaFont", FontType("DejaVuSansCondensed Bold", 10))
+RegisterUISetting("professionRecipe.name.textTransform", "NONE")
+-------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
@@ -93,17 +105,18 @@ Style.UpdateSkin("Default", {
     height                            = 1,
     autoAdjustHeight                  = true, 
     registerForClicks                 = { "LeftButtonDown", "RightButtonDown" },
-    backdrop                          = FromBackdrop(),
-    showBackground                    = true,
-    showBorder                        = true,
-    backdropColor                     = Color(35/255, 40/255, 46/255, 0.73),
-    backdropBorderColor               = Color(0, 0, 0, 0.4),
-    borderSize                        = 1,
+    backdrop                        = FromBackdrop(),
+    showBackground                  = FromUISetting("professionRecipe.showBackground"),
+    showBorder                      = FromUISetting("professionRecipe.showBorder"),
+    backdropColor                   = FromUISetting("professionRecipe.backgroundColor"),
+    backdropBorderColor             = FromUISetting("professionRecipe.borderColor"),
+    borderSize                      = FromUISetting("professionRecipe.borderSize"),
     
     Name = {
       text                            = FromUIProperty("RecipeName"),
       justifyV                        = "MIDDLE",
-      mediaFont                       = FontType("DejaVuSansCondensed Bold", 10),
+      mediaFont                       = FromUISetting("professionRecipe.name.mediaFont"),
+      textTransform                   = FromUISetting("professionRecipe.name.textTransform"),
       location                        = {
                                         Anchor("TOP"),
                                         Anchor("LEFT"),

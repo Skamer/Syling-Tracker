@@ -6,4 +6,7 @@
   <Script file="Trackers.lua" />
   <Script file="ItemBar.lua" />
   <Script file="Quests.lua" />
+  <Script file="Achievements.lua" />
+  <Script file="Profession.lua" />
+  <Script file="Activities.lua" />
 </Ui>

@@ -60,7 +60,7 @@ function UpdateWorldQuest(self, questID)
   worldQuestData.numObjectives = numObjectives
 
   worldQuestData:StartObjectivesCounter()
-  if numObjectives > 0 then 
+  if numObjectives and numObjectives > 0 then
     for index = 1, numObjectives do 
       local objectiveData = worldQuestData:AcquireObjective()
       local text, oType, finished = GetQuestObjectiveInfo(questID, index, false)

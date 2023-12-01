@@ -9,9 +9,9 @@
 Syling                 "SylingTracker.Contents.QuestsContentView"            ""
 -- ========================================================================= -
 export {
-  RegisterUISetting = API.RegisterUISetting,
-  FromUISetting = API.FromUISetting,
-  GenerateUISettings = API.GenerateUISettings,
+  RegisterUISetting                   = API.RegisterUISetting,
+  FromUISetting                       = API.FromUISetting,
+  GenerateUISettings                  = API.GenerateUISettings,
 }
 
 __UIElement__()

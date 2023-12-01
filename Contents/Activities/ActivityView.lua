@@ -11,7 +11,9 @@ Syling                 "SylingTracker.Contents.ActivityView"                 ""
 export {
   FromUIProperty                      = Wow.FromUIProperty,
   FromBackdrop                        = Frame.FromBackdrop,
-  ContextMenu_Show                    = API.ContextMenu_Show
+  ContextMenu_Show                    = API.ContextMenu_Show,
+  RegisterUISetting                   = API.RegisterUISetting,
+  FromUISetting                       = API.FromUISetting,
 }
 
 __UIElement__()
@@ -81,23 +83,34 @@ class(tostring(ActivityView) .. ".Objectives") { ObjectiveListView }
 __UIElement__()
 class "ActivityListView" { ListView }
 -------------------------------------------------------------------------------
+--                              UI Settings                                  --
+-------------------------------------------------------------------------------
+RegisterUISetting("activity.showBackground", true)
+RegisterUISetting("activity.showBorder", true)
+RegisterUISetting("activity.backgroundColor", Color(35/255, 40/255, 46/255, 0.73))
+RegisterUISetting("activity.borderColor", Color(0, 0, 0, 0.4))
+RegisterUISetting("activity.borderSize", 1)
+RegisterUISetting("activity.name.mediaFont", FontType("DejaVuSansCondensed Bold", 10))
+RegisterUISetting("activity.name.textTransform", "NONE")
+-------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
   [ActivityView] = {
     autoAdjustHeight                  = true, 
     registerForClicks                 = { "LeftButtonDown", "RightButtonDown" },
-    backdrop                          = FromBackdrop(),
-    showBackground                    = true,
-    showBorder                        = true,
-    backdropColor                     =  Color(35/255, 40/255, 46/255, 0.73),
-    backdropBorderColor               = Color(0, 0, 0, 0.4),
-    borderSize                        = 1,
-    
+    backdrop                        = FromBackdrop(),
+    showBackground                  = FromUISetting("activity.showBackground"),
+    showBorder                      = FromUISetting("activity.showBorder"),
+    backdropColor                   = FromUISetting("activity.backgroundColor"),
+    backdropBorderColor             = FromUISetting("activity.borderColor"),
+    borderSize                      = FromUISetting("activity.borderSize"),
+
     Name = {
       text                            = FromUIProperty("ActivityName"),
       justifyV                        = "MIDDLE",
-      mediaFont                       = FontType("DejaVuSansCondensed Bold", 10),
+      mediaFont                       = FromUISetting("activity.name.mediaFont"),
+      textTransform                   = FromUISetting("activity.name.textTransform"),
       location                        = {
                                         Anchor("TOP", 0, -5),
                                         Anchor("LEFT"),
