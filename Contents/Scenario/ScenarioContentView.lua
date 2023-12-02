@@ -118,13 +118,14 @@ Style.UpdateSkin("Default", {
         location = {
           Anchor("LEFT", 5, 0),
           Anchor("TOP"),
-          Anchor("BOTTOM"),
+          Anchor("BOTTOM", 0, 0, nil, "CENTER"),
           Anchor("RIGHT")
         }
       },
 
       StageCounter = {
         -- text = "1/4",
+        visible = FromUIProperty("WidgetSetID"):Map(function(id) return not id end),
         text = FromUIProperty("CurrentStage", "NumStages"):Map(function(currentStage, numStages) return currentStage .. "/" .. numStages end),
         justifyH = "RIGHT",
         location = {
@@ -139,7 +140,7 @@ Style.UpdateSkin("Default", {
         justifyH = "CENTER",
         fontObject = GameFontNormal,
         location = {
-          Anchor("TOP", 0, -15, "ScenarioName", "CENTER"),
+          Anchor("TOP", 0, 0, nil, "CENTER"),
           Anchor("LEFT"),
           Anchor("RIGHT"),
           Anchor("BOTTOM", 0, 5)
@@ -148,20 +149,23 @@ Style.UpdateSkin("Default", {
     },
 
     Objectives = {
-      autoAdjustHeight = true, 
+      autoAdjustHeight = true,
+      paddingTop = 5,
+      paddingBottom = 5,
       backdrop = { 
         bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
       },
       backdropColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
 
       location = {
-        Anchor("TOP", 0, 0, "TopScenarioInfo", "BOTTOM"),
+        Anchor("TOP", 0, -5, "TopScenarioInfo", "BOTTOM"),
         Anchor("LEFT"),
         Anchor("RIGHT")
       }      
     },
 
     Widgets = {
+      visible = FromUIProperty("WidgetSetID"):Map(function(id) return id and id > 0 or false end),
       widgetSetID = FromUIProperty("WidgetSetID"),
       location = {
         Anchor("TOP", 0, 0, "Objectives", "BOTTOM"),

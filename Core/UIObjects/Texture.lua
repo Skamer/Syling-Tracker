@@ -30,19 +30,23 @@ class "Texture" (function(_ENV)
   -----------------------------------------------------------------------------
   function SetMediaTexture(self, mediaTexture)
     if not mediaTexture then 
-      Style[self].file = nil
-      Style[self].texCoords = nil 
-      Style[self].size = nil 
+      Style[self].file      = CLEAR
+      Style[self].texCoords = CLEAR 
+      Style[self].size      = CLEAR
+      Style[self].atlas     = CLEAR
+      Style[self].color     = CLEAR
       return 
     end 
 
     if mediaTexture.atlas and not mediaTexture.isMediaAtlas then
-      Style[self].atlas = mediaTexture.atlas 
-
-      if mediaTexture.size then 
-        Style[self].size = mediaTexture.size 
+      if mediaTexture.atlas.useAtlasSize or not mediaTexture.size then 
+        Style[self].size = CLEAR 
+      else 
+        Style[self].size = mediaTexture.size
       end
-      
+
+      Style[self].atlas     = mediaTexture.atlas 
+      Style[self].texCoords = CLEAR
     elseif mediaTexture.atlas then
       local atlasInfo = GetMediaAtlas(mediaTexture.atlas.atlas)
       if atlasInfo then 
@@ -51,23 +55,18 @@ class "Texture" (function(_ENV)
         if mediaTexture.atlas.useAtlasSize then 
           Style[self].size = Size(atlasInfo.width, atlasInfo.height)
         else 
-          Style[self].size = nil 
+          Style[self].size = CLEAR 
         end
 
-        Style[self].texCoords = atlasInfo.texCoords 
+        Style[self].texCoords = atlasInfo.texCoords or CLEAR
       end
     elseif mediaTexture.file then
-      Style[self].file = mediaTexture.file
-
-      if mediaTexture.size then 
-        Style[self].size = mediaTexture.size 
-      end
-
-      if mediaTexture.texCoords then 
-        Style[self].texCoords = mediaTexture.texCoords
-      end
-    elseif mediaTexture.color then 
-      Style[self].color = mediaTexture.color 
+      Style[self].file      = mediaTexture.file 
+      Style[self].size      = mediaTexture.size or CLEAR
+      Style[self].texCoords = mediaTexture.texCoords or CLEAR
+    elseif mediaTexture.color then
+      Style[self].color     = mediaTexture.color
+      Style[self].texCoords = CLEAR
     end
   end
   -----------------------------------------------------------------------------
