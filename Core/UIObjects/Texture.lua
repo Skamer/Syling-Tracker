@@ -36,38 +36,46 @@ class "Texture" (function(_ENV)
       Style[self].atlas     = CLEAR
       Style[self].color     = CLEAR
       return 
-    end 
+    end
 
-    if mediaTexture.atlas and not mediaTexture.isMediaAtlas then
-      if mediaTexture.atlas.useAtlasSize or not mediaTexture.size then 
-        Style[self].size = CLEAR 
-      else 
-        Style[self].size = mediaTexture.size
-      end
+    local size
 
-      Style[self].atlas     = mediaTexture.atlas 
+    if mediaTexture.atlas and not mediaTexture.isMediaAtlas then 
       Style[self].texCoords = CLEAR
-    elseif mediaTexture.atlas then
+      Style[self].color     = CLEAR
+      Style[self].file      = CLEAR
+      Style[self].atlas     = mediaTexture.atlas
+      
+      if not mediaTexture.atlas.useAtlasSize and mediaTexture.size then 
+        size = mediaTexture.size 
+      end
+    elseif mediaTexture.atlas then 
+      Style[self].color     = CLEAR
+      Style[self].atlas     = CLEAR
+      Style[self].texCoords = atlasInfo.texCoords or CLEAR
+
       local atlasInfo = GetMediaAtlas(mediaTexture.atlas.atlas)
       if atlasInfo then 
         Style[self].file = atlasInfo.file 
 
         if mediaTexture.atlas.useAtlasSize then 
-          Style[self].size = Size(atlasInfo.width, atlasInfo.height)
-        else 
-          Style[self].size = CLEAR 
-        end
-
-        Style[self].texCoords = atlasInfo.texCoords or CLEAR
+          size = Size(atlasInfo.width, atlasInfo.height)
+        end 
       end
-    elseif mediaTexture.file then
-      Style[self].file      = mediaTexture.file 
-      Style[self].size      = mediaTexture.size or CLEAR
+    elseif mediaTexture.file then 
+      Style[self].atlas     = CLEAR
+      Style[self].color     = CLEAR
+      Style[self].file      = mediaTexture.file
       Style[self].texCoords = mediaTexture.texCoords or CLEAR
-    elseif mediaTexture.color then
+      size                  = mediaTexture.size
+    elseif mediaTexture.color then 
       Style[self].color     = mediaTexture.color
+      Style[self].file      = CLEAR
+      Style[self].atlas     = CLEAR
       Style[self].texCoords = CLEAR
     end
+
+    Style[self].size = size or CLEAR
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --

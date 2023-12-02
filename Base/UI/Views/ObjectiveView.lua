@@ -315,14 +315,3 @@ Style.UpdateSkin("Default", {
     indexed = false
   }
 })
-
-
--- OBJECTIVE_DATA = {
---  text = "Find a new weapon"
--- }
-
--- function OnLoad(self)
---   OBJECTIVE = ObjectiveView.Acquire()
---   OBJECTIVE:SetPoint("CENTER", -50, -200)
---   OBJECTIVE:UpdateView(OBJECTIVE_DATA)
--- end

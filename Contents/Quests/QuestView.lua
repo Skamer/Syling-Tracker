@@ -510,7 +510,25 @@ Style.UpdateSkin("Default", {
           Anchor("TOPRIGHT")
         }
       },
-  
+      [QuestView.Objectives] = {
+        spacing = 5,
+        location = FromObjectivesLocation()
+      },
+    
+      [QuestView.Item] = {
+        location = {
+          Anchor("TOP", 0, -5, "Header", "BOTTOM"),
+          Anchor("RIGHT", -5, 0)
+        }
+      },
+    
+      [QuestView.Timer] = {
+        location = {
+          Anchor("TOPLEFT", 0, 0, "Objectives", "BOTTOMLEFT"),
+          Anchor("TOPRIGHT", 0, 0, "Objectives", "BOTTOMRIGHT"),
+        }
+      },
+
       location = {
           Anchor("TOPLEFT", 26, 0),
           Anchor("TOPRIGHT")
@@ -522,31 +540,6 @@ Style.UpdateSkin("Default", {
   [QuestView.POI] = {
     location = {
       Anchor("LEFT")
-    }
-  },
-
-  [QuestView.Objectives] = {
-    spacing = 5,
-
-    -- location = {
-    --   Anchor("TOP", 0, -5, "Header", "BOTTOM"),
-    --   Anchor("LEFT"),
-    --   Anchor("RIGHT")
-    -- }
-    location = FromObjectivesLocation()
-  },
-
-  [QuestView.Item] = {
-    location = {
-      Anchor("TOP", 0, -5, "Header", "BOTTOM"),
-      Anchor("RIGHT", -5, 0)
-    }
-  },
-
-  [QuestView.Timer] = {
-    location = {
-      Anchor("TOPLEFT", 0, 0, "Objectives", "BOTTOMLEFT"),
-      Anchor("TOPRIGHT", 0, 0, "Objectives", "BOTTOMRIGHT"),
     }
   },
 
