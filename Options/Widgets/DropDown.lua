@@ -120,6 +120,11 @@ class "DropDown" (function(_ENV)
         return 
       end
     end
+
+    if self.MediaType == "font" then
+      Style[self].TogglePopoutButton.Text.text = Color.RED .. value
+      Style[self].TogglePopoutButton.Text.fontObject = nil
+    end
   end
 
   __Arguments__ { String + Number}
@@ -129,6 +134,11 @@ class "DropDown" (function(_ENV)
         self:SelectEntry(e)
         return 
       end 
+    end
+
+    if self.MediaType == "font" then
+      Style[self].TogglePopoutButton.Text.text = "|cffff0000 Font Not Found|r"
+      Style[self].TogglePopoutButton.Text.fontObject = nil
     end
   end
 
@@ -287,7 +297,6 @@ Style.UpdateSkin("Default", {
       fontObject = GameFontNormal,
       justifyH = "CENTER",
       maxLines = 1,
-      text = "Button",
     },
 
     Arrow = {

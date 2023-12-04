@@ -248,7 +248,7 @@ Style.UpdateSkin("Default", {
   
       Label = {
         fontObject = GameFontNormal,
-        textColor = NORMAL_FONT_COLOR,
+        textColor = Color.WHITE,
         justifyH = "LEFT",
         text = "Texture Source",
         wordWrap = false,
@@ -270,7 +270,7 @@ Style.UpdateSkin("Default", {
   
       Label = {
         fontObject = GameFontNormal,
-        textColor = NORMAL_FONT_COLOR,
+        textColor = Color.WHITE,
         justifyH = "LEFT",
         text = "File",
         wordWrap = false,
@@ -292,7 +292,7 @@ Style.UpdateSkin("Default", {
   
       Label = {
         fontObject = GameFontNormal,
-        textColor = NORMAL_FONT_COLOR,
+        textColor = Color.WHITE,
         justifyH = "LEFT",
         text = "Atlas Name",
         wordWrap = false,
@@ -314,7 +314,7 @@ Style.UpdateSkin("Default", {
   
       Label = {
         fontObject = GameFontNormal,
-        textColor = NORMAL_FONT_COLOR,
+        textColor = Color.WHITE,
         justifyH = "LEFT",
         text = "Media Atlas Name",
         wordWrap = false,
@@ -337,7 +337,7 @@ Style.UpdateSkin("Default", {
 
       Label = {
         fontObject = GameFontNormal,
-        textColor = NORMAL_FONT_COLOR,
+        textColor = Color.WHITE,
         justifyH = "LEFT",
         wordWrap = false,
         text = "Color",

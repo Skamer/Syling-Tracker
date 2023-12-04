@@ -115,8 +115,10 @@ __Static__() function API.IterateMedia(mediaType)
       for index, id in pairs(mediaList) do
         yield(id, LibSharedMedia.MediaTable[mediaType][id])
       end
-    else 
-      return pairs(mediaList)
+    else
+      for id, file in pairs(mediaList) do 
+        yield(id, file)
+      end
     end
   end
 end

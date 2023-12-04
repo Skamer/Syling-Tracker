@@ -850,8 +850,8 @@ Style.UpdateSkin("Default", {
     marginRight = 0,
 
     Text = {
-      fontObject = GameFontNormal,
-      textColor = NORMAL_FONT_COLOR,
+      fontObject = Game11Font,
+      textColor = Color.NORMAL,
       setAllPoints = true,
       justifyV = "MIDDLE",
       justifyH = "LEFT"
@@ -863,8 +863,8 @@ Style.UpdateSkin("Default", {
     marginRight = 0,
 
     Label = {
-      fontObject = GameFontNormal,
-      textColor = NORMAL_FONT_COLOR,
+      fontObject = Game11Font,
+      textColor = Color.NORMAL,
       justifyH = "LEFT",
       wordWrap = false,
       location = {
@@ -885,8 +885,8 @@ Style.UpdateSkin("Default", {
     marginRight = 0,
 
     Label = {
-      fontObject = GameFontNormal,
-      textColor = NORMAL_FONT_COLOR,
+      fontObject = Game11Font,
+      textColor = Color.NORMAL,
       justifyH = "LEFT",
       wordWrap = false,
       location = {
@@ -907,8 +907,8 @@ Style.UpdateSkin("Default", {
     marginRight = 0,
 
     Label = {
-      fontObject = GameFontNormal,
-      textColor = NORMAL_FONT_COLOR,
+      fontObject = Game11Font,
+      textColor = Color.NORMAL,
       justifyH = "LEFT",
       wordWrap = false,
       location = {
@@ -929,8 +929,8 @@ Style.UpdateSkin("Default", {
     marginRight = 0,
 
     Label = {
-      fontObject = GameFontNormal,
-      textColor = NORMAL_FONT_COLOR,
+      fontObject = Game11Font,
+      textColor = Color.NORMAL,
       justifyH = "LEFT",
       wordWrap = false,
       location = {
@@ -951,8 +951,8 @@ Style.UpdateSkin("Default", {
     marginRight = 0,
 
     Label = {
-      fontObject = GameFontNormal,
-      textColor = NORMAL_FONT_COLOR,
+      fontObject = Game11Font,
+      textColor = Color.NORMAL,
       justifyH = "LEFT",
       wordWrap = false,
       location = {
@@ -1020,7 +1020,7 @@ Style.UpdateSkin("Default", {
       height = 35,
 
       Text = {
-        fontObject = GameFontNormal,
+        fontObject = Game11Font,
         justifyH = "LEFT",
         text = "Text Color",
         setAllPoints = true,

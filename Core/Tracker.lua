@@ -180,6 +180,7 @@ class "Tracker" (function(_ENV)
     self:AdjustHeight()
 
     self.Empty = self.Views.Count == 0
+    self.VisibilityRulesShown     = GetRulesVisibilityShownForTracker(self)
   end
 
   __Arguments__ { IView }
@@ -200,6 +201,7 @@ class "Tracker" (function(_ENV)
     -- by the content type
 
     self.Empty = self.Views.Count == 0
+    self.VisibilityRulesShown     = GetRulesVisibilityShownForTracker(self)
   end  
 
   __Iterator__()

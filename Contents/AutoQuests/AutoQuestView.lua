@@ -12,7 +12,6 @@ export {
   FromUIProperty                      = Wow.FromUIProperty,
   ShowQuestOffer                      = ShowQuestOffer,
   ShowQuestComplete                   = ShowQuestComplete,
-  AutoQuestPopupTracker_RemovePopUp   = AutoQuestPopupTracker_RemovePopUp,
 }
 
 __UIElement__()
@@ -29,6 +28,8 @@ class "AutoQuestView" (function(_ENV)
       return 
     end
 
+    -- Important: Don't put AutoQuestPopupTracker_RemovePopUp as export, else the hooks are 
+    -- not triggered, and the popup won't removed from SylingTracker.
     if questType == "OFFER" then 
       ShowQuestOffer(questID)
       AutoQuestPopupTracker_RemovePopUp(questID)
