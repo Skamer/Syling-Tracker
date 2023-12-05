@@ -105,12 +105,12 @@ Style.UpdateSkin("Default", {
     height                            = 1,
     autoAdjustHeight                  = true, 
     registerForClicks                 = { "LeftButtonDown", "RightButtonDown" },
-    backdrop                        = FromBackdrop(),
-    showBackground                  = FromUISetting("professionRecipe.showBackground"),
-    showBorder                      = FromUISetting("professionRecipe.showBorder"),
-    backdropColor                   = FromUISetting("professionRecipe.backgroundColor"),
-    backdropBorderColor             = FromUISetting("professionRecipe.borderColor"),
-    borderSize                      = FromUISetting("professionRecipe.borderSize"),
+    backdrop                          = FromBackdrop(),
+    showBackground                    = FromUISetting("professionRecipe.showBackground"),
+    showBorder                        = FromUISetting("professionRecipe.showBorder"),
+    backdropColor                     = FromUISetting("professionRecipe.backgroundColor"),
+    backdropBorderColor               = FromUISetting("professionRecipe.borderColor"),
+    borderSize                        = FromUISetting("professionRecipe.borderSize"),
     
     Name = {
       text                            = FromUIProperty("RecipeName"),

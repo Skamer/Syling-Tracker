@@ -7,6 +7,8 @@
   <Script file="ItemBar.lua" />
   <Script file="Quests.lua" />
   <Script file="Achievements.lua" />
+  <Script file="Scenario.lua" />
   <Script file="Profession.lua" />
   <Script file="Activities.lua" />
+  <Script file="Collections.lua" />
 </Ui>

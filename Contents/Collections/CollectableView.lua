@@ -11,7 +11,9 @@ Syling                 "SylingTracker.Contents.CollectableView"              ""
 export {
   FromUIProperty                      = Wow.FromUIProperty,
   FromBackdrop                        = Frame.FromBackdrop,
-  ContextMenu_Show                    = API.ContextMenu_Show
+  ContextMenu_Show                    = API.ContextMenu_Show,
+  RegisterUISetting                   = API.RegisterUISetting,
+  FromUISetting                       = API.FromUISetting,
 }
 
 __UIElement__()
@@ -85,6 +87,16 @@ class(tostring(CollectableView) .. ".Objectives") { ObjectiveListView }
 __UIElement__()
 class "CollectableListView" { ListView }
 -------------------------------------------------------------------------------
+--                              UI Settings                                  --
+-------------------------------------------------------------------------------
+RegisterUISetting("collectable.showBackground", true)
+RegisterUISetting("collectable.showBorder", true)
+RegisterUISetting("collectable.backgroundColor", Color(35/255, 40/255, 46/255, 0.73))
+RegisterUISetting("collectable.borderColor", Color(0, 0, 0, 0.4))
+RegisterUISetting("collectable.borderSize", 1)
+RegisterUISetting("collectable.name.mediaFont", FontType("DejaVuSansCondensed Bold", 10))
+RegisterUISetting("collectable.name.textTransform", "NONE")
+-------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
@@ -92,16 +104,17 @@ Style.UpdateSkin("Default", {
     autoAdjustHeight                  = true,
     registerForClicks                 = { "LeftButtonDown", "RightButtonDown" },
     backdrop                          = FromBackdrop(),
-    showBackground                    = true,
-    showBorder                        = true,
-    backdropColor                     = Color(35/255, 40/255, 46/255, 0.73),
-    backdropBorderColor               = Color(0, 0, 0, 0.4),
-    borderSize                        = 1,
+    showBackground                    = FromUISetting("collectable.showBackground"),
+    showBorder                        = FromUISetting("collectable.showBorder"),
+    backdropColor                     = FromUISetting("collectable.backgroundColor"),
+    backdropBorderColor               = FromUISetting("collectable.borderColor"),
+    borderSize                        = FromUISetting("collectable.borderSize"),
     
     Name = {
       text                            = FromUIProperty("CollectableName"),
       justifyV                        = "MIDDLE",
-      mediaFont                       = FontType("DejaVuSansCondensed Bold", 10),
+      mediaFont                       = FromUISetting("collectable.name.mediaFont"),
+      textTransform                   = FromUISetting("collectable.name.textTransform"),
       location                        = {
                                         Anchor("TOP", 0, -5),
                                         Anchor("LEFT"),

@@ -9,7 +9,11 @@
 Syling                "SylingTracker.Contents.ScenarioContentView"           ""
 -- ========================================================================= --
 export {
-  FromUIProperty = Wow.FromUIProperty
+  FromUIProperty                      = Wow.FromUIProperty,
+  FromBackdrop                        = Frame.FromBackdrop,
+  FromUISetting                       = API.FromUISetting,
+  RegisterUISetting                   = API.RegisterUISetting,
+  GenerateUISettings                  = API.GenerateUISettings,
 }
 
 __UIElement__()
@@ -83,95 +87,150 @@ class "ScenarioContentView" (function(_ENV)
   function __ctor() end 
 end)
 -------------------------------------------------------------------------------
+--                              UI Settings                                  --
+-------------------------------------------------------------------------------
+GenerateUISettings("scenario", "content", function(generatedSettings)
+  -- We ovveride the default value as we want by default the header wasn't show for 
+  -- scenario
+  if generatedSettings["scenario.showHeader"] then 
+    generatedSettings["scenario.showHeader"].default = false
+  end
+end)
+
+RegisterUISetting("scenario.name.mediaFont", FontType("DejaVuSansCondensed Bold", 14))
+RegisterUISetting("scenario.name.textTransform", "NONE")
+RegisterUISetting("scenario.name.textColor", Color(1, 0.914, 0.682))
+RegisterUISetting("scenario.topInfo.showBackground", false)
+RegisterUISetting("scenario.topInfo.showBorder", true)
+RegisterUISetting("scenario.topInfo.backgroundColor", Color(35/255, 40/255, 46/255, 0.73))
+RegisterUISetting("scenario.topInfo.borderColor", Color(0, 0, 0, 0.4))
+RegisterUISetting("scenario.topInfo.borderSize", 1)
+RegisterUISetting("scenario.stageName.mediaFont", FontType("PT Sans Narrow Bold", 14))
+RegisterUISetting("scenario.stageName.textTransform", "NONE")
+RegisterUISetting("scenario.stageCounter.mediaFont", FontType("PT Sans Narrow Bold", 14))
+RegisterUISetting("scenario.stageCounter.textTransform", "NONE")
+-------------------------------------------------------------------------------
+--                              Observables                                  --
+-------------------------------------------------------------------------------
+function FromTopInfoLocation()
+  return FromUISetting("scenario.showHeader"):Map(function(visible)
+    if visible then 
+      return {
+        Anchor("TOP", 0, -10, "Header", "BOTTOM"),
+        Anchor("LEFT"),
+        Anchor("RIGHT")        
+      }
+    end
+
+    return {
+        Anchor("TOP"),
+        Anchor("LEFT"),
+        Anchor("RIGHT")
+    }
+  end)
+end
+-------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
   [ScenarioContentView] = {
     Header = {
-      visible = false
+      visible                         = FromUISetting("scenario.showHeader"),
+      showBackground                  = FromUISetting("scenario.header.showBackground"),
+      showBorder                      = FromUISetting("scenario.header.showBorder"),
+      backdropColor                   = FromUISetting("scenario.header.backgroundColor"),
+      backdropBorderColor             = FromUISetting("scenario.header.borderColor"),
+      borderSize                      = FromUISetting("scenario.header.borderSize"),
+
+      Label = {
+        mediaFont                     = FromUISetting("scenario.header.label.mediaFont"),
+        textColor                     = FromUISetting("scenario.header.label.textColor"),
+        justifyH                      = FromUISetting("scenario.header.label.justifyH"),
+        justifyV                      = FromUISetting("scenario.header.label.justifyV"),
+        textTransform                 = FromUISetting("scenario.header.label.textTransform"),
+      }
     },
 
     TopScenarioInfo = {
-      backdrop                        = { edgeFile  = [[Interface\Buttons\WHITE8X8]], edgeSize  = 1 },
-      backdropBorderColor             = Color(35/255, 40/255, 46/255, 0.73),
-      height = 54,
-      
-      location                        = { Anchor("TOP"), Anchor("LEFT"), Anchor("RIGHT") },
+      backdrop                        = FromBackdrop(),
+      showBackground                  = FromUISetting("scenario.topInfo.showBackground"),
+      showBorder                      = FromUISetting("scenario.topInfo.showBorder"),
+      backdropColor                   = FromUISetting("scenario.topInfo.backgroundColor"),
+      backdropBorderColor             = FromUISetting("scenario.topInfo.borderColor"),
+      borderSize                      = FromUISetting("scenario.topInfo.borderSize"),
+      height                          = 54,
+      location                        = FromTopInfoLocation(),
 
       ScenarioIcon = {
-        atlas = AtlasType("groupfinder-background-scenarios"), -- 615222
-        -- fileID = 615222,
-        texCoords = { left = 0.1,  right = 0.9, top = 0.1, bottom = 0.9 } ,
-        setAllPoints = true,
-        -- vertexColor = { r = 1, g = 1, b = 1, a = 0.5 },
-        -- height = 48,
-        -- location = {
-        --   Anchor("LEFT", 1, 0),
-        --   Anchor("RIGHT", -1, 0)
-        -- }
+        atlas                         = AtlasType("groupfinder-background-scenarios"), -- 615222
+        texCoords                     = { left = 0.1,  right = 0.9, top = 0.1, bottom = 0.9 } ,
+        setAllPoints                  = true,
       },
 
       ScenarioName = {
-        text = FromUIProperty("ScenarioName"),
-        fontObject = Game18Font,
-        textColor = { r = 1, g = 0.914, b = 0.682},
-        location = {
-          Anchor("LEFT", 5, 0),
-          Anchor("TOP"),
-          Anchor("BOTTOM", 0, 0, nil, "CENTER"),
-          Anchor("RIGHT")
-        }
+        text                          = FromUIProperty("ScenarioName"),
+        mediaFont                     = FromUISetting("scenario.name.mediaFont"),
+        textTransform                 = FromUISetting("scenario.name.textTransform"),
+        textColor                     = FromUISetting("scenario.name.textColor"),
+        location                      = {
+                                        Anchor("LEFT", 5, 0),
+                                        Anchor("TOP"),
+                                        Anchor("BOTTOM", 0, 0, nil, "CENTER"),
+                                        Anchor("RIGHT")
+                                      }
       },
 
       StageCounter = {
-        -- text = "1/4",
-        visible = FromUIProperty("WidgetSetID"):Map(function(id) return not id end),
-        text = FromUIProperty("CurrentStage", "NumStages"):Map(function(currentStage, numStages) return currentStage .. "/" .. numStages end),
-        justifyH = "RIGHT",
-        location = {
-          Anchor("TOP"),
-          Anchor("LEFT", 1, 0),
-          Anchor("RIGHT", -1, 0),
-        }
+        visible                       = FromUIProperty("WidgetSetID"):Map(function(id) return not id end),
+        text                          = FromUIProperty("CurrentStage", "NumStages"):Map(function(currentStage, numStages) return currentStage .. "/" .. numStages end),
+        justifyH                      = "LEFT",
+        mediaFont                     = FromUISetting("scenario.stageCounter.mediaFont"),
+        location                      = {
+                                        Anchor("TOP", 0, 0, nil, "CENTER"),
+                                        Anchor("LEFT"),
+                                        Anchor("RIGHT"),
+                                        Anchor("BOTTOM", 0, 5)
+                                      }
       },
 
       StageName = {
-        text = FromUIProperty("StageName"),
-        justifyH = "CENTER",
-        fontObject = GameFontNormal,
-        location = {
-          Anchor("TOP", 0, 0, nil, "CENTER"),
-          Anchor("LEFT"),
-          Anchor("RIGHT"),
-          Anchor("BOTTOM", 0, 5)
-        }
+        text                          = FromUIProperty("StageName"),
+        justifyH                      = "CENTER",
+        mediaFont                     = FromUISetting("scenario.stageName.mediaFont"),
+        textTransform                 = FromUISetting("scenario.stageName.textTransform"),
+        location                      = {
+                                        Anchor("TOP", 0, 0, nil, "CENTER"),
+                                        Anchor("LEFT"),
+                                        Anchor("RIGHT"),
+                                        Anchor("BOTTOM", 0, 5)
+                                      }
       }
     },
 
     Objectives = {
-      autoAdjustHeight = true,
-      paddingTop = 5,
-      paddingBottom = 5,
-      backdrop = { 
-        bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
-      },
-      backdropColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
+      autoAdjustHeight                = true,
+      paddingTop                      = 5,
+      paddingBottom                   = 5,
+      backdrop                        = { 
+                                        bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
+                                      },
+      backdropColor                   = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
 
-      location = {
-        Anchor("TOP", 0, -5, "TopScenarioInfo", "BOTTOM"),
-        Anchor("LEFT"),
-        Anchor("RIGHT")
-      }      
+      location                        = {
+                                        Anchor("TOP", 0, -5, "TopScenarioInfo", "BOTTOM"),
+                                        Anchor("LEFT"),
+                                        Anchor("RIGHT")
+                                      }      
     },
 
     Widgets = {
-      visible = FromUIProperty("WidgetSetID"):Map(function(id) return id and id > 0 or false end),
-      widgetSetID = FromUIProperty("WidgetSetID"),
-      location = {
-        Anchor("TOP", 0, 0, "Objectives", "BOTTOM"),
-        Anchor("LEFT"),
-        Anchor("RIGHT")        
-      }
+      visible                         = FromUIProperty("WidgetSetID"):Map(function(id) return id and id > 0 or false end),
+      widgetSetID                     = FromUIProperty("WidgetSetID"),
+      location                        = {
+                                        Anchor("TOP", 0, 0, "Objectives", "BOTTOM"),
+                                        Anchor("LEFT"),
+                                        Anchor("RIGHT")        
+                                      }
     }
   }
 })

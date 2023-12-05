@@ -8,6 +8,11 @@
 -- ========================================================================= --
 Syling             "SylingTracker.Contents.CollectionsContentView"           ""
 -- ========================================================================= --
+export {
+  FromUISetting                       = API.FromUISetting,
+  GenerateUISettings                  = API.GenerateUISettings,
+}
+
 __UIElement__()
 class "CollectionsContentView" (function(_ENV)
   inherit "ContentView"
@@ -43,16 +48,54 @@ end)
 __ChildProperty__(CollectionsContentView, "Collections")
 __UIElement__() class(tostring(CollectionsContentView) .. ".Collections") { CollectableListView }
 -------------------------------------------------------------------------------
+--                              UI Settings                                  --
+-------------------------------------------------------------------------------
+GenerateUISettings("collections", "content")
+-------------------------------------------------------------------------------
+--                              Observables                                  --
+-------------------------------------------------------------------------------
+function FromCollectablesLocation()
+  return FromUISetting("collections.showHeader"):Map(function(visible)
+    if visible then 
+      return {
+        Anchor("TOP", 0, -10, "Header", "BOTTOM"),
+        Anchor("LEFT"),
+        Anchor("RIGHT")        
+      }
+    end
+
+    return {
+        Anchor("TOP"),
+        Anchor("LEFT"),
+        Anchor("RIGHT")
+    }
+  end)
+end
+-------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
   [CollectionsContentView] = {
-    [CollectionsContentView.Collections] = {
-      location = {
-        Anchor("TOP", 0, -10, "Header", "BOTTOM"),
-        Anchor("LEFT"),
-        Anchor("RIGHT")
+
+    Header = {
+      visible                         = FromUISetting("collections.showHeader"),
+      showBackground                  = FromUISetting("collections.header.showBackground"),
+      showBorder                      = FromUISetting("collections.header.showBorder"),
+      backdropColor                   = FromUISetting("collections.header.backgroundColor"),
+      backdropBorderColor             = FromUISetting("collections.header.borderColor"),
+      borderSize                      = FromUISetting("collections.header.borderSize"),
+
+      Label = {
+        mediaFont                     = FromUISetting("collections.header.label.mediaFont"),
+        textColor                     = FromUISetting("collections.header.label.textColor"),
+        justifyH                      = FromUISetting("collections.header.label.justifyH"),
+        justifyV                      = FromUISetting("collections.header.label.justifyV"),
+        textTransform                 = FromUISetting("collections.header.label.textTransform"),
       }
+    },
+
+    [CollectionsContentView.Collections] = {
+      location = FromCollectablesLocation()
     }
   }
 })
