@@ -39,7 +39,12 @@ class "ListView" (function(_ENV)
           if previousView then 
             view:SetPoint("TOP", previousView, "BOTTOM", 0, -self.Spacing)
           else
-            view:SetPoint("TOP", 0, -paddingTop)
+            local firstRegion = self:GetFirstRegion()
+            if firstRegion == self then 
+              view:SetPoint("TOP", 0, -paddingTop)
+            else
+              view:SetPoint("TOP", firstRegion, "BOTTOM", 0, -paddingTop)
+            end
           end
           
           view:SetPoint("LEFT", paddingLeft, 0)
@@ -56,6 +61,10 @@ class "ListView" (function(_ENV)
     end
     
     self:ReleaseUnusedViews()
+  end
+
+  function GetFirstRegion(self)
+    return self
   end
 
   __Iterator__()
@@ -170,6 +179,44 @@ class "ListView" (function(_ENV)
     self.OnViewSizeChanged = function() self:AdjustHeight() end
   end
 end)
+
+
+class "ListViewWithHeaderText" (function(_ENV)
+  inherit "ListView"
+
+  function GetFirstRegion(self)
+    return self:GetChild("HeaderText")
+  end
+
+  function OnAdjustHeight(self)
+    local height = 0
+    local count = 0
+    local paddingTop = Style[self].PaddingTop or 0
+    local paddingBottom = Style[self].PaddingBottom or 0
+
+    height = self:GetChild("HeaderText"):GetHeight() + 5
+
+    for childName, child in pairs(self.Views) do 
+      height = height + child:GetHeight()
+
+      count = count + 1
+    end
+
+    height = height + self.Spacing * math.max(0, count - 1) + paddingBottom + paddingTop
+
+    self:SetHeight(height)
+  end
+  -----------------------------------------------------------------------------
+  --                            Constructors                                 --
+  -----------------------------------------------------------------------------
+  __Template__ {
+    HeaderText = FontString
+  }
+  function __ctor(self)
+  end
+end)
+
+
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
@@ -180,5 +227,15 @@ Style.UpdateSkin("Default", {
     paddingBottom = 5,
     paddingTop = 5,
     paddingRight = 5,
+  },
+
+  [ListViewWithHeaderText] = {
+    HeaderText = {
+      location = {
+        Anchor("TOP", 0, -5),
+        Anchor("LEFT"),
+        Anchor("RIGHT")
+      }
+    }
   }
 })

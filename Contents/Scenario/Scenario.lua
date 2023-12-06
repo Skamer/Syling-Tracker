@@ -99,23 +99,48 @@ function UpdateScenario(self)
       objectiveData.progress = scenarioStepInfo.weightedProgress
       objectiveData.minProgress = 0
       objectiveData.maxProgress = 100
-      objectiveData.progressText = PERCENTAGE_STRING:format(weightedProgress)
+      objectiveData.progressText = PERCENTAGE_STRING:format(scenarioStepInfo.weightedProgress)
     else
       if scenarioData.numCriteria > 0 then
         for index = 1, scenarioStepInfo.numCriteria do 
           local description, criteriaType, completed, quantity, totalQuantity,
           flags, assetID, quantityString, criteriaID, duration, elapsed,
-          failed, isWeightProgress = GetCriteriaInfo(index)
+          failed, isWeightedProgress = GetCriteriaInfo(index)
 
           local objectiveData = scenarioData:AcquireObjective()
 
-          if description and not isWeightProgress then 
+          if description and not isWeightedProgress then 
             description = string.format("%d/%d %s", quantity, totalQuantity, description)
           end
 
-          objectiveData.text = description
+          objectiveData.text        = description
           objectiveData.isCompleted = completed
-          objectiveData.isFailed = failed
+          objectiveData.isFailed    = failed
+
+          if isWeightedProgress then
+            objectiveData.hasProgress = true 
+            objectiveData.minProgress = 0
+            objectiveData.maxProgress = 100
+            objectiveData.progress = quantity
+            objectiveData.progressText = PERCENTAGE_STRING:format(quantity)
+          else
+            objectiveData.hasProgress = nil 
+            objectiveData.minProgress = nil
+            objectiveData.maxProgress = nil
+            objectiveData.progress = nil
+            objectiveData.progressText = nil
+          end          
+
+          local hasTimer = (duration and duration > 0 and not failed and not completed)
+          if hasTimer then 
+            objectiveData.hasTimer  = true
+            objectiveData.startTime = elapsed and GetTime() - elapsed
+            objectiveData.duration  = duration
+          else
+            objectiveData.hasTimer  = nil 
+            objectiveData.startTime = nil 
+            objectiveData.duration  = nil
+          end
         end
       end
     end
@@ -132,15 +157,49 @@ function UpdateScenario(self)
         local bonusStepIndex = tblBonusSteps[index]
         local criteriaString, criteriaType, criteriaCompleted, quantity, totalQuantity, 
         flags, assetID, quantityString, criteriaID, duration, elapsed, 
-        criteriaFailed = C_Scenario.GetCriteriaInfoByStep(bonusStepIndex, 1)
+        criteriaFailed, isWeightedProgress = C_Scenario.GetCriteriaInfoByStep(bonusStepIndex, 1)
 
         local bonusObjectiveData = scenarioData:AcquireBonusObjective()
-        bonusObjectiveData.text = criteriaString
+        -- bonusObjectiveData.text = criteriaString
+        -- bonusObjectiveData.isCompleted = criteriaCompleted
+        -- bonusObjectiveData.isFailed = criteriaFailed
+        -- bonusObjectiveData.hasTimer = (duration and duration > 0 and not criteriaFailed and not criteriaCompleted)
+        -- bonusObjectiveData.startTime = elapsed and GetTime() - elapsed
+        -- bonusObjectiveData.duration = duration
+
+        if criteriaString and not isWeightedProgress then 
+          criteriaString = string.format("%d/%d %s", quantity, totalQuantity, criteriaString)
+        end
+
+        bonusObjectiveData.text        = criteriaString
         bonusObjectiveData.isCompleted = criteriaCompleted
-        bonusObjectiveData.isFailed = criteriaFailed
-        bonusObjectiveData.hasTimer = (duration and duration > 0 and not criteriaFailed and not criteriaCompleted)
-        bonusObjectiveData.startTime = elapsed and GetTime() - elapsed
-        bonusObjectiveData.duration = duration
+        bonusObjectiveData.isFailed    = criteriaFailed
+
+        if isWeightedProgress then 
+          bonusObjectiveData.hasProgress = true 
+          bonusObjectiveData.minProgress = 0
+          bonusObjectiveData.maxProgress = 100
+          bonusObjectiveData.progress = quantity
+          bonusObjectiveData.progressText = PERCENTAGE_STRING:format(quantity)
+        else
+          bonusObjectiveData.hasProgress = nil 
+          bonusObjectiveData.minProgress = nil
+          bonusObjectiveData.maxProgress = nil
+          bonusObjectiveData.progress = nil
+          bonusObjectiveData.progressText = nil
+        end          
+
+        local hasTimer = (duration and duration > 0 and not criteriaFailed and not criteriaCompleted)
+        if hasTimer then 
+          bonusObjectiveData.hasTimer  = true
+          bonusObjectiveData.startTime = elapsed and GetTime() - elapsed
+          bonusObjectiveData.duration  = duration
+        else
+          bonusObjectiveData.hasTimer  = nil 
+          bonusObjectiveData.startTime = nil 
+          bonusObjectiveData.duration  = nil
+        end
+
       end
     end
     scenarioData:StopBonusObjectivesCounter()

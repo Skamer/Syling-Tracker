@@ -641,6 +641,7 @@ API.UpdateBaseSkin({
     autoAdjustHeight                  = true,
     started                           = FromUIProperty("KeystoneStarted"),
     duration                          = FromUIProperty("KeystoneDuration"),
+    showRemainingTime                 = false,
 
     Text = {
       text                            = FromTimerText(),

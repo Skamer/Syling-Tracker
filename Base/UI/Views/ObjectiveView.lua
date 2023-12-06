@@ -56,6 +56,7 @@ class "ObjectiveView" (function(_ENV)
       Style[self].Timer.visible = true 
       Style[self].Timer.startTime = data.startTime
       Style[self].Timer.duration = data.duration
+      Style[self].Timer.started = true
       self.ObjectiveHasTimer = true
     else
       Style[self].Timer = NIL

@@ -14,11 +14,38 @@ export {
   FromUISetting                       = API.FromUISetting,
   RegisterUISetting                   = API.RegisterUISetting,
   GenerateUISettings                  = API.GenerateUISettings,
+  Tooltip                             = API.GetTooltip(),
 }
 
 __UIElement__()
 class "ScenarioContentView" (function(_ENV)
   inherit "ContentView"
+  -----------------------------------------------------------------------------
+  --                               Handlers                                  --
+  -----------------------------------------------------------------------------
+  local function OnTopInfoEnter(self)
+    local parent          = self:GetParent()
+    local scenarioData    = parent.Data and parent.Data.scenario
+
+    local scenarioName    = parent.ScenarioName
+    local stageName       = parent.StageName
+    local currentStage    = parent.CurrentStage
+    local numStages       = parent.NumStages
+    local description     = scenarioData and scenarioData.stepDescription
+
+    Tooltip:SetOwner(self)
+    if currentStage <= numStages then 
+      GameTooltip_SetTitle(Tooltip, SCENARIO_STAGE_STATUS:format(currentStage, numStages))
+      GameTooltip_AddNormalLine(Tooltip, stageName)
+      GameTooltip_AddBlankLineToTooltip(Tooltip)
+      GameTooltip_AddNormalLine(Tooltip, description)
+      Tooltip:Show()
+    end
+  end
+
+  local function OnTopInfoLeave(self)
+    Tooltip:Hide()
+  end
   -----------------------------------------------------------------------------
   --                                Methods                                  --
   -----------------------------------------------------------------------------
@@ -36,6 +63,16 @@ class "ScenarioContentView" (function(_ENV)
 
       local objectives = self:GetChild("Objectives")
       objectives:UpdateView(scenarioData.objectives, metadata)
+
+
+      local bonusObjectivesData = scenarioData.bonusObjectives
+      if bonusObjectivesData then 
+        Style[self].BonusObjectives.visible = true
+        local bonusObjectives = self:GetPropertyChild("BonusObjectives")
+        bonusObjectives:UpdateView(bonusObjectivesData, metadata)
+      else
+        Style[self].BonusObjectives = NIL
+      end
 
 
     else 
@@ -84,8 +121,20 @@ class "ScenarioContentView" (function(_ENV)
       }
     }
   }
-  function __ctor() end 
+  function __ctor(self) 
+    local topInfo = self:GetChild("TopScenarioInfo")
+    topInfo.OnEnter = topInfo.OnEnter + OnTopInfoEnter
+    topInfo.OnLeave = topInfo.OnLeave + OnTopInfoLeave
+  end 
 end)
+
+-- Optional Children for ScenarioContentView
+__ChildProperty__(ScenarioContentView, "BonusObjectives")
+class(tostring(ScenarioContentView) .. ".BonusObjectives") { ListViewWithHeaderText }
+
+-- __ChildProperty__(ScenarioContentView, "BonusObjectivesText"
+-- class(tostring(ScenarioContentView) .. ".BonusObjectivesText") { FontString }
+
 -------------------------------------------------------------------------------
 --                              UI Settings                                  --
 -------------------------------------------------------------------------------
@@ -228,6 +277,30 @@ Style.UpdateSkin("Default", {
       widgetSetID                     = FromUIProperty("WidgetSetID"),
       location                        = {
                                         Anchor("TOP", 0, 0, "Objectives", "BOTTOM"),
+                                        Anchor("LEFT"),
+                                        Anchor("RIGHT")        
+                                      }
+    },
+
+    [ScenarioContentView.BonusObjectives] = {
+      autoAdjustHeight                = true,
+      paddingTop                      = 5,
+      paddingBottom                   = 5,
+      viewClass                       = ObjectiveView,
+      indexed                         = false,
+      backdrop                        = { 
+                                        bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
+                                      },
+      backdropColor                   = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
+
+      HeaderText =  {
+        mediaFont                     = FontType("PT Sans Narrow Bold", 14),
+        text                          = "Bonus Objectives",
+        textColor                     = Color.WHITE,
+      },
+
+      location                        = {
+                                        Anchor("TOP", 0, -5, "Objectives", "BOTTOM"),
                                         Anchor("LEFT"),
                                         Anchor("RIGHT")        
                                       }

@@ -23,6 +23,7 @@
   <Script file="UIObjects\Frame.lua" />
   <Script file="UIObjects\Button.lua" />
 
+  <Script file="Tooltip.lua"/>
   <Script file="ScrollBar.lua" />
   <Script file="Tracker.lua" />
   <Script file="ContentManager.lua" />

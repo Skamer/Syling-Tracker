@@ -124,7 +124,7 @@ end)
 -------------------------------------------------------------------------------
 --                              UI Settings                                  --
 -------------------------------------------------------------------------------
-RegisterUISetting("timer.showRemainingTime", false)
+-- RegisterUISetting("timer.showRemainingTime", false)
 -------------------------------------------------------------------------------
 --                              Observables                                  --
 -------------------------------------------------------------------------------
@@ -155,7 +155,7 @@ end
 Style.UpdateSkin("Default", {
   [Timer] = {
     height                            = 25,
-    showRemainingTime                 = FromUISetting("timer.showRemainingTime"),
+    showRemainingTime                 = true,
   
     Text = {
       text                            = FromText(),
