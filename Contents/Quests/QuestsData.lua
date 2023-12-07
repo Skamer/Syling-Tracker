@@ -51,3 +51,8 @@ __DataProperties__ {
   { name = "item", type = QuestItemData }
 }
 class "QuestData" { ObjectData }
+
+__DataProperties__ {
+  { name = "quests", type = QuestData, isMap = true, singularName = "quest" }
+}
+class "QuestsContentSubject" { ContentSubject }

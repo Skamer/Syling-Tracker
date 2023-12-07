@@ -325,8 +325,6 @@ class "DungeonQuestView" { QuestView }
 __UIElement__()
 class "LegendaryQuestView" { QuestView }
 
--- __UIElement__()
--- class "QuestListView" { ListView }
 __UIElement__()
 class "QuestListView" (function(_ENV)
   inherit "ListView"

@@ -12,6 +12,8 @@ export {
   FromUIProperty            = Wow.FromUIProperty,
   FromBackdrop              = Frame.FromBackdrop,
   ContextMenu_Show          = API.ContextMenu_Show,
+  RegisterUISetting         = API.RegisterUISetting,
+  FromUISetting             = API.FromUISetting,
 }
 
 __UIElement__()
@@ -80,7 +82,17 @@ end)
 -- Optional Children for QuestView 
 __ChildProperty__(TaskView, "Objectives")
 class(tostring(TaskView) .. ".Objectives") { ObjectiveListView }
-
+-------------------------------------------------------------------------------
+--                              UI Settings                                  --
+-------------------------------------------------------------------------------
+RegisterUISetting("task.showBackground", true)
+RegisterUISetting("task.showBorder", true)
+RegisterUISetting("task.backgroundColor", Color(35/255, 40/255, 46/255, 0.73))
+RegisterUISetting("task.borderColor", Color(0, 0, 0, 0.4))
+RegisterUISetting("task.borderSize", 1)
+RegisterUISetting("task.name.mediaFont", FontType("DejaVuSansCondensed Bold", 10))
+RegisterUISetting("task.name.textTransform", "NONE")
+RegisterUISetting("task.name.textColor", Color(1, 106/255, 0))
 __UIElement__()
 class "TaskListView" { ListView }
 -------------------------------------------------------------------------------
@@ -93,20 +105,21 @@ Style.UpdateSkin("Default", {
     autoAdjustHeight                  = true,
     registerForClicks                 = { "LeftButtonDown", "RightButtonDown" },
     backdrop                          = FromBackdrop(),
-    showBackground                    = true,
-    showBorder                        = true,
-    backdropColor                     =  Color(35/255, 40/255, 46/255, 0.73),
-    backdropBorderColor               = Color(0, 0, 0, 0.4),
-    borderSize                        = 1,
-
+    showBackground                    = FromUISetting("task.showBackground"),
+    showBorder                        = FromUISetting("task.showBorder"),
+    backdropColor                     = FromUISetting("task.backgroundColor"),
+    backdropBorderColor               = FromUISetting("task.borderColor"),
+    borderSize                        = FromUISetting("task.borderSize"),
+    
     Header = {
       height                          = 24,
 
       Name = {
         text                          = FromUIProperty("TaskName"),
         justifyV                      = "MIDDLE",
-        mediaFont                     = FontType("DejaVuSansCondensed Bold", 10),
-        textColor                     =  { r = 1, g = 106/255, b = 0 },
+        mediaFont                     = FromUISetting("task.name.mediaFont"),
+        textTransform                 = FromUISetting("task.name.textTransform"),
+        textColor                     = FromUISetting("task.name.textColor"),
         location                      = {
                                         Anchor("TOP"),
                                         Anchor("LEFT"),

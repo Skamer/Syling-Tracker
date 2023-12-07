@@ -22,7 +22,16 @@ class "WidgetsContentView"(function(_ENV)
     self.ContentName = GetRealZoneText()
   end
 
+  function OnExpand(self)
+    Style[self].Widgets.visible  = true
+  end
 
+  function OnCollapse(self)
+    Style[self].Widgets.visible  = false
+  end
+  -----------------------------------------------------------------------------
+  --                              Constructors                               --
+  -----------------------------------------------------------------------------
   __Template__{
     Widgets = UIWidgets
   }

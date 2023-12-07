@@ -118,13 +118,29 @@ class "UIWidgetScenarioHeaderTimer" (function(_ENV)
   inherit "Timer" extend "IUIWidget"
 
   function Setup(self, widgetInfo)
-    local timerValue = Clamp(widgetInfo.timerValue, widgetInfo.timerMin, widgetInfo.timerMax)
+    local timerMax = widgetInfo.timerMax
+    local timerMin = widgetInfo.timerMin
+    local timerValue = Clamp(widgetInfo.timerValue, timerMin, timerMax)
 
-    self.Duration = widgetInfo.timerMax
-    self.StartTime = GetTime() - Lerp(widgetInfo.timerMax, 0, timerValue / widgetInfo.timerMax)
-    self.ElapsedTime = GetTime()
-    self.Started = true
-    Style[self].ShowRemainingTime = true
+    local hasTimer = widgetInfo.hasTimer
+    -- When 'hasTimer' is true, this says the timer needs to update of its own.
+    -- No more events wlll trigger this function.
+    if hasTimer then 
+      self.Duration = widgetInfo.timerMax
+      self.StartTime = GetTime() - Lerp(timerMax, 0, timerValue / timerMax)
+      self.ElapsedTime = GetTime()
+      self.Started = true
+    else
+      -- If we are there, we don't need the timer update of its own because this function
+      -- will be triggered every second, so we disable the timer and update manually 
+      -- the Elapsed Time.
+      self.Started = false
+      self.StartTime = nil
+      self.Duration = timerMax
+
+      -- We have slight gap of '1' sec with the blizzard timer, so we will offset it.
+      self.ElapsedTime = timerMax - timerValue + 1
+    end
   end
 end)
 
@@ -164,7 +180,9 @@ UI_WIDGETS_CLASSES = {
   __UIElement__()
   class "UIWidgets" (function(_ENV)
     inherit "Frame"
-
+    ---------------------------------------------------------------------------
+     --                               Methods                                --
+    ---------------------------------------------------------------------------
     function ProcessWidget(self, widgetInfo)
       local widgetID    = widgetInfo.widgetID
       local widgetType  = widgetInfo.widgetType
@@ -217,12 +235,27 @@ UI_WIDGETS_CLASSES = {
     function ProcessAllWidgets(self)
       wipe(self.WidgetsKeys)
 
-      local widgetsInfo = GetAllWidgetsBySetID(self.WidgetSetID)
-      for index, widgetInfo in ipairs(widgetsInfo) do
-        self:ProcessWidget(widgetInfo)
+      if self.WidgetSetID then 
+        local widgetsInfo = GetAllWidgetsBySetID(self.WidgetSetID)
+        for index, widgetInfo in ipairs(widgetsInfo) do
+          self:ProcessWidget(widgetInfo)
+        end
       end
-
       self:ReleaseUnusedWidgets()
+    end
+
+    function OnSystemEvent(self, event, ...)
+      local widgetSetID = self.WidgetSetID
+      if widgetSetID then 
+        if event == "UPDATE_ALL_UI_WIDGETS" then 
+          self:ProcessAllWidgets()
+        elseif event == "UPDATE_UI_WIDGET" then 
+          local widgetInfo = ...
+          if widgetInfo and widgetInfo.widgetSetID == widgetSetID then 
+            self:ProcessWidget(widgetInfo)
+          end
+        end
+      end
     end
 
     function ReleaseUnusedWidgets(self)
@@ -233,9 +266,20 @@ UI_WIDGETS_CLASSES = {
         end
       end
     end
-  -----------------------------------------------------------------------------
-  --                               Properties                                --
-  -----------------------------------------------------------------------------
+
+    function OnAcquire(self)
+      self:RegisterSystemEvents("UPDATE_ALL_UI_WIDGETS", "UPDATE_UI_WIDGET")
+    end
+
+    function OnRelease(self)
+      self:UnregisterSystemEvents("UPDATE_ALL_UI_WIDGETS", "UPDATE_UI_WIDGET")
+
+      wipe(self.WidgetsKeys)
+      self:ReleaseUnusedWidgets()
+    end
+    ---------------------------------------------------------------------------
+    --                               Properties                              --
+    ---------------------------------------------------------------------------
     property "WidgetSetID" {
       type = Number,
       handler = function(self, new)
@@ -255,6 +299,10 @@ UI_WIDGETS_CLASSES = {
       default = function() return {} end
 
     }
+
+    function __ctor(self)
+      self:OnAcquire()
+    end
   end)
 -------------------------------------------------------------------------------
 --                              Observables                                  --

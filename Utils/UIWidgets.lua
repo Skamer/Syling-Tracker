@@ -8,11 +8,14 @@
 -- ========================================================================= --
 Syling                  "SylingTracker.Utils.UIWidgets"                      ""
 -- ========================================================================= --
+export {
+  GetAllWidgetsBySetID                = C_UIWidgetManager.GetAllWidgetsBySetID
+}
+
 OBJECTIVE_TRACKER_WIDGET_SET_ID = C_UIWidgetManager.GetObjectiveTrackerWidgetSetID()
 
-
 function HasObjectiveWidgets()
-  local widgets = C_UIWidgetManager.GetAllWidgetsBySetID(OBJECTIVE_TRACKER_WIDGET_SET_ID)
+  local widgets = GetAllWidgetsBySetID(OBJECTIVE_TRACKER_WIDGET_SET_ID)
   for _, widgetInfo in pairs(widgets) do 
     local widgetTypeInfo = UIWidgetManager:GetWidgetTypeInfo(widgetInfo.widgetType)
     if widgetTypeInfo and widgetTypeInfo.visInfoDataFunction(widgetInfo.widgetID) then 
@@ -22,7 +25,6 @@ function HasObjectiveWidgets()
 
   return false
 end
-
 
 -- Export as utils functions 
 Utils.HasObjectiveWidgets = HasObjectiveWidgets

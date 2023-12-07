@@ -85,20 +85,20 @@ RegisterContent({
   data = GetObservableContent("keystone"),
   statusFunc = function() return C_ChallengeMode.GetActiveKeystoneInfo() > 0 end,
 })
--------------------------------------------------------------------------------
---                             Torghast                                      --
--------------------------------------------------------------------------------
-RegisterContent({
-  id = "torghast",
-  name = "Torghast",
-  formattedName = CreateAtlasMarkup("poi-torghast", 16, 16) .. " Torghast",
-  description = "TORGHAST_PH_DESC",
-  icon = { atlas = AtlasType("poi-torghast") },
-  order = 50,
-  viewClass = ContentView,
-  statusFunc = function() return false end,
-})
--------------------------------------------------------------------------------
+-- -------------------------------------------------------------------------------
+-- --                             Torghast                                      --
+-- -------------------------------------------------------------------------------
+-- RegisterContent({
+--   id = "torghast",
+--   name = "Torghast",
+--   formattedName = CreateAtlasMarkup("poi-torghast", 16, 16) .. " Torghast",
+--   description = "TORGHAST_PH_DESC",
+--   icon = { atlas = AtlasType("poi-torghast") },
+--   order = 50,
+--   viewClass = ContentView,
+--   statusFunc = function() return false end,
+-- })
+-- -------------------------------------------------------------------------------
 --                             World Quests                                  --
 -------------------------------------------------------------------------------
 RegisterContent({

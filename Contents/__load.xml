@@ -28,8 +28,7 @@
   <Script file="ProfessionRecipes\ProfessionRecipesContentView.lua"/>
   <Script file="ProfessionRecipes\ProfessionRecipes.lua" />
   <!-- Quests -->
-  <Script file="Quests\QuestData.lua" />
-  <Script file="Quests\QuestsContentSubject.lua" />
+  <Script file="Quests\QuestsData.lua" />
   <Script file="Quests\QuestView.lua" />
   <Script file="Quests\QuestCategoryView.lua" />
   <Script file="Quests\QuestsContentView.lua" />

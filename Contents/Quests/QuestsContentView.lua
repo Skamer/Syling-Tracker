@@ -82,8 +82,9 @@ class "QuestsContentView"(function(_ENV)
       end
     end
   end
-
-
+  -----------------------------------------------------------------------------
+  --                               Properties                                --
+  -----------------------------------------------------------------------------
   property "ShowCategories" {
     type = Boolean,
     default = false,

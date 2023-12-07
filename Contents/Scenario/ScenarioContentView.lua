@@ -80,6 +80,28 @@ class "ScenarioContentView" (function(_ENV)
     end
   end
 
+  function OnExpand(self)
+    Style[self].TopScenarioInfo.visible = true 
+    Style[self].Widgets.visible = true 
+    Style[self].Objectives.visible = true
+
+    if self:GetPropertyChild("BonusObjectives") then 
+      Style[self].BonusObjectives.visible = true 
+    end
+  end
+
+  function OnCollapse(self)
+    Style[self].TopScenarioInfo.visible = false  
+    Style[self].Widgets.visible = false 
+    Style[self].Objectives.visible = false
+
+    if self:GetPropertyChild("BonusObjectives") then 
+      Style[self].BonusObjectives.visible = false
+    end
+  end
+  -----------------------------------------------------------------------------
+  --                               Properties                                --
+  -----------------------------------------------------------------------------
   __Observable__()
   property "ScenarioName" {
     type = String
@@ -106,8 +128,9 @@ class "ScenarioContentView" (function(_ENV)
   property "WidgetSetID" {
     type = Number
   }
-
-
+  -----------------------------------------------------------------------------
+  --                              Constructors                               --
+  -----------------------------------------------------------------------------
   __Template__ {
     TopScenarioInfo = Frame,
     Widgets = UIWidgets,
@@ -131,10 +154,6 @@ end)
 -- Optional Children for ScenarioContentView
 __ChildProperty__(ScenarioContentView, "BonusObjectives")
 class(tostring(ScenarioContentView) .. ".BonusObjectives") { ListViewWithHeaderText }
-
--- __ChildProperty__(ScenarioContentView, "BonusObjectivesText"
--- class(tostring(ScenarioContentView) .. ".BonusObjectivesText") { FontString }
-
 -------------------------------------------------------------------------------
 --                              UI Settings                                  --
 -------------------------------------------------------------------------------

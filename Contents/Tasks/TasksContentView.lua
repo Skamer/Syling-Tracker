@@ -8,6 +8,12 @@
 -- ========================================================================= --
 Syling             "SylingTracker.Contents.TasksContentView"                 ""
 -- ========================================================================= --
+export {
+  RegisterUISetting                   = API.RegisterUISetting,
+  FromUISetting                       = API.FromUISetting,
+  GenerateUISettings                  = API.GenerateUISettings,
+}
+
 __UIElement__()
 class "TasksContentView"(function(_ENV)
   inherit "ContentView"
@@ -43,16 +49,53 @@ end)
 __ChildProperty__(TasksContentView, "Tasks")
 __UIElement__() class(tostring(TasksContentView) .. ".Tasks") { TaskListView }
 -------------------------------------------------------------------------------
+--                              UI Settings                                  --
+-------------------------------------------------------------------------------
+GenerateUISettings("tasks", "content")
+-------------------------------------------------------------------------------
+--                              Observables                                  --
+-------------------------------------------------------------------------------
+function FromTasksLocation()
+  return FromUISetting("tasks.showHeader"):Map(function(visible)
+    if visible then 
+      return {
+        Anchor("TOP", 0, -10, "Header", "BOTTOM"),
+        Anchor("LEFT"),
+        Anchor("RIGHT")        
+      }
+    end
+
+    return {
+        Anchor("TOP"),
+        Anchor("LEFT"),
+        Anchor("RIGHT")
+    }
+  end)
+end
+-------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
   [TasksContentView] = {
-    [TasksContentView.Tasks] = {
-      location = {
-        Anchor("TOP", 0, -10, "Header", "BOTTOM"),
-        Anchor("LEFT"),
-        Anchor("RIGHT")
+    Header = {
+      visible                         = FromUISetting("tasks.showHeader"),
+      showBackground                  = FromUISetting("tasks.header.showBackground"),
+      showBorder                      = FromUISetting("tasks.header.showBorder"),
+      backdropColor                   = FromUISetting("tasks.header.backgroundColor"),
+      backdropBorderColor             = FromUISetting("tasks.header.borderColor"),
+      borderSize                      = FromUISetting("tasks.header.borderSize"),
+
+      Label = {
+        mediaFont                     = FromUISetting("tasks.header.label.mediaFont"),
+        textColor                     = FromUISetting("tasks.header.label.textColor"),
+        justifyH                      = FromUISetting("tasks.header.label.justifyH"),
+        justifyV                      = FromUISetting("tasks.header.label.justifyV"),
+        textTransform                 = FromUISetting("tasks.header.label.textTransform"),
       }
+    },
+
+    [TasksContentView.Tasks] = {
+      location = FromTasksLocation()
     }
   }
 })

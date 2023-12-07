@@ -85,6 +85,7 @@ function UpdateScenario(self)
     scenarioData.rewardQuestID = scenarioStepInfo.rewardQuestID
     scenarioData.widgetSetID = scenarioStepInfo.widgetSetID
     scenarioData.stepID = scenarioStepInfo.stepID
+    scenarioData.weightedProgress = scenarioStepInfo.weightedProgress
 
     scenarioData:StartObjectivesCounter()
     if scenarioStepInfo.weightedProgress then 
@@ -94,12 +95,13 @@ function UpdateScenario(self)
       -- if the stage has a weightedProgress, show only this one even if the 
       -- numCriteria say > = 1 
       local objectiveData = scenarioData:AcquireObjective()
-      objectiveData.text = scenarioStepInfo.description
-      objectiveData.hasProgress = true
-      objectiveData.progress = scenarioStepInfo.weightedProgress
-      objectiveData.minProgress = 0
-      objectiveData.maxProgress = 100
-      objectiveData.progressText = PERCENTAGE_STRING:format(scenarioStepInfo.weightedProgress)
+      objectiveData.isCompleted   = false
+      objectiveData.text          = scenarioStepInfo.description
+      objectiveData.hasProgress   = true
+      objectiveData.progress      = scenarioStepInfo.weightedProgress
+      objectiveData.minProgress   = 0
+      objectiveData.maxProgress   = 100
+      objectiveData.progressText  = PERCENTAGE_STRING:format(scenarioStepInfo.weightedProgress)
     else
       if scenarioData.numCriteria > 0 then
         for index = 1, scenarioStepInfo.numCriteria do 
@@ -160,12 +162,6 @@ function UpdateScenario(self)
         criteriaFailed, isWeightedProgress = C_Scenario.GetCriteriaInfoByStep(bonusStepIndex, 1)
 
         local bonusObjectiveData = scenarioData:AcquireBonusObjective()
-        -- bonusObjectiveData.text = criteriaString
-        -- bonusObjectiveData.isCompleted = criteriaCompleted
-        -- bonusObjectiveData.isFailed = criteriaFailed
-        -- bonusObjectiveData.hasTimer = (duration and duration > 0 and not criteriaFailed and not criteriaCompleted)
-        -- bonusObjectiveData.startTime = elapsed and GetTime() - elapsed
-        -- bonusObjectiveData.duration = duration
 
         if criteriaString and not isWeightedProgress then 
           criteriaString = string.format("%d/%d %s", quantity, totalQuantity, criteriaString)
@@ -204,8 +200,6 @@ function UpdateScenario(self)
     end
     scenarioData:StopBonusObjectivesCounter()
   end
-
-
 end
 
 

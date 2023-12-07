@@ -48,11 +48,12 @@ __Async__() function SylingTracker_OPEN_OPTIONS()
 
     -- Contents entries
     panel:AddCategoryEntry({ text = "Quests", value = SettingDefinitions.Quests}, "contents")
+    panel:AddCategoryEntry({ text = "Tasks", value = SettingDefinitions.Tasks}, "contents")
     -- panel:AddCategoryEntry({ text = "World Quests"}, "contents")
     -- panel:AddCategoryEntry({ text = "Bonus objectives"}, "contents")
     panel:AddCategoryEntry({ text = "Scenario", value = SettingDefinitions.Scenario }, "contents")
     panel:AddCategoryEntry({ text = Color.GRAY .. "Mythic + (NYI)"}, "contents")
-    panel:AddCategoryEntry({ text = Color.GRAY .. "Dungeon (NYI)"}, "contents")
+    panel:AddCategoryEntry({ text = "Dungeon", value = SettingDefinitions.Dungeon}, "contents")
     panel:AddCategoryEntry({ text = "Achievements", value = SettingDefinitions.Achievements}, "contents")
     panel:AddCategoryEntry({ text = "Profession", value = SettingDefinitions.Profession}, "contents")
     panel:AddCategoryEntry({ text = "Activities", value = SettingDefinitions.Activities}, "contents")

@@ -9,7 +9,11 @@
 Syling                 "SylingTracker.Contents.DungeonContentView"           ""
 -- ========================================================================= --
 export {
-  FromUIProperty                      = Wow.FromUIProperty
+  FromUIProperty                      = Wow.FromUIProperty,
+  FromBackdrop                        = Frame.FromBackdrop,
+  FromUISetting                       = API.FromUISetting,
+  RegisterUISetting                   = API.RegisterUISetting,
+  GenerateUISettings                  = API.GenerateUISettings,
 }
 
 __UIElement__()
@@ -42,7 +46,9 @@ class "DungeonContentView" (function(_ENV)
     Style[self].TopDungeonInfo.visible  = false
     Style[self].Objectives.visible      = false
   end
-
+  -----------------------------------------------------------------------------
+  --                               Properties                                --
+  -----------------------------------------------------------------------------
   __Observable__()
   property "DungeonTextureFileID" {
     type = Number
@@ -52,8 +58,9 @@ class "DungeonContentView" (function(_ENV)
   property "DungeonName" {
     type = String
   }
-
-
+  -----------------------------------------------------------------------------
+  --                              Constructors                               --
+  -----------------------------------------------------------------------------
   __Template__{
     TopDungeonInfo  = Frame,
     Objectives      = ObjectiveListView,
@@ -68,19 +75,75 @@ class "DungeonContentView" (function(_ENV)
   function __ctor(self) end
 end)
 -------------------------------------------------------------------------------
+--                              UI Settings                                  --
+-------------------------------------------------------------------------------
+GenerateUISettings("dungeon", "content", function(generatedSettings)
+  -- We ovveride the default value as we want by default the header wasn't show for 
+  -- scenario
+  if generatedSettings["dungeon.showHeader"] then 
+    generatedSettings["dungeon.showHeader"].default = false
+  end
+end)
+
+RegisterUISetting("dungeon.name.mediaFont", FontType("DejaVuSansCondensed Bold", 14))
+RegisterUISetting("dungeon.name.textTransform", "NONE")
+RegisterUISetting("dungeon.name.textColor", Color(1, 0.914, 0.682))
+RegisterUISetting("dungeon.topInfo.showBackground", false)
+RegisterUISetting("dungeon.topInfo.showBorder", true)
+RegisterUISetting("dungeon.topInfo.backgroundColor", Color(35/255, 40/255, 46/255, 0.73))
+RegisterUISetting("dungeon.topInfo.borderColor", Color(0, 0, 0, 0.4))
+RegisterUISetting("dungeon.topInfo.borderSize", 1)
+-------------------------------------------------------------------------------
+--                              Observables                                  --
+-------------------------------------------------------------------------------
+function FromTopInfoLocation()
+  return FromUISetting("dungeon.showHeader"):Map(function(visible)
+    if visible then 
+      return {
+        Anchor("TOP", 0, -10, "Header", "BOTTOM"),
+        Anchor("LEFT"),
+        Anchor("RIGHT")        
+      }
+    end
+
+    return {
+        Anchor("TOP"),
+        Anchor("LEFT"),
+        Anchor("RIGHT")
+    }
+  end)
+end
+-------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
   [DungeonContentView] = {
     Header = {
-      visible                         = false
+      visible                         = FromUISetting("dungeon.showHeader"),
+      showBackground                  = FromUISetting("dungeon.header.showBackground"),
+      showBorder                      = FromUISetting("dungeon.header.showBorder"),
+      backdropColor                   = FromUISetting("dungeon.header.backgroundColor"),
+      backdropBorderColor             = FromUISetting("dungeon.header.borderColor"),
+      borderSize                      = FromUISetting("dungeon.header.borderSize"),
+
+      Label = {
+        mediaFont                     = FromUISetting("dungeon.header.label.mediaFont"),
+        textColor                     = FromUISetting("dungeon.header.label.textColor"),
+        justifyH                      = FromUISetting("dungeon.header.label.justifyH"),
+        justifyV                      = FromUISetting("dungeon.header.label.justifyV"),
+        textTransform                 = FromUISetting("dungeon.header.label.textTransform"),
+      }
     },
 
     TopDungeonInfo = {
-      backdrop                        = { edgeFile  = [[Interface\Buttons\WHITE8X8]], edgeSize  = 1 },
-      backdropBorderColor             = Color(35/255, 40/255, 46/255, 0.73),
+      backdrop                        = FromBackdrop(),
+      showBackground                  = FromUISetting("scenario.topInfo.showBackground"),
+      showBorder                      = FromUISetting("scenario.topInfo.showBorder"),
+      backdropColor                   = FromUISetting("scenario.topInfo.backgroundColor"),
+      backdropBorderColor             = FromUISetting("scenario.topInfo.borderColor"),
+      borderSize                      = FromUISetting("scenario.topInfo.borderSize"),
       height                          = 48,
-      location                        = { Anchor("TOP"), Anchor("LEFT"), Anchor("RIGHT") },
+      location                        = FromTopInfoLocation(),
 
       DungeonObjectIcon = {
         atlas                         = AtlasType("Dungeon", true),
@@ -94,8 +157,9 @@ Style.UpdateSkin("Default", {
 
       DungeonName = {
         text                          = FromUIProperty("DungeonName"),
-        fontObject                    = Game18Font,
-        textColor                     = { r = 1, g = 0.914, b = 0.682},
+        mediaFont                     = FromUISetting("dungeon.name.mediaFont"),
+        textTransform                 = FromUISetting("dungeon.name.textTransform"),
+        textColor                     = FromUISetting("dungeon.name.textColor"),
 
         location                      = {
                                         Anchor("LEFT", 5, 0),

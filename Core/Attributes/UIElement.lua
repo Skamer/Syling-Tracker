@@ -157,7 +157,7 @@ class "__UIElement__" (function(_ENV)
         function RegisterSystemEvents(self, ...)
           for i = 1, select("#", ...) do 
             local event = select(i, ...)
-            self:RegisterEvent(event)
+            self:RegisterSystemEvent(event)
           end
         end
 
