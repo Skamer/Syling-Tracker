@@ -1,700 +1,579 @@
 -- ========================================================================= --
---                              EskaTracker 2                                --
---           https://www.curseforge.com/wow/addons/eskatracker-2             --
+--                              SylingTracker                                --
+--           https://www.curseforge.com/wow/addons/sylingtracker             --
 --                                                                           --
 --                               Repository:                                 --
---                   https://github.com/Skamer/EskaTracker2                  --
+--                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling                      "SylingTracker.Quests.QuestView"                 ""
+Syling                 "SylingTracker.Contents.QuestView"                    ""
 -- ========================================================================= --
-namespace                          "SLT"
--- ========================================================================= --
--- Iterator helper for ignoring the children are used for backdrop, and avoiding
--- they are taken as account for their parent height
-IterateFrameChildren  = Utils.IterateFrameChildren
--- Check if the player is on the Shadowlands environment
-IsOnShadowlands       = Utils.IsOnShadowlands
--- ========================================================================= --
-ResetStyles           = Utils.ResetStyles
-ShowContextMenu       = API.ShowContextMenu
-ValidateFlags         = System.Toolset.validateflags
-GameTooltip           = GameTooltip
--- ========================================================================= --
-__Recyclable__ "SylingTracker_QuestView%d"
-class "QuestView" (function(_ENV)
-  inherit "Button" extend "IView"
+export {
+  FromUIProperty                        = Wow.FromUIProperty,
+  GetQuestDifficultyColor               = GetQuestDifficultyColor,
+  TryToComputeHeightFromChildren        = Utils.Frame_TryToComputeHeightFromChildren,
+  ContextMenu_Show                      = API.ContextMenu_Show,
+  RegisterUISetting                     = API.RegisterUISetting,
+  FromUISetting                         = API.FromUISetting,
+  FromUISettings                        = API.FromUISettings,
+  GetFrame                              = Wow.GetFrame,
 
-  enum "Type" {
-    Common    = 1,
-    Dungeon   = 2,
-    Raid      = 3,
-    Legendary = 4,
-  }
+  -- Wow API & Utils
+  GetSuperTrackedQuestID                = C_SuperTrack.GetSuperTrackedQuestID,
+  GetNextWaypoint                       = C_QuestLog.GetNextWaypoint,
+  GetQuestPOINumber                     = Utils.GetQuestPOINumber,
+  ShouldQuestIconsUseCampaignAppearance = QuestUtil.ShouldQuestIconsUseCampaignAppearance
+}
 
-  __Flags__()
-  enum "Flags" {
-    NONE = 0,
-    HAS_OBJECTIVES = 1,
-    HAS_ITEM = 2
-  }
+__UIElement__()
+class "QuestItemIcon" (function(_ENV)
+  inherit "Frame"
+  -----------------------------------------------------------------------------
+  --                               Handlers                                  --
+  -----------------------------------------------------------------------------
+  local function OnLeaveHandler(self)
+    GameTooltip:Hide()
+  end
+
+  local function OnEnterHandler(self)
+    local itemLink = self.ItemLink
+    if itemLink then 
+      GameTooltip:SetOwner(self)
+      GameTooltip:SetHyperlink(itemLink)
+      GameTooltip:Show()
+    end
+  end
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
-  function OnViewUpdate(self, data)
-    local header          = self:GetChild("Header")
-    local name            = header:GetChild("Name")
-    local levelBadge      = header:GetChild("Level")
-    local levelTextBadge  = levelBadge:GetChild("Label")
-    local tagIcon         = header:GetChild("Tag")
+  function OnSystemEvent(self, event)
+    local questID = self.id
 
-    -- Set the quest title 
-    name:SetText(data.name)
-
-    -- Set the level 
-    if data.level then
-      levelTextBadge:SetText(data.level)
-      local difficultyColor = GetQuestDifficultyColor(data.level)
-      if difficultyColor then 
-        Style[levelTextBadge].textColor = Color(difficultyColor)
-        Style[levelBadge].backdropColor = {
-          r = difficultyColor.r,
-          g = difficultyColor.g,
-          b = difficultyColor.b, 
-          a = 0.5
-        }
-      end
+    if not event == "BAG_UPDATE_COOLDOWN" or not questID or questID <= 0 then 
+      return 
     end
 
-    -- Update the context menu
-    if data.questID then 
-      self.OnClick = function(_, mouseButton)
-        if mouseButton == "RightButton" then 
-          ShowContextMenu("quest", self, data.questID)
-        else
-          if data.isAutoComplete and data.isComplete then
-            AutoQuestPopupTracker_RemovePopUp(data.questID)
-            if IsOnShadowlands() then 
-              ShowQuestComplete(data.questID)
-            else 
-              ShowQuestComplete(data.questLogIndex)
-            end
-          else 
-            QuestMapFrame_OpenToQuestDetails(data.questID)
-          end
-        end
-      end
-    end
+    local questLogIndex = C_QuestLog.GetLogIndexForQuestID(questID)
 
-    -- Determines the flags
-    local flags = Flags.NONE
-    if data.objectives then 
-      flags = flags + Flags.HAS_OBJECTIVES
-    end
+    if questLogIndex then 
+      local start, duration, enable = GetQuestLogSpecialItemCooldown(questLogIndex)
 
-    if data.item then 
-      flags = flags + Flags.HAS_ITEM
-    end
+      CooldownFrame_Set(self.__cooldown, start, duration, enable)
 
-    if flags ~= self.Flags then
-      ResetStyles(self)
-      ResetStyles(name)
-      ResetStyles(header)
-      ResetStyles(tagIcon)
-
-      -- Is the quest has objectives
-      if ValidateFlags(Flags.HAS_OBJECTIVES, flags) then 
-        self:AcquireObjectives()
+      if duration and duration > 0 and enable and enable == 0 then 
+        self.ItemUsable = false
       else
-        self:ReleaseObjectives()
+        self.ItemUsable = true
       end
-
-      -- Is the quest has an item quest
-      if ValidateFlags(Flags.HAS_ITEM, flags) then 
-        self:AcquireItemBadge()
-      else 
-        self:ReleaseItemBadge()
-      end
-
-      -- Styling stuff
-      if flags ~= Flags.NONE then 
-        local styles = self.FlagsStyles and self.FlagsStyles[flags]
-        if styles then 
-          Style[self] = styles 
-        end
-      end
-    end
-
-    -- Tag 
-    local tag = data.tag 
-    if tag then
-      -- REVIEW: should we use QuestUtils_GetQuestTagAtlas instead ?
-      local atlas = QUEST_TAG_ATLAS[tag.tagID]
-      if atlas then
-        tagIcon:SetAtlas(atlas)
-        tagIcon:Show() 
-      else 
-        tagIcon:Hide()
-      end
-    else 
-      tagIcon:Hide()
-    end
-
-    -- Update the conditionnal children if exists
-    local objectivesView = self.__objectivesView
-    if objectivesView then
-      objectivesView:UpdateView(data.objectives)
-    end
-
-    local itemBadge = self.__itemBadge
-    if itemBadge then
-      Style[itemBadge].Icon.fileID = data.item.texture 
-      if data.item.link then 
-        itemBadge.OnLeave = function() GameTooltip:Hide() end
-        itemBadge.OnEnter = function()
-          GameTooltip:SetOwner(itemBadge, "ANCHOR_LEFT")
-          GameTooltip:SetHyperlink(data.item.link)
-          GameTooltip:Show()
-        end
-      end
-    end
-
-    self.Flags = flags
-  end
-
-  function OnAdjustHeight(self, useAnimation)
-    local height = 0
-    local maxOuterBottom
-    for childName, child in IterateFrameChildren(self) do
-
-      local outerBottom = child:GetBottom()
-      local outerTop = child:GetTop()
-      if outerBottom then 
-        if not maxOuterBottom or maxOuterBottom > outerBottom then 
-            maxOuterBottom = outerBottom
-            maxChild = child
-        end
-      end
-    end
-
-    if maxOuterBottom then 
-      local computeHeight = (self:GetTop() - maxOuterBottom) + self.PaddingBottom
-      if useAnimation then 
-        self:SetAnimatedHeight(computeHeight)
-      else 
-        self:SetHeight(computeHeight)
-      end
-    end    
-  end
-
-  function AcquireItemBadge(self)
-    local itemBadge = self:GetChild("Item")
-    if not itemBadge then 
-      itemBadge = IconBadge.Acquire()
-      self.__previousItemBadgeName = itemBadge:GetName()
-
-      itemBadge:SetParent(self)
-      itemBadge:SetName("Item")
-      -- REVIEW: Is Inst
-      -- itemBadge:InstantApplyStyle()
-
-      self:AdjustHeight()
-
-      self.__itemBadge = itemBadge
-    end
-
-    return itemBadge
-  end
-
-  function ReleaseItemBadge(self)
-    local itemBadge = self:GetChild("Item")
-    if itemBadge then 
-      itemBadge:SetName(self.__previousItemBadgeName)
-      self.__previousItemBadgeName = nil 
-
-      itemBadge.OnLeave = nil 
-      itemBadge.OnEnter = nil 
-
-      itemBadge:Release()
-
-      self:AdjustHeight()
-
-      self.__itemBadge = nil
-    end 
-  end
-
-  function AcquireObjectives(self)
-    local objectives = self:GetChild("Objectives")
-    if not objectives then 
-      objectives = self.ObjectivesClass.Acquire()
-
-      -- We need to keep the old name when we'll release it
-      self.__previousObjectivesName = objectives:GetName()
-
-      objectives:SetParent(self)
-      objectives:SetName("Objectives")
-
-      -- It's important to only style it once we have set its parent and its new
-      -- name
-      -- if self.Objectives then 
-      --   Style[objectives] = self.Objectives 
-      -- end
-
-      -- Register the events
-      objectives.OnSizeChanged = objectives.OnSizeChanged + self.OnObjectivesSizeChanged
-
-      self:AdjustHeight()
-
-      self.__objectivesView = objectives
-    end
-
-    return objectives 
-  end
-
-  function ReleaseObjectives(self)
-    local objectives = self:GetChild("Objectives")
-    if objectives then
-      -- Give its old name (generated by the recycle system)
-      objectives:SetName(self.__previousObjectivesName)
-      self.__previousObjectivesName = nil 
-
-      -- Unregister the events
-      objectives.OnSizeChanged = objectives.OnSizeChanged - self.OnObjectivesSizeChanged
-
-      -- It's better to release after events have been unregistered for avoiding
-      -- useless class 
-      objectives:Release()
-
-      self:AdjustHeight()
-
-      self.__objectivesView = nil
     end
   end
-
-  --- Recycle System
-  function OnRelease(self)
-    -- Release first the children
-    self:ReleaseItemBadge()
-    self:ReleaseObjectives()
-
-
-    self:ClearAllPoints()
-    self:SetParent()
-    self:Hide()
-
-    -- "CancelAdjustHeight" and "CancelAnimatingHeight" wiil cancel the pending
-    -- computing stuff for height, so they not prevent "SetHeight" here doing 
-    -- its stuff.
-    self:CancelAdjustHeight()
-    self:CancelAnimatingHeight()
-    self:SetHeight(1)
-
-    -- Reset the class properties
-    self.Type = nil 
-    self.Flags = nil
-
-    -- Will Remove all custom styles properties, so the  next time the object will
-    -- be used, this one will be in a clean state
-    ResetStyles(self)
-
-
-    -- -- REVIEW: Probably find a better way ?
-    -- local objectives = self:GetChild("Objectives")
-    -- objectives:ReleaseUnusedObjectives(0)
-
-    -- self.Type = nil
-  end 
 
   function OnAcquire(self)
-    -- Important ! We need the frame is instantly styled as this may affect 
-    -- its height.
-    self:InstantApplyStyle()
-
-    self:Show()
-
-    self:AdjustHeight()
+    self:RegisterSystemEvent("BAG_UPDATE_COOLDOWN")
   end
 
+  function OnRelease(self)
+    self:UnregisterSystemEvent("BAG_UPDATE_COOLDOWN")
+  end
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
-  property "FlagsStyles" {
-    type = Table
+  __Observable__()
+  property "ItemLink" {
+    type = Any
   }
 
-  property "Type" {
-    type = QuestView.Type,
-    default = QuestView.Type.Common
+  __Observable__()
+  property "ItemTexture" {
+    type = Any
   }
 
-  property "Flags" {
-    type = QuestView.Flags,
-    default = QuestView.Flags.NONE
+  __Observable__()
+  property "ItemUsable" {
+    type = Boolean,
+    default = true
   }
 
-  property "ObjectivesClass" {
-    type    = ClassType,
-    default = ObjectiveListView
+  property "id" {
+    type = Number
   }
-
-  property "PaddingBottom" {
-    type = Number, 
-    default = 5
-  }
-
-  -- property "Objectives" {
-  --   type = Table,
-  -- }
-
-  -- property "NewObjectives" {
-  --   type = Table
-  -- }
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
   -----------------------------------------------------------------------------
-  __Template__{
-    -- Objectives = ObjectiveListView,
-    Header = Frame,
-    {
-      Header = {
-        Tag  = Texture,
-        Name = SLTFontString,
-        Level = TextBadge
-      }
-    }
+  __Template__ {
+    Icon = Texture
   }
-  function __ctor(self)
-    -- Important! As the frame ajusts its height depending of its children height
-    -- we need to set its height when contructed for the event "OnSizechanged" of
-    -- its children is triggered.
-    self:SetHeight(1)
+  function __ctor(self, name)
+    local cooldown = CreateFrame("Cooldown", name.."Cooldown", self, "CooldownFrameTemplate")
+    cooldown:SetAllPoints()
+    self.__cooldown = cooldown
 
-    -- local objectives = self:GetChild("Objectives")
-    -- objectives.OnSizeChanged = objectives.OnSizeChanged + function(f, ...)
-    --   self:AdjustHeight()
-    -- end
-
-    self.OnObjectivesSizeChanged = function() self:AdjustHeight() end
-
-    -- self:AdjustHeight()
-
-    -- Experimental 
-    self:SetClipsChildren(true)
-  end 
+    self.OnEnter = self.OnEnter + OnEnterHandler
+    self.OnLeave = self.OnLeave + OnLeaveHandler
+  end
 end)
 
 
-__Recyclable__ "SylingTracker_LegendaryQuestView%d"
-class "LegendaryQuestView" { QuestView }
+__UIElement__()
+class "QuestViewContent"(function(_ENV)
+  inherit "Frame"
+  -----------------------------------------------------------------------------
+  --                              Constructors                               --
+  -----------------------------------------------------------------------------
+  __Template__ {
+    Header = Frame,
+    {
+      Header = {
+        Tag   = Texture,
+        Name  = FontString,
+        Level = FontString
+      }
+    }
+  }
+  function __ctor(self) end
+end)
 
-__Recyclable__ "SylingTracker_RaidQuestView%d"
-class "RaidQuestView" { QuestView }
+__UIElement__()
+class "QuestView" (function(_ENV)
+  inherit "Button" extend "IView" 
+  -----------------------------------------------------------------------------
+  --                               Handlers                                  --
+  -----------------------------------------------------------------------------
+  local function OnClickHandler(self, mouseButton)
+    local questID = self.QuestID
+    local contextMenuPattern = self.ContextMenuPattern
 
-__Recyclable__ "SylingTracker_DungeonQuestView%d"
-class "DungeonQuestView" { QuestView }
+    if mouseButton == "RightButton" then 
+      if questID and contextMenuPattern then 
+        ContextMenu_Show(contextMenuPattern, self, questID)
+      end
+    end
+  end
 
-
---- Manages the quests, if your view may have various quests, this is advised
--- using this class
-__Recyclable__ "SylingTracker_QuestListView%d"
-class "QuestListView" (function(_ENV)
-  inherit "Frame" extend "IView"
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
-  function OnViewUpdate(self, data, updater)
-    local questIndex = 0
+  function OnViewUpdate(self, data, ...)
+    local questID = data.questID
+    local isWaypoint = data.isWaypoint -- TODO: Check and add isWaypoint
+    local isComplete = data.isComplete
+    local isSuperTracked = questID == GetSuperTrackedQuestID()
+    local hasLocalPOI = data.hasLocalPOI
 
-    wipe(self.questsID)
-    wipe(self.questsOrder)
-    
-    for _, questData in pairs(data) do 
-      tinsert(self.questsOrder, questData)
+
+    if data.objectives then
+      Style[self].Content.Objectives.visible = true
+      local child = self:GetChild("Content"):GetPropertyChild("Objectives")
+
+      -- child:InstantApplyStyle()
+      child:UpdateView(data.objectives, ...)
     end
 
-    table.sort(self.questsOrder, function(a, b)
+    if data.item then 
+      Style[self].Content.Item.visible = true
+      local itemIcon = self:GetChild("Content"):GetPropertyChild("Item")
+      itemIcon.ItemTexture = data.item.texture 
+      itemIcon.ItemLink = data.item.link
+      itemIcon.id = questID
+
+      self.QuestHasItem = true
+    else 
+      Style[self].Content.Item = NIL
+
+      self.QuestHasItem = false
+    end
+
+    -- Update POI
+    local showPOI = false 
+    if isComplete then 
+      showPOI = true 
+    elseif hasLocalPOI or (isSuperTracked and GetNextWaypoint(questID) ~= nil) then 
+      showPOI = true 
+    end
+
+    local poiButton = self:GetChild("POI")
+    if showPOI then
+      Style[self].POI.visible = true
+      local poiButton = self:GetPropertyChild("POI")
+      if isWaypoint then
+        poiButton:SetStyle(POIButton.Style.Waypoint)
+      elseif isComplete then 
+        poiButton:SetStyle(POIButton.Style.QuestComplete)
+      else
+        poiButton:SetStyle(POIButton.Style.Numeric)
+        local poiNumber = GetQuestPOINumber(questID)
+        if poiNumber then 
+          poiButton:SetNumber(poiNumber)
+        end
+      end
+
+
+      if ShouldQuestIconsUseCampaignAppearance(questID) then
+        poiButton:SetQuestType(POIButton.QuestType.Campaign)
+      elseif data.isCalling then 
+        poiButton:SetQuestType(POIButton.QuestType.Calling)
+      elseif data.isImportant then 
+        poiButton:SetQuestType(POIButton.QuestType.Important)
+      else
+        poiButton:SetQuestType(POIButton.QuestType.Normal)
+      end
+
+      poiButton:SetSelected(isSuperTracked)
+      poiButton:SetQuestID(questID)
+    else 
+      Style[self].POI = NIL
+    end
+
+    if data.hasTimer then 
+      Style[self].Content.Timer.visible     = true 
+      Style[self].Content.Timer.startTime   = data.startTime
+      Style[self].Content.Timer.duration    = data.totalTime
+      self.ObjectiveHasTimer        = true 
+    else
+      Style[self].Content.Timer     = NIL
+      self.ObjectiveHasTimer        = false 
+    end
+
+    self.QuestID = data.questID
+    self.QuestName = data.name 
+    self.QuestLevel = data.level
+    self.QuestTagID = data.tag and data.tag.tagID
+  end
+
+  function OnRelease(self)
+    self.QuestName = nil 
+    self.QuestLevel = nil 
+    self.QuestHasTimer = nil 
+    self.QuestHasItem = nil
+    self.QuestTagID = nil 
+    self.QuestID = nil
+
+    Style[self].POI = NIL
+    Style[self].Content.Timer = NIL
+    Style[self].Content.Item = NIL
+  end
+  -----------------------------------------------------------------------------
+  --                               Properties                                --
+  -----------------------------------------------------------------------------   
+  __Observable__()
+  property "QuestName" {
+    type = String, 
+    default = ""
+  } 
+
+  __Observable__()
+  property "QuestLevel" {
+    type = Number,
+    default = 70,
+  }
+
+  __Observable__()
+  property "QuestHasTimer" {
+    type = Boolean,
+    default = false, 
+  }
+
+  __Observable__()
+  property "QuestHasItem" {
+    type = Boolean,
+    default = false
+  }
+
+  __Observable__()
+  property "QuestTagID" {
+    type = Number
+  }
+
+  property "QuestID" {
+    type = Number
+  }
+
+  property "ContextMenuPattern" {
+    type = String,
+    default = "quest"
+  }
+  -----------------------------------------------------------------------------
+  --                              Constructors                               --
+  -----------------------------------------------------------------------------
+  __Template__ {
+    Content = QuestViewContent
+  }
+  function __ctor(self)
+    self.OnClick = self.OnClick + OnClickHandler
+  end   
+end)
+
+-- Optional Children for QuestView 
+__ChildProperty__(QuestViewContent, "Objectives")
+class(tostring(QuestView) .. ".Objectives") { ObjectiveListView }
+
+__ChildProperty__(QuestViewContent, "Timer")
+class(tostring(QuestView) .. ".Timer") { SylingTracker.Timer }
+
+__ChildProperty__(QuestViewContent, "Item")
+class(tostring(QuestView) .. ".Item") { SylingTracker.QuestItemIcon }
+
+__ChildProperty__(QuestView, "POI")
+class(tostring(QuestView) .. ".POI") { SylingTracker.POIButton }
+
+__UIElement__()
+class "RaidQuestView" { QuestView }
+
+__UIElement__()
+class "DungeonQuestView" { QuestView }
+
+__UIElement__()
+class "LegendaryQuestView" { QuestView }
+
+__UIElement__()
+class "QuestListView" (function(_ENV)
+  inherit "ListView"
+
+  __Iterator__()
+  function IterateData(self, data, metadata)
+    local yield = coroutine.yield 
+
+    wipe(self.QuestsOrder)
+
+    for _, questData in pairs(data) do 
+      tinsert(self.QuestsOrder, questData)
+    end
+
+    table.sort(self.QuestsOrder, function(a, b)
       local aDistance, bDistance = a.distance, b.distance
       if aDistance and bDistance then 
-        return aDistance < bDistance 
+        return aDistance < bDistance
       end
 
       return a.questID < b.questID
     end)
-
-    local previousQuest
-    for _, questData in ipairs(self.questsOrder) do
-      questIndex = questIndex + 1
-
-      local questID     = questData.questID
-      local isLegendary = questData.isLegendary
-      local isDungeon   = questData.isDungeon
-      local isRaid      = questData.isRaid
-      local type        = QuestView.Type.Common
-
-      if isLegendary then 
-        type = QuestView.Type.Legendary
-      elseif isRaid then 
-        type = QuestView.Type.Raid 
-      elseif isDungeon then 
-        type = QuestView.Type.Dungeon 
-      end 
-
-      local quest = self:AcquireQuest(questID, type)
-
-      if questIndex > 1 then 
-        quest:SetPoint("TOP", previousQuest, "BOTTOM", 0, -5) -- TODO: Add Spacing
-        quest:SetPoint("LEFT", 0, 0) -- 4 
-        quest:SetPoint("RIGHT", 0, 0) -- -4
-      elseif questIndex == 1 then 
-        quest:SetPoint("TOP")
-        quest:SetPoint("LEFT", 0, 0) -- 4
-        quest:SetPoint("RIGHT", 0, 0) -- -4
-      end
-      quest:UpdateView(questData, updater)
-
-      previousQuest = quest
-
-      self.questsID[questID] = true
+    
+    for index, questData in ipairs(self.QuestsOrder) do 
+      yield(questData.questID, questData, metadata)
     end
-
-    self:ReleaseUnusedQuests()
-  end
-
-  __Static__() function IsCorrectObjectForType(obj, type)
-    if type == QuestView.Type.Common and Class.IsObjectType(obj, QuestView) then 
-      return true 
-    elseif type == QuestView.Type.Dungeon and Class.IsObjectType(obj, DungeonQuestView) then 
-      return true 
-    elseif type == QuestView.Type.Raid and Class.IsObjectType(obj, RaidQuestView) then 
-      return true 
-    elseif type == QuestView.Type.Legendary and Class.IsObjectType(obj, LegendaryQuestView) then 
-      return true 
-    end 
-
-    return false 
-  end
-
-  function AcquireQuest(self, id, type)
-    local quest = self.questsCache[id]
-    local new = false 
-
-    if quest and not IsCorrectObjectForType(quest, type) then 
-      quest:Release()
-      self.questsCache[id] = nil 
-      new = true 
-    end
-
-    if not quest or new then 
-      if type == QuestView.Type.Legendary then 
-        quest = LegendaryQuestView.Acquire() 
-      elseif type == QuestView.Type.Raid then 
-        quest = RaidQuestView.Acquire()
-      elseif type == QuestView.Type.Dungeon then 
-        quest = DungeonQuestView.Acquire()
-      else 
-        quest = QuestView.Acquire() 
-      end
-      quest:Show()
-
-      quest:SetParent(self)
-
-      quest.OnSizeChanged = quest.OnSizeChanged + self.OnQuestSizeChanged
-
-      self:AdjustHeight()
-
-      self.questsCache[id] = quest
-    end
-
-    return quest
-  end
-
-
-  function ReleaseUnusedQuests(self)
-    for questID, quest in pairs(self.questsCache) do 
-      if not self.questsID[questID] then
-        self.questsCache[questID] = nil 
-
-        quest.OnSizeChanged = quest.OnSizeChanged - self.OnQuestSizeChanged
-        quest:Release()
-        self:AdjustHeight()
-      end 
-    end 
-  end 
-
-  function OnAdjustHeight(self)
-    local height = 0
-    local count = 0
-    for _, child in IterateFrameChildren(self) do
-      height = height + child:GetHeight() 
-
-      count = count + 1
-    end
-
-    height = height + 5 * math.max(0, count-1)
-
-    -- self:SetHeight(height)
-    PixelUtil.SetHeight(self, height)
-  end
-
-  function OnRelease(self)
-    wipe(self.questsID)
-    wipe(self.questsOrder)
-    self:ReleaseUnusedQuests()
-
-    self:ClearAllPoints()
-    self:SetParent()
-    self:Hide()
-    self:CancelAdjustHeight()
-    self:CancelAnimatingHeight()
-
-    self:SetHeight(1)
-
-    ResetStyles(self)
-  end
-
-  function OnAcquire(self)
-    self:Show()
   end
   -----------------------------------------------------------------------------
-  --                            Constructors                                 --
+  --                               Properties                                --
   -----------------------------------------------------------------------------
-  function __ctor(self)
-    -- Important ! We need the frame is instantly styled as this may affect 
-    -- its height.
-    self:InstantApplyStyle()
-
-    -- Important! As the frame ajusts its height depending of its children height
-    -- we need to set its height when contructed for the event "OnSizechanged" of
-    -- its children is triggered.
-    self:SetHeight(1) -- !important
-
-     -- Keep in the cache the quest, to be reused. 
-    -- use: self.questsCache[questID] = questObject
-    self.questsCache = setmetatable({}, { __mode = "v"})
-
-    -- Get the current quest id's list. Used internally to release the 
-    -- unused quests
-    -- use: self.questsID[questID] = true or nil
-    self.questsID = {}
-
-    self.questsOrder = {}
-
-
-    self.OnQuestSizeChanged = function() self:AdjustHeight() end
-
-
-    self:SetClipsChildren(true)
-  end
-
+  property "QuestsOrder" {
+    set = false,
+    default = function() return {} end
+  }
 end)
+-------------------------------------------------------------------------------
+--                              UI Settings                                  --
+-------------------------------------------------------------------------------
+RegisterUISetting("quest.showBackground", true)
+RegisterUISetting("quest.showBorder", true)
+RegisterUISetting("quest.backgroundColor", Color(35/255, 40/255, 46/255, 0.73))
+RegisterUISetting("quest.borderColor", Color(0, 0, 0, 0.4))
+RegisterUISetting("quest.borderSize", 1)
+RegisterUISetting("quest.name.mediaFont", FontType("DejaVuSansCondensed Bold", 10))
+RegisterUISetting("quest.name.textTransform", "NONE")
+RegisterUISetting("quest.level.mediaFont", FontType("PT Sans Caption Bold", 10))
+-------------------------------------------------------------------------------
+--                              Observables                                  --
+-------------------------------------------------------------------------------
+function FromBackdrop()
+ return GetFrame("OnBackdropChanged")
+    :Next()
+    :Map(function(tracker, value, _, prop)
+      local showBackground = tracker.ShowBackground
+      local showBorder = tracker.ShowBorder
+      if not showBackground and not showBorder then 
+        return nil 
+      end
+
+      local backdrop = {}
+      if showBackground then 
+        backdrop.bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]]
+      end
+
+      if showBorder then 
+        backdrop.edgeFile = [[Interface\Buttons\WHITE8X8]]
+        backdrop.edgeSize = tracker.BorderSize
+      end
+
+      return backdrop
+    end)
+end
+
+function FromObjectivesLocation()
+  return FromUIProperty("QuestHasItem"):Map(function(hasItem)
+    return {
+      Anchor("TOP", 0, -5, "Header", "BOTTOM"),
+      Anchor("LEFT"),
+      Anchor("RIGHT", hasItem and -37 or 0, 0)
+    }
+  end)
+end
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
-  [QuestView] = {
-    width = 300,
-    backdrop = { 
-      bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
-    },
-    backdropColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
-    registerForClicks = { "LeftButtonDown", "RightButtonDown" },
-
-    -- NormalTexture = {
-    --   file = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
-    --   vertexColor =  { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
-    --   setAllPoints = true,
-    -- },
-
-    -- HighlightTexture = {
-    --   file = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
-    --   vertexColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.1},
-    --   setAllPoints = true,
-    -- },
+  [QuestItemIcon] = {
+    height                            = 32,
+    width                             = 32,
+    backdrop                          = FromBackdrop(),
+    showBackground                    = false,
+    showBorder                        = true, 
+    backdropBorderColor               = Color(0, 0, 0, 0.4),
+    borderSize                        = 1,
     
-    -- Header Child
-    Header = {
-      height = 24,
-      location = {
-        Anchor("TOPLEFT"),
-        Anchor("TOPRIGHT")
-      },
-      
-      Tag = {
-        height = 18,
-        width  = 18,
-        file = QUEST_ICONS_FILE,
-        location = {
-          Anchor("LEFT", 3, 0)
-        }
-      },
+    Icon = {
+      file = FromUIProperty("ItemTexture"),
+      setAllPoints = true,
+      texCoords = { left = 0.07, right = 0.93, top = 0.07, bottom = 0.93 },
+      vertexColor = FromUIProperty("ItemUsable"):Map(function(usable)
+        if usable then 
+          return { r = 1, g = 1, b = 1 }
+        end 
 
-      -- Header/Name child 
-      Name = {
-        location = {
-          Anchor("TOP"),
-          Anchor("LEFT", 0, 0, "Tag", "RIGHT"),
-          Anchor("RIGHT", 0, 0, "Level", "LEFT"),
-          Anchor("BOTTOM")
-        },
-        sharedMediaFont = FontType("DejaVuSansCondensed Bold", 10)
-      },
-      -- Header/Level child 
-      Level = {
-        height = 16,
-        width  = 30,
-        backdropColor = { r = 160/255, g = 160/255, b = 160/255, a = 0.5},
-        location = {
-          Anchor("RIGHT", -5, 0)
-        },
-
-        Label = {
-          justifyH = "RIGHT"
-        }
-      },
-    },
-
-    FlagsStyles = {
-      [QuestView.Flags.HAS_OBJECTIVES] = {
-        Objectives = {
-          spacing = 5,
-          location = {
-            Anchor("TOP", 0, -4, "Header", "BOTTOM"),
-            Anchor("LEFT"),
-            Anchor("RIGHT")
-          }
-        }
-      },
-      [QuestView.Flags.HAS_OBJECTIVES + QuestView.Flags.HAS_ITEM] = {
-        Item = {
-          height = 28,
-          width  = 28,
-          location = {
-            Anchor("TOPLEFT", 4, -4, "Header", "BOTTOMLEFT")
-          },
-
-          Icon = {
-            texCoords = RectType(0.07, 0.93, 0.07, 0.93)
-          }
-        },
-        Objectives = {
-          spacing = 5,
-          location = {
-            Anchor("TOP", 2, -4, "Header", "BOTTOM"),
-            Anchor("LEFT", 2, 0, "Item", "RIGHT"),
-            Anchor("RIGHT")            
-          }
-        }
-      }
+        return { r = 0.4, g = 0.4, b = 0.4}
+      end)
     }
   },
-  -- [LegendaryQuestView] = {
-  --   backdropColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
-  -- },
+
+  [QuestView] = {
+    height                            = 24,
+    minResize                         = { width = 0, height = 24},
+    autoAdjustHeight                  = true,
+    registerForClicks                 = { "LeftButtonDown", "RightButtonDown" },
+
+    Content = {
+      height                          = 24,
+      minResize                       = { width = 0, height = 24},
+      autoAdjustHeight                = true,
+      backdrop                        = FromBackdrop(),
+      showBackground                  = FromUISetting("quest.showBackground"),
+      showBorder                      = FromUISetting("quest.showBorder"),
+      backdropColor                   = FromUISetting("quest.backgroundColor"),
+      backdropBorderColor             = FromUISetting("quest.borderColor"),
+      borderSize                      = FromUISetting("quest.borderSize"),
+
+      Header = {
+        height                        = 24,
+  
+        Tag = {
+          atlas = FromUIProperty("QuestTagID"):Map(function(tagID)
+            if not tagID then 
+              return 
+            end
+  
+            return { atlas = QUEST_TAG_ATLAS[tagID] }
+          end),
+          height = 18,
+          width = 18,
+          location = {
+            Anchor("LEFT", 3, 0)
+          }        
+        },
+  
+        Name = {
+          text = FromUIProperty("QuestName"),
+          justifyV = "MIDDLE",
+          mediaFont = FromUISetting("quest.name.mediaFont"),
+          textTransform = FromUISetting("quest.name.textTransform"),
+          location = {
+            Anchor("LEFT", 0, 0, "Tag", "RIGHT"),
+            Anchor("RIGHT", 0, 0, "Level", "LEFT"),
+            Anchor("TOP"),
+            Anchor("BOTTOM")
+          }
+        },
+  
+        Level = {
+          text = Wow.FromUIProperty("QuestLevel"):Map(function(level)
+             local difficultyColor = GetQuestDifficultyColor(level)
+             if difficultyColor then 
+              return Color(difficultyColor.r, difficultyColor.g, difficultyColor.b, 1) .. level
+             else
+              return level 
+             end
+          end),
+          width = 18,
+          justifyV = "MIDDLE",
+          justifyH = "RIGHT",
+          
+          mediaFont = FromUISetting("quest.level.mediaFont"),
+          location = {
+            Anchor("TOP"),
+            Anchor("RIGHT", -5, 0),
+            Anchor("BOTTOM")
+          }
+        },
+  
+        location = {
+          Anchor("TOPLEFT"),
+          Anchor("TOPRIGHT")
+        }
+      },
+      [QuestView.Objectives] = {
+        spacing = 5,
+        location = FromObjectivesLocation()
+      },
+    
+      [QuestView.Item] = {
+        location = {
+          Anchor("TOP", 0, -5, "Header", "BOTTOM"),
+          Anchor("RIGHT", -5, 0)
+        }
+      },
+    
+      [QuestView.Timer] = {
+        location = {
+          Anchor("TOPLEFT", 0, 0, "Objectives", "BOTTOMLEFT"),
+          Anchor("TOPRIGHT", 0, 0, "Objectives", "BOTTOMRIGHT"),
+        }
+      },
+
+      location = {
+          Anchor("TOPLEFT", 26, 0),
+          Anchor("TOPRIGHT")
+      }
+    },
+
+  },
+
+  [QuestView.POI] = {
+    location = {
+      Anchor("LEFT")
+    }
+  },
+
+  [LegendaryQuestView] = {
+    Content = {
+      backdropColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
+    }
+  },
 
   [RaidQuestView] = {
-    backdropColor = { r = 0, g = 84/255, b = 2/255, a = 0.73}
+    Content = {
+      backdropColor = { r = 0, g = 84/255, b = 2/255, a = 0.73}
+    }
   },
   [DungeonQuestView] = {
-    backdropColor = { r = 0, g = 72/255, b = 124/255, a = 0.73 }
+    Content = {
+      backdropColor = { r = 0, g = 72/255, b = 124/255, a = 0.73 }
+    }
+  },
+
+  [QuestListView] = {
+    paddingLeft   = 0,
+    paddingRight  = 5,
+    viewClass = function(data)
+      if data then 
+        if data.isLegendary then 
+          return LegendaryQuestView
+        elseif data.isDungeon then 
+          return DungeonQuestView
+        elseif data.isRaid then 
+          return RaidQuestView
+        end
+      end
+
+      return QuestView
+    end,
+    indexed = false
   }
 })

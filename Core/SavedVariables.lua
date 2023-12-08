@@ -8,14 +8,12 @@
 -- ========================================================================= --
 Syling                "SylingTracker.Core.SavedVariables"                    ""
 -- ========================================================================= --
---- TODO: As SavedVariables includes the features of Database andd Profiles, 
---- remove these ones once the transition done.
 export {
   GetRealmName                      = GetRealmName,
   UnitName                          = UnitName
 }
 
---- Helper for combinining the paths
+-- Helper fo combining the paths
 local combinePaths = setmetatable({ [0] = function(...) return ... end }, { __index = function(self, cnt)
     local args = List(cnt, "i=>'a['.. i .. ']'"):Join(",")
     local def  = [[ return function(a, ...) return ]] .. args .. [[, ... end]]
@@ -25,36 +23,36 @@ local combinePaths = setmetatable({ [0] = function(...) return ... end }, { __in
   end 
 })
 
-class "SLT.SavedVariables" (function(_ENV)
-  _PATH_ID = ""
-  _BASE_DB_ID = ""
-  _ID_SEPERATOR_CHAR = "/"
-  _PROFILES_DISABLED = false
+class "SavedVariables" (function(_ENV)
+  PATH_ID             = ""
+  BASE_DB_ID          = ""
+  ID_SEPARATOR_CHAR   = "/"
+  PROFILES_DISABLED   = false 
 
-  --- Modifiers
-  _PATH = {}
-  _EXPLICIT_PATH = false 
-  _DEFAULT_PATH = {}
-  _BASE_PATH = {}
-  _BASE_DB = "global"
-  _PROFILE = nil 
-  _PROFILE_SELECTED = nil
-  _ALL = false
+  -- Modifiers 
+  PATH              = {}
+  EXPLICIT_PATH     = false 
+  DEFAULT_PATH      = {}
+  BASE_PATH         = {}
+  BASE_DB           = "global"
+  PROFILE           = nil 
+  PROFILE_SELECTED  = nil 
+  ALL               = false
 
-  --- Caching 
-  _CACHE_TABLES = System.Toolset.newtable(false, true)
-  _CACHE_TABLES_ID_FETCHED = {}
+  -- Caching 
+  CACHE_TABLES              = System.Toolset.newtable(false, true)
+  CACHE_TABLES_ID_FETCHED   = {}
   -----------------------------------------------------------------------------
   --                         Private Methods                                 --
   -----------------------------------------------------------------------------
   __Static__() function private__PostEndProcess() 
-    wipe(_PATH)
-    _PATH_ID = ""
+    wipe(PATH)
+    PATH_ID         = ""
 
-    _EXPLICIT_PATH = false
-    _RELATIVE_DB = "global"
-    _PROFILE = nil
-    _ALL = false
+    EXPLICIT_PATH   = false
+    RELATIVE_DB     = "global"
+    PROFILE         = nil
+    ALL             = false
   end
 
   __Static__() function private__GetRawDB() 
@@ -74,34 +72,34 @@ class "SLT.SavedVariables" (function(_ENV)
   end
 
   __Static__() function private__GetBaseTable()
-    --- We don't need to check if the profile has a DB as this one has been 
+    -- We don't need to check if the profile has a DB as this one has been 
     -- done previously by Path
-    if _BASE_DB == "profile" then
+    if BASE_DB == "profile" then
       local profilesDB = private__GetDB()["__profiles"]
-      local profileDB = profilesDB and profilesDB[_PROFILE]
+      local profileDB = profilesDB and profilesDB[PROFILE]
       
       if profileDB then 
         return profileDB
       end
     end
 
-    --- We return the Global DB as fallback
+    -- We return the Global DB as fallback
     return private__GetDB()
   end
 
   __Arguments__ { String + Number }
   __Static__() function private__GetTableFromCache(id) 
-    local alreadyFetched = _CACHE_TABLES_ID_FETCHED[id] or false 
+    local alreadyFetched = CACHE_TABLES_ID_FETCHED[id] or false 
     if not alreadyFetched then 
-      _CACHE_TABLES_ID_FETCHED[id] = true 
+      CACHE_TABLES_ID_FETCHED[id] = true 
     end
 
-    return _CACHE_TABLES[id], alreadyFetched
+    return CACHE_TABLES[id], alreadyFetched
   end
 
   __Arguments__ { String + Number, Table/nil}
   __Static__() function private__PutTableIntoCache(id, t) 
-    _CACHE_TABLES[id] = t
+    CACHE_TABLES[id] = t
   end
 
   __Arguments__ { String + Number, String + Number }
@@ -114,7 +112,7 @@ class "SLT.SavedVariables" (function(_ENV)
       return path 
     end
 
-    return prefix .. _ID_SEPERATOR_CHAR .. path
+    return prefix .. ID_SEPARATOR_CHAR .. path
   end
 
   __Arguments__ { (String + Number) * 0}
@@ -122,12 +120,12 @@ class "SLT.SavedVariables" (function(_ENV)
     for i = 1, select("#", ...) do 
       local value = select(i, ...) 
       if i == 1 then 
-        _PATH_ID = value 
+        PATH_ID = value 
       else 
-        _PATH_ID = _PATH_ID .. _ID_SEPERATOR_CHAR .. value 
+        PATH_ID = PATH_ID .. ID_SEPARATOR_CHAR .. value 
       end 
 
-      tinsert(_PATH, value)
+      tinsert(PATH, value)
     end
 
     return SavedVariables
@@ -135,21 +133,21 @@ class "SLT.SavedVariables" (function(_ENV)
 
   __Arguments__ { (String + Number) * 0}
   __Static__() function private__Path(...)
-    if #_BASE_PATH > 0 then
-      return private__AbsPath(combinePaths[#_BASE_PATH](_BASE_PATH, ...))
+    if #BASE_PATH > 0 then
+      return private__AbsPath(combinePaths[#BASE_PATH](BASE_PATH, ...))
     end
 
     return private__AbsPath(...)
   end
 
   __Static__() function private__ImplicitPath()
-    if _EXPLICIT_PATH then 
+    if EXPLICIT_PATH then 
       return 
     end
 
-    local defaultPathCount = #_DEFAULT_PATH
+    local defaultPathCount = #DEFAULT_PATH
     if defaultPathCount > 0 then
-      private__Path(unpack(_DEFAULT_PATH))
+      private__Path(unpack(DEFAULT_PATH))
       return 
     end
 
@@ -158,38 +156,39 @@ class "SLT.SavedVariables" (function(_ENV)
 
   __Arguments__ { String + Number }
   __Static__() function private__GetValue(index) 
-    if _PATH_ID == "" then 
+    if PATH_ID == "" then 
       return private__GetBaseTable()[index]
     end
 
-    --- We use the cache for trying to speed up the things 
-    local cacheId = private__CreateCacheId(_BASE_DB_ID, _PATH_ID)
+    -- We use the cache for trying to speed up the things 
+    local cacheId = private__CreateCacheId(BASE_DB_ID, PATH_ID)
     local cache, alreadyFetched = private__GetTableFromCache(cacheId)
 
-    if cache then 
+    if cache then
       return cache[index]
+    else
     end
-
-    --- If the cache is nil, and it's has been previously fetch, don't need 
-    --- to continue because the path not exists, so the value in all case is nil 
+    
+    -- If the cache is nil, and it's has been previously fetch, don't need 
+    -- to continue because the path not exists, so the value in all case is nil 
     if alreadyFetched then 
       return 
     end
-
-    --- If we here, we need to iterate the table for trying to get the value 
-    --- We take also the opportunity for building the cache for each table iterated 
+    
+    -- If we here, we need to iterate the table for trying to get the value 
+    -- We take also the opportunity for building the cache for each table iterated 
     local currentTable = private__GetBaseTable()
     local currentCacheId = ""
 
-    for i, k in ipairs(_PATH) do 
+    for i, k in ipairs(PATH) do 
       local t = currentTable[k]
-      --- We don't continue if the table not exists, so the value is nil
+      -- We don't continue if the table not exists, so the value is nil
       if not t then 
         return 
       end 
 
       if i == 1 then 
-        currentCacheId = private__CreateCacheId(_BASE_DB_ID, k)
+        currentCacheId = private__CreateCacheId(BASE_DB_ID, k)
       else 
         currentCacheId = private__CreateCacheId(currentCacheId, k)
       end 
@@ -204,12 +203,12 @@ class "SLT.SavedVariables" (function(_ENV)
 
   __Arguments__ { String + Number, Any/nil }
   __Static__() function private__SetValue(index, value)
-    if _PATH_ID == "" then 
+    if PATH_ID == "" then 
       private__GetBaseTable()[index] = value
     end
 
-    --- We use the cache for trying to speed up the things 
-    local cacheId = private__CreateCacheId(_BASE_DB_ID, _PATH_ID)
+    -- We use the cache for trying to speed up the things 
+    local cacheId = private__CreateCacheId(BASE_DB_ID, PATH_ID)
     local cache, alreadyFetched = private__GetTableFromCache(cacheId)
 
     if cache then 
@@ -217,18 +216,18 @@ class "SLT.SavedVariables" (function(_ENV)
       return
     end
 
-    --- If the cache is nil, and it's has been previously fetch, don't need 
-    --- to continue because the path not exists
+    -- If the cache is nil, and it's has been previously fetch, don't need 
+    -- to continue because the path not exists
     if alreadyFetched then 
       return 
     end
 
-    --- If we here, we need to iterate the table for trying to get the value 
-    --- We take also the opportunity for building the cache for each table iterated 
+    -- If we here, we need to iterate the table for trying to get the value 
+    -- We take also the opportunity for building the cache for each table iterated 
     local currentTable = private__GetBaseTable()
     local currentCacheId = ""
 
-    for i, k in ipairs(_PATH) do 
+    for i, k in ipairs(PATH) do 
       local t = currentTable[k]
       -- We stop if the table not exists, as SetValue not create the path
       if not t then 
@@ -236,7 +235,7 @@ class "SLT.SavedVariables" (function(_ENV)
       end
 
       if i == 1 then 
-        currentCacheId = private__CreateCacheId(_BASE_DB_ID, k)
+        currentCacheId = private__CreateCacheId(BASE_DB_ID, k)
       else
         currentCacheId = private__CreateCacheId(currentCacheId, k)
       end
@@ -247,17 +246,17 @@ class "SLT.SavedVariables" (function(_ENV)
     end
 
     currentTable[index] = value
-  end 
+  end
 
   __Arguments__ { String + Number, Any/nil }
   __Static__() function private__SaveValue(index, value)
 
-    if _PATH_ID == "" then 
+    if PATH_ID == "" then 
       private__GetBaseTable()[index] = value
     end
 
-    --- We use the cache for trying to speed up the things 
-    local cacheId = private__CreateCacheId(_BASE_DB_ID, _PATH_ID)
+    -- We use the cache for trying to speed up the things 
+    local cacheId = private__CreateCacheId(BASE_DB_ID, PATH_ID)
     local cache  = private__GetTableFromCache(cacheId)
 
     if cache then 
@@ -265,12 +264,12 @@ class "SLT.SavedVariables" (function(_ENV)
       return
     end
 
-    --- If we here, we need to iterate the table for trying to get the value 
-    --- We take also the opportunity for building the cache for each table iterated 
+    -- If we here, we need to iterate the table for trying to get the value 
+    -- We take also the opportunity for building the cache for each table iterated 
     local currentTable = private__GetBaseTable()
     local currentCacheId = ""
 
-    for i, k in ipairs(_PATH) do 
+    for i, k in ipairs(PATH) do 
       local t = currentTable[k]
       -- We create the path if not exists
       if not t then
@@ -279,7 +278,7 @@ class "SLT.SavedVariables" (function(_ENV)
       end
 
       if i == 1 then 
-        currentCacheId = private__CreateCacheId(_BASE_DB_ID, k)
+        currentCacheId = private__CreateCacheId(BASE_DB_ID, k)
       else
         currentCacheId = private__CreateCacheId(currentCacheId, k)
       end
@@ -290,7 +289,7 @@ class "SLT.SavedVariables" (function(_ENV)
     end
 
     currentTable[index] = value
-  end 
+  end
 
   __Arguments__ { Table }
   __Static__() function private__ClearEmptyTable(t)
@@ -308,89 +307,89 @@ class "SLT.SavedVariables" (function(_ENV)
   -----------------------------------------------------------------------------
   __Arguments__ { String/nil }
   __Static__() function Profile(profile)
-    --- Ignore if the profiles system has been disabled
-    if not _PROFILES_DISABLED then
+    -- Ignore if the profiles system has been disabled
+    if not PROFILES_DISABLED then
 
-      --- if the profile has been given, use the profile selected instead
+      -- if the profile has been given, use the profile selected instead
       if not profile then 
         local specDB = private__GetSpecDB()
-        profile = _PROFILE_SELECTED
+        profile = PROFILE_SELECTED
       end
 
       if profile and profile ~= "__global" then
         local profilesDB = private__GetDB().__profiles
-        --- We need to check the profile has a DB, all profiles created have a 
-        --- DB as we have a "__profile_id" during the cureation
+        -- We need to check the profile has a DB, all profiles created have a 
+        -- DB as we have a "__profile_id" during the cureation
         if profilesDB and profilesDB[profile] then 
-          _BASE_DB = "profile"
-          _BASE_DB_ID = "profiles" .. _ID_SEPERATOR_CHAR .. profile
-          _PROFILE = profile
+          BASE_DB = "profile"
+          BASE_DB_ID = "profiles" .. ID_SEPARATOR_CHAR .. profile
+          PROFILE = profile
           return SavedVariables
         end
       end
     end
 
-    --- We fallback to global 
-    _BASE_DB = "global"
-    _BASE_DB_ID = ""
-    _PROFILE = nil
+    -- We fallback to global 
+    BASE_DB     = "global"
+    BASE_DB_ID  = ""
+    PROFILE     = nil
 
     return SavedVariables
-  end 
+  end
 
   __Static__() function Global() 
-    _BASE_DB = "global"
-    _BASE_DB_ID = ""
-    _PROFILE = nil
+    BASE_DB     = "global"
+    BASE_DB_ID  = ""
+    PROFILE     = nil
 
     return SavedVariables
   end
 
   __Static__() function All()
-    _ALL = true
+    ALL = true
 
     return SavedVariables
   end
 
   __Arguments__ { (String + Number) * 0 }
   __Static__() function Path(...)
-    _EXPLICIT_PATH = true 
+    EXPLICIT_PATH = true 
     return private__Path(...)
   end
 
   __Arguments__ { (String + Number) * 0}
   __Static__() function AbsPath(...)
-    _EXPLICIT_PATH = true 
+    EXPLICIT_PATH = true 
     return private__AbsPath(...)
   end
 
   __Arguments__ { String * 0 }
   __Static__() function SetDefaultPath(...) 
-    wipe(_DEFAULT_PATH)
+    wipe(DEFAULT_PATH)
   
     for i = 1, select("#", ...) do 
       local value = select(i, ...)
-      tinsert(_DEFAULT_PATH, value)
+      tinsert(DEFAULT_PATH, value)
     end
-  end 
+  end
 
   __Arguments__ { String * 0 }
   __Static__() function SetBasePath(...) 
-    wipe(_BASE_PATH)
+    wipe(BASE_PATH)
   
     for i = 1, select("#", ...) do 
       local value = select(i, ...)
-      tinsert(_BASE_PATH, value)
+      tinsert(BASE_PATH, value)
     end
-  end  
+  end
 
-  --- Get the value for an index in the current path. 
-  --- @See also Path, SetDefaultPath, and SetBasePath for changing the path.
+  --- Get the value for an index in the current path.
+  --- @see also Path, SetDefaultPath, and SetBasePath for changing the path.
   __Arguments__ { String + Number }
   __Static__() function GetValue(index) 
-    --- We call it in case where 'Path' has been called, and SetDefaultPath or 
-    --- SetBasePath has been used. 
-    --- It does nothing if "Path" or "AbsPath" has been used for this current operation.
+    -- We call it in case where 'Path' has been called, and SetDefaultPath or 
+    -- SetBasePath has been used. 
+    -- It does nothing if "Path" or "AbsPath" has been used for this current operation.
     private__ImplicitPath()
 
     local value = private__GetValue(index)
@@ -403,29 +402,29 @@ class "SLT.SavedVariables" (function(_ENV)
   --- Set the value for an index for the current path.
   --- Take note this does nothing if the current path not exists. 
   --- If you want setting a value in all case, use SaveValue instead.
-  --- @See also Path, SetDefaultPath, and SetBasePath for changing the path. 
+  --- @see also Path, SetDefaultPath, and SetBasePath for changing the path. 
   __Arguments__ { String + Number, Any/nil }
   __Static__() function SetValue(index, value)
-    --- We call it in case where 'Path' has been called, and SetDefaultPath or 
-    --- SetBasePath has been used. 
-    --- It does nothing if "Path" or "AbsPath" has been used for this current operation.
+    -- We call it in case where 'Path' has been called, and SetDefaultPath or 
+    -- SetBasePath has been used. 
+    -- It does nothing if "Path" or "AbsPath" has been used for this current operation.
     private__ImplicitPath()
 
-    --- Check if the All() modifier has been used 
-    if _ALL then
-      --- We start with global
+    -- Check if the All() modifier has been used 
+    if ALL then
+      -- We start with global
       Global()
       private__SetValue(index, value)
 
-      --- We save the value for all existing profiles 
+      -- We save the value for all existing profiles 
       local profilesDB = private__GetDB().__profiles 
       if profilesDB then 
         for profile in pairs(profilesDB) do 
-          --- We need to manually change the base db and its id before calling 
-          --- private__SaveValue
-          _BASE_DB = "profile"
-          _BASE_DB_ID = "profiles" .. _ID_SEPERATOR_CHAR .. profile
-          _PROFILE = profile
+          -- We need to manually change the base db and its id before calling 
+          -- private__SaveValue
+          BASE_DB = "profile"
+          BASE_DB_ID = "profiles" .. ID_SEPARATOR_CHAR .. profile
+          PROFILE = profile
           
           private__SetValue(index, value)
         end
@@ -435,7 +434,7 @@ class "SLT.SavedVariables" (function(_ENV)
     end
 
     private__PostEndProcess()
-  end 
+  end
 
   --- Save the value for an index in the current path. In case where the path 
   --- not exists, this will create it.
@@ -449,7 +448,7 @@ class "SLT.SavedVariables" (function(_ENV)
     private__ImplicitPath()
 
     --- Check if the All() modifier has been used 
-    if _ALL then
+    if ALL then
       --- We start with global
       Global()
       private__SaveValue(index, value)
@@ -460,9 +459,9 @@ class "SLT.SavedVariables" (function(_ENV)
         for profile in pairs(profilesDB) do 
           --- We need to manually change the base db and its id before calling 
           --- private__SaveValue
-          _BASE_DB = "profile"
-          _BASE_DB_ID = "profiles" .. _ID_SEPERATOR_CHAR .. profile
-          _PROFILE = profile
+          BASE_DB = "profile"
+          BASE_DB_ID = "profiles" .. ID_SEPARATOR_CHAR .. profile
+          PROFILE = profile
           
           private__SaveValue(index, value)
         end
@@ -483,7 +482,7 @@ class "SLT.SavedVariables" (function(_ENV)
     --- It does nothing if "Path" or "AbsPath" has been used for this current operation.
     private__ImplicitPath()
 
-    if _ALL then 
+    if ALL then 
       --- We start by global
       Global()
 
@@ -499,9 +498,9 @@ class "SLT.SavedVariables" (function(_ENV)
         for profile in pairs(profilesDB) do 
             --- We need to manually change the base db and its id before calling 
             --- private__SaveValue
-            _BASE_DB = "profile"
-            _BASE_DB_ID = "profiles" .. _ID_SEPERATOR_CHAR .. profile
-            _PROFILE = profile
+            BASE_DB = "profile"
+            BASE_DB_ID = "profiles" .. ID_SEPARATOR_CHAR .. profile
+            PROFILE = profile
             
             fromValue = private__GetValue(fromIndex)
             if fromValue ~= nil then 
@@ -524,25 +523,25 @@ class "SLT.SavedVariables" (function(_ENV)
   --- This will disable the profile system so Profile() will always return 
   --- the global
   __Static__() function DisableProfiles() 
-    _PROFILES_DISABLED = true 
-  end 
+    PROFILES_DISABLED = true 
+  end
 
   --- This will enable the profile system so Profile() will return the profile 
   --- or global as fallback
   __Static__() function EnableProfiles() 
-    _PROFILES_DISABLED = false
+    PROFILES_DISABLED = false
   end
 
   --- Create a profile
   __Arguments__ { String }
   __Static__() function CreateProfile(name)
-    --- __global is blacklisted
+    -- __global is blacklisted
     if name == "__global" then 
       return 
     end
 
-    --- We use "AbsPath" for avoiding conflict if SetDefaultPath or SetBasePath
-    --- is used previously
+    -- We use "AbsPath" for avoiding conflict if SetDefaultPath or SetBasePath
+    -- is used previously
     local profileDB = AbsPath("__profiles").GetValue(name)
 
     if profileDB then 
@@ -551,29 +550,29 @@ class "SLT.SavedVariables" (function(_ENV)
 
     AbsPath("__profiles").SaveValue(name, { __profileId = name })
 
-    --- TODO: Trigger an event 
+    -- TODO: Trigger an event 
   end
 
   --- Delete a profile
   __Arguments__ { String }
   __Static__() function DeleteProfile(name)
-    --- We use "AbsPath" for avoiding conflict if SetDefaultPath or SetBasePath
-    --- is used previously
+    -- We use "AbsPath" for avoiding conflict if SetDefaultPath or SetBasePath
+    -- is used previously
     AbsPath("__profiles").SetValue(name, nil)
 
-    --- TODO: Trigger an event
+    -- TODO: Trigger an event
   end
 
   __Static__() function GetCurrentProfile()
-    return _PROFILE_SELECTED or "__global"
+    return PROFILE_SELECTED or "__global"
   end
 
   __Arguments__ { Number, String/nil}
   __Static__() function SelectProfileForSpec(specIndex, profile)
     local fullPlayerName = GetRealmName() .. "-" .. UnitName("player")
 
-    --- We use "AbsPath" for avoiding conflict if SetDefaultPath or SetBasePath
-    --- is used previously
+    -- We use "AbsPath" for avoiding conflict if SetDefaultPath or SetBasePath
+    -- is used previously
     AbsPath("__ScorpioChars", fullPlayerName, "__ScorpioSpecs", specIndex)
       .SaveValue("__profileUsed", profile)
 
@@ -584,14 +583,14 @@ class "SLT.SavedVariables" (function(_ENV)
     local hasChanged = false 
     local profileUsed = private__GetSpecDB().__profileUsed
 
-    local old = _PROFILE_SELECTED or "__global"
+    local old = PROFILE_SELECTED or "__global"
     local new = profile_used or "__global"
 
     if old ~= new then 
       hasChanged = true 
     end
 
-    _PROFILE_SELECTED = profileUsed
+    PROFILE_SELECTED = profileUsed
 
     if hasChanged then 
       Scorpio.FireSystemEvent("SLT_PROFILE_CHANGED", new, old)

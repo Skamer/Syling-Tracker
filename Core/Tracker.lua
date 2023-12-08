@@ -9,46 +9,62 @@
 Syling                      "SylingTracker.Core.Tracker"                     ""
 -- ========================================================================= --
 export {
-  __UIElement__         = SLT.__UIElement__,
-  Profiles              = SLT.Profiles,
-  Database              = SLT.Database,
-  SavedVariables        = SLT.SavedVariables,
+  GetCurrentTarget                    = Scorpio.UI.Style.GetCurrentTarget,
+  GetNearestFrameForType              = Utils.GetNearestFrameForType,
+  FromUIProperty                      = Wow.FromUIProperty,
+  GetFrameByType                      = Wow.GetFrameByType,
+  GetFrame                            = Wow.GetFrame,
 
-  IsInInstance          = IsInInstance,
-  GetActiveKeystoneInfo = C_ChallengeMode.GetActiveKeystoneInfo,
-  SecureCmdOptionParse  = SecureCmdOptionParse
+  -- Wow API
+  IsInInstance                        = IsInInstance,
+  GetActiveKeystoneInfo               = C_ChallengeMode.GetActiveKeystoneInfo,
+  SecureCmdOptionParse                = SecureCmdOptionParse
 }
 
-_Trackers       = System.Toolset.newtable(false, true)
-
 __UIElement__()
-class "SLT.TrackerMover" (function(_ENV)
-  inherit "Mover"
-  -----------------------------------------------------------------------------
-  --                               Methods                                   --
-  -----------------------------------------------------------------------------
-  function OnRelease(self)
-    self:SetID(0)
-    self:Hide()
-    self:ClearAllPoints()
-    self:SetParent(nil)
-  end
-  -----------------------------------------------------------------------------
-  --                            Constructors                                 --
-  -----------------------------------------------------------------------------
-  __Template__{
-    Text = SLT.FontString
+class "TrackerMinimizeButton" (function(_ENV)
+  inherit "Button"
+
+  __Observable__()
+  property "Minimized" {
+    type = Boolean,
+    default = false
   }
-  function __ctor() end 
+
+  __Observable__()
+  property "Enabled" {
+    type = Boolean,
+    default = true
+  }
 end)
 
+struct "VisibilityRulesType" {
+  { name = "defaultVisibility",               type = String,  default = "show"},
+  { name = "hideWhenEmpty",                   type = Boolean, default = true },
+  { name = "enableAdvancedRules",             type = Boolean, default = false},
+  { name = "inDungeonVisibility",             type = String,  default = "show"},
+  { name = "inKeystoneVisibility",            type = String,  default = "show"},
+  { name = "inRaidVisibility",                type = String,  default = "show"},
+  { name = "inScenarioVisibility",            type = String,  default = "show"},
+  { name = "inArenaVisibility",               type = String,  default = "show"},
+  { name = "inBattlegroundVisibility",        type = String,  default = "show"},
+  { name = "inPartyVisibility",               type = String,  default = "show"},
+  { name = "inRaidGroupVisibility",           type = String,  default = "show"},
+  { name = "macroVisibility",                 type = String;  default = "" },
+  { name = "evaluateMacroVisibilityAtFirst",  type = Boolean, default = false}
+}
+
 __UIElement__()
-class "SLT.Tracker" (function(_ENV)
-  inherit "Frame"
+class "Tracker" (function(_ENV)
+  inherit "Frame" extend "IQueueLayout" "IQueueAdjustHeight"
+
   -----------------------------------------------------------------------------
   --                               Events                                    --
   -----------------------------------------------------------------------------
-  event "OnPositionChanged"
+  __Bubbling__ { Resizer = "OnStopResizing" }
+  event "OnStopResizing"
+
+  event "OnStopMoving"
   -----------------------------------------------------------------------------
   --                               Handlers                                  --
   -----------------------------------------------------------------------------
@@ -60,46 +76,37 @@ class "SLT.Tracker" (function(_ENV)
   local function OnScrollRangeChanged(self, xRange, yRange)
     local scrollBar = self:GetScrollBar()
     local scrollFrame = self:GetScrollFrame()
-    
+
     local visibleHeight = scrollFrame:GetHeight()
     local contentHeight = visibleHeight + yRange
     scrollBar:SetVisibleExtentPercentage(visibleHeight / contentHeight)
 
-    -- REVIEW: Should translate this feature directly in the ScrollBar class ?
     if self.ShowScrollBar and scrollBar:HasScrollableExtent() then 
       scrollBar:Show()
-    else 
+    else
       scrollBar:Hide()
     end
   end
 
   local function OnScroll(self, value)
     local scrollFrame = self:GetScrollFrame()
-
     scrollFrame:SetVerticalScroll(scrollFrame:GetVerticalScrollRange() * value)
   end
 
   local function OnLockedChanged(self, value)
-    if value then 
-      self:ReleaseMover()
-      Style[self].movable = false
-      Style[self].resizable = false
-    else 
-      self:ShowMover()
-      Style[self].movable = true
-      Style[self].resizable = true
+    if value then
+      Style[self].Mover           = NIL
+      Style[self].movable         = false
+      Style[self].resizable       = false
+    else
+      Style[self].movable         = true 
+      Style[self].resizable       = true
+      Style[self].Mover.visible   = true
     end
   end
 
-  local function OnTrackerStopMoving(self, mover)
-    local left  = self:GetLeft()
-    local top   = self:GetTop()
-
-    self:OnPositionChanged(left, top)
-  end
-
   local function OnShowScrollBarChanged(self, value)
-    --- We show the scroll bar only if there is a scrollable content
+    -- We show the scroll bar only if there is a scrollable content
     local scrollBar = self:GetScrollBar()
 
     if value and scrollBar:HasScrollableExtent() then 
@@ -109,201 +116,93 @@ class "SLT.Tracker" (function(_ENV)
     end
   end
 
-  local function OnScrollBarPositionChanged(self, value, old)
-    if value == "LEFT" then
-      Style[self].ScrollBar.location = {
-        Anchor("RIGHT", -15, 0, nil, "LEFT")
-      }
-    elseif value == "RIGHT" then 
-      Style[self].ScrollBar.location = {
-        Anchor("LEFT", 15, 0, nil, "RIGHT")
-      }
-    end
-  end
 
-  local function OnShowBorderChanged(self, new, old, prop)
-    if prop == "ShowTopBorder" then 
-      Style[self].TopBGTexture.visible = new 
-    elseif prop == "ShowBottomBorder" then 
-      Style[self].BottomBGTexture.visible = new 
-    elseif prop == "ShowLeftBorder" then 
-      Style[self].LeftBGTexture.visible = new 
-    elseif prop == "ShowRightBorder" then 
-      Style[self].RightBGTexture.visible = new 
-    elseif prop == "ShowTopLeftBorder" then 
-      Style[self].TopLeftBGTexture.visible = new 
-    elseif prop == "ShowTopRightBorder" then 
-      Style[self].TopRightBGTexture.visible = new 
-    elseif prop == "ShowBottomLeftBorder" then 
-      Style[self].BottomLeftBGTexture.visible = new 
-    elseif prop == "ShowBottomRightBorder" then 
-      Style[self].BottomRightBGTexture.visible = new 
-    end
-  end
+  __Async__()
+  function StopMovingOrSizing(self)
+    super.StopMovingOrSizing(self)
 
-  local function OnBorderColorChanged(self, new, old, prop)
-    if prop == "TopBorderColor" then 
-      Style[self].TopBGTexture.vertexColor = new 
-    elseif prop == "BottomBorderColor" then 
-      Style[self].BottomBGTexture.vertexColor = new 
-    elseif prop == "LeftBorderColor" then 
-      Style[self].LeftBGTexture.vertexColor = new 
-    elseif prop == "RightBorderColor" then 
-      Style[self].RightBGTexture.vertexColor = new 
-    elseif prop == "TopLeftBorderColor" then 
-      Style[self].TopLeftBGTexture.vertexColor = new 
-    elseif prop == "TopRightBorderColor" then 
-      Style[self].TopRightBGTexture.vertexColor = new 
-    elseif prop == "BottomLeftBorderColor" then 
-      Style[self].BottomLeftBGTexture.vertexColor = new 
-    elseif prop == "BottomRightBorderColor" then 
-      Style[self].BottomRightBGTexture.vertexColor = new 
-    end
-  end
+    Next()
 
-  local function OnBorderSizeChanged(self, new, old, prop)
-    if prop == "TopBorderSize" then 
-      Style[self].TopBGTexture.height = new
-      Style[self].TopLeftBGTexture.height = new
-      Style[self].TopRightBGTexture.height = new
-    elseif prop == "BottomBorderSize" then 
-      Style[self].BottomBGTexture.height = new
-      Style[self].BottomLeftBGTexture.height = new
-      Style[self].BottomRightBGTexture.height = new
-    elseif prop == "LeftBorderSize" then 
-      Style[self].LeftBGTexture.width = new
-      Style[self].TopLeftBGTexture.width = new
-      Style[self].BottomLeftBGTexture.width = new 
-    elseif prop == "RightBorderSize" then 
-      Style[self].RightBGTexture.width = new 
-      Style[self].TopRightBGTexture.width = new
-      Style[self].BottomRightBGTexture.width = new
-    end
-  end
-
-  local function OnVisibilityRulesChanged(self)
-    UPDATE_VISIBILITY_ON_EVENTS()
-  end
-
-  local function OnEnabledChanged(self, new)
-    if new then 
-      UPDATE_VISIBILITY_ON_EVENTS()
-    else
-      self:Hide()
-    end
+    OnStopMoving(self)
   end
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
-  function GetScrollBar(self)
-    return self:GetChild("ScrollBar")
+  __Arguments__ { String, Boolean/true }
+  function AcquireSettingSubject(self, id, createOnNotFound)
+    local subjects = self.__settingSubjects
+
+    if not subjects and createOnNotFound then 
+      subjects = {}
+      self.__settingSubjects = subjects 
+    elseif not subjects then
+      return nil, false 
+    end
+
+
+    local subject = subjects[id]
+    local isNew = false 
+
+    if not subject and createOnNotFound then 
+      subject = BehaviorSubject()
+      subjects[id] = subject 
+      isNew = true 
+    end
+
+    return subject, isNew
   end
 
-  function GetScrollFrame(self)
-    return self:GetChild("ScrollFrame")
-  end
 
-  function GetScrollContent(self)
-    return self:GetScrollFrame():GetChild("Content")
-  end
+  __Iterator__()
+  function IterateSettingSubjects(self)
+    local yield = coroutine.yield
+    local subjects = self.__settingSubjects
 
-  function AcquireMover(self)
-    local mover = self:GetChild("Mover")
-    if not mover then 
-      mover = SLT.TrackerMover.Acquire()
-      mover:SetParent(self)
-      mover:SetName("Mover")
-      mover:InstantApplyStyle()
-      mover.MoveTarget = self 
-      mover.OnStopMoving = mover.OnStopMoving + self.OnTrackerStopMoving
-    end 
-
-    return mover
-  end
-
-  function ShowMover(self)
-    local mover = self:AcquireMover()
-    mover:Show() 
-  end
-
-  function ReleaseMover(self)
-    local mover = self:GetChild("Mover")
-    if mover then 
-      mover.OnStopMoving = mover.OnStopMoving - self.OnTrackerStopMoving
-      mover:Release()
+    if subjects then 
+      for settingID, subject in pairs(subjects) do 
+        yield(settingID, subject)
+      end
     end
   end
 
-  __Arguments__ { String + Number }
-  function TrackContentType(self, contentID)
-    Scorpio.FireSystemEvent("SLT_TRACKER_TRACK_CONTENT_TYPE", self, contentID)
-
-    self.Contents[contentID] = true
-  end
-  
-  __Arguments__ { String + Number }
-  function UntrackContentType(self, contentID)
-    Scorpio.FireSystemEvent("SLT_TRACKER_UNTRACK_CONTENT_TYPE", self, contentID)
-    self.Contents[contentID] = false
-  end
-
-  __Arguments__ { String }
-  function IsContentTracked(self, contentID)
-
-    if self.Contents[contentID] then 
-      return true 
-    end
-    return false
-  end
-
-  __Arguments__ { SLT.IView }
+  __Arguments__ { IView}
   function AddView(self, view)
     self.Views:Insert(view)
     view:SetParent(self:GetScrollContent())
+    view:Show()
 
-    --- Register the events 
+    -- Bind the events 
     view.OnSizeChanged = view.OnSizeChanged + self.OnViewSizeChanged
     view.OnOrderChanged = view.OnOrderChanged + self.OnViewOrderChanged
-    view.OnShouldBeDisplayedChanged = view.OnShouldBeDisplayedChanged + self.OnViewShouldBeDisplayedChanged
+    -- view.OnShouldBeDisplayedChanged = view.OnShouldBeDisplayedChanged + self.OnShouldBeDisplayedChanged
 
     self:OnLayout()
-    self:OnAdjustHeight()
+    self:AdjustHeight()
+
+    self.Empty = self.Views.Count == 0
+    self.VisibilityRulesShown     = GetRulesVisibilityShownForTracker(self)
   end
 
-  __Arguments__ { SLT.IView }
+  __Arguments__ { IView }
   function RemoveView(self, view)
     self.Views:Remove(view)
 
-    --- Unregister the events 
+    -- Unbind the events 
     view.OnSizeChanged = view.OnSizeChanged - self.OnViewSizeChanged
     view.OnOrderChanged = view.OnOrderChanged - self.OnViewOrderChanged
-    view.OnShouldBeDisplayedChanged = view.OnShouldBeDisplayedChanged - self.OnViewShouldBeDisplayedChanged
+    -- view.OnShouldBeDisplayedChanged = view.OnShouldBeDisplayedChanged - self.OnShouldBeDisplayedChanged
 
-    --- We call an instant layout and adjust height for avoiding a
-    --- flashy behavior when the content has been removed.
+    -- We call an instant layout and adjust height for avoiding a 
+    -- flashy behavior when the content has been removed.
     self:OnLayout()
-    self:OnAdjustHeight()
+    self:AdjustHeight()
 
-    --- NOTE: We don't call the "Release" method of view because it will be done
-    --- by the content type.
-  end
+    -- NOTE: We don't call the "Release" method of view because it will be done 
+    -- by the content type
 
-  __Arguments__ { SLT.IView }
-  function DisplayView(self, view)
-    view:OnAcquire()
-    view:SetParent(self:GetScrollContent())
-    
-    self:OnLayout()
-    self:OnAdjustHeight()
-  end
-
-  __Arguments__ { SLT.IView }
-  function HideView(self, view)
-    view:OnRelease()
-
-    self:OnLayout()
-    self:OnAdjustHeight()
-  end
+    self.Empty = self.Views.Count == 0
+    self.VisibilityRulesShown     = GetRulesVisibilityShownForTracker(self)
+  end  
 
   __Iterator__()
   function IterateViews(self)
@@ -320,11 +219,11 @@ class "SLT.Tracker" (function(_ENV)
 
   function OnLayout(self)
     local content = self:GetScrollContent()
-    local previousView
-
+    local previousView 
+    
     for index, view in self:IterateViews() do
       if index > 1 then 
-        view:SetPoint("TOP", previousView, "BOTTOM", 0, -self.Spacing)
+        view:SetPoint("TOP", previousView, "BOTTOM", 0, -10)
         view:SetPoint("LEFT")
         view:SetPoint("RIGHT")
       else
@@ -337,632 +236,157 @@ class "SLT.Tracker" (function(_ENV)
     end
   end
 
-  function Layout(self)
-    if not self._pendingLayout then 
-      self._pendingLayout = true 
-
-      Scorpio.Delay(0.1, function() 
-        local aborted = false
-        if self._cancelLayout then 
-          aborted = self._cancelLayout 
-        end
-
-        if not aborted then 
-          self:OnLayout()
-        end
-
-        self._pendingLayout = nil
-        self._cancelLayout = nil
-      end)
-    end 
-  end
-
-  function CancelLayout(self)
-    if self._pendingLayout then 
-      self._cancelLayout = true
-    end
-  end
-
   function OnAdjustHeight(self)
-    local height = 0
+    -- IMPORTANT: For avoiding the content height might not be computed and 
+    -- not displayed, we need to use '1' as minimun height.
+    local height = 1
     local count = 0
     local content = self:GetScrollContent()
-    for _, view in self:IterateViews() do 
+    for _, view in self:IterateViews() do
       count = count + 1
-      height  = height + view:GetHeight()
+      height = height + view:GetHeight()
     end
-    
-    height = height + 0 * math.max(0, count-1)
+
+    height = height + 10 * math.max(0, count - 1)
 
     content:SetHeight(height)
   end
 
-  --- This is helper function will call "OnAdjustHeight".
-  --- This is safe to call it multiple time in short time, resulting only a one 
-  --- call of "OnAdjustHeight"
-  function AdjustHeight(self)
-    if not self._pendingAdjustHeight then 
-      self._pendingAdjustHeight = true 
+  __Arguments__ { String }
+  function TrackContent(self, contentID)
+    Scorpio.FireSystemEvent("SylingTracker_TRACK_CONTENT", self, contentID)
 
-      Scorpio.Delay(0.1, function() 
-        local aborted = false
-        if self._cancelAdjustHeight then 
-          aborted = self._cancelAdjustHeight 
-        end
+    self.ContentsTracked[contentID] = true
+  end
 
-        if not aborted then 
-          self:OnAdjustHeight()
-        end
+  __Arguments__ { String }
+  function UntrackContent(self, contentID)
+    Scorpio.FireSystemEvent("SylingTracker_UNTRACK_CONTENT", self, contentID)
 
-        self._pendingAdjustHeight = nil
-      end)
-    end 
+    self.ContentsTracked[contentID] = false
+  end
+
+  __Arguments__ { String }
+  function IsContentTracked(self, contentID)
+    if self.ContentsTracked[contentID] then 
+      return true 
+    end
+
+    return false 
   end
   
-  --- Cancel the "OnAdjustHeight" call if there is one in queue.
-  --- You probably do when the obj is releasing.
-  function CancelAdjustHeight(self)
-    if self._pendingAdjustHeight then 
-      self._cancelAdjustHeight = true
-    end
+  function GetScrollBar(self)
+    return self:GetChild("ScrollBar")
   end
 
-  function OnAcquire(self)
-    self:SetPersistent(true)
+  function GetScrollFrame(self)
+    return self:GetChild("ScrollFrame")
+  end
+
+  function GetScrollContent(self)
+    return self:GetScrollFrame():GetChild("Content")
+  end
+  
+  function GetMinimizeButton(self)
+    return self.__minimizeButton or self:GetChild("MinimizeButton")
   end
 
   function OnRelease(self)
-    self:SetPersistent(false)
-
-    self:ClearAllPoints()
-    self:SetParent()
-    self:Hide()
-
-    self:CancelAdjustHeight()
-
-    --- Untrack all contents tracked 
-    for contentID in pairs(self.Contents) do 
-      self:UntrackContentType(contentID)
-      self.Contents[contentID] = nil
+    for contentID, tracked in pairs(self.ContentsTracked) do 
+      if tracked then
+        self:UntrackContent(contentID)
+      end
     end
 
-    self.ID = nil
-    self.Spacing = nil 
-    self.Locked = nil
+    wipe(self.ContentsTracked)
+
+    self.id = nil 
+    self.Enabled = nil 
+    self.Locked = nil 
+    self.Minimized = nil 
+    self.ShowScrollBar = nil
+
+    self:GetMinimizeButton().Enabled = false
+
+    self:GetScrollFrame():SetVerticalScroll(0)
+    self:GetScrollBar():SetScrollPercentage(0)
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
-  -----------------------------------------------------------------------------
+  -----------------------------------------------------------------------------  
+  property "id" {
+    type = String
+  }
+
   property "Enabled" {
-    type = Boolean,
-    default = true,
-    handler = OnEnabledChanged
-  }
-
-  property "Views" {
-    set     = false,
-    default = function() return Array[SLT.IView]() end 
-  }
-
-  property "Contents" {
-    set     = false,
-    default = function() return {} end
-  }
-
-  property "Spacing" {
-    type    = Number,
-    default = 10
-  }
-
-  property "ID" {
-    type = Number + String
-  }
-
-  property "ContentHeight" {
-    type = Number,
-    default = 1
+    type      = Boolean,
+    default   = true,
   }
 
   property "Locked" {
+    type      = Boolean,
+    default   = true,
+    handler   = OnLockedChanged
+  }
+
+  property "Empty" {
     type = Boolean,
-    default = true,
-    handler = OnLockedChanged
+    default = true
+  }
+
+  __Observable__()
+  property "Minimized" {
+    type      = Boolean,
+    default   = false
   }
 
   property "ShowScrollBar" {
     type = Boolean,
     default = true,
-    handler = OnShowScrollBarChanged
+    handler = OnShowScrollBarChanged,
   }
 
-  property "ScrollBarPosition" {
-    type = String,
-    default = "RIGHT",
-    handler = OnScrollBarPositionChanged
+  property "Views" {
+    set = false, 
+    default = function() return Array[IView]() end 
   }
 
-  property "ShowTopBorder" {
+  property "ContentsTracked" {
+    set = false, 
+    default = function() return {} end
+  }
+
+  property "VisibilityRules" {
+    set = false,
+    type = VisibilityRulesType,
+    default = function() return VisibilityRulesType() end
+  }
+
+  __Observable__()
+  property "VisibilityRulesShown" {
     type = Boolean,
-    default = false,
-    handler = OnShowBorderChanged
+    default = true
   }
-
-  property "ShowBottomBorder"{
-    type = Boolean,
-    default = false,
-    handler = OnShowBorderChanged
-  }
-
-  property "ShowLeftBorder" {
-    type = Boolean,
-    default = false,
-    handler = OnShowBorderChanged
-  }
-
-  property "ShowRightBorder" {
-    type = Boolean,
-    default = false,
-    handler = OnShowBorderChanged 
-  }
-
-  property "ShowTopLeftBorder" {
-    type = Boolean,
-    default = false,
-    handler = OnShowBorderChanged 
-  }
-
-  property "ShowTopRightBorder" {
-    type = Boolean,
-    default = false,
-    handler = OnShowBorderChanged
-  }
-
-  property "ShowBottomLeftBorder" {
-    type = Boolean,
-    default = false,
-    handler = OnShowBorderChanged 
-  }
-
-  property "ShowBottomRightBorder" {
-    type = Boolean,
-    default = false,
-    handler = OnShowBorderChanged
-  }
-
-  property "TopBorderColor" {
-    type = ColorType,
-    default = Color.BLACK,
-    handler = OnBorderColorChanged
-  }
-
-  property "BottomBorderColor" {
-    type = ColorType,
-    default = Color.BLACK,
-    handler = OnBorderColorChanged
-  }
-
-  property "LeftBorderColor" {
-    type = ColorType,
-    default = Color.BLACK,
-    handler = OnBorderColorChanged
-  }
-
-  property "RightBorderColor" {
-    type = ColorType,
-    default = Color.BLACK,
-    handler = OnBorderColorChanged
-  }
-
-  property "TopLeftBorderColor" {
-    type = ColorType,
-    default = Color.BLACK,
-    handler = OnBorderColorChanged
-  }
-
-  property "TopRightBorderColor" {
-    type = ColorType,
-    default = Color.BLACK,
-    handler = OnBorderColorChanged
-  }
-
-  property "BottomLeftBorderColor" {
-    type = ColorType,
-    default = Color.BLACK,
-    handler = OnBorderColorChanged
-  }
-
-  property "BottomRightBorderColor" {
-    type = ColorType,
-    default = Color.BLACK,
-    handler = OnBorderColorChanged
-  }
-
-  property "TopBorderSize" {
-    type = Number,
-    default = 1,
-    handler = OnBorderSizeChanged
-  }
-
-  property "BottomBorderSize" {
-    type = Number,
-    default = 1,
-    handler = OnBorderSizeChanged
-  }
-
-  property "LeftBorderSize" {
-    type = Number,
-    default = 1,
-    handler = OnBorderSizeChanged
-  }
-
-  property "RightBorderSize" {
-    type = Number,
-    default = 1,
-    handler = OnBorderSizeChanged
-  }
-
-  --- Display Rules properties
-  enum "TrackerDefaultVisibilityType" {
-    "show",
-    "hide"
-  }
-
-  property "DefaultVisibility" {
-    type = TrackerDefaultVisibilityType, 
-    default = "show",
-    handler = OnVisibilityRulesChanged
-  }
-
-  enum "TrackerVisibilityType" {
-    "show",
-    "hide",
-    "default",
-    "ignore"
-  }
-  
-  property "InDungeonVisibility" {
-    type = TrackerVisibilityType,
-    default = "show",
-    handler = OnVisibilityRulesChanged
-  }
-  
-  property "InKeystoneVisibility" {
-    type = TrackerVisibilityType,
-    default = "show",
-    handler = OnVisibilityRulesChanged
-  }
-
-  property "InRaidVisibility" {
-    type = TrackerVisibilityType,
-    default = "show",
-    handler = OnVisibilityRulesChanged
-  }
-
-  property "InScenarioVisibility" {
-    type = TrackerVisibilityType,
-    default = "show",
-    handler = OnVisibilityRulesChanged
-  }
-
-  property "InArenaVisibility" {
-    type = TrackerVisibilityType,
-    default = "show",
-    handler = OnVisibilityRulesChanged
-  }
-
-  property "InBattlegroundVisibility" {
-    type = TrackerVisibilityType,
-    default = "show",
-    handler = OnVisibilityRulesChanged
-  }
-
-  property "InPartyVisibility" {
-    type = TrackerVisibilityType,
-    default = "show",
-    handler = OnVisibilityRulesChanged
-  }
-
-  property "InRaidGroupVisibility" {
-    type = TrackerVisibilityType,
-    default = "show",
-    handler = OnVisibilityRulesChanged
-  }
-
-  property "MacroVisibility" {
-    type = String,
-    default = "",
-    handler = OnVisibilityRulesChanged
-  }
-
-  property "EvaluateMacroVisibilityAtFirst" {
-    type = Boolean,
-    default = false,
-    handler = OnVisibilityRulesChanged
-  }
-  -----------------------------------------------------------------------------
-  --                        Configuration Methods                            --
-  -----------------------------------------------------------------------------
-  enum "TrackerSettingType" {
-    "position",
-    "width",
-    "height",
-    "hidden",
-    "locked",
-    "scale",
-    "showBackground",
-    "backgroundColor",
-    "showScrollBar",
-    "scrollBarPosition",
-    "scrollBarThumbColor",
-    "contentTracked",
-    "contentOrder",
-    "showTopBorder",
-    "showBottomBorder",
-    "showLeftBorder",
-    "showRightBorder",
-    "showTopLeftBorder",
-    "showTopRightBorder",
-    "showBottomLeftBorder",
-    "showBottomRightBorder",
-    "topBorderColor",
-    "bottomBorderColor",
-    "leftBorderColor",
-    "rightBorderColor",
-    "topLeftBorderColor",
-    "topRightBorderColor",
-    "bottomLeftBorderColor",
-    "bottomRightBorderColor",
-    "topBorderSize",
-    "bottomBorderSize",
-    "leftBorderSize",
-    "rightBorderSize",
-    "defaultVisibility",
-    "inDungeonVisibility",
-    "inKeystoneVisibility",
-    "inRaidVisibility",
-    "inScenarioVisibility",
-    "inArenaVisibility",
-    "inBattlegroundVisibility",
-    "inPartyVisibility",
-    "inRaidGroupVisibility",
-    "macroVisibility",
-    "evaluateMacroVisibilityAtFirst"
-  }
-
-  __Arguments__ { Tracker, TrackerSettingType, Any * 0}
-  __Static__() function private__ApplySetting(tracker, setting, ...)
-    local isMainTracker = tracker.ID == "main"
-    if setting == "position" then 
-      local xPos, yPos = ...
-      if not xPos and not yPos then 
-        --- By default, the custom tracker are positioned to center andd the main tracker 
-        --- to right 
-        if isMainTracker then 
-          tracker:SetPoint("RIGHT", -40, 0)
-        else
-          tracker:SetPoint("CENTER")
-        end
-      else 
-        tracker:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", xPos or 0, yPos or 0)
-      end
-    elseif setting == "width" then 
-      local width = ...
-      Style[tracker].width = width
-    elseif setting == "height" then
-      local height = ... 
-      Style[tracker].height = height
-    elseif setting == "hidden" then 
-      local hidden = ...
-      if hidden then
-        tracker.Enabled = not hidden
-        -- tracker:Hide()
-      else
-        tracker.Enabled = true
-        -- tracker:Show()
-      end
-    elseif setting == "locked" then 
-      local locked = ...
-      --- By default,  the custom tracker are unlocked 
-      if locked == nil and not isMainTracker then 
-        tracker.Locked = false 
-      else
-        tracker.Locked = locked
-      end
-    elseif setting == "scale" then
-      local scale = ...
-      Style[tracker].scale = scale
-    elseif setting == "showBackground" then
-      local show = ... 
-      Style[tracker].BackgroundTexture.visible = show
-    elseif setting == "backgroundColor" then 
-      local r, g, b, a = ...
-      Style[tracker].BackgroundTexture.vertexColor = ColorType(r, g, b, a)
-    elseif setting == "showScrollBar" then
-      local show = ...
-      Style[tracker].showScrollBar = show
-    elseif setting == "scrollBarPosition" then 
-      local position = ...
-      Style[tracker].scrollBarPosition = position
-    elseif setting == "scrollBarThumbColor" then
-      local r, g, b, a = ...
-      tracker:GetScrollBar():GetThumb():SetNormalColor(ColorType(r, g, b, a))
-    elseif setting == "contentTracked" then 
-      local contentId, tracked = ...
-      if tracked == nil then 
-        --- The main tracker still track the content unless this has been said 
-        --- explicitely to no do it
-        if isMainTracker then 
-          tracker:TrackContentType(contentId)
-        else
-          tracker:UntrackContentType(contentId)
-        end
-      else
-        if tracked then 
-          tracker:TrackContentType(contentId)
-        else
-          tracker:UntrackContentType(contentId)
-        end
-      end
-    elseif setting == "contentOrder" then 
-      --- TODO
-    elseif setting:match("show[%a]+Border") then 
-      local show = ...
-      Style[tracker][setting] = show
-    elseif setting:match("[%a]+BorderColor") then 
-      local r, g, b, a = ...
-      Style[tracker][setting] = ColorType(r, g, b, a)
-    elseif setting:match("[%a]+BorderSize") then 
-      local size = ...
-      Style[tracker][setting] = size
-    elseif setting:match("[%a]+Visibility") then
-      local visibility = ...
-      Style[tracker][setting] = visibility
-    elseif setting == "evaluateMacroVisibilityAtFirst" then 
-      local isFirst = ...
-      Style[tracker][setting] = isFirst
-    end
-  end
-
-  function ApplySetting(trackerOrId, setting, ...)
-    local tracker
-    if trackerOrId == "string" then
-      tracker = _Trackers[trackerOrId]
-    elseif Class.IsObjectType(trackerOrId, Tracker) then 
-      tracker = trackerOrId
-    end
-
-    if tracker then 
-      private__ApplySetting(tracker, setting, ...)
-    end
-  end
-
-  __Arguments__ { String, TrackerSettingType, Any * 0}
-  __Static__() function private__SaveSetting(trackerId, setting, ...)
-    local isMainTracker = trackerId == "main"
-
-    --- We set the base path for avoiding to have to give it every time 
-    SavedVariables.SetBasePath("trackers", trackerId)
-
-    --- Tracker position
-    if setting == "position" then
-      local xPos, yPos = ...
-      SavedVariables.Profile().SaveValue("xPos", xPos)
-      SavedVariables.Profile().SaveValue("yPos", yPos)
-    --- Tracker width 
-    elseif setting == "width" then 
-      local width = ...
-      SavedVariables.Profile().SaveValue("width", width)
-    --- Tracker height
-    elseif setting == "height" then 
-      local height = ...
-      SavedVariables.Profile().SaveValue("height", height)
-    --- Tracker visibility 
-    elseif setting == "hidden" then
-      local hidden = ...
-      SavedVariables.Profile().SaveValue("hidden", hidden)
-    --- Tracker locked 
-    elseif setting == "locked" then
-      local locked = ...
-      SavedVariables.Profile().SaveValue("locked", locked)
-    --- Tracker scale
-    elseif setting == "scale" then 
-      local scale = ...
-      SavedVariables.Profile().SaveValue("scale", scale)
-    --- Tracker -> Background -> Show
-    elseif setting == "showBackground" then
-      local show = ...
-      SavedVariables.Profile().SaveValue("showBackground", show)
-    --- Tracker -> Background -> Color
-    elseif setting == "backgroundColor" then 
-      local r, g, b, a = ...
-      SavedVariables.Profile().SaveValue("backgroundColor", { r = r, g = g, b = b, a = a })
-    --- Tracker -> Show ScrollBar
-    elseif setting == "showScrollBar" then 
-      local showScrollBar = ...
-      SavedVariables.Profile().Path("scrollBar").SaveValue("show", showScrollBar)
-    --- Tracker ->  Scroll Bar Position
-    elseif setting == "scrollBarPosition" then 
-      local scrollBarPosition = ...
-      SavedVariables.Profile().Path("scrollBar").SaveValue("position", scrollBarPosition)
-    --- ScrollBar -> Thumb ColorType
-    elseif setting == "scrollBarThumbColor" then
-      local r, g, b, a = ...
-      SavedVariables.Profile().Path("scrollBar").SaveValue("thumbColor", { r = r, g = g, b = b, a = a})
-    --- Tracker -> Content Tracked
-    elseif setting == "contentTracked" then 
-      local contentId, tracked = ...
-      --- Will saved for the next operation
-      SavedVariables.Profile().Path("contents", contentId)
-      --- The main still track all contents unless this 
-      if isMainTracker then 
-        --- The main tracker still track the content unless this has been said 
-        --- explicitely to no do it
-        if tracked ~= nil and tracked == false then  
-          SavedVariables.SaveValue("tracked", false)
-        else
-          SavedVariables.SaveValue("tracked", nil)
-        end
-      else
-        if tracked then 
-          SavedVariables.SaveValue("tracked", true)
-        else
-          SavedVariables.SaveValue("tracked", nil)
-        end
-      end
-    elseif setting == "contentOrder" then 
-      -- TODO
-    elseif setting:match("show[%a]+Border") then 
-      local show = ...
-      SavedVariables.Profile().Path("borders").SaveValue(setting, show)
-    elseif setting:match("[%a]+BorderColor") then 
-      local r, g, b, a = ...
-      SavedVariables.Profile().Path("borders").SaveValue(setting, { r = r, g = g, b = b, a = a })
-    elseif setting:match("[%a]+BorderSize") then 
-      local size = ...
-      SavedVariables.Profile().Path("borders").SaveValue(setting, size)
-    elseif setting:match("[%a]+Visibility") then 
-      local visibility = ...
-      SavedVariables.Profile().Path("visibilityRules").SaveValue(setting, visibility)
-    elseif setting == evaluateMacroVisibilityAtFirst then 
-      local isFirst = ...
-      SavedVariables.Profile().Path("visibilityRules").SaveValue(setting, isFirst)
-    end
-    
-    --- We reset the base path
-    SavedVariables.SetBasePath()
-  end
-
-  function SaveSetting(trackerOrId, setting, ...)
-    if type(trackerOrId) == "string" then 
-      private__SaveSetting(trackerOrId, setting, ...)
-    else
-      private__SaveSetting(trackerOrId.ID, setting, ...)
-    end
-  end
-
-  function ApplyAndSaveSetting(trackerOrId, setting, ...)
-    ApplySetting(trackerOrId, setting, ...)
-    SaveSetting(trackerOrId, setting, ...)
-  end
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
   -----------------------------------------------------------------------------
-  __Template__{
+  __Template__ {
     ScrollFrame = ScrollFrame,
-    ScrollBar   = SLT.ScrollBar,
-    Resizer     = Resizer,
+    ScrollBar = ScrollBar,
+    Resizer = Resizer,
+    MinimizeButton = TrackerMinimizeButton,
     {
       ScrollFrame = {
         Content = Frame
-      }
+      },
     }
-  }
+  }    
   function __ctor(self)
-    local scrollFrame = self:GetScrollFrame()
-    scrollFrame:SetClipsChildren(true)
+    local scrollFrame =self:GetScrollFrame()
+    -- scrollFrame:SetClipsChildren(true)
 
-    scrollFrame.OnScrollRangeChanged = scrollFrame.OnScrollRangeChanged + function(_, xrange, yrange)
-      OnScrollRangeChanged(self, xrange, yrange)
+    scrollFrame.OnScrollRangeChanged = scrollFrame.OnScrollRangeChanged + function(_, xRange, yRange)
+      OnScrollRangeChanged(self, xRange, yRange)
     end
 
     scrollFrame.OnMouseWheel = scrollFrame.OnMouseWheel + function(_, value)
@@ -975,401 +399,638 @@ class "SLT.Tracker" (function(_ENV)
       OnScroll(self, value)
     end
 
-
     local content = self:GetScrollContent()
     content:SetHeight(1)
     content:SetWidth(scrollFrame:GetWidth())
+    
     scrollFrame:SetScrollChild(content)
-
     scrollFrame.OnSizeChanged = scrollFrame.OnSizeChanged + function(_, width)
       content:SetWidth(width)
     end
 
-    self.OnViewOrderChanged = function() self:Layout() end 
-    self.OnViewSizeChanged = function() self:AdjustHeight() end 
-
-    self.OnViewShouldBeDisplayedChanged = function(view, new)
-      if new then 
-        self:DisplayView(view)
-      else 
-        self:HideView(view)
+    local minimizeButton = self:GetMinimizeButton()
+    minimizeButton.OnClick = minimizeButton.OnClick + function()
+      local minimized = not self.Minimized
+      if minimized then 
+        -- We rename the name for avoiding conflict with the other minimize buttons name 
+        minimizeButton:SetName("SylingTracker_"..self.id.."MinimizeButton")
+        minimizeButton:SetParent(UIParent)
+        self.__minimizeButton = minimizeButton
+      else
+        minimizeButton:SetParent(self)
+        minimizeButton:SetName("MinimizeButton")
+        self.__minimizeButton = nil
       end
+
+      minimizeButton.Minimized = minimized
+
+      self.Minimized = minimized
     end
 
-    self.OnTrackerStopMoving = function(mover, ...) OnTrackerStopMoving(self, mover, ...) end
+    -- @TODO: Finish the handlers part
+    self.OnViewOrderChanged = function() end 
+    self.OnViewSizeChanged = function() self:AdjustHeight() end 
   end
 end)
+-------------------------------------------------------------------------------
+--                                   API                                     --
+-------------------------------------------------------------------------------
+TRACKERS = System.Toolset.newtable(false, true)
+TRACKER_SETTINGS  = {}
 
-local function OnTrackerHideHandler(self)
-  --- We save the changed to the DB only if the tracker is marked as persistent
-   --- at this time.
-  if self:IsPersistent() then
-    Profiles.PrepareDatabase()
-      
-    if Database.SelectTable(true, "trackers", self.ID) then 
-      Database.SetValue("hidden", true)
-    end
-  end
+local function OnTrackerStopMoving(tracker)
+  local left = tracker:GetLeft()
+  local top = tracker:GetTop()
+
+
+  SetTrackerSetting(tracker.id, "position", Position(left, top), false)
 end
 
-local function OnTrackerShowHandler(self)
-  --- We save the changed to the DB only if the tracker is marked as persistent
-   --- at this time.
-  if self:IsPersistent() then
-    Profiles.PrepareDatabase()
-      
-    if Database.SelectTable(true, "trackers", self.ID) then 
-      Database.SetValue("hidden", nil)
-    end
-  end
+local function OnTrackerStopResizing(tracker)
+  local width   = Round(tracker:GetWidth())
+  local height  = Round(tracker:GetHeight())
+
+  SetTrackerSetting(tracker.id, "size", Size(width, height), false)
 end
 
-local function OnTrackerSizeChanged(self, width, height)
-  self:SaveSetting("width", Round(width))
-  self:SaveSetting("height", Round(height))
-end
-
-local function OnTrackerPositionChanged(self, xPos, yPos)
-  local top   = self:GetTop()
-  local left  = self:GetLeft()
-
-  self:SaveSetting("position", left, top)
-end
-
-local function private__LoadContentsForTracker(tracker)
-  for _, content in SLT.API.IterateContentTypes() do 
-    local tracked = SavedVariables.Profile()
-      .Path("trackers", tracker.ID, "contents", content.ID) 
-      .GetValue("tracked")
-
-    tracker:ApplySetting("contentTracked", content.ID, tracked)
-  end
-end
-
-local function private__NewTracker(id)
-  local tracker = SLT.Tracker.Acquire()
+__Arguments__ { String }
+function private__NewTracker(id)
+  local tracker = Tracker.Acquire()
+  tracker.id = id
   tracker:SetParent(UIParent)
-  tracker.ID = id 
+  tracker:Show()
 
-  --- We set the base path for avoiding to give it every time 
-  SavedVariables.SetBasePath("trackers", id)
-
-  --- Trackers global saved variables
-  local xPos    = SavedVariables.Profile().GetValue("xPos")
-  local yPos    = SavedVariables.Profile().GetValue("yPos")
-  local width   = SavedVariables.Profile().GetValue("width") or 300
-  local height  = SavedVariables.Profile().GetValue("height") or 325
-  local hidden  = SavedVariables.Profile().GetValue("hidden") 
-  local locked  = SavedVariables.Profile().GetValue("locked")
-  local scale   = SavedVariables.Profile().GetValue("scale")
-  local showBg  = SavedVariables.Profile().GetValue("showBackground") or false
-  local bgColor = SavedVariables.Profile().GetValue("backgroundColor")
-
-  --- Trackers scrollbar saved variables
-  local showScrollBar     = SavedVariables.Profile().Path("scrollBar").GetValue("show")
-  local scrollBarPosition = SavedVariables.Profile().Path("scrollBar").GetValue("position")
-  local thumbColor        = SavedVariables.Profile().Path("scrollBar").GetValue("thumbColor")
-  local borderSettings    = SavedVariables.Profile().GetValue("borders")
-
-  --- Trackers visibility rules variables 
-  local visibilityRules = SavedVariables.Profile().GetValue("visibilityRules")
-
-  --- Set if the tracker is enabled 
-  --- Currently the hidden property means if the tracker is enabled or not. 
-  --- With the visibility rules is coming, we probably need to rename hidden to enable in DB.
-  tracker.Enabled = not hidden 
-
-  --- Apply Settings 
-  tracker:ApplySetting("position", xPos, yPos)
-  tracker:ApplySetting("width", width)
-  tracker:ApplySetting("height", height)
-  tracker:ApplySetting("hidden", hidden)
-  tracker:ApplySetting("locked", locked)
-  tracker:ApplySetting("scale", scale)
-  tracker:ApplySetting("showScrollBar", showScrollBar)
-  tracker:ApplySetting("scrollBarPosition", scrollBarPosition)
-  tracker:ApplySetting("showBackground", showBg)
-  
-  if bgColor then 
-    tracker:ApplySetting("backgroundColor", bgColor.r, bgColor.g, bgColor.b, bgColor.a)
+  -- NOTE: As there a delay between the skin process, the subjects may not be 
+  -- yet created, so this iteration is not run. This case is covered by 
+  -- API.FromTrackerSetting function. 
+  --
+  -- Call InstantApplyTracker on the tracker before will run this iterator but 
+  -- this is not needed, and this iterator is here for cover thise case where 
+  -- an instant apply style is called. 
+  for setting, subject in tracker:IterateSettingSubjects() do
+    local value = GetTrackerSettingWithDefault(id, setting)
+    subject:OnNext(value, tracker)
   end
 
-  if borderSettings then 
-    for setting, value in pairs(borderSettings) do
-      if setting:match("[%a]+BorderColor") then 
-        tracker:ApplySetting(setting, value.r, value.g, value.b, value.a)
-      else 
-        tracker:ApplySetting(setting, value)
-      end
-    end
-  end
+  -- NOTE: The contents tracked will be handled later. 
 
-  if thumbColor then 
-    tracker:ApplySetting("scrollBarThumbColor", thumbColor.r, thumbColor.g, thumbColor.b, thumbColor.a)
-  end
+  tracker.OnStopResizing  = tracker.OnStopResizing + OnTrackerStopResizing
+  tracker.OnStopMoving    = tracker.OnStopMoving + OnTrackerStopMoving
 
-  if visibilityRules then 
-    for visibilitySetting, value in pairs(visibilityRules) do 
-      tracker:ApplySetting(visibilitySetting, value)
-    end
-  end
-
-  --- NOTE: THe contents tracked will be handled later
-
-  --- Add some handlers
-  tracker.OnSizeChanged = tracker.OnSizeChanged + OnTrackerSizeChanged
-  tracker.OnPositionChanged = tracker.OnPositionChanged + OnTrackerPositionChanged
-
-  --- Important: Don't forget to reset the bath path for avoiding unexpected issues
-  --- for next operations
-  SavedVariables.SetBasePath()
-
-  _Trackers[id] = tracker
+  TRACKERS[id] = tracker
 
   return tracker
 end
 
-local function private__DeleteTracker(tracker)
-  local trackerId = tracker.ID
+--- Create an tracker. 
+--- 
+--- @param id the tracker id to register (note: the id 'main' is reserved)
+__Arguments__ { String }
+function NewTracker(id)
+  -- the 'main' id is reserved for the main tracker. 
+  if id == "main" then 
+    return 
+  end
 
-  Scorpio.FireSystemEvent("SLT_TRACKER_DELETED", tracker)
+  local tracker = private__NewTracker(id)
 
-  --- Remove handlers
-  tracker.OnSizeChanged = tracker.OnSizeChanged - OnTrackerSizeChanged
-  tracker.OnPositionChanged = tracker.OnPositionChanged - OnTrackerPositionChanged
-
-  --- Remove the tracker from the list
-  SavedVariables.Path("list", "tracker").SetValue(trackerId, nil)
+  -- Don't forget to add in the tracker list else it won't be persisted for 
+  -- the next time.
+  SavedVariables.Path("list", "trackers").SaveValue(id, true)
   
-  --- Remove the tracker settings for global and all profiles 
-  SavedVariables.Path("trackers").All().SetValue(trackerId, nil)
+  -- Trigger a system event for notifying the outside
+  Scorpio.FireSystemEvent("SylingTracker_TRACKER_CREATED", id)
 
-  _Trackers[trackerId] = nil 
+  return tracker
+end
+
+__Arguments__ { String }
+function private__DeleteTracker(trackerID)
+  local tracker = TRACKERS[trackerID]
+  if not tracker then 
+    return 
+  end
+
+  -- Remove handlers 
+  tracker.OnStopResizing      = tracker.OnStopResizing - OnTrackerStopResizing
+  tracker.OnStopMoving        = tracker.OnStopMoving - OnTrackerStopMoving
+
+  TRACKERS[trackerID] = nil 
 
   tracker:Release()
 end
 
--------------------------------------------------------------------------------
--- Enhancing the API                                                         --
--------------------------------------------------------------------------------
-class "SLT.API" (function(_ENV)
+--- Delete a tracker
+--- note: the main tracker cannot be deleted.
+---
+--- @param trackerID the id of tracker to delete
+__Arguments__ { String }
+function DeleteTracker(trackerID)
+  if trackerID == "main" then 
+    return 
+  end
+  
+  private__DeleteTracker(trackerID)
+  
+  -- Remove the tracker from the list 
+  SavedVariables.Path("list", "trackers").SetValue(trackerID, nil)
 
-  --- This is the public API for creating a tracker, it will prevent a tracker 
-  --- to be created if the id is "main"
-  __Arguments__ { String }
-  __Static__() function NewTracker(id)
-    if id == "main" then 
-      return 
+  -- Remove the tracker setting for global and all profiles 
+  SavedVariables.Path("trackers").All().SetValue(trackerID, nil)
+
+  Scorpio.FireSystemEvent("SylingTracker_TRACKER_DELETED", trackerID)
+end
+
+--- Return an iterafor for the trackers 
+--- 
+--- @param includeMainTracker if the main tracker should be included
+--- @param includeDisabledTrackers if the disabled trackers soulld be included
+__Iterator__()
+__Arguments__ { Boolean/true, Boolean/true }
+function IterateTrackers(includeMainTracker, includeDisabledTrackers)
+  local yield = coroutine.yield
+  local trackersList =  SavedVariables.Profile().Path("list").GetValue("trackers")
+  local trackersSettings = SavedVariables.Profile().GetValue("trackers")
+  
+  if includeMainTracker then
+    local settings = trackersSettings["main"] 
+    local enabled = settings and setting.enabled 
+    local ignored = false 
+
+    if not includeDisabledTrackers and enabled ~= nil and enabled == false then 
+      ignored = true 
     end
 
-    local tracker = private__NewTracker(id)
-    --- Don't forget to add in the tracker list else it won't be created the 
-    --- next time
-    SavedVariables.Path("list", "tracker").SaveValue(id, true)
-
-    --- Load the contents tracked
-    private__LoadContentsForTracker(tracker)
-
-    Scorpio.FireSystemEvent("SLT_TRACKER_CREATED", tracker)
-
-    return tracker
-  end
-
-  --- This is the public API for deleting a tracker, the main tracker cannot be 
-  --- deleted
-  __Arguments__ { SLT.Tracker + String}
-  __Static__() function DeleteTracker(trackerOrId)
-    local tracker
-    if type(trackerOrId) == "string" then 
-      if trackerOrId == "main" then 
-        return 
-      end
-      tracker = _Trackers[trackerOrId]
-    else
-      tracker = trackerOrId
+    if not ignored then 
+      yield("main")
     end
-
-    if tracker == _MainTracker then 
-      return 
-    end
-
-    private__DeleteTracker(tracker)
   end
 
-
-  __Arguments__ { String }
-  __Static__() function GetTracker(id)
-    return _Trackers[id]
-  end
-
-  __Iterator__()
-  __Arguments__ { Boolean/true, Boolean/true}
-  function IterateTrackers(includeMainTracker, includeDisabledTrackers)
-    local yield = coroutine.yield
-    for trackerId, tracker in pairs(_Trackers) do
-      local isIgnored = false
-
-      if trackerId == "main" and includeMainTracker == false then 
-        isIgnored = true
+  if trackersList then 
+    for trackerID in pairs(trackersList) do 
+      local settings = trackersSettings[trackerID]
+      local enabled = settings and settings.enabled
+      local ignored = false
+      if not includeDisabledTrackers and enabled ~= nil and enabled == false then 
+        ignored = true 
       end
 
-      if tracker.Enabled == false and includeDisabledTrackers == false then 
-        isIgnored = true 
+      if not ignored then 
+        yield(trackerID)
+      end
+    end
+  end
+end
+
+--- Get the tracker 
+---
+--- @param id the tracker id to return
+__Arguments__ { String }
+function GetTracker(id)
+  return TRACKERS[id]
+end
+
+struct "TrackerSettingInfoType" {
+ { name = "id", type = String, require = true },
+ { name = "default", type = Any},
+ { name = "handler", type = Function },
+ { name = "saveHandler", type = Function},
+ { name = "ignoreDefault", type = Boolean, default = false},
+ { name = "getHandler", type = Function},
+ { name = "defaultHandler", type = Function},
+ { name = "structType", type = StructType },
+}
+
+--- Register a setting for a tracker
+---
+--- @param settingInfo the setting info to register.
+__Arguments__ { TrackerSettingInfoType}
+function RegisterTrackerSetting(settingInfo)
+  if TRACKER_SETTINGS[settingInfo.id] then 
+    return 
+  end
+
+  TRACKER_SETTINGS[settingInfo.id] = settingInfo
+end
+
+--- Create an obsersable will read a setting value of tracker.
+--- it can be used by the style system.
+---
+--- @param setting the setting where the value will be fetched.
+--- @param ... extra args will be pushed to get handler.
+__AutoCache__()
+__Arguments__ { String, Any * 0 }
+function FromTrackerSetting(setting, ...)
+  local extraArgs = { ... }
+  return Observable(function(observer)
+    -- The current frame may not be a tracker, so we need to try to get 
+    -- the nearest tracker object.
+    local tracker = GetNearestFrameForType(GetCurrentTarget(), Tracker)
+    if tracker then 
+      local trackerID       = tracker.id
+      local subject, isNew  = tracker:AcquireSettingSubject(setting)
+      
+      if isNew then 
+        local value
+        
+        -- The id may be nil, so we need to check it.
+        if trackerID and trackerID ~= "" then 
+          value = GetTrackerSettingWithDefault(trackerID, setting, unpack(extraArgs))
+        else
+          value = TRACKER_SETTINGS[setting] and TRACKER_SETTINGS[setting].default
+        end
+
+        subject:OnNext(value, tracker)
       end
       
-      if not isIgnored then 
-        yield(trackerId, tracker)
+      subject:Subscribe(observer)
+    end
+  end)
+end
+
+--- Get the setting value for a tracker 
+---
+--- @param the tracker id where fetching the setting.
+--- @param setting the setting to get.
+--- @param ... extra args will be passed to get handler.
+__Arguments__ { String, String, Any * 0 }
+function GetTrackerSetting(trackerID, setting, ...)
+  local hasDefaultValue = false 
+  local defaultValue 
+  local dbValue 
+  local getHandler
+
+  local settingInfo = TRACKER_SETTINGS[setting]
+  if settingInfo then 
+    defaultHandler  = settingInfo.defaultHandler
+    structType      = settingInfo.structType
+    getHandler      = settingInfo.getHandler
+    hasDefaultValue = not settingInfo.ignoreDefault
+
+    if defaultHandler then 
+      defaultValue = defaultHandler(trackerID, ...)
+    elseif structType then
+      local subSetting = ...
+      local structMember = Struct.GetMember(structType, subSetting)
+      defaultValue = structMember and structMember:GetDefault()
+    else
+      defaultValue = settingInfo.default
+    end
+  end 
+
+  if trackerID and trackerID ~= "" then 
+    if getHandler then
+      dbValue = getHandler(trackerID, ...)
+    elseif structType then 
+      local subSetting = ...
+      if subSetting then
+        dbValue = SavedVariables.Profile().Path("trackers", trackerID, setting).GetValue(subSetting)
+      else 
+        dbValue = SavedVariables.Profile().Path("trackers", trackerID).GetValue(setting)
+      end
+    else
+      dbValue = SavedVariables.Profile().Path("trackers", trackerID).GetValue(setting)
+    end
+
+    return dbValue, hasDefaultValue, defaultValue
+  end
+end
+
+--- This is a helper function around GetTrackerSetting
+--- Get the setting value for a tracker, and replace by the default value if there is one.
+---
+--- @param the tracker id where fetching the setting.
+--- @param setting the setting to get.
+--- @param ... extra args will be passed to get handler.
+__Arguments__ { String, String, Any * 0 }
+function GetTrackerSettingWithDefault(trackerOrID, setting, ...)
+  local dbValue, hasDefaultValue, defaultValue = GetTrackerSetting(trackerOrID, setting, ...)
+
+  if dbValue == nil and hasDefaultValue then 
+    return defaultValue
+  end
+
+  return dbValue 
+end
+
+--- Set the setting value for a tracker
+---
+--- @param trackerID the tracker id where the setting will be set
+--- @param setting the setting to set 
+--- @param value the setting value to set 
+--- @param notify if the observers and setting handler should be notified.
+--- @param ... extra arguments will be passed to different handlers.
+__Arguments__ { String, String, Any/nil, Boolean/true, Any * 0 }
+function SetTrackerSetting(trackerID, setting, value, notify, ...)
+  local default = nil 
+  local ignoreDefault = false 
+  local handler = nil 
+  local saveHandler = nil
+  local structType = nil 
+
+  local settingInfo = TRACKER_SETTINGS[setting]
+  if settingInfo then 
+    ignoreDefault   = settingInfo.ignoreDefault
+    defaultHandler  = settingInfo.defaultHandler
+    handler         = settingInfo.handler
+    saveHandler     = settingInfo.saveHandler
+    structType      = settingInfo.structType
+  
+    
+    if defaultHandler then 
+      default = defaultHandler(trackerID, ...)
+    elseif structType then
+      local subSetting = ...
+      local structMember = Struct.GetMember(structType, subSetting)
+      default = structMember and structMember:GetDefault()
+    else
+      default = settingInfo.default
+    end
+  end
+
+  if value == nil or value == default then
+    if saveHandler then 
+      saveHandler(trackerID, nil, ...)
+    elseif structType then 
+      local subSetting = ...
+      if subSetting then 
+        SavedVariables.Profile().Path("trackers", trackerID, setting).SetValue(subSetting, nil)
+      end
+    else
+      SavedVariables.Profile().Path("trackers", trackerID).SetValue(setting, nil)
+    end
+  else
+    if saveHandler then 
+      saveHandler(trackerID, value, ...)
+    elseif structType then
+      local subSetting = ...
+      if subSetting then 
+        SavedVariables.Profile().Path("trackers", trackerID, setting).SaveValue(subSetting, value)
+      end
+    else
+      SavedVariables.Profile().Path("trackers", trackerID).SaveValue(setting, value)
+    end
+  end
+  
+  if value == nil and not ignoreDefault then 
+    value = default
+  end
+  
+  if notify then
+    if handler then 
+      handler(trackerID, value, ...)
+    end
+    
+    local tracker = TRACKERS[trackerID]
+    if tracker then 
+      -- We don't want to create a subject if the setting don't have one because this 
+      -- say none is interested to be notified by this setting.
+      local subject = tracker:AcquireSettingSubject(setting, false)
+      if subject then
+        subject:OnNext(value, tracker, ...)
       end
     end
   end
-end)
--------------------------------------------------------------------------------
---                                Styles                                     --
--------------------------------------------------------------------------------
-Style.UpdateSkin("Default", {
-  [SLT.TrackerMover] = {
-    backdrop = {
-      bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]]
-    },
-    backdropColor = { r = 0, g = 1, b = 0, a = 0.3},
-    location = {
-      Anchor("BOTTOMLEFT", 0, 0, nil, "TOPLEFT"),
-      Anchor("BOTTOMRIGHT", 0, 0, nil, "TOPRIGHT")
-    },
-    Text = {
-      text = "Click here to move the tracker",
-      setAllPoints = true,
-      sharedMediaFont = FontType("PT Sans Narrow Bold", 13)
-    }
-  },
+end
 
-  [SLT.Tracker] = {
-    size = Size(300, 325),
-    resizable = false,
-    movable = false,
+__Arguments__ { String , Boolean/nil }
+function private__IsContentShouldTracked(trackerID, contentTracked)
+  local tracked, isDefault
+  if trackerID == "main" then 
+    if contentTracked or contentTracked == nil then
+      tracked = true 
+      isDefault = true 
+    else
+      tracked = false 
+      isDefault = false 
+    end
+  else
+    if contentTracked then
+      tracked = true 
+      isDefault = false 
+    else
+      tracked = false 
+      isDefault = true 
+    end
+  end
 
-    ScrollFrame = {
-      location = {
-        Anchor("TOPLEFT"),
-        Anchor("BOTTOMRIGHT")
-      }
-    },
+  return tracked, isDefault
+end
 
-    ScrollBar = {
-      size = Size(6, 244),
-      location = {
-        Anchor("LEFT", 15, 0, nil, "RIGHT")
-      }
-    },
+__Arguments__ { Tracker }
+__Async__() function LoadTracker(tracker)
+  local trackerBottom = tracker:GetBottom()
+  -- Important ! We have to delay a little until the tracker returning a valid 
+  -- "GetBottom". This indicate all is ready for elements are able to compute
+  -- their height.
+  while not trackerBottom do
+    trackerBottom = tracker:GetBottom()
+    Next()
+  end
 
-    BackgroundTexture = {
-      visible = false,
-      file = "Interface\\Buttons\\WHITE8X8",
-      drawLayer = "BACKGROUND",
-      vertexColor = Color.BLACK,
-      setAllPoints = true,
-    },
+  tracker:GetMinimizeButton().Enabled = true
 
-    --- Corner Border 
-    TopLeftBGTexture = {
-      visible = false,
-      width = 1,
-      height = 1,
-      file = "Interface\\Buttons\\WHITE8X8",
-      drawLayer = "BORDER",
-      vertexColor = Color.BLACK,
-      location = {
-        Anchor("BOTTOMRIGHT", 0, 0, nil, "TOPLEFT")
-      }
-    },
+  private__LoadContentsForTracker(tracker)
+  LoadVisibilityRulesForTracker(tracker)
+end
 
-    TopRightBGTexture = {
-      visible = false,
-      width = 1,
-      height = 1,
-      file = "Interface\\Buttons\\WHITE8X8",
-      drawLayer = "BORDER",
-      vertexColor = Color.BLACK,
-      location = {
-        Anchor("BOTTOMLEFT", 0, 0, nil , "TOPRIGHT")
-      }
-    },
+__Arguments__ { String/nil, String/nil }
+function private__GetContentTracked(trackerID, contentID)
+    local tracked = SavedVariables.Profile()
+      .Path("trackers", trackerID, "contents", contentID)
+      .GetValue("tracked")
 
-    BottomLeftBGTexture = {
-      visible = false,
-      width = 1,
-      height = 1,
-      file = "Interface\\Buttons\\WHITE8X8",
-      drawLayer = "BORDER",
-      vertexColor = Color.BLACK,
-      location = {
-        Anchor("TOPRIGHT", 0, 0, nil, "BOTTOMLEFT")
-      }
-    },
+    return private__IsContentShouldTracked(trackerID, tracked)
+end
 
-    BottomRightBGTexture = {
-      visible = false,
-      width = 1,
-      height = 1,
-      file = "Interface\\Buttons\\WHITE8X8",
-      drawLayer = "BORDER",
-      vertexColor = Color.BLACK,
-      location = {
-        Anchor("TOPLEFT", 0, 0, nil, "BOTTOMRIGHT")
-      }
-    },
+--- Reserved only during the loading when the trackers are created.
+__Arguments__ { Tracker }
+function private__LoadContentsForTracker(tracker)
+  for _, content in API.IterateContents() do
+    local contentID = content.id 
+    local tracked = private__GetContentTracked(tracker.id, contentID)
+    if tracked then 
+      tracker:TrackContent(contentID)
+    end
+  end
+end
 
-    --- Edge Borders 
-    TopBGTexture =  {
-      visible = false,
-      file = "Interface\\Buttons\\WHITE8X8",
-      drawLayer = "BORDER",
-      vertexColor = Color.BLACK,
-      location = {
-        Anchor("TOPLEFT", 0, 0, "TopLeftBGTexture", "TOPRIGHT"),
-        Anchor("BOTTOMRIGHT", 0, 0, "TopRightBGTexture", "BOTTOMLEFT")
-      }
-    },
-    BottomBGTexture =  {
-      visible = false,
-      file = "Interface\\Buttons\\WHITE8X8",
-      drawLayer = "BORDER",
-      vertexColor = Color.BLACK,
-      location = {
-        Anchor("TOPLEFT", 0, 0, "BottomLeftBGTexture", "TOPRIGHT"),
-        Anchor("BOTTOMRIGHT", 0, 0, "BottomRightBGTexture", "BOTTOMLEFT")
-      }
-    },
-    LeftBGTexture =  {
-      visible = false,
-      file = "Interface\\Buttons\\WHITE8X8",
-      drawLayer = "BORDER",
-      vertexColor = Color.BLACK,
-      location = {
-        Anchor("TOPLEFT", 0, 0, "TopLeftBGTexture", "BOTTOMLEFT"),
-        Anchor("BOTTOMRIGHT", 0, 0, "BottomLeftBGTexture", "TOPRIGHT")
-      }
-    },
-    RightBGTexture =  {
-      visible = false,
-      file = "Interface\\Buttons\\WHITE8X8",
-      drawLayer = "BORDER",
-      vertexColor = Color.BLACK,
-      location = {
-        Anchor("TOPLEFT", 0, 0, "TopRightBGTexture", "BOTTOMLEFT"),
-        Anchor("BOTTOMRIGHT", 0, 0, "BottomRightBGTexture", "TOPRIGHT")
-      }
-    }
-  }
-})
+__Arguments__ { String, Boolean/true }
+function private__SetEnabledTracker(trackerID, enabled)
+  if enabled and TRACKERS[trackerID] then 
+    return 
+  end
+
+  if enabled then
+    local tracker = private__NewTracker(trackerID)
+    LoadTracker(tracker)
+  else
+    private__DeleteTracker(trackerID)
+  end
+end
+
+TRACKERS_AUTO_VISIBILITY_REGISTERED       = List()
+AUTO_VISIBILITY_EVENTS_HANDLER_REGISTERED = false
+AUTO_VISIBILITY_EVENTS                    = {
+  "MODIFIER_STATE_CHANGED", "ACTIONBAR_PAGE_CHANGED", "UPDATE_BONUS_ACTIONBAR",
+  "PLAYER_ENTERING_WORLD", "UPDATE_SHAPESHIFT_FORM", "UPDATE_STEALTH", "PLAYER_TARGET_CHANGED",
+  "PLAYER_FOCUS_CHANGED", "PLAYER_REGEN_DISABLED", "PLAYER_REGEN_ENABLED", "UNIT_PET", 
+  "GROUP_ROSTER_UPDATE", "CHALLENGE_MODE_START"
+}
+TRACKERS_MACRO_TICKER_REGISTERED          = List() 
+MACRO_TICKER_ENABLED                      = false
 
 
-function EvaluateTrackerVisibility(self, tracker)
-  local macroText         = tracker.MacroVisibility
-  local defaultVisibility = tracker.DefaultVisibility
+__Async__() function VISIBILITY_MACRO_TICKER()
+  if not MACRO_TICKER_ENABLED then 
+    return 
+  end
+
+  while MACRO_TICKER_ENABLED do 
+    for _, tracker in TRACKERS_MACRO_TICKER_REGISTERED:GetIterator() do
+      tracker.VisibilityRulesShown = GetRulesVisibilityShownForTracker(tracker)
+    end
+
+    Delay(0.2)
+  end
+end
+
+__Arguments__ { Tracker }
+function RegisterTrackerForMacroTicker(tracker)
+  if TRACKERS_MACRO_TICKER_REGISTERED:Contains(tracker) then 
+    return 
+  end
+
+  TRACKERS_MACRO_TICKER_REGISTERED:Insert(tracker)
+  
+  if TRACKERS_MACRO_TICKER_REGISTERED.Count > 0 and not MACRO_TICKER_ENABLED then 
+    MACRO_TICKER_ENABLED = true 
+    VISIBILITY_MACRO_TICKER()
+  end
+end
+
+__Arguments__ { Tracker }
+function UnregisterTrackerForMacroTicker(tracker)
+  if not TRACKERS_MACRO_TICKER_REGISTERED:Contains(tracker) then 
+    return 
+  end
+  
+  TRACKERS_MACRO_TICKER_REGISTERED:Remove(tracker)
+  
+  if TRACKERS_MACRO_TICKER_REGISTERED.Count == 0 and MACRO_TICKER_ENABLED then 
+    MACRO_TICKER_ENABLED = false 
+  end
+end
+
+function UPDATE_VISIBILITY_ON_EVENTS()
+  for _, tracker in TRACKERS_AUTO_VISIBILITY_REGISTERED:GetIterator() do
+    tracker.VisibilityRulesShown = GetRulesVisibilityShownForTracker(tracker)
+  end
+end
+
+__Arguments__ { Tracker}
+function RegisterTrackerForAutoVisibility(tracker)
+  if TRACKERS_AUTO_VISIBILITY_REGISTERED:Contains(tracker) then 
+    return 
+  end
+
+  TRACKERS_AUTO_VISIBILITY_REGISTERED:Insert(tracker)
+
+  if not AUTO_VISIBILITY_EVENTS_HANDLER_REGISTERED then 
+    for _, event in ipairs(AUTO_VISIBILITY_EVENTS) do
+      _M:RegisterEvent(event, UPDATE_VISIBILITY_ON_EVENTS)
+    end
+
+    AUTO_VISIBILITY_EVENTS_HANDLER_REGISTERED = true
+  end
+
+  if tracker.VisibilityRules.macroVisibility ~= "" then 
+    RegisterTrackerForMacroTicker(tracker)
+  end
+end
+
+__Arguments__ { Tracker }
+function UnregisterTrackerForAutoVisibility(tracker)
+  if not TRACKERS_AUTO_VISIBILITY_REGISTERED:Contains(tracker) then 
+    return 
+  end
+  
+  TRACKERS_AUTO_VISIBILITY_REGISTERED:Remove(tracker)
+
+  if TRACKERS_AUTO_VISIBILITY_REGISTERED.Count == 0 then 
+    for _, event in ipairs(AUTO_VISIBILITY_EVENTS) do
+      _M:UnregisterEvent(event)
+    end
+
+    AUTO_VISIBILITY_EVENTS_HANDLER_REGISTERED = false
+  end
+
+  if tracker.VisibilityRules.macroVisibility ~= "" then 
+    UnregisterTrackerForMacroTicker(tracker)
+  end
+end
+
+__Arguments__ { Tracker }
+function LoadVisibilityRulesForTracker(tracker)
+  local rules = GetTrackerSetting(tracker.id, "visibilityRules")
+  local trackerVisibilityRules = tracker.VisibilityRules
+
+  for _, prop in Struct.GetMembers(VisibilityRulesType) do
+    local propName = prop:GetName()
+    trackerVisibilityRules[propName] = rules and rules[propName] or prop:GetDefault()
+  end
+
+  tracker.HideWhenEmpty = trackerVisibilityRules.hideWhenEmpty
+  tracker.DefaultVisibility = trackerVisibilityRules.defaultVisibility
+  
+  if trackerVisibilityRules.enableAdvancedRules then
+    RegisterTrackerForAutoVisibility(tracker)
+  end
+
+  tracker.VisibilityRulesShown = GetRulesVisibilityShownForTracker(tracker)
+end
+
+function UpdateTrackersVisibility()
+  for _, tracker in TRACKERS_AUTO_VISIBILITY_REGISTERED:GetIterator() do
+    tracker.VisibilityRulesShown = GetRulesVisibilityShownForTracker(tracker)
+  end
+end
+
+__Arguments__ { Tracker }
+function GetRulesVisibilityShownForTracker(tracker)
+  local rules = tracker.VisibilityRules
+
+  if tracker.Empty and rules.hideWhenEmpty then
+    return false 
+  end
+
+  if rules.enableAdvancedRules then 
+    local result = EvaluateVisibilityAdvancedRules(rules)
+    if result == "show" then 
+      return true 
+    elseif result == "hide" then 
+      return false 
+    end
+  end
+
+  if rules.defaultVisibility == "hide" then 
+    return false 
+  end
+
+  return true
+end
+
+__Arguments__ { VisibilityRulesType }
+function EvaluateVisibilityAdvancedRules(rules)
   local trackerVisibility
 
-  if tracker.EvaluateMacroVisibilityAtFirst and macroText and macroText ~= "" then
+  if not rules then 
+    return trackerVisibility
+  end
+
+  local macroText = rules.macroVisibility
+  
+  if rules.evaluateMacroVisibilityAtFirst and macroText and macroText ~= "" then
     trackerVisibility = SecureCmdOptionParse(macroText)
   end
 
@@ -1381,29 +1042,29 @@ function EvaluateTrackerVisibility(self, tracker)
   local isInKeystone = GetActiveKeystoneInfo() > 0
 
   if isInKeystone then 
-    trackerVisibility = tracker.InKeystoneVisibility
+    trackerVisibility = rules.inKeystoneVisibility
   elseif instanceType == "party" then
-    trackerVisibility = tracker.InDungeonVisibility
+    trackerVisibility = rules.inDungeonVisibility
   elseif instanceType == "raid" then 
-    trackerVisibility = tracker.InRaidVisibility
+    trackerVisibility = rules.inRaidVisibility
   elseif instanceType == "scenario" then 
-    trackerVisibility = tracker.InScenarioVisibility  
+    trackerVisibility = rules.inScenarioVisibility  
   elseif instanceType == "arena" then 
-    trackerVisibility = tracker.InArenaVisibility
+    trackerVisibility = rules.inArenaVisibility
   elseif instanceType == "pvp" then 
-    trackerVisibility = tracker.inBattlegroundVisibility
+    trackerVisibility = rules.inBattlegroundVisibility
   else
     trackerVisibility = "ignore"
   end
 
-  if trackerVisibility and trackerVisibility ~= "ignore" then
+  if trackerVisibility and trackerVisibility ~= "ignore" then 
     return trackerVisibility
   end
 
   if IsInRaid()  then 
-    trackerVisibility = tracker.inRaidGroupVisibility
+    trackerVisibility = rules.inRaidGroupVisibility
   elseif IsInGroup() then 
-    trackerVisibility = tracker.InPartyVisibility
+    trackerVisibility = rules.inPartyVisibility
   else 
     trackerVisibility = "ignore"
   end
@@ -1412,199 +1073,320 @@ function EvaluateTrackerVisibility(self, tracker)
     return trackerVisibility
   end
 
-  if not tracker.EvaluateMacroVisibilityAtFirst and macroText and macroText ~= "" then 
+  if not rules.evaluateMacroAtFirstCheckBox and macroText and macroText ~= "" then 
     trackerVisibility = SecureCmdOptionParse(macroText)
   end
 
   return trackerVisibility
 end
 
+-- Export the functions in the API
+API.NewTracker = NewTracker
+API.DeleteTracker = DeleteTracker
+API.IterateTrackers = IterateTrackers
+API.GetTracker = GetTracker
+API.RegisterTrackerSetting = RegisterTrackerSetting
+API.GetTrackerSetting = GetTrackerSetting
+API.GetTrackerSettingWithDefault = GetTrackerSettingWithDefault 
+API.SetTrackerSetting = SetTrackerSetting
+API.FromTrackerSetting = FromTrackerSetting
 
+__UIElement__()
+__ChildProperty__(Tracker, "Mover")
+class "TrackerMover" (function(_ENV)
+  inherit "Mover"
+  -----------------------------------------------------------------------------
+  --                            Constructors                                 --
+  -----------------------------------------------------------------------------
+  __Template__ {
+    Text = FontString
+  }
+  function __ctor(self) 
+   end 
+end)
+-------------------------------------------------------------------------------
+--                              UI Settings                                  --
+-------------------------------------------------------------------------------
+RegisterTrackerSetting({ id = "enabled", default = true, handler = private__SetEnabledTracker })
+RegisterTrackerSetting({ id = "locked", default = false })
+RegisterTrackerSetting({ id = "scale", default = 1})
+RegisterTrackerSetting({ id = "position"})
+RegisterTrackerSetting({ id = "size", default = Size(300, 325) })
+RegisterTrackerSetting({ id = "showBackground", default = false})
+RegisterTrackerSetting({ id = "showBorder", default = false})
+RegisterTrackerSetting({ id = "backgroundColor", default = Color.BLACK})
+RegisterTrackerSetting({ id = "borderColor", default = Color.BLACK})
+RegisterTrackerSetting({ id = "borderSize", default = 1})
+RegisterTrackerSetting({ id = "showScrollBar", default = true})
+RegisterTrackerSetting({ id = "scrollBarPosition", default = "RIGHT"})
+RegisterTrackerSetting({ id = "scrollBarThumbColor", default =  ColorType(1, 199/255, 0, 0.75)})
 
-VISIBILITY_MACRO_TICKER_STARTED = false 
-__Async__()
-function StartVisibilityMacroTicker()
-  if VISIBILITY_MACRO_TICKER_STARTED then 
-    return 
-  end
-
-  VISIBILITY_MACRO_TICKER_STARTED = true 
-
-  while true do
-    UPDATE_VISIBILITY_ON_EVENTS()
-    Delay(0.2)
-  end
-end
-
-function OnEnable(self)
-  --- Create the main tracker 
-  _MainTracker = private__NewTracker("main")
-end
-
-function OnLoad(self)
-  StartVisibilityMacroTicker()
-end
-
-__SystemEvent__ "MODIFIER_STATE_CHANGED" "ACTIONBAR_PAGE_CHANGED" "UPDATE_BONUS_ACTIONBAR"
-"PLAYER_ENTERING_WORLD" "UPDATE_SHAPESHIFT_FORM" "UPDATE_STEALTH" "PLAYER_TARGET_CHANGED"
-"PLAYER_FOCUS_CHANGED" "PLAYER_REGEN_DISABLED" "PLAYER_REGEN_ENABLED" "UNIT_PET" 
-"GROUP_ROSTER_UPDATE" "CHALLENGE_MODE_START"
-function UPDATE_VISIBILITY_ON_EVENTS()
-  for _, tracker in SLT.API.IterateTrackers(true, false) do
-    local visibility = _M:EvaluateTrackerVisibility(tracker)
-
-    if not visibility or (visibility ~= "hide" and visibility ~= "show") then 
-      visibility = tracker.DefaultVisibility
+RegisterTrackerSetting({
+  id = "contentsTracked",
+  ignoreDefault = true, 
+  handler = function(trackerID, contentTracked, contentID)
+    if not contentID then 
+      return 
     end
 
-    if visibility == "show" then 
-      tracker:Show()
-    elseif visibility == "hide" then 
-      tracker:Hide()
-    end
-  end
-end
-
-__SystemEvent__()
-__Async__()
-function PLAYER_ENTERING_WORLD(isInitialLogin, isReloadingUi)
-  if isInitialLogin or isReloadingUi then
-    local trackerBottom = _MainTracker:GetBottom()
-    --- Important ! We have to delay the tracking of content type after an 
-    --- initial and a reloading ui for they getting a valid "GetBottom" is important
-    --- to compute the height of their frame. 
-    --- So we delay until the tracker "GetBottom" returns a no nil value, saying GetBottom
-    --- now return valid value. 
-    while not trackerBottom do 
-      trackerBottom = _MainTracker:GetBottom()
-      Next()
+    local tracker = TRACKERS[trackerID]
+    if not tracker then 
+      return 
     end
 
-    --- Load the contents tracker for the main tracker 
-    private__LoadContentsForTracker(_MainTracker)
+    local shouldBeTracked = private__IsContentShouldTracked(trackerID, contentTracked)
+    if shouldBeTracked then 
+      tracker:TrackContent(contentID)
+    else
+      tracker:UntrackContent(contentID)
+    end
 
-    --- Create the custom trackers, and load the contents tracked by them 
-    local trackers = SavedVariables.Path("list").GetValue("tracker")
-    if trackers then 
-      for trackerId in pairs(trackers) do
-        local tracker = private__NewTracker(trackerId)
-        private__LoadContentsForTracker(tracker)
+    tracker.VisibilityRulesShown = GetRulesVisibilityShownForTracker(tracker)
+  end, 
+  saveHandler = function(trackerID, contentTracked, contentID)
+    if not contentID then 
+      return 
+    end
+
+    local _, isDefault = private__IsContentShouldTracked(trackerID, contentTracked)
+
+    SavedVariables.Profile().Path("trackers", trackerID, "contents", contentID)
+    if isDefault then
+      SavedVariables.SetValue("tracked", nil)
+    else
+      SavedVariables.SaveValue("tracked", contentTracked)
+    end
+  end,
+  getHandler = private__GetContentTracked
+})
+
+RegisterTrackerSetting({
+  id = "visibilityRules",
+  structType = VisibilityRulesType,
+  handler = function(trackerID, value, subSetting)
+    local tracker = TRACKERS[trackerID]
+    if not tracker and not subSetting then 
+      return 
+    end
+
+    tracker.VisibilityRules[subSetting] = value
+
+    if subSetting == "enableAdvancedRules" then
+      if value then  
+        RegisterTrackerForAutoVisibility(tracker)
+      else
+        UnregisterTrackerForAutoVisibility(tracker)
+      end
+    elseif subSetting == "macroVisibility" then
+      if value ~= "" then 
+        RegisterTrackerForMacroTicker(tracker)
+      else 
+        UnregisterTrackerForMacroTicker(tracker)
       end
     end
+
+    tracker.VisibilityRulesShown = GetRulesVisibilityShownForTracker(tracker)
   end
+})
+-------------------------------------------------------------------------------
+--                              Observables                                  --
+-------------------------------------------------------------------------------
+function FromVisible()
+  return FromUIProperty("Minimized", "VisibilityRulesShown"):Map(function(minimized, visibilityRulesShown)
+    if minimized then 
+      return false 
+    end
+    
+    return visibilityRulesShown
+  end)
 end
 
-__SystemEvent__()
-function SLT_HIDE_TRACKERS()
-  for _, tracker in SLT.API.IterateTrackers() do 
-    tracker:ApplyAndSaveSetting("hidden", true)
-  end  
+function FromLocation()
+  return FromTrackerSetting("position"):Map(function(pos, tracker)
+    if pos then
+      return  { Anchor("TOPLEFT", pos.x or 0, pos.y or 0, nil, "BOTTOMLEFT") }
+    end
+    
+    return tracker.id == "main" and { Anchor("RIGHT", -40, 0) } or { Anchor("CENTER") }
+  end)
 end
 
-__SystemEvent__()
-function SLT_SHOW_TRACKERS()
-  for _, tracker in SLT.API.IterateTrackers() do 
-    tracker:ApplyAndSaveSetting("hidden", false)
-  end  
+function FromBackdrop()
+ return Wow.GetFrame("OnBackdropChanged")
+    :Next()
+    :Map(function(tracker, value, _, prop)
+      local showBackground = tracker.ShowBackground
+      local showBorder = tracker.ShowBorder
+      if not showBackground and not showBorder then 
+        return nil 
+      end
+
+      local backdrop = {}
+      if showBackground then 
+        backdrop.bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]]
+      end
+
+      if showBorder then 
+        backdrop.edgeFile = [[Interface\Buttons\WHITE8X8]]
+        backdrop.edgeSize = tracker.BorderSize
+      end
+
+      return backdrop
+    end)
 end
 
-__SystemEvent__()
-function SLT_LOCK_TRACKERS()
-  for _, tracker in SLT.API.IterateTrackers() do 
-    tracker:ApplyAndSaveSetting("locked", true)
-  end
+__Arguments__ { Boolean/true}
+function FromMinizeButtonAtlas(normal)
+  return FromUIProperty("Minimized"):Map(function(minimized)
+    if minimized then 
+      return normal and AtlasType("common-button-dropdown-closed", false) or AtlasType("common-button-dropdown-closedpressed", false)
+
+    else
+      return normal and AtlasType("common-button-dropdown-open", false) or AtlasType("common-button-dropdown-closedpressed", false)
+    end
+  end)
 end
 
-__SystemEvent__()
-function SLT_UNLOCK_TRACKERS()
-  for _, tracker in SLT.API.IterateTrackers() do 
-    tracker:ApplyAndSaveSetting("locked", false)
-  end
+function FromScrollFrameLocation()
+  return GetFrame("OnBackdropChanged"):Map(function(tracker)
+    local showBorder = tracker.ShowBorder
+    
+    if showBorder then 
+      local borderSize = tracker.BorderSize
+      return {
+        Anchor("TOPLEFT", borderSize, -borderSize),
+        Anchor("BOTTOMRIGHT", -borderSize, borderSize)
+      }
+    end
+
+    return { Anchor("TOPLEFT"), Anchor("BOTTOMRIGHT") }
+  end)
 end
 
-__SystemEvent__()
-function SLT_SHOW_TRACKER(trackerId)
-  if not trackerId then 
-    return 
-  end
-
-  local tracker = SLT.API.GetTracker(trackerId)
-  if tracker then 
-    tracker:ApplyAndSaveSetting("hidden", false)
-  end
+function FromScrollBarLocation()
+  return FromTrackerSetting("scrollBarPosition"):Map(function(position)
+    if position == "LEFT" then
+      return { Anchor("RIGHT", -15, 0, nil, "LEFT") }
+    end
+    
+    return { Anchor("LEFT", 15, 0, nil, "RIGHT") }
+  end)
 end
 
-__SystemEvent__()
-function SLT_HIDE_TRACKER(trackerId)
-  if not trackerId then 
-    return 
-  end
-
-  local tracker = SLT.API.GetTracker(trackerId)
-  if tracker then 
-    tracker:ApplyAndSaveSetting("hidden", true)
-  end
+function FromScrollBarThumbColor()
+  return FromTrackerSetting("scrollBarThumbColor"):Map(function(color)
+    return color
+  end)
 end
+-------------------------------------------------------------------------------
+--                                Styles                                     --
+-------------------------------------------------------------------------------
+Style.UpdateSkin("Default", {
+  [TrackerMover] = {
+    backdrop = {
+      bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]]
+    },
 
+    backdropColor                     = { r = 0, g = 1, b = 0, a = 0.3},
+    location                          = NIL,
+    Text = {
+      text                            = "Click here to move the tracker",
+      setAllPoints                    = true,
+      mediaFont                       = FontType("PT Sans Narrow Bold", 13)
+    },
+  },
+
+  [TrackerMinimizeButton] = {
+    size                              = { width = 24, height = 24 },
+    registerForClicks                 = { "AnyUp"},
+    visible                           = FromUIProperty("Enabled"),
+
+    NormalTexture = {
+      setAllPoints                    = true,
+      atlas                           = FromMinizeButtonAtlas()
+    },
+    PushedTexture = {
+      setAllPoints                    = true,
+      atlas                           = FromMinizeButtonAtlas(false)
+    },
+
+    HighlightTexture        = {
+      atlas                           = AtlasType("common-iconmask", false),
+      setAllPoints                    = true,
+      vertexColor                     = { r = 1, g = 1, b = 1, a = 0.05}
+    }
+  },
+
+  [Tracker] = {
+    visible                           = FromVisible(),
+    locked                            = FromTrackerSetting("locked"),
+    scale                             = FromTrackerSetting("scale"),
+    clipChildren                      = false,
+    minResize                         = { width = 100, height = 100},
+    size                              = FromTrackerSetting("size"),
+    location                          = FromLocation(),
+    resizable                         = false,
+    movable                           = false,
+    backdrop                          = FromBackdrop(),
+    showBackground                    = FromTrackerSetting("showBackground"),
+    showBorder                        = FromTrackerSetting("showBorder"),
+    backdropColor                     = FromTrackerSetting("backgroundColor"),
+    backdropBorderColor               = FromTrackerSetting("borderColor"),
+    borderSize                        = FromTrackerSetting("borderSize"),
+    showScrollBar                     = FromTrackerSetting("showScrollBar"),
+
+    ScrollFrame = {
+      location                        = FromScrollFrameLocation()
+    },
+
+    MinimizeButton = {
+      location                        = { Anchor("BOTTOMLEFT", 5, 0, nil, "TOPRIGHT") }
+    },
+
+    ScrollBar = {
+      size                            = Size(6, 244),
+      location                        = FromScrollBarLocation(),
+      thumbColor                      = FromScrollBarThumbColor()
+    },
+
+    [TrackerMover] = {
+      location = {
+        Anchor("BOTTOMLEFT", 0, 0, nil, "TOPLEFT"),
+        Anchor("BOTTOMRIGHT", 0, 0, nil, "TOPRIGHT")
+      },
+    }
+  }
+})
+-------------------------------------------------------------------------------
+--                                Module                                     --
+-------------------------------------------------------------------------------
 __SystemEvent__()
-function SLT_LOCK_TRACKER(trackerId)
-  if not trackerId then 
-    return 
-  end
+__Async__() function PLAYER_ENTERING_WORLD(isInitialLogin, isReloadingUI)
+  if isInitialLogin or isReloadingUI then 
+    local trackers = SavedVariables.Path("list").GetValue("trackers")
+    local trackersSettings = SavedVariables.Profile().GetValue("trackers") or {}
 
-  local tracker = SLT.API.GetTracker(trackerId)
-  if tracker then 
-    tracker:ApplyAndSaveSetting("locked", true)
-  end
-end
+    if trackersSettings then 
+      -- Create the main tracker if enabled
+      local settings = trackersSettings["main"]
+      local enabled = settings and settings.enabled or true
 
-__SystemEvent__()
-function SLT_UNLOCK_TRACKER(trackerId)
-  if not trackerId then 
-    return 
-  end
+      if enabled == nil or enabled then 
+        local tracker = private__NewTracker("main")
+        LoadTracker(tracker)
+      end
 
-  local tracker = SLT.API.GetTracker(trackerId)
-  if tracker then 
-    tracker:ApplyAndSaveSetting("locked", false)
-  end
-end
-
-__SystemEvent__()
-function SLT_TOGGLE_TRACKER(trackerId) 
-  if not trackerId then 
-    return 
-  end
-
-  local tracker = SLT.API.GetTracker(trackerId)
-  if tracker then 
-    tracker:ApplyAndSaveSetting("hidden", tracker:IsShown())
-  end
-end
-
-__SystemEvent__()
-function SLT_TOGGLE_LOCK_TRACKER(trackerId) 
-  if not trackerId then 
-    return 
-  end
-
-  local tracker = SLT.API.GetTracker(trackerId)
-  if tracker then 
-    tracker:ApplyAndSaveSetting("locked", not tracker.Locked)
-  end
-end
-
-
-__SystemEvent__()
-function SLT_SHOW_ANCHORS()
-  for _, tracker in SLT.API.IterateTrackers() do 
-    tracker.Locked = false 
-  end
-end
-
-__SystemEvent__()
-function SLT_HIDE_ANCHORS()
-  for _, tracker in SLT.API.IterateTrackers() do 
-    tracker.Locked = true 
+      -- Create the custtom trackers if enabled
+      if trackers then 
+        for trackerID in pairs(trackers) do 
+          settings = trackersSettings[trackerID]
+          enabled = settings and settings.enabled or true 
+          if enabled then 
+            local tracker = private__NewTracker(trackerID)
+            LoadTracker(tracker)
+          end         
+        end
+      end
+    end
   end
 end

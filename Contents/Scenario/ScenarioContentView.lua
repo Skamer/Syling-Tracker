@@ -6,396 +6,324 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling              "SylingTracker.Scenario.ContentView"                    ""
+Syling                "SylingTracker.Contents.ScenarioContentView"           ""
 -- ========================================================================= --
-namespace                           "SLT"
--- ========================================================================= --
--- Iterator helper for ignoring the children are used for backdrop, and avoiding
--- they are taken as account for their parent height
-IterateFrameChildren  = Utils.IterateFrameChildren
--- ========================================================================= --
-ValidateFlags         = System.Toolset.validateflags
-ResetStyles           = Utils.ResetStyles
--- ========================================================================= --
-__Recyclable__ "SylingTracker_ScenarioContentView%d"
+export {
+  FromUIProperty                      = Wow.FromUIProperty,
+  FromBackdrop                        = Frame.FromBackdrop,
+  FromUISetting                       = API.FromUISetting,
+  RegisterUISetting                   = API.RegisterUISetting,
+  GenerateUISettings                  = API.GenerateUISettings,
+  Tooltip                             = API.GetTooltip(),
+}
+
+__UIElement__()
 class "ScenarioContentView" (function(_ENV)
   inherit "ContentView"
-
-  __Flags__()
-  enum "Flags" {
-    NONE                  = 0,
-    HAS_OBJECTIVES        = 1,
-    HAS_BONUS_OBJECTIVES  = 2,
-  }
   -----------------------------------------------------------------------------
-  --                               Methods                                   --
+  --                               Handlers                                  --
   -----------------------------------------------------------------------------
-  function OnViewUpdate(self, data)
-    local scenarioData = data.scenario 
-    if not scenarioData then 
-      return 
-    end 
+  local function OnTopInfoEnter(self)
+    local parent          = self:GetParent()
+    local scenarioData    = parent.Data and parent.Data.scenario
 
-    local name = scenarioData.name 
-    if name then 
-      local nameFrame = self:GetChild("Header"):GetChild("ScenarioName")
-      Style[nameFrame].text = name 
+    local scenarioName    = parent.ScenarioName
+    local stageName       = parent.StageName
+    local currentStage    = parent.CurrentStage
+    local numStages       = parent.NumStages
+    local description     = scenarioData and scenarioData.stepDescription
+
+    Tooltip:SetOwner(self)
+    if currentStage <= numStages then 
+      GameTooltip_SetTitle(Tooltip, SCENARIO_STAGE_STATUS:format(currentStage, numStages))
+      GameTooltip_AddNormalLine(Tooltip, stageName)
+      GameTooltip_AddBlankLineToTooltip(Tooltip)
+      GameTooltip_AddNormalLine(Tooltip, description)
+      Tooltip:Show()
     end
+  end
 
-    -- Stage Part
-    local contentFrame = self:GetChild("Content")
-    local stageFrame = contentFrame:GetChild("Stage")
+  local function OnTopInfoLeave(self)
+    Tooltip:Hide()
+  end
+  -----------------------------------------------------------------------------
+  --                                Methods                                  --
+  -----------------------------------------------------------------------------
+  function OnViewUpdate(self, data, metadata)
+    super.OnViewUpdate(self, data, metadata)
 
-    local currentStage, numStages = scenarioData.currentStage, scenarioData.numStages
-    if currentStage and numStages then 
-      local stageCounter = stageFrame:GetChild("Counter")
-      Style[stageCounter].text = string.format("%i/%i", currentStage, numStages)
-    end 
+    local scenarioData = data and data.scenario
 
-    local stageName = scenarioData.stageName
-    if stageName then 
-      local stageNameFrame = stageFrame:GetChild("Name")
-      Style[stageNameFrame].text = stageName
-    end
+    if scenarioData then 
+      self.ScenarioName = scenarioData.name
+      self.StageName = scenarioData.stepName
+      self.CurrentStage = scenarioData.currentStage
+      self.NumStages = scenarioData.numStages
+      self.WidgetSetID = scenarioData.widgetSetID
+
+      local objectives = self:GetChild("Objectives")
+      objectives:UpdateView(scenarioData.objectives, metadata)
 
 
-    -- Determine the flags 
-    local flags = Flags.NONE 
-    if scenarioData.objectives then 
-      flags = flags + Flags.HAS_OBJECTIVES
-    end
-
-    if scenarioData.bonusObjectives then 
-      flags = flags + Flags.HAS_BONUS_OBJECTIVES
-    end
-
-    if flags ~= self.Flags then 
-      ResetStyles(self)
-      -- REVIEW: Probably need adding the header
-
-      -- Is the scenario has objectives
-      if ValidateFlags(Flags.HAS_OBJECTIVES, flags) then 
-        self:AcquireObjectives()
+      local bonusObjectivesData = scenarioData.bonusObjectives
+      if bonusObjectivesData then 
+        Style[self].BonusObjectives.visible = true
+        local bonusObjectives = self:GetPropertyChild("BonusObjectives")
+        bonusObjectives:UpdateView(bonusObjectivesData, metadata)
       else
-        self:ReleaseObjectives()
-      end
-      
-      -- Is the scenario has bonus objectives
-      if ValidateFlags(Flags.HAS_BONUS_OBJECTIVES, flags) then 
-        objectivesView = self:AcquireBonusObjectives()
-      else
-        self:ReleaseBonusObjectives()
+        Style[self].BonusObjectives = NIL
       end
 
 
-
-      -- Styling stuff
-      if flags ~= Flags.NONE then 
-        local styles = self.FlagsStyles and self.FlagsStyles[flags]
-        if styles then 
-          Style[self] = styles
-        end 
-      end
-    end
-
-    -- Update the conditional children if exists 
-    if scenarioData.objectives then 
-      local objectivesView = self:AcquireObjectives()
-      objectivesView:UpdateView(scenarioData.objectives)
-    end
-
-    if scenarioData.bonusObjectives then
-      local bonusObjectivesView = self:AcquireBonusObjectives()
-      bonusObjectivesView:UpdateView(scenarioData.bonusObjectives)
-    end
-
-    -- Don't forget to set the new flag for avoiding "Flashy" behaviors
-    self.Flags = flags
-  end
-
-  function AcquireObjectives(self)
-    local content = self:GetChild("Content")
-    local objectives = content:GetChild("Objectives")
-    if not objectives then 
-      objectives = self.ObjectivesClass.Acquire()
-
-      -- We need to keep the old name when we'll release it
-      self.__previousObjectivesName = objectives:GetName()
-
-      objectives:SetParent(content)
-      objectives:SetName("Objectives")
-
-      objectives.OnSizeChanged = objectives.OnSizeChanged + self.OnObjectivesSizeChanged
-    
-      self:AdjustHeight(true)
-    end
-
-    return objectives 
-  end
-
-  function ReleaseObjectives(self)
-    local content = self:GetChild("Content")
-    local objectives = content:GetChild("Objectives")
-    if objectives then 
-      -- Give its old name (generated by the recycle system)
-      objectives:SetName(self.__previousObjectivesName)
-      self.__previousObjectivesName = nil 
-
-      -- Unregister the events
-      objectives.OnSizeChanged = objectives.OnSizeChanged - self.OnObjectivesSizeChanged
-
-      -- It's better to release after events have been un registered for avoiding
-      -- useless calls
-      objectives:Release()
-
-      self:AdjustHeight(true)
+    else 
+      self.ScenarioName = nil
     end
   end
 
-  function AcquireBonusObjectives(self)
-    local bonusObjectives = self.__bonusObjectives
-    if not bonusObjectives then
-      local content = self:GetChild("Content")
+  function OnExpand(self)
+    Style[self].TopScenarioInfo.visible = true 
+    Style[self].Widgets.visible = true 
+    Style[self].Objectives.visible = true
 
-      bonusObjectives = self.BonusObjectivesClass.Acquire()
-      local bonusObjectivesText = SLTFontString.Acquire()
-      local bonusObjectivesIcon = IconBadge.Acquire()
-
-      self.__bonusObjectives = bonusObjectives
-      self.__bonusObjectivesText = bonusObjectivesText
-      self.__bonusObjectivesIcon = bonusObjectivesIcon 
-
-      -- We need to keep the old name when we'll release it 
-      self.__previousBonusObjectivesName = bonusObjectives:GetName()
-      self.__previousBonusObjectivesTextName = bonusObjectivesText:GetName()
-      self.__previousBonusObjectivesIconName = bonusObjectivesIcon:GetName()
-
-      bonusObjectives:SetParent(content)
-      bonusObjectivesText:SetParent(content)
-      bonusObjectivesIcon:SetParent(content)
-
-      bonusObjectives:SetName("BonusObjectives")
-      bonusObjectivesText:SetName("BonusObjectivesText")
-      bonusObjectivesIcon:SetName("BonusObjectivesIcon")
-
-
-      bonusObjectives.OnSizeChanged = bonusObjectives.OnSizeChanged + self.OnObjectivesSizeChanged
-
-      self:AdjustHeight(true)
+    if self:GetPropertyChild("BonusObjectives") then 
+      Style[self].BonusObjectives.visible = true 
     end
-
-    return bonusObjectives
   end
 
-  function ReleaseBonusObjectives(self)
-    local bonusObjectives = self.__bonusObjectives
-    if bonusObjectives then
-      local bonusObjectivesText = self.__bonusObjectivesText
-      local bonusObjectivesIcon = self.__bonusObjectivesIcon
+  function OnCollapse(self)
+    Style[self].TopScenarioInfo.visible = false  
+    Style[self].Widgets.visible = false 
+    Style[self].Objectives.visible = false
 
-      self.__bonusObjectives = nil
-      self.__bonusObjectivesIcon = nil 
-      self.__bonusObjectivesText = nil 
-
-      -- Give its old name (generated by the recycle system) 
-      bonusObjectives:SetName(self.__previousBonusObjectivesName)
-      bonusObjectivesText:SetName(self.__previousBonusObjectivesTextName)
-      bonusObjectivesIcon:SetName(self.__previousBonusObjectivesIconName)
-
-      self.__previousBonusObjectivesName = nil
-      self.__previousBonusObjectivesTextName = nil 
-      self.__previousBonusObjectivesIconName = nil
-
-      -- Unregister the events
-      bonusObjectives.OnSizeChanged = bonusObjectives.OnSizeChanged - self.OnObjectivesSizeChanged
-
-      -- It's better to release after events have been un registered for avoiding
-      -- useless calls
-      bonusObjectives:Release()
-      bonusObjectivesText:Release()
-      BonusObjectivesIcon:Release()
-
-      self:AdjustHeight(true)
-    end 
-  end
-
-  function OnRelease(self)
-    -- First, release the children 
-    self:ReleaseObjectives()
-
-    -- We call the "Parent" OnRelease (see, ContentView)
-    super.OnRelease(self)
-
-    -- Reset the class properties
-    self.Flags  = nil
+    if self:GetPropertyChild("BonusObjectives") then 
+      Style[self].BonusObjectives.visible = false
+    end
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
-  property "Flags" {
-    type    = ScenarioContentView.Flags,
-    default = ScenarioContentView.Flags.NONE
+  __Observable__()
+  property "ScenarioName" {
+    type = String
   }
 
-  property "ObjectivesClass" {
-    type    = ClassType,
-    default = ObjectiveListView
-  }
-  
-  property "BonusObjectivesClass" {
-    type    = ClassType,
-    default = ObjectiveListView
+  __Observable__()
+  property "StageName" {
+    type = String
   }
 
-  property "FlagsStyles" {
-    type = Table
+  __Observable__()
+  property "NumStages" {
+    type = Number,
+    default = 0
+  }
+
+  __Observable__()
+  property "CurrentStage" {
+    type = Number,
+    default = 0
+  }
+
+  __Observable__()
+  property "WidgetSetID" {
+    type = Number
   }
   -----------------------------------------------------------------------------
-  --                            Constructors                                 --
+  --                              Constructors                               --
   -----------------------------------------------------------------------------
   __Template__ {
+    TopScenarioInfo = Frame,
+    Widgets = UIWidgets,
+    Objectives = ObjectiveListView,
     {
-      Header = {
-        ScenarioName = SLTFontString
-      },
-      Content = {
-        Stage = Frame,
-        {
-          Stage = {
-            Counter = SLTFontString,
-            Name    = SLTFontString
-          }
-        }
+      TopScenarioInfo = {
+        ScenarioName = FontString,
+        ScenarioIcon = Texture,
+        StageName = FontString,
+        StageCounter = FontString,
       }
     }
   }
-  function __ctor(self)
-    self.OnObjectivesSizeChanged = function() self:AdjustHeight(true) end
+  function __ctor(self) 
+    local topInfo = self:GetChild("TopScenarioInfo")
+    topInfo.OnEnter = topInfo.OnEnter + OnTopInfoEnter
+    topInfo.OnLeave = topInfo.OnLeave + OnTopInfoLeave
+  end 
+end)
+
+-- Optional Children for ScenarioContentView
+__ChildProperty__(ScenarioContentView, "BonusObjectives")
+class(tostring(ScenarioContentView) .. ".BonusObjectives") { ListViewWithHeaderText }
+-------------------------------------------------------------------------------
+--                              UI Settings                                  --
+-------------------------------------------------------------------------------
+GenerateUISettings("scenario", "content", function(generatedSettings)
+  -- We ovveride the default value as we want by default the header wasn't show for 
+  -- scenario
+  if generatedSettings["scenario.showHeader"] then 
+    generatedSettings["scenario.showHeader"].default = false
   end
 end)
+
+RegisterUISetting("scenario.name.mediaFont", FontType("DejaVuSansCondensed Bold", 14))
+RegisterUISetting("scenario.name.textTransform", "NONE")
+RegisterUISetting("scenario.name.textColor", Color(1, 0.914, 0.682))
+RegisterUISetting("scenario.topInfo.showBackground", false)
+RegisterUISetting("scenario.topInfo.showBorder", true)
+RegisterUISetting("scenario.topInfo.backgroundColor", Color(35/255, 40/255, 46/255, 0.73))
+RegisterUISetting("scenario.topInfo.borderColor", Color(0, 0, 0, 0.4))
+RegisterUISetting("scenario.topInfo.borderSize", 1)
+RegisterUISetting("scenario.stageName.mediaFont", FontType("PT Sans Narrow Bold", 14))
+RegisterUISetting("scenario.stageName.textTransform", "NONE")
+RegisterUISetting("scenario.stageCounter.mediaFont", FontType("PT Sans Narrow Bold", 14))
+RegisterUISetting("scenario.stageCounter.textTransform", "NONE")
+-------------------------------------------------------------------------------
+--                              Observables                                  --
+-------------------------------------------------------------------------------
+function FromTopInfoLocation()
+  return FromUISetting("scenario.showHeader"):Map(function(visible)
+    if visible then 
+      return {
+        Anchor("TOP", 0, -10, "Header", "BOTTOM"),
+        Anchor("LEFT"),
+        Anchor("RIGHT")        
+      }
+    end
+
+    return {
+        Anchor("TOP"),
+        Anchor("LEFT"),
+        Anchor("RIGHT")
+    }
+  end)
+end
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
   [ScenarioContentView] = {
     Header = {
-      backdropBorderColor = { r = 0, g = 0, b = 0, a = 0 },
-      IconBadge = {
-        backdropColor = { r = 0, g = 0, b = 0, a = 0},
-        Icon = {
-          atlas = AtlasType("ScenariosIcon")
-        }
-      },
+      visible                         = FromUISetting("scenario.showHeader"),
+      showBackground                  = FromUISetting("scenario.header.showBackground"),
+      showBorder                      = FromUISetting("scenario.header.showBorder"),
+      backdropColor                   = FromUISetting("scenario.header.backgroundColor"),
+      backdropBorderColor             = FromUISetting("scenario.header.borderColor"),
+      borderSize                      = FromUISetting("scenario.header.borderSize"),
 
       Label = {
-        text            = "Scenario",
-        sharedMediaFont = FontType("PT Sans Narrow Bold", 14),
-        justifyV        = "TOP"
+        mediaFont                     = FromUISetting("scenario.header.label.mediaFont"),
+        textColor                     = FromUISetting("scenario.header.label.textColor"),
+        justifyH                      = FromUISetting("scenario.header.label.justifyH"),
+        justifyV                      = FromUISetting("scenario.header.label.justifyV"),
+        textTransform                 = FromUISetting("scenario.header.label.textTransform"),
+      }
+    },
+
+    TopScenarioInfo = {
+      backdrop                        = FromBackdrop(),
+      showBackground                  = FromUISetting("scenario.topInfo.showBackground"),
+      showBorder                      = FromUISetting("scenario.topInfo.showBorder"),
+      backdropColor                   = FromUISetting("scenario.topInfo.backgroundColor"),
+      backdropBorderColor             = FromUISetting("scenario.topInfo.borderColor"),
+      borderSize                      = FromUISetting("scenario.topInfo.borderSize"),
+      height                          = 54,
+      location                        = FromTopInfoLocation(),
+
+      ScenarioIcon = {
+        atlas                         = AtlasType("groupfinder-background-scenarios"), -- 615222
+        texCoords                     = { left = 0.1,  right = 0.9, top = 0.1, bottom = 0.9 } ,
+        setAllPoints                  = true,
       },
 
       ScenarioName = {
-        sharedMediaFont = FontType("PT Sans Caption Bold", 13),
-        textColor       = Color(1, 233/255, 174/255),
-        justifyV        = "BOTTOM",
-        textTransform   = "UPPERCASE",
-        location        = {
-          Anchor("TOP"),
-          Anchor("LEFT", 0, 0, "IconBadge", "RIGHT"),
-          Anchor("RIGHT"),
-          Anchor("BOTTOM", 0, 2)
-        }
+        text                          = FromUIProperty("ScenarioName"),
+        mediaFont                     = FromUISetting("scenario.name.mediaFont"),
+        textTransform                 = FromUISetting("scenario.name.textTransform"),
+        textColor                     = FromUISetting("scenario.name.textColor"),
+        location                      = {
+                                        Anchor("LEFT", 5, 0),
+                                        Anchor("TOP"),
+                                        Anchor("BOTTOM", 0, 0, nil, "CENTER"),
+                                        Anchor("RIGHT")
+                                      }
+      },
+
+      StageCounter = {
+        visible                       = FromUIProperty("WidgetSetID"):Map(function(id) return not id end),
+        text                          = FromUIProperty("CurrentStage", "NumStages"):Map(function(currentStage, numStages) return currentStage .. "/" .. numStages end),
+        justifyH                      = "LEFT",
+        mediaFont                     = FromUISetting("scenario.stageCounter.mediaFont"),
+        location                      = {
+                                        Anchor("TOP", 0, 0, nil, "CENTER"),
+                                        Anchor("LEFT"),
+                                        Anchor("RIGHT"),
+                                        Anchor("BOTTOM", 0, 5)
+                                      }
+      },
+
+      StageName = {
+        text                          = FromUIProperty("StageName"),
+        justifyH                      = "CENTER",
+        mediaFont                     = FromUISetting("scenario.stageName.mediaFont"),
+        textTransform                 = FromUISetting("scenario.stageName.textTransform"),
+        location                      = {
+                                        Anchor("TOP", 0, 0, nil, "CENTER"),
+                                        Anchor("LEFT"),
+                                        Anchor("RIGHT"),
+                                        Anchor("BOTTOM", 0, 5)
+                                      }
       }
     },
-    Content = {
-      backdrop = { 
-        bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
-      },
-      backdropColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
 
-      Stage = {
-        height    = 20,
-        location  = {
-          Anchor("TOP"),
-          Anchor("LEFT"),
-          Anchor("RIGHT")
-        },
+    Objectives = {
+      autoAdjustHeight                = true,
+      paddingTop                      = 5,
+      paddingBottom                   = 5,
+      backdrop                        = { 
+                                        bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
+                                      },
+      backdropColor                   = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
 
-        Counter = {
-          sharedMediaFont = FontType("PT Sans Narrow Bold", 13),
-          textColor       = Color(1, 1, 1),
-          location        = {
-            Anchor("TOP", 0, -4),
-            Anchor("LEFT", 4, 0),
-            Anchor("BOTTOM", 0, 4)
-          }
-        },
-
-        Name = {
-          sharedMediaFont = FontType("PT Sans Narrow Bold", 13),
-          textColor       = Color(1, 1, 0),
-          justifyH        = "LEFT",
-          location        = {
-            Anchor("TOP", 0, -4),
-            Anchor("LEFT", 10, 0, "Counter", "RIGHT"),
-            Anchor("BOTTOM", 0, 4),
-            Anchor("RIGHT")
-          }
-        }
-      }
+      location                        = {
+                                        Anchor("TOP", 0, -5, "TopScenarioInfo", "BOTTOM"),
+                                        Anchor("LEFT"),
+                                        Anchor("RIGHT")
+                                      }      
     },
-    FlagsStyles = {
-      [ScenarioContentView.Flags.HAS_OBJECTIVES] = {
-        Content = {
-          Objectives  = {
-            spacing   = 5,
-            location  = {
-              Anchor("TOP", 0, -4, "Stage", "BOTTOM"),
-              Anchor("LEFT"),
-              Anchor("RIGHT")
-            }
-          }
-        }
+
+    Widgets = {
+      visible                         = FromUIProperty("WidgetSetID"):Map(function(id) return id and id > 0 or false end),
+      widgetSetID                     = FromUIProperty("WidgetSetID"),
+      location                        = {
+                                        Anchor("TOP", 0, 0, "Objectives", "BOTTOM"),
+                                        Anchor("LEFT"),
+                                        Anchor("RIGHT")        
+                                      }
+    },
+
+    [ScenarioContentView.BonusObjectives] = {
+      autoAdjustHeight                = true,
+      paddingTop                      = 5,
+      paddingBottom                   = 5,
+      viewClass                       = ObjectiveView,
+      indexed                         = false,
+      backdrop                        = { 
+                                        bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
+                                      },
+      backdropColor                   = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
+
+      HeaderText =  {
+        mediaFont                     = FontType("PT Sans Narrow Bold", 14),
+        text                          = "Bonus Objectives",
+        textColor                     = Color.WHITE,
       },
-      [ScenarioContentView.Flags.HAS_OBJECTIVES + ScenarioContentView.Flags.HAS_BONUS_OBJECTIVES] = {
-        Content = {
-          Objectives = {
-            spacing   = 5,
-            location  = {
-              Anchor("TOP", 0, -4, "Stage", "BOTTOM"),
-              Anchor("LEFT"),
-              Anchor("RIGHT")
-            }
-          },
 
-          BonusObjectivesText = {
-            text            = TRACKER_HEADER_BONUS_OBJECTIVES,
-            height          = 16,
-            sharedMediaFont = FontType("PT Sans Narrow Bold", 13),
-            location        = {
-              Anchor("TOP", 0, -8, "Objectives", "BOTTOM"),
-            }
-          },
-
-          BonusObjectivesIcon = {
-            width   = 16,
-            height    = 16,
-            Icon      = {
-              atlas = AtlasType("VignetteEventElite")
-            },
-            location  = {
-              Anchor("RIGHT", 0, 0, "BonusObjectivesText", "LEFT")
-            }
-          },
-
-          BonusObjectives = {
-            location = {
-              Anchor("TOP", 0, -4, "BonusObjectivesText", "BOTTOM"),
-              Anchor("LEFT"),
-              Anchor("RIGHT")
-            }
-          }
-        }
-      }
+      location                        = {
+                                        Anchor("TOP", 0, -5, "Objectives", "BOTTOM"),
+                                        Anchor("LEFT"),
+                                        Anchor("RIGHT")        
+                                      }
     }
   }
 })
+

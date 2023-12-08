@@ -6,16 +6,15 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling                  "SylingTracker.Core.Settings"                        ""
+Syling                   "SylingTracker.Core.Settings"                       ""
 -- ========================================================================= --
-namespace                          "SLT"
--- ========================================================================= --
+
 class "Setting" (function(_ENV)
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
-  property "ID" {
-    type = String 
+  property "id" {
+    type = String
   }
 
   property "Default" {
@@ -23,199 +22,146 @@ class "Setting" (function(_ENV)
   }
 
   property "Func" {
-    type = Callable + String
+    type = Callable
   }
-  -----------------------------------------------------------------------------
-  --                          Meta-Methods                                   --
-  -----------------------------------------------------------------------------
-  function __call(self, ...)
-    if self.Func then 
-      if type(self.Func) == "string" then 
-        CallbackManager.Call(self.Func, ...)
-      else 
-        self.Func(...)
-      end
-    end
-  end
-  -----------------------------------------------------------------------------
-  --                            Constructors                                 --
-  -----------------------------------------------------------------------------
-  __Arguments__ { String, Any, Variable.Optional(Callable + String) }
+
+  __Arguments__ { String, Any, Callable/nil }
   function Setting(self, id, default, func)
-    self.ID         = id
-    self.Default    = default
-    self.Func       = func
-  end 
+    self.id       = id 
+    self.Default  = default
+    self.Func     = func 
+  end
+
 end)
+-------------------------------------------------------------------------------
+-- Extending the API                                                         --
+-------------------------------------------------------------------------------
+SUBJECTS_ONLOAD_PROCESS_DONE        = false
+SETTINGS                            = {}
+SETTINGS_DB_INDEX                   = "settings"
+SETTING_SUBJECTS                    = {}
 
-class "Settings" (function(_ENV)
-  SETTINGS = Dictionary()
+--- Get the value of setting has been registered. If the player hasn't set 
+--- value for this, this will return the default value. 
+---
+--- @param id the setting id. 
+__Arguments__ { String }
+__Static__() function API.GetSetting(id)
+  local settingInfo = SETTINGS[id] 
 
-  __Static__() function SelectCurrentProfile()
-    -- Get the current profile for this character
-    local dbUsed = Settings.GetCurrentProfile()
+  if not settingInfo then 
+    return 
+  end
 
-    if dbUsed == "spec" then
-      Database.SelectRootSpec()
-    elseif dbUsed == "char" then
-      Database.SelectRootChar()
+  local value = SavedVariables.Profile().Path(SETTINGS_DB_INDEX).GetValue(id)
+
+  if value ~= nil then
+    return value 
+  end
+
+  return settingInfo.Default
+end
+
+--- Set the value for a registered setting. This will trigger a event if the 
+--- value has changed. 
+---
+--- @param id the setting id.
+--- @param value the new value for the setting 
+--- @param useHandler if the function must be called (default to true)
+--- @param passValue if the value will be passed to the function (default to true)
+__Arguments__ { String, Any/nil, Boolean/true, Boolean/true}
+__Static__() function API.SetSetting(id, value, useHandler, passValue)
+  local oldValue = SavedVariables.Profile().Path(SETTINGS_DB_INDEX).GetValue(id)
+  local newValue = value 
+  local settingInfo = SETTINGS[id]
+
+
+  if not settingInfo then 
+    error(("Try to set an unregistered setting '%s'"):format(id))
+  end
+
+  local defaultValue = settingInfo.Default
+
+  if oldValue == nil then 
+    oldValue = defaultValue
+  end
+
+  if value and value == defaultValue then 
+    SavedVariables.Profile().Path(SETTINGS_DB_INDEX).SetValue(id, nil)
+  else
+    SavedVariables.Profile().Path(SETTINGS_DB_INDEX).SaveValue(id, value)
+  end
+
+  if newValue == nil then 
+    newValue = defaultValue
+  end
+
+  if newValue ~= oldValue then 
+    Scorpio.FireSystemEvent("SylingTracker_SETTING_CHANGED", id, newValue, oldValue)
+
+    -- We notify the observers if needed 
+    local subject = SETTING_SUBJECTS[id]
+    if subject then 
+      subject:OnNext(newValue)
+    end
+  end
+
+  -- Call the handler if needed 
+  if useHandler and settingInfo.Func then 
+    if passValue then 
+      settingInfo.Func(newValue)
     else
-      Database.SelectRoot()
+      settingInfo.Func()
     end
-  end
-
-  __Arguments__ { String }
-  __Static__() function Get(setting)
-    -- select the current profile (global, char or spec)
-    Profiles.PrepareDatabase()
-
-    if Database.SelectTable(false, "settings") then
-      local value = Database.GetValue(setting)
-      if value ~= nil then
-        return value
-      end
-    end
-
-    if SETTINGS[setting] then
-      return SETTINGS[setting].Default
-    end
-  end
-
-  __Arguments__ { String }
-  __Static__() function Exists(setting)
-      -- select the current profile (global, char or spec)
-      Profiles.PrepareDatabase()
-
-      if Database.SelectTable(false, "settings") then
-        local value = Database.GetValue(setting)
-        if value then
-          return true
-        end
-      end
-      return false
-  end
-
-  __Arguments__ { String, Variable.Optional(), Variable.Optional(Boolean, true), Variable.Optional(Boolean, true)}
-  __Static__() function Set(setting, value, useHandler, passValue)
-    -- select the current profile (global, char or spec)
-    Profiles.PrepareDatabase()
-
-    Database.SelectTable("settings")
-    local oldValue = Database.GetValue(setting)
-    local newValue = value
-    local defaultValue = SETTINGS[setting] and SETTINGS[setting].Default
-
-    if oldValue == nil then
-      oldValue = defaultValue
-    end
-
-    if value and value == defaultValue then
-      Database.SetValue(setting, nil)
-    else
-      Database.SetValue(setting, value)
-    end
-
-    if newValue == nil then
-      newValue = defaultValue
-    end
-
-    if newValue ~= oldValue then
-      -- TODO: Broadcast this changed to ISettingsListener 
-      -- Frame:BroadcastSetting(setting, newValue, oldValue)
-      Scorpio.FireSystemEvent("SLT_SETTING_CHANGED", setting, newValue, oldValue)
-    end
-
-    -- Call the handler if needed
-    if useHandler then
-      local opt = SETTINGS[setting]
-      if opt then
-        if passValue then
-          opt(value)
-        else
-          opt()
-        end
-      end
-    end
-  end
-
-  __Arguments__ { String, Any, Variable.Optional(Callable + String) }
-  __Static__() function Register(setting, default, func)
-    Settings.Register(Setting(setting, default, func))
-  end
-
-  __Arguments__ { Setting }
-  __Static__() function Register(setting)
-    SETTINGS[setting.ID] = setting
-  end
-
-  __Arguments__ { Variable.Optional(String, "global") }
-  __Static__() function SelectProfile(profile)
-    Database.SelectRoot()
-    Database.SelectTable("dbUsed")
-
-    local name, realm = UnitFullName("player")
-    name = realm .. "-" .. name
-
-    Database.SetValue(name, profile)
-  end
-
-  __Arguments__ { ClassType }
-  __Static__() function GetCurrentProfile(self)
-    Database.SelectRoot()
-    if Database.SelectTable(false, "dbUsed") then
-      local name  = UnitFullName("player")
-      local realm = GetRealmName()
-      name = realm .. "-" .. name
-      local dbUsed = Database.GetValue(name)
-      if dbUsed then
-        return dbUsed
-      end
-    end
-    return "global"
-  end
-
-  __Arguments__ { String }
-  function ResetSetting(id)
-    Settings.Set(id, nil)
-  end
-end)
-
-
-__SystemEvent__()
-function SLT_PROFILE_CHANGED(profile, oldProfile)
-  local oldProfileData = DiffMap()
-  Profiles.PrepareDatabase(oldProfile)
-
-  if Database.SelectTable(false, "settings") then
-    for k, v in Database:IterateTable() do
-      oldProfileData:SetValue(k, v)
-    end
-  end
-
-  local newProfileData = DiffMap()
-  Profiles.PrepareDatabase(profile)
-
-  if Database.SelectTable(false, "settings") then
-    for k, v in Database.IterateTable() do
-      newProfileData:SetValue(k, v)
-    end
-  end
-
-  local diff = oldProfileData:Diff(newProfileData)
-  for index, setting in ipairs(diff) do
-    local value = Settings.Get(setting)
-    -- if setting == "theme-selected" then
-    --   Themes:Select(value, false)
-    -- else
-    --   Frame:BroadcastSetting(setting, value)
-    -- end
   end
 end
 
+--- Reset the value for a registered setting. 
+---
+--- @param id the setting id. 
+__Arguments__ { String }
+__Static__() function API.ResetSetting(id)
+  API.SetSetting(id, nil)
+end
 
-__SystemEvent__()
-function SLT_COPY_PROFILE_PROCESS(sourceDB, destDB, destProfile)
-  if sourceDB["settings"] then
-    destDB["settings"] = sourceDB["settings"]
+--- Register a setting. 
+---
+--- @param id the setting id to register.
+--- @param default the default value.
+--- @param func a optional function will be called when the setting value is changed.
+__Arguments__ { String, Any, Callable/nil }
+__Static__() function API.RegisterSetting(id, default, func)
+  SETTINGS[id] = Setting(id, default, func)
+end
+
+__Arguments__ { String }
+__Static__() function API.FromSetting(id)
+  return Observable(function(observer)
+    local subject = SETTING_SUBJECTS[id]
+
+    if not subject then 
+      subject = BehaviorSubject()
+      SETTING_SUBJECTS[id] = subject
+    end
+
+    subject:Subscribe(observer)
+
+    if SUBJECTS_ONLOAD_PROCESS_DONE then 
+      local value = API.GetSetting(id)
+      subject:OnNext(value)
+    end
+
+
+    return subject
+  end)
+end
+
+function OnLoad(self)
+  -- When the db is initialized, we read the settings and notify the observer.
+  for id, subject in pairs(SETTING_SUBJECTS) do    
+    local value = API.GetSetting(id)
+    subject:OnNext(value)
   end
+
+  SUBJECTS_ONLOAD_PROCESS_DONE = true
 end

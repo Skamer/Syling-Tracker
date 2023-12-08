@@ -6,355 +6,157 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling                "SylingTracker.Quests.QuestsContentView"               ""
--- ========================================================================= --
-namespace                          "SLT"
--- ========================================================================= --
+Syling                 "SylingTracker.Contents.QuestsContentView"            ""
+-- ========================================================================= -
 export {
-  ResetStyles                       = Utils.ResetStyles,
-  ValidateFlags                     = System.Toolset.validateflags
+  RegisterUISetting                   = API.RegisterUISetting,
+  FromUISetting                       = API.FromUISetting,
+  GenerateUISettings                  = API.GenerateUISettings,
 }
--- ========================================================================= --
-local SHOW_CATEGORIES = true
--- ========================================================================= --
-__Recyclable__ "SylingTracker_QuestsContentView%d"
-class "QuestsContentView" (function(_ENV)
+
+__UIElement__()
+class "QuestsContentView"(function(_ENV)
   inherit "ContentView"
-
-  __Flags__()
-  enum "Flags" {
-    NONE = 0,
-    HAS_QUESTS = 1,
-    HAS_CATEGORIES = 2,
-  }
   -----------------------------------------------------------------------------
-  --                               Methods                                   --
+  --                                Methods                                  --
   -----------------------------------------------------------------------------
-  function HookData(self, data)
-    if data.quests then
-      local newData = {}
-      local hasQuests = false 
-      for questID, questData in pairs(data.quests) do 
-        if not questData.campaignID or questData.campaignID == 0 then 
-          if not newData.quests then
-            newData.quests = {}
-          end
+  function OnViewUpdate(self, data, metadata)
+    super.OnViewUpdate(self, data, metadata)
 
-          newData.quests[questID] = questData
-          hasQuests = true
-        end
-      end
-
-      self.ShouldBeDisplayed = hasQuests
-      
-      return newData
-    end
-
-    return data
-  end
-
-  function OnViewUpdate(self, data)
-    local questsData = data.quests 
-
-    local showCategories
-    if self.IgnoreOptions then 
-      showCategories = self.ShowCategories
-    else
-      showCategories = SHOW_CATEGORIES
-    end
-
-    -- Determines the flags
-    local flags = Flags.NONE 
-    if questsData then
-      if showCategories then  
-        flags = Flags.HAS_CATEGORIES
-      else 
-        flags = Flags.HAS_QUESTS
-      end
-    end
     
-    if flags ~= self.Flags then 
-      ResetStyles(self)
-
-      -- are there quests 
-      if ValidateFlags(Flags.HAS_QUESTS, flags) then 
-        self:AcquireQuests()
+    local showCategories = self.ShowCategories
+    
+    if data and data.quests then
+      
+      if showCategories then
+        Style[self].Categories.visible = self.Expanded
+        local categoriesListView = self:GetPropertyChild("Categories")
+        categoriesListView:UpdateView(data.quests, metadata)
+        Style[self].Quests = NIL
       else
-        self:ReleaseQuests()
+        Style[self].Quests.visible = self.Expanded
+        local questListView = self:GetPropertyChild("Quests")
+        questListView:UpdateView(data.quests, metadata)
+        Style[self].Categories = NIL
       end
-
-      -- are there categories 
-      if ValidateFlags(Flags.HAS_CATEGORIES, flags) then 
-        self:AcquireCategories()
-      else 
-        self:ReleaseCategories()
-      end
-
-      -- Styling stuff 
-      if flags ~= Flags.NONE then 
-        local styles = self.FlagsStyles and self.FlagsStyles[flags]
-        if styles then 
-          Style[self] = styles
-        end
-      end
-    end
-
-
-    if questsData then
-      if showCategories then 
-        local categories = self:AcquireCategories()
-        categories:UpdateView(questsData)
-      else 
-        local quests = self:AcquireQuests()
-        quests:UpdateView(questsData)
-      end
-    end
-
-    self.Flags = flags
-  end
-
-  function AcquireQuests(self)
-    local content = self:GetChild("Content")
-    local quests = content:GetChild("Quests")
-    if not quests then 
-      quests = QuestListView.Acquire()
-
-      -- We need to keep the old name when we'll release it
-      self.__PreviousQuestsName = quests:GetName()
-      
-      quests:SetParent(content)
-      quests:SetName("Quests")
-      quests:InstantApplyStyle()
-
-      -- Register the events
-      quests.OnSizeChanged = quests.OnSizeChanged + self.OnChildrenSizeChanged
-
-      self:AdjustHeight(true)
-    end
-    
-    return quests
-  end
-
-  function ReleaseQuests(self)
-    local content = self:GetChild("Content")
-    local quests = content:GetChild("Quests")
-    if quests then 
-      -- Give its old name (generated by the recycle system)
-      quests:SetName(self.__PreviousQuestsName)
-      self.__PreviousQuestsName = nil
-
-      -- Unregister the events
-      quests.OnSizeChanged = quests.OnSizeChanged - self.OnChildrenSizeChanged
-
-      -- It's better to release it after the event has been unregistered for avoiding
-      -- useless call
-      quests:Release()
-
-      self:AdjustHeight(true)
-    end
-  end
-
-  function AcquireCategories(self)
-    local content = self:GetChild("Content")
-    local categories = content:GetChild("Categories")
-    if not categories then 
-      categories = QuestCategoryListView.Acquire()
-
-      -- We need to keep the old name when we'll release it
-      self.__PreviousCategoriesName = categories:GetName()
-
-      categories:SetParent(content)
-      categories:SetName("Categories")
-      categories:InstantApplyStyle()
-
-      -- -- It's important to only style it once we have set its parent and its new
-      -- -- name 
-      -- if self.Quests then 
-      --   Style[quests] = self.Quests
-      -- end
-
-      -- Register the events
-      categories.OnSizeChanged = categories.OnSizeChanged + self.OnChildrenSizeChanged
-
-      self:AdjustHeight(true)
-    end
-    
-    return categories
-  end
-
-  function ReleaseCategories(self)
-    local content = self:GetChild("Content")
-    local categories = content:GetChild("Categories")
-
-    if categories then 
-      -- Give its old name (generated by the recycle system)
-      categories:SetName(self.__PreviousCategoriesName)
-      self.__PreviousCategoriesName = nil
-
-      -- Unregister the events
-      categories.OnSizeChanged = categories.OnSizeChanged - self.OnChildrenSizeChanged
-
-      -- It's better to release it after the event has been unregistered for avoiding
-      -- useless call
-      categories:Release()
-
-      self:AdjustHeight(true)
+    else
+      Style[self].Quests = NIL
+      Style[self].Categories = NIL
     end 
   end
 
-  function OnRelease(self)
-    -- First, release the children 
-    self:ReleaseQuests()
-    self:ReleaseCategories()
+  function OnExpand(self)
+    if self:GetPropertyChild("Quests") then 
+      Style[self].Quests.visible = true 
+    end
 
-    -- We call the "Parent" OnRelease (see, ContentView)
-    super.OnRelease(self)
+    if self:GetPropertyChild("Categories") then 
+      Style[self].Categories.visible = true 
+    end
+  end
 
-    self.Flags = nil
+  function OnCollapse(self)
+    if self:GetPropertyChild("Quests") then 
+      Style[self].Quests.visible = false
+    end
+
+    if self:GetPropertyChild("Categories") then 
+      Style[self].Categories.visible = false
+    end
+  end
+
+  function SetCategoriesShown(self, show)
+    local data = self.Data
+    local questsData = data and data.quests
+    if questsData then 
+      if show then 
+        Style[self].Categories.visible = self.Expanded
+        local categoriesListView = self:GetPropertyChild("Categories")
+        categoriesListView:UpdateView(questsData, self.Metadata)
+        Style[self].Quests = NIL     
+      else 
+        Style[self].Quests.visible = self.Expanded
+        local questListView = self:GetPropertyChild("Quests")
+        questListView:UpdateView(data.quests, metadata)
+        Style[self].Categories = NIL
+      end
+    end
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
-  property "FlagsStyles" {
-    type = Table
-  }
-
-  property "Flags" {
-    type = QuestsContentView.Flags,
-    default = QuestsContentView.Flags.NONE
-  }
-
-  -- Currently, this isn't used but will be in the future when the skin system
-  -- is ready.
-  -- The displaying of categories is determined by SHOW_CATEGORIES instead
   property "ShowCategories" {
     type = Boolean,
-    default = true
+    default = false,
+    handler = function(self, new) self:SetCategoriesShown(new) end
   }
-
-  -- @HACK: Prevent the options to be applied
-  -- e.g, to be sure the categories are not displayed for campaign
-  property "IgnoreOptions" {
-    type = Boolean,
-    default = false
-  }
-  -----------------------------------------------------------------------------
-  --                            Constructors                                 --
-  -----------------------------------------------------------------------------
-  __Template__{}
-  function __ctor(self)
-    self.OnChildrenSizeChanged = function() self:AdjustHeight(true) end
-  end
 end)
--- ========================================================================= --
-__Recyclable__ "SylingTracker_CampaignContentView%d"
-class "CampaignContentView" (function(_ENV)
-  inherit "QuestsContentView"
 
-  function HookData(self, data)
-    if data.quests then
-      local newData = {}
-      local hasCampaign = false 
-      for questID, questData in pairs(data.quests) do 
-        if questData.campaignID and questData.campaignID ~= 0 then 
-          if not newData.quests then
-            newData.quests = {}
-          end
+__ChildProperty__(QuestsContentView, "Quests")
+__UIElement__()
+class(tostring(QuestsContentView) .. ".Quests") { QuestListView }
 
-          newData.quests[questID] = questData
-          hasCampaign = true 
-        end
-      end
+__ChildProperty__(QuestsContentView, "Categories")
+__UIElement__()
+class(tostring(QuestsContentView) .. ".Categories") { QuestCategoryListView }
+-------------------------------------------------------------------------------
+--                              UI Settings                                  --
+-------------------------------------------------------------------------------
+RegisterUISetting("quests.showCategories", false)
 
-      self.ShouldBeDisplayed = hasCampaign
-      
-      return newData
+GenerateUISettings("quests", "content")
+-------------------------------------------------------------------------------
+--                              Observables                                  --
+-------------------------------------------------------------------------------
+function FromQuestsAndCategoriesLocation()
+  return FromUISetting("quests.showHeader"):Map(function(visible)
+    if visible then 
+      return {
+        Anchor("TOP", 0, -10, "Header", "BOTTOM"),
+        Anchor("LEFT"),
+        Anchor("RIGHT")        
+      }
     end
 
-    return data
-  end
-end)
+    return {
+        Anchor("TOP"),
+        Anchor("LEFT"),
+        Anchor("RIGHT")
+    }
+  end)
+end
 
+QuestsContentView.FromQuestsAndCategoriesLocation = FromQuestsAndCategoriesLocation
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
   [QuestsContentView] = {
+    showCategories                    = FromUISetting("quests.showCategories"),
+
     Header = {
-      IconBadge = {
-        backdropColor = { r = 0, g = 0, b = 0, a = 0},
-        Icon = {
-          atlas = AtlasType("QuestNormal")
-        }
-      },
+      visible                         = FromUISetting("quests.showHeader"),
+      showBackground                  = FromUISetting("quests.header.showBackground"),
+      showBorder                      = FromUISetting("quests.header.showBorder"),
+      backdropColor                   = FromUISetting("quests.header.backgroundColor"),
+      backdropBorderColor             = FromUISetting("quests.header.borderColor"),
+      borderSize                      = FromUISetting("quests.header.borderSize"),
 
       Label = {
-        text = "Quests"
-      }
-    },
-    Content = {
-      backdropColor = { r = 1, g = 0, b = 0, a = 1},
-      location = {
-        Anchor("TOP", 0, -5, "Header", "BOTTOM"),
-        Anchor("LEFT", 5, 0),
-        Anchor("RIGHT", -5, 0)
+        mediaFont                     = FromUISetting("quests.header.label.mediaFont"),
+        textColor                     = FromUISetting("quests.header.label.textColor"),
+        justifyH                      = FromUISetting("quests.header.label.justifyH"),
+        justifyV                      = FromUISetting("quests.header.label.justifyV"),
+        textTransform                 = FromUISetting("quests.header.label.textTransform"),
       }
     },
 
-    FlagsStyles = {
-      [QuestsContentView.Flags.HAS_QUESTS] = {
-        Content = {
-          Quests = {
-            location = {
-              Anchor("TOP"),
-              Anchor("LEFT"),
-              Anchor("RIGHT")
-            }
-          }
-        }
-      },
+    [QuestsContentView.Quests] = {
+      location                        = FromQuestsAndCategoriesLocation()
+    },
 
-      [QuestsContentView.Flags.HAS_CATEGORIES] = {
-        Content = {
-          Categories = {
-            location = {
-              Anchor("TOP"),
-              Anchor("LEFT"),
-              Anchor("RIGHT")
-            }
-          }
-        }
-      }
-    }
-  },
-  [CampaignContentView] = {
-    IgnoreOptions = true,
-    ShowCategories = false,
-    Header = {
-      IconBadge = {
-        Icon = {
-          atlas = AtlasType("quest-campaign-available")
-        }
-      },
-      Label = {
-        text = "Campaign"
-      }
-    }
+    [QuestsContentView.Categories] = {
+      location                        = FromQuestsAndCategoriesLocation()
+    },
   }
 })
--- ========================================================================= --
-function OnLoad(self)
-  Settings.Register("questsEnableCategories", true, "Quests/EnableCategories")
-
-  CallbackManager.Register("Quests/EnableCategories", Callback(
-    function(enable) 
-      SHOW_CATEGORIES = enable 
-      Warn("The displaying of categories has been set to |cff00ffff%s|r. |cffff6a00The change will take effect on the next data update or after a reload ui.|r", 
-        SHOW_CATEGORIES and "true" or "false"
-      )
-    end))
-end
-
-function OnEnable(self)
-  SHOW_CATEGORIES = Settings.Get("questsEnableCategories")
-end

@@ -6,22 +6,19 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling                      "SylingTracker.Quests"                           ""
--- ========================================================================= --
-import                              "SLT"
+Syling                      "SylingTracker.Datastores.Quests"                ""
 -- ========================================================================= --
 _Active                             = false
 -- ========================================================================= --
 export {
-  -- Syling API
-  ItemBar_AddItemData                 = API.ItemBar_AddItemData,
-  ItemBar_RemoveItemData              = API.ItemBar_RemoveItemData,
+  -- Addon API
+  RegisterObservableContent           = API.RegisterObservableContent,
+  ItemBar_AddItem                     = API.ItemBar_AddItem,
+  ItemBar_RemoveItem                  = API.ItemBar_RemoveItem,
   ItemBar_Update                      = API.ItemBar_Update,
-  RegisterContentType                 = API.RegisterContentType,
-  RegisterModel                       = API.RegisterModel,
+  ItemBar_SetItemDistance             = API.ItemBar_SetItemDistance,
 
-  -- WoW API & Utils
-  CreateAtlasMarkup                   = CreateAtlasMarkup,
+  --- WoW API & Utils
   AddQuestWatch                       = C_QuestLog.AddQuestWatch,
   EnumQuestWatchType                  = _G.Enum.QuestWatchType,
   GetCampaignID                       = C_CampaignInfo.GetCampaignID,
@@ -42,73 +39,43 @@ export {
   GetRequiredMoney                    = C_QuestLog.GetRequiredMoney,
   GetSuggestedGroupSize               = C_QuestLog.GetSuggestedGroupSize,
   GetTimeAllowed                      = C_QuestLog.GetTimeAllowed,
-  IsCampaignQuest                     = Utils.Quest.IsCampaignQuest,
-  IsDungeonQuest                      = Utils.Quest.IsDungeonQuest,
+  IsDungeonQuest                      = Utils.IsDungeonQuest,
   IsFailed                            = C_QuestLog.IsFailed,
+  IsImportantQuest                    = C_QuestLog.IsImportantQuest,
   IsLegendaryQuest                    = C_QuestLog.IsLegendaryQuest,
   IsOnMap                             = C_QuestLog.IsOnMap,
   IsQuestBounty                       = C_QuestLog.IsQuestBounty,
+  IsQuestCalling                      = C_QuestLog.IsQuestCalling,
   IsQuestComplete                     = C_QuestLog.IsComplete,
   IsQuestTask                         = C_QuestLog.IsQuestTask,
   IsQuestTrivial                      = C_QuestLog.IsQuestTrivial,
   IsQuestWatched                      = QuestUtils_IsQuestWatched,
-  IsRaidQuest                         = Utils.Quest.IsRaidQuest,
+  IsRaidQuest                         = Utils.IsRaidQuest,
   IsWorldQuest                        = QuestUtils_IsQuestWorldQuest,
   RequestLoadQuestByID                = C_QuestLog.RequestLoadQuestByID,
   SelectQuestLogEntry                 = SelectQuestLogEntry,
   SelectQuestLogEntry                 = SelectQuestLogEntry,
   SetSelectedQuest                    = C_QuestLog.SetSelectedQuest
 }
--- ========================================================================= --
-_QuestModel                         = RegisterModel(QuestModel, "quests-data")
--- ========================================================================= --
--- Register the achievements content type
--- ========================================================================= --
-_QuestsIconMarkupAtlas = CreateAtlasMarkup("QuestNormal", 16, 16)
-_CampaignIconMarkupAtlas = CreateAtlasMarkup("quest-campaign-available", 16, 16)
 
-RegisterContentType({
-  ID = "quests",
-  Name = "Quests",
-  DisplayName = _QuestsIconMarkupAtlas.." Quests",
-  Description = "Track the watched quests",
-  DefaultOrder = 100,
-  DefaultModel = _QuestModel,
-  DefaultViewClass = QuestsContentView,
-  Events = { "PLAYER_ENTERING_WORLD", "QUEST_WATCH_LIST_CHANGED"},
-  Status = function() return GetNumQuestWatches() > 0 end
-})
+QUESTS_CONTENT_SUBJECT = RegisterObservableContent("quests", QuestsContentSubject)
 
-RegisterContentType({
-  ID = "campaign",
-  Name = "Campaign",
-  DisplayName = _CampaignIconMarkupAtlas.." Campaign",
-  Description = "Track the camapign quests",
-  DefaultOrder = 90,
-  DefaultModel = _QuestModel,
-  DefaultViewClass = CampaignContentView,
-  Events = { "PLAYER_ENTERING_WORLD", "QUEST_WATCH_LIST_CHANGED"},
-  Status = function() return GetNumQuestWatches() > 0 end
-})
--- ========================================================================= --
-local DISTANCE_UPDATER_ENABLED      = false
-local QUESTS_CACHE                  = {}
-local QUEST_HEADERS_CACHE           = {}
-local QUESTS_WITH_PROGRESS          = {}
-local QUESTS_WITH_ITEMS             = {}
-local QUESTS_REQUESTED              = {}
+QUESTS_CACHE = {}
+QUEST_HEADERS_CACHE = {}
+QUESTS_WITH_PROGRESS = {}
+QUESTS_WITH_ITEMS = {}
+QUESTS_REQUESTED = {}
 
 
--- ========================================================================= --
 __ActiveOnEvents__  "PLAYER_ENTERING_WORLD" "QUEST_WATCH_LIST_CHANGED" "QUEST_ACCEPTED"
 function BecomeActiveOn(self, event, ...)
-  if event == "QUEST_ACCEPTED" then
-    -- Caling QUEST_ACCEPTED will watch the quest if matching the requirements,
+  if event == "QUEST_ACCEPTED" then 
+    -- Calling QUEST_ACCEPTED will watch the quest if matching the requirements,
     -- so going to trigger the checking on "QUEST_WATCH_LIST_CHANGED".
-    -- As QUEST_ACCEPTED returns nil, the system skip the event.
+    -- As QUEST_ACCEPTED returns nil, the system skip the event. 
     return QUEST_ACCEPTED(...)
-  end 
-  
+  end
+
   return GetNumQuestWatches() > 0
 end
 
@@ -116,7 +83,7 @@ __InactiveOnEvents__  "PLAYER_ENTERING_WORLD" "QUEST_WATCH_LIST_CHANGED"
 function BecomeInactiveOn(self, event, ...)
   return GetNumQuestWatches() == 0
 end
--- ========================================================================= --
+
 __Async__()
 function OnActive(self)
   if self:IsActivateByEvent("PLAYER_ENTERING_WORLD") then 
@@ -131,33 +98,36 @@ function OnActive(self)
   _M:LoadQuests()
 end
 
+-- function GetQuestData(self, questID)
+--   local questData = QUESTS_DATA[questID]
+--   if not questData then 
+--     questData = {}
+--     QUESTS_DATA[questID] = questData
+--   end
+
+--   return questData
+-- end
+
 function OnInactive(self)
-  _QuestModel:ClearData()
-  
   wipe(QUESTS_CACHE)
   wipe(QUESTS_WITH_PROGRESS)
 
-  for questID in pairs(QUESTS_WITH_ITEMS) do
-    ItemBar_RemoveItemData(questID)
+  for questId in pairs(QUESTS_WITH_ITEMS) do 
+    ItemBar_RemoveItem(questId)
   end
+
   ItemBar_Update()
 
   wipe(QUESTS_WITH_ITEMS)
 end
--- ========================================================================= --
+
 function LoadQuests(self)
   local numEntries, numQuests = GetNumQuestLogEntries()
-  local currentHeader = "Misc"
+  local currentHeader         = "Misc"
 
-  for i = 1, numEntries do
-
+  for i = 1, numEntries do 
     local questInfo = GetInfo(i)
 
-
-    -- local title, questLogIndex, questID, campaignID, level, difficultyLevel, 
-    --   suggestedGroup, frequency, isHeader, isCollapsed, startEvent, isTask,
-    --   isBounty, isStory, isScaling, isOnMap, hasLocalPOI, isHidden,
-    --   isAutoComplete, overridesSortOrder, readyForTranslation = GetInfo(i)
     local questID   = questInfo.questID
     local isHeader  = questInfo.isHeader
     local isHidden  = questInfo.isHidden
@@ -166,245 +136,275 @@ function LoadQuests(self)
 
     if questInfo.isHeader then 
       currentHeader = questInfo.title
-    elseif IsQuestWatched(questID) and not isHidden and not isBounty and not isTask then
-    -- elseif IsQuestWatched(IsOnShadowlands() and questID or i) and not questInfo.isHidden and not isBounty and not isTask then 
-      QUESTS_CACHE[questID] = true
-      QUEST_HEADERS_CACHE[questID] = currentHeader
+    elseif IsQuestWatched(questID) and not isHidden and not isBounty and not isTask then 
+      QUESTS_CACHE[questID]         = true 
+      QUEST_HEADERS_CACHE[questID]  = currentHeader
 
-      local questData = {
-        title               = questInfo.title,
-        name                = questInfo.title,
-        questLogIndex       = questInfo.questLogIndex,
-        questID             = questInfo.questID,
-        campaignID          = questInfo.campaignID,
-        level               = questInfo.level,
-        difficultyLevel     = questInfo.difficultyLevel,
-        suggestedGroup      = questInfo.suggestedGroup,
-        frequency           = questInfo.frequency,
-        isHeader            = questInfo.isHeader,
-        isCollapsed         = questInfo.isCollapsed,
-        startEvent          = questInfo.startEvent,
-        isTask              = questInfo.isTask,
-        isBounty            = questInfo.isBounty,
-        isStory             = questInfo.isStory,
-        isScaling           = questInfo.isScaling,
-        isOnMap             = questInfo.isOnMap,
-        hasLocalPOI         = questInfo.hasLocalPOI,
-        isHidden            = questInfo.isHidden,
-        isAutoComplete      = questInfo.isAutoComplete,
-        overridesSortOrder  = questInfo.overridesSortOrder,
-        readyForTranslation = questInfo.readyForTranslation,
-        header              = currentHeader,
-        category            = currentHeader
-      }
+      local questData = QUESTS_CONTENT_SUBJECT:AcquireQuest(questID)
+      questData.questID = questID
+      questData.questLogIndex = questInfo.questLogIndex
+      questData.title = questInfo.title
+      questData.name = questInfo.title
+      questData.header = header
+      questData.category = header
+      questData.campaignID = questInfo.campaignID
+      questData.level = questInfo.level
+      questData.difficultyLevel = questInfo.difficultyLevel
+      questData.suggestedGroup = questInfo.suggestedGroup
+      questData.frequency = questInfo.frequency
+      questData.isHeader = questInfo.isHeader
+      questData.isCollapsed = questInfo.isCollapsed
+      questData.startEvent = questInfo.startEvent
+      questData.isTask = questInfo.isTask
+      questData.isBounty = questInfo.isBounty
+      questData.isScaling = questInfo.isScaling
+      questData.isOnMap = questInfo.isOnMap
+      questData.hasLocalPOI = questInfo.hasLocalPOI
+      questData.isHidden = questInfo.isHidden
+      questData.isAutoComplete = questInfo.isAutoComplete
+      questData.overridesSortOrder = questInfo.overridesSortOrder
+      questData.readyForTranslation = questInfo.readyForTranslation
 
-      _QuestModel:SetQuestData(questID, questData)
-
-      QUESTS_REQUESTED[questID] = true
+      QUESTS_REQUESTED[questID] = true 
       RequestLoadQuestByID(questID)
-    end 
+    end
   end
-
-  _QuestModel:Flush()
 end
 
 function UpdateQuest(self, questID)
-  -- Cross function & unchanged fonction
-  local title             = GetQuestName(questID)
-  local level             = GetQuestDifficultyLevel(questID)
-  local header            = self:GetQuestHeader(questID)
-  local questLogIndex     = GetLogIndexForQuestID(questID)
-  local numObjectives     = GetNumQuestObjectives(questID)
-  local isComplete        = IsQuestComplete(questID)
-  local isFailed          = IsFailed(questID)
-  local isTask            = IsQuestTask(questID)
-  local isBounty          = IsQuestBounty(questID)
-  local distance          = GetDistanceSqToQuest(questID)
-  local isDungeon         = IsDungeonQuest(questID)
-  local isRaid            = IsRaidQuest(questID)
-  local requiredMoney     = GetRequiredMoney(questID)
-  local suggestedGroup    = GetSuggestedGroupSize(questID)
-  local isLegendary       = IsLegendaryQuest(questID)
-  local tag               = GetQuestTagInfo(questID)
-  local campaignID        = GetCampaignID(questID)
-  local isSequenced       = IsQuestSequenced(questID)
-  local isSuperTracked    = (questID == C_SuperTrack.GetSuperTrackedQuestID())
-  
-  if not distance then
+  local isFailed = IsFailed(questID)
+  local title = GetQuestName(questID)
+  local level = GetQuestDifficultyLevel(questID)
+  local header = self:GetQuestHeader(questID)
+  local questLogIndex = GetLogIndexForQuestID(questID)
+  local numObjectives = GetNumQuestObjectives(questID)
+  local isComplete = IsQuestComplete(questID)
+  local isTask = IsQuestTask(questID)
+  local isBounty = IsQuestBounty(questID)
+  local distance = GetDistanceSqToQuest(questID)
+  local isDungeon = IsDungeonQuest(questID)
+  local isRaid = IsRaidQuest(questID)
+  local requiredMoney = GetRequiredMoney(questID)
+  local suggestedGroup = GetSuggestedGroupSize(questID)
+  local isLegendary = IsLegendaryQuest(questID)
+  local tag = GetQuestTagInfo(questID)
+  local campaignID = GetCampaignID(questID)
+  local isImportant =  IsImportantQuest(questID)
+  local isCalling = IsQuestCalling(questID)
+
+  if not distance then 
     distance = 99999
-  else 
+  else
     distance = sqrt(distance)
   end
 
-  local failureTime, timeElapsed = GetTimeAllowed(questID)
+  local totalTime, elapsedTime = GetTimeAllowed(questID)
   local isOnMap, hasLocalPOI = IsOnMap(questID)
 
-  local shouldShowWaypoint = isSuperTracked or (questID == QuestMapFrame_GetFocusedQuestID())
+  local questData = QUESTS_CONTENT_SUBJECT:AcquireQuest(questID)
 
-  -- local isStory        
-  -- local startEvent      
-  -- local isAutoComplete
-
-  local questData = {
-    questID             = questID,
-    title               = title,
-    name                = title,
-    level               = level,
-    header              = header,
-    category            = header,
-    campaignID          = campaignID,
-    questLogIndex       = questLogIndex,
-    numObjectives       = numObjectives,
-    isComplete          = isComplete,
-    isFailed            = isFailed,
-    isTask              = isTask,
-    isBounty            = isBounty,
-    requiredMoney       = requiredMoney,
-    failureTime         = failureTime,
-    isOnMap             = isOnMap,
-    hasLocalPOI         = hasLocalPOI,
-    questType           = questType,
-    tag                 = questType,
-    isStory             = isStory,
-    startEvent          = startEvent,
-    isAutoComplete      = isAutoComplete,
-    suggestedGroup      = suggestedGroup,
-    distance            = distance,
-    isDungeon           = isDungeon,
-    isRaid              = isRaid,
-    isLegendary         = isLegendary,
-    tag                 = tag,
-    shouldShowWaypoint  = shouldShowWaypoint,
-    isSequenced         = isSequenced,
-    isSuperTracked      = isSuperTracked
-  }
+  questData.questID = questID
+  questData.questLogIndex = questLogIndex
+  questData.isFailed = isFailed
+  questData.title = title
+  questData.name = title
+  questData.level = level
+  questData.header = header
+  questData.category = header
+  questData.campaignID = campaignID
+  questData.numObjectives = numObjectives
+  questData.isComplete = isComplete
+  questData.isTask = isTask
+  questData.isBounty = isBounty
+  questData.requiredMoney = requiredMoney
+  questData.totalTime = totalTime
+  questData.elapsedTime = elapsedTime
+  questData.startTime =  elapsedTime and GetTime() - elapsedTime
+  questData.hasTimer = (totalTime and elapsedTime) and true
+  questData.isOnMap = isOnMap
+  questData.hasLocalPOI = hasLocalPOI
+  -- questData.questType= tag
+  questData.tag = tag
+  questData.isStory = isStory
+  questData.startEvent = startEvent
+  questData.isAutoComplete = isAutoComplete
+  questData.suggestedGroup = suggestedGroup
+  questData.distance = distance
+  questData.isDungeon = isDungeon
+  questData.isRaid = isRaid
+  questData.isLegendary = isLegendary
+  questData.isImportant = isImportant
+  questData.isCalling = isCalling
 
   -- Is the quest has an item quest ?
   local itemLink, itemTexture
-  
-  -- We check if the quest log index is valid before fetching as sometimes 
-  -- for unknown reason this can be nil.
+
+  -- We check if the quest log index is valid before fetching as sometimes for 
+  -- unknown reason this can be nil 
   if questLogIndex then 
     itemLink, itemTexture = GetQuestLogSpecialItemInfo(questLogIndex)
-  end 
-
-  if itemLink and itemTexture then
-    questData.item = {
-      link    = itemLink,
-      texture = itemTexture
-    }
-
-    -- We check if the quest has already the item for avoiding useless data 
-    -- update.
-    if not QUESTS_WITH_ITEMS[questID] then 
-      ItemBar_AddItemData(questID, {
-        link = itemLink, 
-        texture = itemTexture
-      })
-      ItemBar_Update()
-
-      QUESTS_WITH_ITEMS[questID] = true 
-    end
-  else 
-    QUESTS_WITH_ITEMS[questID] = nil 
   end
 
+  if itemLink and itemTexture then 
+    local itemData = questData.item
 
-  local objectivesData = {}
-  if isComplete then
-    if not isAutoComplete then 
+    itemData.link = itemLink
+    itemData.texture = itemTexture
+
+    -- We don't need to check if the item has been already added, as it's done 
+    -- internally, and in this case the call is ignored. 
+    ItemBar_AddItem(questID, itemLink, itemTexture, distance)
+
+    QUESTS_WITH_ITEMS[questID] = true
+  end
+
+  -- Updating the objectives 
+  local objectiveCount = 0
+
+  if isComplete then 
+    if not isAutoComplete then
       for index = 1, numObjectives do 
-        local text, type, finished = GetQuestObjectiveInfo(questID, index, true)
-        tinsert(objectivesData, { text = text, type = type, isCompleted = finished })
+        local objectiveData = questData:AcquireObjective(objectiveCount + 1)
+        local text, oType, finished = GetQuestObjectiveInfo(questID, index, true)
+        
+        objectiveData.text = text
+        objectiveData.type = oType
+        objectiveData.isCompleted =  finished
+        
+        objectiveCount = objectiveCount + 1
+
+        if oType == "progressbar" then 
+          objectiveData.hasProgress = nil 
+          objectiveData.progress = nil 
+          objectiveData.minProgress = nil
+          objectiveData.maxProgress = nil
+          objectiveData.progressText = nil
+          
+          -- We don't display the progress bar if it's completed, we remove it from tracking 
+          QUESTS_WITH_PROGRESS[questID] = nil
+        end
       end
     end
 
-    -- We don't display the progress bar if it's completed, we remove it from tracking.
-    QUESTS_WITH_PROGRESS[questID] = nil
+    -- In case where the quest is auto completed, this says the user needs to click 
+    -- for finishing the quest. We need to notify the player 
+    if isAutoComplete then 
+      local objectiveCompleteData = questData:AcquireObjective(objectiveCount + 1)
+      objectiveCompleteData.isCompleted = true 
+      objectiveCompleteData.text = QUEST_WATCH_QUEST_COMPLETE
 
-    -- In case where the quest is auto complete, this say the user needs to click 
-    -- for finishing the quest. We need to notify the player. 
-    if isAutoComplete then
-      tinsert(objectivesData, { isCompleted = true, text = QUEST_WATCH_QUEST_COMPLETE })
-      tinsert(objectivesData, { isCompleted = false, text = QUEST_WATCH_CLICK_TO_COMPLETE })
+      local objectiveClickData = questData:AcquireObjective(objectiveCount + 2)
+      objectiveClickData.isCompleted = false 
+      objectiveClickData.text = QUEST_WATCH_CLICK_TO_COMPLETE 
+
+      -- We don't forget to add 2 objectives in the objective counter
+      objectiveCount = objectiveCount + 2
     else
       local completionText = GetQuestLogCompletionText(questLogIndex)
       if completionText then 
-
-        -- The waypoint text is here for helping the player to navigate for completing the quest.
+        -- The waypoint text is here for helping the player to navigate for completing the quests 
         if shouldShowWaypoint then 
           local waypointText = GetNextWaypointText(questID)
-          if waypointText then 
-            tinsert(objectivesData, { isCompleted = false, text =  WAYPOINT_OBJECTIVE_FORMAT_OPTIONAL:format(waypointText)})
+          if waypointText then
+            local objectiveData = questData:AcquireObjective(objectiveCount + 1)
+            objectiveData.isCompleted = false 
+            objectiveData.text = WAYPOINT_OBJECTIVE_FORMAT_OPTIONAL:format(waypointText)
+            objectiveCount = objectiveCount + 1
           end
         end
 
-        tinsert(objectivesData, { isCompleted = false, text= completionText} )
-      else 
+        local objectiveCompletionData = questData:AcquireObjective(objectiveCount + 1)
+        objectiveCompletionData.isCompleted = false 
+        objectiveCompletionData.text = completionText
+        objectiveCount = objectiveCount + 1
+      else
         local waypointText = GetNextWaypointText(questID)
-        if waypointText then 
-          tinsert(objectivesData, { isCompleted = false, text = waypointText})
+        local objectiveWaypointData = questData:AcquireObjective(objectiveCount + 1)
+        objectiveWaypointData.isCompleted = false
+        objectiveCount = objectiveCount + 1
+
+        if waypointText then
+          objectiveWaypointData.text = waypointText
         else
-          tinsert(objectivesData, { isCompleted = false, text = QUEST_WATCH_QUEST_READY})
-        end
+          objectiveWaypointData.text =  QUEST_WATCH_QUEST_READY
+        end 
       end
     end
-  elseif isFailed then
-    objectivesData = { [1] = { isCompleted = false, failed = true, text = FAILED } }
+  elseif isFailed then 
+    local objectiveData = questData:AcquireObjective(objectiveCount + 1)
+    objectiveData.text = FAILED
+    objectiveData.isCompleted = false 
+    objectiveData.isFailed = true
+    objectiveCount = objectiveCount + 1
 
     -- We don't display the progress bar if it's failed, we remove it from tracking.
     QUESTS_WITH_PROGRESS[questID] = nil
-  else
+  else 
     if shouldShowWaypoint then 
       -- The waypoint text is here for helping the player to navigate for progress on the quest, it's still optional.
       local waypointText = GetNextWaypointText(questID)
       if waypointText then
-        tinsert(objectivesData, { isCompleted = false, text = WAYPOINT_OBJECTIVE_FORMAT_OPTIONAL:format(waypointText)})
+        local objectiveData = questData:AcquireObjective(objectiveCount + 1)
+        objectiveCount = objectiveCount + 1
+        objectiveData.isCompleted = false 
+        objectiveData.text = WAYPOINT_OBJECTIVE_FORMAT_OPTIONAL:format(waypointText)
       end
     end
 
     for index = 1, numObjectives do 
-      local text, type, finished = GetQuestObjectiveInfo(questID, index, false)
-      local data = { text = text, type = type, isCompleted = finished }
+      local objectiveData = questData:AcquireObjective(objectiveCount + 1)
+      local text, oType, finished = GetQuestObjectiveInfo(questID, index, false)
+      objectiveData.text = text 
+      objectiveData.type = oType 
+      objectiveData.isCompleted = finished 
 
-        if type == "progressbar" then
-          local progress = GetQuestProgressBarPercent(questID)
-          data.hasProgressBar = true
-          data.progress = progress
-          data.minProgress = 0
-          data.maxProgress = 100
-          data.progressText = PERCENTAGE_STRING:format(progress)
-          QUESTS_WITH_PROGRESS[questID] = true
-        else 
-          QUESTS_WITH_PROGRESS[questID] = nil 
-        end
+      if oType == "progressbar" then 
+        local progress = GetQuestProgressBarPercent(questID)
+        objectiveData.hasProgress = true 
+        objectiveData.progress = progress 
+        objectiveData.minProgress = 0
+        objectiveData.maxProgress = 100
+        objectiveData.progressText = PERCENTAGE_STRING:format(progress)
+        QUESTS_WITH_PROGRESS[questID] = true 
+      else
+        objectiveData.hasProgress = nil 
+        objectiveData.progress = nil 
+        objectiveData.minProgress = nil
+        objectiveData.maxProgress = nil
+        objectiveData.progressText = nil
+        QUESTS_WITH_PROGRESS[questID]  = nil
+      end
 
-        tinsert(objectivesData, data)
+      objectiveCount = objectiveCount + 1
     end
 
     --- Display the money objective if the player hasn't enought for the quest.
     local playerMoney = GetMoney()
     if requiredMoney > playerMoney then 
       local text = GetMoneyString(playerMoney) .. " / " .. GetMoneyString(requiredMoney)
-      tinsert(objectivesData, { isCompleted = false, text = text })
+      local objectiveMoneyData = questData:AcquireObjective(objectiveCount + 1)
+      objectiveMoneyData.text = text 
+      objectiveMoneyData.isCompleted = false 
+
+      objectiveCount = objectiveCount + 1
     end
   end
 
-  _QuestModel:AddQuestData(questID, questData)
-  -- For the objectives, we use 'SetData' directly to be sure there are no old 
-  -- data about them, in addition to keep the 'AddQuestData' feature for the
-  -- other quest data.
-  _QuestModel:SetData(objectivesData, "quests", questID, "objectives")
-end
+  questData:SetObjectivesCount(objectiveCount)
 
+  -- if totalTime and elapsedTime then 
+  --   local lastObjective = questData:GetObjectiveData(objectiveCount)
+  --   lastObjective.hasTimer = true
+  --   lastObjective.startTime = GetTime() - elapsedTime
+  --   lastObjective.duration = totalTime 
+  -- end
+end
 
 __SystemEvent__ "QUEST_LOG_UPDATE" "SUPER_TRACKING_CHANGED"
 function QUESTS_UPDATE()
   for questID in pairs(QUESTS_CACHE) do
     _M:UpdateQuest(questID)
   end
-
-  _QuestModel:Flush()
 end
 
 __SystemEvent__()
@@ -425,27 +425,18 @@ end
 __SystemEvent__()
 function QUEST_ACCEPTED(questID)
   -- Don't continue if the quest is a world quest or a emissary 
-  if IsWorldQuest(questID) or IsQuestTask(questID) or IsQuestBounty(questID) then
-    return
+  if IsWorldQuest(questID) or IsQuestTask(questID) or IsQuestBounty(questID) then 
+    return 
   end 
 
-  Trace("The quest (id:%i) has been accepted", questID)
 
   -- Add it in the quest watched 
   if GetCVarBool("autoQuestWatch") and GetNumQuestWatches() < Constants.QuestWatchConsts.MAX_QUEST_WATCHES then
     local wasWatched = AddQuestWatch(questID, EnumQuestWatchType.Automatic)
     if wasWatched then 
       QuestSuperTracking_OnQuestTracked(questID)
-      Debug("The quest (id:%i) has been watched with success", questID)
-    else 
-      Debug("The quest (id:%i) hasn't been watched for a unknown reason", questID)
-    end
-  else 
-    Debug("The quest (id:%i) doesn't match the requirements for being watched", questID)
-    Trace("AUTO_QUEST_WATCH: %s", AUTO_QUEST_WATCH)
-    Trace("GetNumQuestWatches(): %i", GetNumQuestWatches())
-    Trace("MAX_QUEST_WATCHES: %i", Constants.QuestWatchConsts.MAX_QUEST_WATCHES)
-  end
+    end 
+  end 
 end
 
 __SystemEvent__()
@@ -454,99 +445,91 @@ function QUEST_WATCH_LIST_CHANGED(questID, isAdded)
     return 
   end
 
-  -- Manually tracking the world quest trigger this event so we need to check
-  -- this isn't a world quest
+  -- Manually tracking the world quest triggers this event so we need to check
+  -- this isn't a world quest 
   if IsWorldQuest(questID) then 
     return 
-  end
+  end 
 
-  if isAdded then
-    Debug("The quest (id:%i) has been added in the watch list", questID)
-
+  if isAdded then 
     QUESTS_CACHE[questID] = true 
-    QUESTS_REQUESTED[questID] = true
+    QUESTS_REQUESTED[questID] = true 
 
     RequestLoadQuestByID(questID)
-
-    -- _M:UpdateQuest(questID)
   else 
-    Debug("The quest (id:%i) has been removed from the watch list", questID)
+    QUESTS_CACHE[questID] = nil 
+    QUESTS_REQUESTED[questID] = nil 
 
-    QUESTS_CACHE[questID] = nil
-    QUESTS_REQUESTED[questID] = nil
-    
     if QUESTS_WITH_ITEMS[questID] then 
-      ItemBar_RemoveItemData(questID)
-      ItemBar_Update()
-      QUESTS_WITH_ITEMS[questID] = nil
+      ItemBar_RemoveItem(questID)
+      QUESTS_WITH_ITEMS[questID] = nil 
     end
 
-    _QuestModel:RemoveQuestData(questID)
-    _QuestModel:Flush()
-  end 
+    -- QUESTS_CONTENT_SUBJECT:RemoveQuestData(questID)
+    QUESTS_CONTENT_SUBJECT.quests[questID] = nil
+  end
 end
+
 
 __SystemEvent__()
 function QUEST_DATA_LOAD_RESULT(questID, success)
-  if success and QUESTS_REQUESTED[questID] then
+  if success and QUESTS_REQUESTED[questID] then 
     QUESTS_REQUESTED[questID] = nil 
 
     _M:UpdateQuest(questID)
-    _QuestModel:Flush()
   end
 end
 
 function GetQuestHeader(self, qID)
-    -- Check if the quest header is in the cache
-    if QUEST_HEADERS_CACHE[qID] then
-      return QUEST_HEADERS_CACHE[qID]
+  -- Check if the quest header is in the cache 
+  if QUEST_HEADERS_CACHE[qID] then 
+    return QUEST_HEADERS_CACHE[qID]
+  end
+
+  -- If no, find the quest header 
+  local currentHeader = "Misc"
+  local numEntries, numQuests = GetNumQuestLogEntries()
+
+  for i = 1, numEntries do 
+    local data = GetInfo(1)
+    if data.isHeader then 
+      currentHeader = data.title 
+    elseif data.questID == qID then 
+      QUEST_HEADERS_CACHE[qID] = currentHeader
+      return currentHeader
     end
+  end
 
-    -- if no, find the quest header
-    local currentHeader = "Misc"
-    local numEntries, numQuests = GetNumQuestLogEntries()
-
-    for i = 1, numEntries do
-      local data = GetInfo(i)
-      if data.isHeader then
-        currentHeader = data.title
-      elseif data.questID == qID then
-        QUEST_HEADERS_CACHE[qID] = currentHeader
-        return currentHeader
-      end
-    end
-
-    return currentHeader
+  return currentHeader
 end
 
 __Async__()
 __SystemEvent__()
 function PLAYER_STARTED_MOVING()
   DISTANCE_UPDATER_ENABLED = true
-  while  DISTANCE_UPDATER_ENABLED do
+  while DISTANCE_UPDATER_ENABLED do 
     _M:UpdateDistance()
 
-    -- TODO: Create an option for changing the refresh rate.
     Delay(1)
   end
 end
 
 __SystemEvent__()
 function PLAYER_STOPPED_MOVING()
-  DISTANCE_UPDATER_ENABLED = false
+  DISTANCE_UPDATER_ENABLED = false 
 
   _M:UpdateDistance()
 end
 
-IN_TAXI = false
+IN_TAXI = false 
 __Async__()
 __SystemEvent__()
 function VEHICLE_ANGLE_SHOW()
-  if IN_TAXI then
-    return
+  if IN_TAXI then 
+    return 
   end
 
-  IN_TAXI = true
+  IN_TAXI = true 
 
   PLAYER_STARTED_MOVING()
 
@@ -556,24 +539,20 @@ function VEHICLE_ANGLE_SHOW()
 
   Delay(0.2)
 
-  IN_TAXI = false
+  IN_TAXI = false 
 end
 
 function UpdateDistance()
   for questID in pairs(QUESTS_CACHE) do 
     local distanceSq = GetDistanceSqToQuest(questID)
+
     if distanceSq then 
-      _QuestModel:AddQuestData(questID, { distance = math.sqrt(distanceSq) })
+      local questData = QUESTS_CONTENT_SUBJECT:AcquireQuest(questID)
+      questData.distance = math.sqrt(distanceSq)
     end
   end
-  
-  _QuestModel:Flush()
 end
 -- ========================================================================= --
 -- Debug Utils Tools
 -- ========================================================================= --
-function OnEnable(self)
-  if ViragDevTool and ViragDevTool.AddData then 
-    ViragDevTool:AddData(_QuestModel, "SLT Quest Model")
-  end
-end
+DebugTools.TrackData(QUESTS_CONTENT_SUBJECT, "Quests Content Subject")
