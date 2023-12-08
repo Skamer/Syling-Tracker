@@ -9,13 +9,13 @@
 Syling                 "SylingTracker.UI.ObjectiveView"                      ""
 -- ========================================================================= --
 export {
-  FromUIProperty      = Wow.FromUIProperty,
-  GetFrameByType      = Wow.GetFrameByType,
-  RegisterUISetting   = API.RegisterUISetting,
-  FromUISetting       = API.FromUISetting,
-  FromUISettings      = API.FromUISettings,
-  GenerateUISettings  = API.GenerateUISettings,
-  GetUISetting        = API.GetUISetting
+  FromUIProperty                      = Wow.FromUIProperty,
+  GetFrameByType                      = Wow.GetFrameByType,
+  RegisterUISetting                   = API.RegisterUISetting,
+  FromUISetting                       = API.FromUISetting,
+  FromUISettings                      = API.FromUISettings,
+  GenerateUISettings                  = API.GenerateUISettings,
+  GetUISetting                        = API.GetUISetting
 }
 
 __UIElement__()

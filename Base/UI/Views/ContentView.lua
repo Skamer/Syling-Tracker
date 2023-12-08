@@ -9,17 +9,19 @@
 Syling                  "SylingTracker.UI.ContentView"                       ""
 -- ========================================================================= --
 export {
-  TryToComputeHeightFromChildren = Utils.Frame_TryToComputeHeightFromChildren,
-  FromUIProperty = Wow.FromUIProperty,
-  RegisterUISetting = API.RegisterUISetting,
-  FromUISetting = API.FromUISetting,
-  FromBackdrop = Frame.FromBackdrop,
+  TryToComputeHeightFromChildren      = Utils.Frame_TryToComputeHeightFromChildren,
+  FromUIProperty                      = Wow.FromUIProperty,
+  RegisterUISetting                   = API.RegisterUISetting,
+  FromUISetting                       = API.FromUISetting,
+  FromBackdrop                        = Frame.FromBackdrop,
 }
 
 __UIElement__()
 __Sealed__() class "ContentView" (function(_ENV)
   inherit "Frame" extend "IView" "IQueueAdjustHeight" "ISizeAnimation"
-
+  -----------------------------------------------------------------------------
+  --                               Handlers                                  --
+  -----------------------------------------------------------------------------
   local function OnExpandedHandler(self, new, old)
     if new then 
       self:OnExpand()
@@ -29,10 +31,11 @@ __Sealed__() class "ContentView" (function(_ENV)
 
     self:AdjustHeight()
   end
-
+  -----------------------------------------------------------------------------
+  --                                Methods                                  --
+  -----------------------------------------------------------------------------
   function OnExpand() end 
   function OnCollapse() end
-
 
   function OnViewUpdate(self, data, metadata)
     if metadata then 
@@ -40,7 +43,6 @@ __Sealed__() class "ContentView" (function(_ENV)
       self.ContentIcon = metadata.contentIcon
     end
   end
-
 
   function OnAdjustHeight(self)
     local height = self:TryToComputeHeightFromChildren()
@@ -74,9 +76,9 @@ __Sealed__() class "ContentView" (function(_ENV)
     Header    = Frame,
     {
       Header = {
-        Icon    = Texture,
-        Label   = FontString,
-        Minimize = Button,
+        Icon      = Texture,
+        Label     = FontString,
+        Minimize  = Button,
       }
     }
   }
@@ -164,23 +166,6 @@ Style.UpdateSkin("Default", {
           Anchor("RIGHT", -6, 0)
         }
       }
-    },
-
-    -- Content = {
-    --   height = 200,
-    --   backdrop = {
-    --     bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
-    --     edgeFile  = [[Interface\Buttons\WHITE8X8]],
-    --     edgeSize  = 1
-    --   },
-
-    --   backdropColor       = { r = 18/255, g = 20/255, b = 23/255, a = 0.87}, -- 87
-    --   backdropBorderColor = { r = 0, g = 0, b = 0, a = 1},
-    --   location = {
-    --     Anchor("TOP", 0, 0, "Header", "BOTTOM"),
-    --     Anchor("LEFT"),
-    --     Anchor("RIGHT")
-    --   }
-    -- }
+    }
   }
 })

@@ -13,7 +13,6 @@ export {
   GenerateUISettings                  = API.GenerateUISettings,
 }
 
-
 __UIElement__()
 class "ProfessionRecipesContentView"(function(_ENV)
   inherit "ContentView"

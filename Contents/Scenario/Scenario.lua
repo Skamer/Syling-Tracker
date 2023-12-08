@@ -47,8 +47,6 @@ function OnActive(self)
   self:UpdateScenario()
 end
 
-
-
 function UpdateScenario(self)
   local scenarioInfo = GetScenarioInfo()
   if not scenarioInfo then 

@@ -16,9 +16,6 @@ export {
 
   HasObjectiveWidgets         = Utils.HasObjectiveWidgets
 }
-
---- TODO: Add Widgets (e.g, Fishing tracking for knowing the fish amount)
-
 -------------------------------------------------------------------------------
 --                             AutoQuests                                 --
 -------------------------------------------------------------------------------

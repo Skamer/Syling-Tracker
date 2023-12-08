@@ -9,10 +9,9 @@
 Syling                 "SylingTracker.UI.ListView"                           ""
 -- ========================================================================= --
 export {
-  newtable = System.Toolset.newtable,
-  IsObjectType = Class.IsObjectType,
+  newtable                            = System.Toolset.newtable,
+  IsObjectType                        = Class.IsObjectType,
 }
-
 
 __UIElement__()
 class "ListView" (function(_ENV)
@@ -215,8 +214,6 @@ class "ListViewWithHeaderText" (function(_ENV)
   function __ctor(self)
   end
 end)
-
-
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------

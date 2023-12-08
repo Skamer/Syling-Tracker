@@ -13,38 +13,6 @@ export {
   GetFrameByType                      = Wow.GetFrameByType,
 }
 
--- Enemy Forces Text Format
--- Pull percent text Format
-
--- ONLY_PERCENT
--- ONLY_ABSOLUTE
--- ABSOLUTE_AND_PERCENT
-
--- ABSOLUTE
--- PERCENT
--- ABSOLUTE_AND_PERCENT
-
-
--- 50.7 (pull)
-
--- Enemy Forces 
--- -> 99.23 
-
--- 50.7%
--- 198 / 240
--- 198 / 240 - 82%58
-
-
--- OnlyPercent
--- OnlyAbsolute
--- AbsoluteAndPercent
--- Custom 
-
--- OnlyFinalPercent
--- OnlyFinalCount
--- OnlyAdditivePercent
--- OnlyAdditiveCount
--- Custom
 enum "KeystoneEnemyForcesFormatType" {
   "OnlyPercent",
   "OnlyAbsolute",
@@ -440,12 +408,6 @@ function FromTimerDuration()
   return FromUIProperty("KeystoneDuration")
 end
 
---[[
-  
-
-
----]]
-
 function FromTimerText()
   return GetFrameByType(KeystoneTimer, FromUIProperty("ElapsedTime"))
     :CombineLatest(FromKeystoneDuration())
@@ -588,40 +550,8 @@ function FromEnemyForcesText()
 
       return enemyForcesText
 
-
-
-      -- -- Enemy Forces
-      -- local enemyForcesText = ""
-      -- if not enemyForcesTextFormatType or enemyForcesTextFormatType == "ONLY_PERCENT" then 
-      --   enemyForcesText = format("%.2f%%", Utils.TruncateDecimal(current / total * 100, 2))
-      -- end
-
-      -- -- Current Pull Textzq
-      -- if pending > 0 then 
-      --   local pullText = ""
-      --   if not pullTextFormatType or pullTextFormatType == "ONLY_ADDITION_PERCENT" then 
-      --     pullText = format("+%.2f%%", Utils.TruncateDecimal(pending / total * 100, 2))
-      --   end
-
-      --   if current + pending >= total then
-      --     return enemyForcesText .. Color.GREEN .. format(" ( %s )", pullText)
-      --   else
-      --     return format("%s ( %s )", enemyForcesText, pullText)
-      --   end
-      -- end
-
-      -- return enemyForcesText
-
     end)
 end
-
--- keystoneDuration
-
--- function FromKeystoneTimerText()
---   return GetFrameByType()
--- end
-
-
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
