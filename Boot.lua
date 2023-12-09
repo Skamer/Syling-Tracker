@@ -118,3 +118,128 @@ function OpenOptions()
 
   _M:FireSystemEvent("SylingTracker_OPEN_OPTIONS")
 end
+
+
+--- `/slt enable` enable all the trackers
+--- `/slt enable all` the same as above 
+--- `/slt enable trackers` the same as above 
+--- `/slt enable tracker main` enable only the main tracker 
+--- `/slt enable tracker second` enable only the tracker with for id: second
+__SlashCmd__ "slt" "enable"
+function EnableElementCommand(args)
+  local arg1, arg2 = strsplit(" ", args)
+  if arg1 == "" or arg1 == "all" then 
+    _M:FireSystemEvent("SylingTracker_ENABLE_TRACKERS")
+    _M:FireSystemEvent("SylingTracker_ENABLE_ITEMBAR")
+  elseif arg1 == "itembar" then 
+    _M:FireSystemEvent("SylingTracker_ENABLE_ITEMBAR")
+  elseif arg1 == "trackers" then 
+    _M:FireSystemEvent("SylingTracker_ENABLE_TRACKERS")
+  elseif arg1 == "tracker" then 
+    _M:FireSystemEvent("SylingTracker_ENABLE_TRACKER", arg2)
+  end
+end
+
+--- `/slt disable` disable all the trackers
+--- `/slt disable all` the same as above 
+--- `/slt disable trackers` the same as above 
+--- `/slt disable tracker main` disable only the main tracker 
+--- `/slt disable tracker second` disable only the tracker with for id: second 
+__SlashCmd__ "slt" "disable"
+function DisableElementCommand(args)
+  local arg1, arg2 = strsplit(" ", args)
+  if arg1 == "" or arg1 == "all" then 
+    _M:FireSystemEvent("SylingTracker_DISABLE_TRACKERS")
+    _M:FireSystemEvent("SylingTracker_DISABLE_ITEMBAR")
+  elseif arg1 == "itembar" then 
+    _M:FireSystemEvent("SylingTracker_DISABLE_ITEMBAR")
+  elseif arg1 == "trackers" then 
+    _M:FireSystemEvent("SylingTracker_DISABLE_TRACKERS")
+  elseif arg1 == "tracker" then 
+    _M:FireSystemEvent("SylingTracker_DISABLE_TRACKER", arg2)
+  end
+end
+
+--- `/slt show` show all the trackers and the item bar 
+--- `/slt show all` the same as above 
+--- `/slt show itembar` show only the item bar 
+--- `/slt show trackers` show only all the trackers 
+--- `/slt show tracker main` show only the main tracker 
+--- `/slt show tracker second` show only the tracker with for id: second 
+__SlashCmd__ "slt" "show"
+function ShowElementCommand(args)
+  local arg1, arg2 = strsplit(" ", args)
+  if arg1 == "" or arg1 == "all" then 
+    _M:FireSystemEvent("SylingTracker_SHOW_TRACKERS")
+    _M:FireSystemEvent("SylingTracker_ENABLE_ITEMBAR")
+  elseif arg1 == "itembar" then 
+    _M:FireSystemEvent("SylingTracker_ENABLE_ITEMBAR")
+  elseif arg1 == "trackers" then 
+    _M:FireSystemEvent("SylingTracker_SHOW_TRACKERS")
+  elseif arg1 == "tracker" then 
+    _M:FireSystemEvent("SylingTracker_SHOW_TRACKER", arg2)
+  end
+end
+
+--- `/slt hide` show all the trackers and the item bar 
+--- `/slt hide all` the same as above 
+--- `/slt hide itembar` hide only the item bar 
+--- `/slt hide trackers` hide only all the trackers 
+--- `/slt hide tracker main` hide only the main tracker 
+--- `/slt hide tracker second` hide only the tracker with for id: second 
+__SlashCmd__ "slt" "hide"
+function HideElementCommand(args)
+  local arg1, arg2 = strsplit(" ", args)
+  if arg1 == "" or arg1 == "all" then 
+    _M:FireSystemEvent("SylingTracker_HIDE_TRACKERS")
+    _M:FireSystemEvent("SylingTracker_DISABLE_ITEMBAR")
+  elseif arg1 == "itembar" then 
+    _M:FireSystemEvent("SylingTracker_DISABLE_ITEMBAR")
+  elseif arg1 == "trackers" then 
+    _M:FireSystemEvent("SylingTracker_HIDE_TRACKERS")
+  elseif arg1 == "tracker" then
+    _M:FireSystemEvent("SylingTracker_HIDE_TRACKER", arg2)
+  end
+end
+
+--- `/slt lock` lock all the trackers and the item bar 
+--- `/slt lock all` the same as above 
+--- `/slt lock itembar` lock only the item bar 
+--- `/slt lock trackers` lock only all the trackers 
+--- `/slt lock tracker main` lock only the main tracker 
+--- `/slt lock tracker second` lock only the tracker with for id: second 
+__SlashCmd__ "slt" "lock"
+function LockElementCommand(args)
+  local arg1, arg2 = strsplit(" ", args)
+  if arg1 == "" or arg1 == "all" then 
+    _M:FireSystemEvent("SylingTracker_LOCK_TRACKERS")
+    _M:FireSystemEvent("SylingTracker_LOCK_ITEMBAR")
+  elseif arg1 == "itembar" then 
+    _M:FireSystemEvent("SylingTracker_LOCK_ITEMBAR")
+  elseif arg1 == "trackers" then 
+    _M:FireSystemEvent("SylingTracker_LOCK_TRACKERS")
+  elseif arg1 == "tracker" then 
+    _M:FireSystemEvent("SylingTracker_LOCK_TRACKER", arg2)
+  end
+end
+
+--- `/slt unlock` unlock all the trackers and the item bar 
+--- `/slt unlock all` the same as above 
+--- `/slt unlock itembar` unlock only the item bar 
+--- `/slt unlock trackers` unlock only all the trackers 
+--- `/slt unlock tracker main` unlock only the main tracker 
+--- `/slt unlock tracker second` unlock only the tracker with for id: second 
+__SlashCmd__ "slt" "unlock"
+function UnlockElementCommand(args)
+  local arg1, arg2 = strsplit(" ", args)
+  if arg1 == "" or arg1 == "all" then 
+    _M:FireSystemEvent("SylingTracker_UNLOCK_TRACKERS")
+    _M:FireSystemEvent("SylingTracker_UNLOCK_ITEMBAR")
+  elseif arg1 == "itembar" then 
+    _M:FireSystemEvent("SylingTracker_UNLOCK_ITEMBAR")
+  elseif arg1 == "trackers" then 
+    _M:FireSystemEvent("SylingTracker_UNLOCK_TRACKERS")
+  elseif arg1 == "tracker" then 
+    _M:FireSystemEvent("SylingTracker_UNLOCK_TRACKER", arg2)
+  end
+end

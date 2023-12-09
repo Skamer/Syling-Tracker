@@ -1,6 +1,11 @@
-# 2.0.1
+# 2.0.2
 
-- Re-added the slash commands for tracker and item bar
+- Re-added the slash commands for tracker and item bar.
+
+---
+
+## 2.0.1
+
 - Left clicking on the quest will open again the quest log for this one.
 - The distance updater for quests will be disabled while the player is in instance.
 
