@@ -2,6 +2,8 @@
 
 - Re-added the slash commands for tracker and item bar
 - Left clicking on the quest will open again the quest log for this one.
+- The distance updater for quests will be disabled while the player is in instance.
+- Try a fix for resolving a case where the text of objectives wasn't wrapped when using with some fonts and font sizes.
 
 --
 

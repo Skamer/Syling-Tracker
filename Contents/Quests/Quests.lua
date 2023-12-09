@@ -506,16 +506,24 @@ end
 __Async__()
 __SystemEvent__()
 function PLAYER_STARTED_MOVING()
+  if IsInInstance() then 
+    return 
+  end
+
   DISTANCE_UPDATER_ENABLED = true
   while DISTANCE_UPDATER_ENABLED do 
     _M:UpdateDistance()
 
-    Delay(1)
+    Delay(5)
   end
 end
 
 __SystemEvent__()
 function PLAYER_STOPPED_MOVING()
+  if IsInInstance() then 
+    return 
+  end
+
   DISTANCE_UPDATER_ENABLED = false 
 
   _M:UpdateDistance()

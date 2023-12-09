@@ -77,20 +77,6 @@ class "ObjectiveView" (function(_ENV)
 
     self.ObjectiveText = data and data.text
   end
-
-  function UpdateTextHeight(self)
-    local fsText = self:GetChild("Text")
-    fsText:SetText(fsText:GetText())
-  end
-
-
-  function OnAcquire(self)
-    self.OnSizeChanged = self.OnSizeChanged + self.OnSizeChangedHandler
-  end
-
-  function OnRelease(self)
-    self.OnSizeChanged = self.OnSizeChanged - self.OnSizeChangedHandler
-  end
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
@@ -146,16 +132,9 @@ class "ObjectiveView" (function(_ENV)
   -----------------------------------------------------------------------------
   __Template__ {
     Icon = Texture,
-    Text = FontString
+    Text = TextFrame,
   } 
-  function __ctor(self) 
-    self.OnSizeChangedHandler = function(_, width)
-      local w = Round(width)
-      if not self.__width or (self.__width ~= w) then
-        self.__width = w 
-        self:UpdateTextHeight()
-      end
-    end
+  function __ctor(self)
   end
 end)
 
@@ -268,15 +247,18 @@ Style.UpdateSkin("Default", {
     },
 
     Text = {
-      text = FromUIProperty("ObjectiveText"),
-      -- mediaFont = FontType("PT Sans Narrow Bold", 13),
-      mediaFont       = ObjectiveView.FromStateWithTextUISetting("mediaFont"),
-      justifyH        = ObjectiveView.FromStateWithTextUISetting("justifyH"),
-      justifyV        = ObjectiveView.FromStateWithTextUISetting("justifyV"),
-      textTransform   = ObjectiveView.FromStateWithTextUISetting("textTransform"),
-      wordWrap        = true, 
-      nonSpaceWrap    = true,
-      textColor       = ObjectiveView.FromStateWithTextUISetting("textColor"),
+      Text = {
+        setAllPoints = true,
+        text = FromUIProperty("ObjectiveText"),
+        -- mediaFont = FontType("PT Sans Narrow Bold", 13),
+        mediaFont       = ObjectiveView.FromStateWithTextUISetting("mediaFont"),
+        justifyH        = ObjectiveView.FromStateWithTextUISetting("justifyH"),
+        justifyV        = ObjectiveView.FromStateWithTextUISetting("justifyV"),
+        textTransform   = ObjectiveView.FromStateWithTextUISetting("textTransform"),
+        wordWrap        = true, 
+        nonSpaceWrap    = true,
+        textColor       = ObjectiveView.FromStateWithTextUISetting("textColor"),
+      },
       location = {
         Anchor("TOP"),
         Anchor("LEFT", 5, 0, "Icon", "RIGHT"),

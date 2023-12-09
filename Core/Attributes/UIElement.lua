@@ -16,7 +16,8 @@ Syling                  "SylingTracker.Core.UIElement"                       ""
 -- The "OnAcquired" method will be called when the object will be acuiqred.
 --
 EVENTS                              = {}
-RECYCLER_HOLDER                     = CreateFrame("Frame") 
+RECYCLER_HOLDER                     = CreateFrame("Frame")
+FRAME_FIRST_ACQUIRE                 = {}
 RECYCLER_HOLDER:Hide()
 
 local function RegisterFrameForSystemEvent(frame, event)
@@ -55,8 +56,10 @@ interface "IChildPropertyHookRelease" (function(_ENV)
       if not Class.Validate(getmetatable(parent)) and parent ~= RECYCLER_HOLDER then 
         self:Release(true)
       elseif not Class.Validate(getmetatable(oparent)) and oparent ~= RECYCLER_HOLDER then
-        if self.OnAcquire then 
-          self:OnAcquire(true)
+        if self.OnAcquire then
+          self:OnAcquire(true, FRAME_FIRST_ACQUIRE[self] and false or true)
+
+          FRAME_FIRST_ACQUIRE[self] = true
         end 
       end
     end
@@ -126,7 +129,9 @@ class "__UIElement__" (function(_ENV)
           ACQUIRED_ELEMENTS[obj] = true 
 
           if obj.OnAcquire then
-            obj:OnAcquire(false)
+            obj:OnAcquire(false, FRAME_FIRST_ACQUIRE[self] and false or true)
+
+            FRAME_FIRST_ACQUIRE[self] = true
           end
 
           return obj 
