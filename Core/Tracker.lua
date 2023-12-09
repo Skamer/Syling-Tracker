@@ -511,11 +511,14 @@ function private__DeleteTracker(trackerID)
     return 
   end
 
+  UnregisterTrackerForAutoVisibility(tracker)
+  UnregisterTrackerForMacroTicker(tracker)
+
   -- Remove handlers 
   tracker.OnStopResizing      = tracker.OnStopResizing - OnTrackerStopResizing
   tracker.OnStopMoving        = tracker.OnStopMoving - OnTrackerStopMoving
 
-  TRACKERS[trackerID] = nil 
+  TRACKERS[trackerID] = nil
 
   tracker:Release()
 end
@@ -554,7 +557,7 @@ function IterateTrackers(includeMainTracker, includeDisabledTrackers)
   
   if includeMainTracker then
     local settings = trackersSettings["main"] 
-    local enabled = settings and setting.enabled 
+    local enabled = settings and settings.enabled 
     local ignored = false 
 
     if not includeDisabledTrackers and enabled ~= nil and enabled == false then 
@@ -860,7 +863,7 @@ function private__SetEnabledTracker(trackerID, enabled)
   if enabled and TRACKERS[trackerID] then 
     return 
   end
-
+  
   if enabled then
     local tracker = private__NewTracker(trackerID)
     LoadTracker(tracker)
@@ -1390,3 +1393,101 @@ __Async__() function PLAYER_ENTERING_WORLD(isInitialLogin, isReloadingUI)
     end
   end
 end
+
+__SystemEvent__()
+function SylingTracker_HIDE_TRACKERS()
+  for trackerID in IterateTrackers() do
+    SetTrackerSetting(trackerID, "visibilityRules", "hide", nil, "defaultVisibility")
+  end
+end
+
+__SystemEvent__()
+function SylingTracker_SHOW_TRACKERS()
+  for trackerID in IterateTrackers() do
+    SetTrackerSetting(trackerID, "visibilityRules", "show", nil, "defaultVisibility")
+  end  
+end
+
+__SystemEvent__()
+function SylingTracker_ENABLE_TRACKERS()
+  for trackerID in IterateTrackers() do
+    SetTrackerSetting(trackerID, "enabled", true)
+  end
+end
+
+__SystemEvent__()
+function SylingTracker_DISABLE_TRACKERS()
+  for trackerID in IterateTrackers() do
+    SetTrackerSetting(trackerID, "enabled", false)
+  end  
+end
+
+__SystemEvent__()
+function SylingTracker_LOCK_TRACKERS()
+  for trackerID in IterateTrackers() do
+    SetTrackerSetting(trackerID, "locked", true)
+  end  
+end
+
+
+__SystemEvent__()
+function SylingTracker_UNLOCK_TRACKERS()
+  for trackerID in IterateTrackers() do
+    SetTrackerSetting(trackerID, "locked", false)
+  end  
+end
+
+__SystemEvent__()
+function SylingTracker_ENABLE_TRACKER(trackerID)
+  if not trackerID then 
+    return 
+  end
+
+  SetTrackerSetting(trackerID, "enabled", true)
+end
+
+__SystemEvent__()
+function SylingTracker_DISABLE_TRACKER(trackerID)
+  if not trackerID then 
+    return 
+  end
+
+  SetTrackerSetting(trackerID, "enabled", false)
+end
+
+__SystemEvent__()
+function SylingTracker_SHOW_TRACKER(trackerID)
+  if not trackerID then 
+    return 
+  end
+
+  SetTrackerSetting(trackerID, "visibilityRules", "show", nil, "defaultVisibility")
+end
+
+__SystemEvent__()
+function SylingTracker_HIDE_TRACKER(trackerID)
+  if not trackerID then 
+    return 
+  end
+
+  SetTrackerSetting(trackerID, "visibilityRules", "hide", nil, "defaultVisibility")
+end
+
+__SystemEvent__()
+function SylingTracker_LOCK_TRACKER(trackerID)
+  if not trackerID then 
+    return 
+  end
+
+  SetTrackerSetting(trackerID, "locked", true)
+end
+
+__SystemEvent__()
+function SylingTracker_UNLOCK_TRACKER(trackerID)
+  if not trackerID then 
+    return 
+  end
+
+  SetTrackerSetting(trackerID, "locked", false)
+end
+

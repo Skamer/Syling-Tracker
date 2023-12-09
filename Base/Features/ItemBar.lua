@@ -546,6 +546,26 @@ function SylingTracker_DATABASE_LOADED()
   private__SetEnabled(GetItemBarSettingWithDefault("enabled"))
   private__SetLocked(GetItemBarSettingWithDefault("locked"))
 end
+
+__SystemEvent__()
+function SylingTracker_ENABLE_ITEMBAR()
+  SetItemBarSetting("enabled", true)
+end
+
+__SystemEvent__()
+function SylingTracker_DISABLE_ITEMBAR()
+  SetItemBarSetting("enabled", false)
+end
+
+__SystemEvent__()
+function SylingTracker_LOCK_ITEMBAR()
+  SetItemBarSetting("locked", false)
+end
+
+__SystemEvent__()
+function SylingTracker_UNLOCK_ITEMBAR()
+  SetItemBarSetting("locked", true)
+end
 -- ========================================================================= --
 -- Debug Utils Tools
 -- ========================================================================= --

@@ -10,4 +10,5 @@
   <Script file="Instance.lua" />
   <Script file="Keystone.lua" />
   <Script file="UIWidgets.lua" />
+  <Script file="Secure.lua"/>
 </Ui>

@@ -1,4 +1,11 @@
-# 2.0.0
+# 2.0.1
+
+- Re-added the slash commands for tracker and item bar
+- Left clicking on the quest will open again the quest log for this one.
+
+--
+
+## 2.0.0
 
 Welcome to the v2. The addon has been rewritten from scratch with a new core.
 
