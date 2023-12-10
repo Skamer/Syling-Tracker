@@ -673,7 +673,7 @@ class "SettingsMediaFont" (function(_ENV)
       end
 
       if value.monochrome then 
-        self:GetChild("FontMonochromeSetting"):SetValue(value.monochrome)
+        self:GetChild("FontMonochromeSetting"):SetChecked(value.monochrome)
       end
     end
 

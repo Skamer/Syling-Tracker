@@ -29,12 +29,12 @@ __DataProperties__ {
   { name = "enemyForcesQuantity", type = Number, default = 0 },
   { name = "enemyForcesTotalQuantity", type = Number, default = 0},
   { name = "enemyForcesPendingQuantity", type = Number, default = 0},
+  { name = "deathCount", type = Number, default = 0}
 }
 class "KeystoneContentSubject" { ContentSubject }
 
 -- TODO: 
 -- rezTimer
 -- rezCount
--- deathCount
 -- bloodlustTimer
 

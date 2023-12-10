@@ -89,6 +89,12 @@ API.RegisterCustomSkin("Eddy", {
   [KeystoneContentView] = {
     inherit = "default",
 
+    DeathCounter = {
+      location = {
+        Anchor("TOPRIGHT", -5, -58)
+      }
+    },
+
     Content = {
       EnemyForces = {
         location = {

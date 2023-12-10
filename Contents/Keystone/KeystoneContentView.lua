@@ -280,8 +280,19 @@ class "KeystoneEnemyForces" (function(_ENV)
 end)
 
 
--- TwoChestElapsed
--- ThreeChestElapsed
+__UIElement__()
+class "KeystoneDeathCounter" (function(_ENV)
+  inherit "Frame"
+  -----------------------------------------------------------------------------
+  --                              Constructors                               --
+  -----------------------------------------------------------------------------
+  __Template__ {
+    Icon = Texture,
+    Counter = FontString
+  }
+  function __ctor(self) end
+end)
+
 
 __UIElement__()
 class "KeystoneContentView" (function(_ENV)
@@ -298,6 +309,7 @@ class "KeystoneContentView" (function(_ENV)
       self.KeystoneStarted = data.started
       self.DungeonTextureFileID = data.textureFileID
       self.KeystoneDuration = data.timeLimit
+      self.KeystoneDeathCount = data.deathCount
 
       local objectives = self:GetChild("Content"):GetChild("Objectives")
       objectives:UpdateView(data.objectives, metadata)
@@ -370,12 +382,19 @@ class "KeystoneContentView" (function(_ENV)
     type = Number,
     default = 0
   }
+
+  __Observable__()
+  property "KeystoneDeathCount" {
+    type = Number,
+    default = 0
+  }
   -----------------------------------------------------------------------------
   --                              Constructors                               --
   -----------------------------------------------------------------------------
   __Template__{
     TopDungeonInfo  = Frame,
     Content         = Frame, 
+    DeathCounter    = KeystoneDeathCounter,
     {
       Content = {
         TimerInfo   = KeystoneTimer,
@@ -383,15 +402,14 @@ class "KeystoneContentView" (function(_ENV)
         Objectives  = ObjectiveListView,
       },
       TopDungeonInfo = {
-        Level       = FontString,
-        Affixes     = KeystoneAffixes,
-        DungeonName = FontString,
-        DungeonIcon = Texture
+        Level         = FontString,
+        Affixes       = KeystoneAffixes,
+        DungeonName   = FontString,
+        DungeonIcon   = Texture,
       },
     }
   }
-  function __ctor(self)
-  end
+  function __ctor(self) end
 end)
 -------------------------------------------------------------------------------
 --                              Observables                                  --
@@ -649,9 +667,30 @@ API.UpdateBaseSkin({
     }
   },
 
+  [KeystoneDeathCounter] = {
+    width                             = 40,
+    height                            = 25,
+
+    Icon = {
+      atlas = AtlasType("poi-graveyard-neutral", true)
+    },
+
+    Counter = {
+      justifyH                        = "RIGHT",
+      justifyV                        = "MIDDLE",
+    }
+  },
+
   [KeystoneContentView] = {
     Header = {
       visible                         = false
+    },
+
+    DeathCounter = {
+      visible = FromUIProperty("KeystoneDeathCount"):Map(function(count) return count > 0 end),
+      Counter = {
+        text = FromUIProperty("KeystoneDeathCount")
+      }
     },
 
     TopDungeonInfo = {
@@ -781,6 +820,25 @@ API.UpdateDefaultSkin({
       }
     }
   },
+
+  [KeystoneDeathCounter] = {
+    inherit = "base",
+
+    Icon = {
+      location = {
+        Anchor("RIGHT")
+      }
+    },
+
+    Counter = {
+      location = {
+        Anchor("TOP"),
+        Anchor("RIGHT", -2, 0, "Icon", "LEFT"),
+        Anchor("LEFT"),
+        Anchor("BOTTOM")
+      }
+    }
+  },
   
   [KeystoneContentView] = {
     inherit = "base",
@@ -816,8 +874,16 @@ API.UpdateDefaultSkin({
           Anchor("LEFT", 70, 0),
           Anchor("TOP"),
           Anchor("BOTTOM"),
-          Anchor("RIGHT")
+          Anchor("RIGHT", -45, 0)
         }        
+      },
+
+    },
+    
+    DeathCounter = {
+      frameStrata = "HIGH",
+      location = {
+        Anchor("TOPRIGHT", -5, -24)
       }
     },
 
@@ -860,5 +926,6 @@ API.RegisterSkinTag("keystone",
   KeystoneAffixe, 
   KeystoneAffixes, 
   KeystoneTimer,
+  KeystoneDeathCounter,
   KeystoneContentView
 )

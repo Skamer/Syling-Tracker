@@ -14,10 +14,49 @@ export {
   GetFrameByType                      = Wow.GetFrameByType,
   FromUIProperty                      = Wow.FromUIProperty
 }
+TIMERS                                = {}
+
+TICKER = C_Timer.NewTicker(0.5, function()
+  for timer in pairs(TIMERS) do 
+    timer:OnTick()
+  end
+end)
+
+local function RegisterTimer(timer)
+  if not TICKER or TICKER:IsCancelled() then 
+    TICKER = C_Timer.NewTicker(1, function()
+      for timer in pairs(TIMERS) do 
+        timer:OnTick()
+      end
+    end)
+  end
+
+  TIMERS[timer] = true
+
+  timer:OnTick()
+end
+
+local function UnregisterTimer(timer)
+  TIMERS[timer] = nil 
+
+  for k,v in pairs(TIMERS) do 
+    return
+  end
+
+  if TICKER then 
+    TICKER:Cancel()
+  end
+
+  TICKER = nil
+end
 
 __UIElement__()
 class "Timer" (function(_ENV)
   inherit "Frame"
+  -----------------------------------------------------------------------------
+  --                               Events                                    --
+  -----------------------------------------------------------------------------
+  event "OnTick"
   -----------------------------------------------------------------------------
   --                               Handlers                                  --
   -----------------------------------------------------------------------------
@@ -32,9 +71,11 @@ class "Timer" (function(_ENV)
   local function OnTimeSettingsChangedHandler(self, new, old, prop)
     -- If the timer is not started or no full timer info, don't continue
     if self.Started and self.StartTime > 0 and self.Duration > 0 then
-      self.OnUpdate = OnUpdateHandler
+      RegisterTimer(self)
+      self.OnTick = OnUpdateHandler
     else
-      self.OnUpdate = nil
+      UnregisterTimer(self)
+      self.OnTick = nil
     end
   end
   -----------------------------------------------------------------------------

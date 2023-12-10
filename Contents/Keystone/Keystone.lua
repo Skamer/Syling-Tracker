@@ -20,6 +20,7 @@ export {
   GetCriteriaInfo                     = C_Scenario.GetCriteriaInfo,
   GetActiveKeystoneInfo               = C_ChallengeMode.GetActiveKeystoneInfo,
   GetAffixInfo                        = C_ChallengeMode.GetAffixInfo,
+  GetDeathCount                       =  C_ChallengeMode.GetDeathCount,
   GetMapUIInfo                        = C_ChallengeMode.GetMapUIInfo,
   GetActiveChallengeMapID             = C_ChallengeMode.GetActiveChallengeMapID,
   GetInstanceTextureFileID            = Utils.GetInstanceTextureFileID
@@ -36,6 +37,7 @@ function OnActive(self)
   self:UpdateKeystoneInfo()
   self:UpdateDungeonTexture()
   self:UpdateObjectives()
+  self:UpdateDeathCounter()
 end
 
 function UpdateObjectives(self)
@@ -101,6 +103,11 @@ function UpdateKeystoneInfo()
   KEYSTONE_CONTENT_SUBJECT:StopAffixesCounter()
 end
 
+function UpdateDeathCounter()
+  local death, timeLost = GetDeathCount()
+  KEYSTONE_CONTENT_SUBJECT.deathCount = death
+end
+
 --- IMPORTANT !!!
 --- During a reload, elapsed returned by GetWorldElapsedTime(1) don't change even
 --- after some seconds, causing a desync on the timer. 
@@ -117,6 +124,10 @@ function UPDATE_INSTANCE_INFO()
     return 
   end
   
+  if KEYSTONE_CONTENT_SUBJECT.started  then 
+    return 
+  end
+
   local nextElapsed = elapsed + 1
   local nextTime 
 
@@ -160,6 +171,8 @@ end
 
 __SystemEvent__()
 function CHALLENGE_MODE_DEATH_COUNT_UPDATED()
+  _M:UpdateDeathCounter()
+
   local _, elapsed, type = GetWorldElapsedTime(1)
   -- We reduce the start time for advancing the timer of '5' seconds.
   KEYSTONE_CONTENT_SUBJECT.startTime = KEYSTONE_CONTENT_SUBJECT.startTime - 5

@@ -1,4 +1,16 @@
-# 2.0.2
+# 2.0.3
+
+- Re-added the death counter for the mythic +.
+- The timers will now be updated every 0.5s (instead to be every frame) for reducing performance cost.
+
+**FIXES**
+
+- Fixed a case where an error is triggered in the options with the font settings.
+- Fixed [ticker #81](https://github.com/Skamer/Syling-Tracker/issues/81) : an "script too long" error triggered during a Mythic +.
+
+---
+
+## 2.0.2
 
 - Re-added the slash commands for tracker and item bar.
 
