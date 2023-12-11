@@ -1123,6 +1123,7 @@ RegisterTrackerSetting({ id = "borderSize", default = 1})
 RegisterTrackerSetting({ id = "showScrollBar", default = true})
 RegisterTrackerSetting({ id = "scrollBarPosition", default = "RIGHT"})
 RegisterTrackerSetting({ id = "scrollBarThumbColor", default =  ColorType(1, 199/255, 0, 0.75)})
+RegisterTrackerSetting({ id = "showMinimizeButton", default = true})
 
 RegisterTrackerSetting({
   id = "contentsTracked",
@@ -1343,6 +1344,7 @@ Style.UpdateSkin("Default", {
     },
 
     MinimizeButton = {
+      visible                         = FromTrackerSetting("showMinimizeButton"),
       location                        = { Anchor("BOTTOMLEFT", 5, 0, nil, "TOPRIGHT") }
     },
 

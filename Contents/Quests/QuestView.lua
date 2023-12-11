@@ -16,6 +16,7 @@ export {
   RegisterUISetting                     = API.RegisterUISetting,
   FromUISetting                         = API.FromUISetting,
   FromUISettings                        = API.FromUISettings,
+  GenerateUISettings                    = API.GenerateUISettings,
   GetFrame                              = Wow.GetFrame,
 
   -- Wow API & Utils
@@ -159,6 +160,14 @@ class "QuestView" (function(_ENV)
       end
     end
   end
+
+  local function OnEnablePOIHandler(self, enable)
+    if enable then 
+      self:UpdatePOI()
+    else
+      Style[self].POI = NIL 
+    end
+  end
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
@@ -192,15 +201,47 @@ class "QuestView" (function(_ENV)
       self.QuestHasItem = false
     end
 
-    -- Update POI
+    if self.EnablePOI then 
+      self:UpdatePOI()
+    end
+
+    if data.hasTimer then 
+      Style[self].Content.Timer.visible     = true 
+      Style[self].Content.Timer.startTime   = data.startTime
+      Style[self].Content.Timer.duration    = data.totalTime
+      self.ObjectiveHasTimer        = true 
+    else
+      Style[self].Content.Timer     = NIL
+      self.ObjectiveHasTimer        = false 
+    end
+
+    self.QuestID = data.questID
+    self.QuestName = data.name 
+    self.QuestLevel = data.level
+    self.QuestTagID = data.tag and data.tag.tagID
+  end
+
+  function UpdatePOI(self)
+    local data = self.Data
+
+    if not data then 
+      return 
+    end
+
+    local questID = data.questID
+    local isWaypoint = data.isWaypoint -- TODO: Check and add isWaypoint
+    local isComplete = data.isComplete
+    local isSuperTracked = questID == GetSuperTrackedQuestID()
+    local hasLocalPOI = data.hasLocalPOI
+
+
     local showPOI = false 
     if isComplete then 
-      showPOI = true 
+      showPOI = true
     elseif hasLocalPOI or (isSuperTracked and GetNextWaypoint(questID) ~= nil) then 
       showPOI = true 
     end
 
-    local poiButton = self:GetChild("POI")
     if showPOI then
       Style[self].POI.visible = true
       local poiButton = self:GetPropertyChild("POI")
@@ -232,21 +273,6 @@ class "QuestView" (function(_ENV)
     else 
       Style[self].POI = NIL
     end
-
-    if data.hasTimer then 
-      Style[self].Content.Timer.visible     = true 
-      Style[self].Content.Timer.startTime   = data.startTime
-      Style[self].Content.Timer.duration    = data.totalTime
-      self.ObjectiveHasTimer        = true 
-    else
-      Style[self].Content.Timer     = NIL
-      self.ObjectiveHasTimer        = false 
-    end
-
-    self.QuestID = data.questID
-    self.QuestName = data.name 
-    self.QuestLevel = data.level
-    self.QuestTagID = data.tag and data.tag.tagID
   end
 
   function OnRelease(self)
@@ -300,6 +326,13 @@ class "QuestView" (function(_ENV)
   property "ContextMenuPattern" {
     type = String,
     default = "quest"
+  }
+
+  property "EnablePOI" {
+    type = Boolean,
+    default = true,
+    event = "POIEnabledChanged",
+    handler = OnEnablePOIHandler
   }
   -----------------------------------------------------------------------------
   --                              Constructors                               --
@@ -377,9 +410,29 @@ RegisterUISetting("quest.showBorder", true)
 RegisterUISetting("quest.backgroundColor", Color(35/255, 40/255, 46/255, 0.73))
 RegisterUISetting("quest.borderColor", Color(0, 0, 0, 0.4))
 RegisterUISetting("quest.borderSize", 1)
+RegisterUISetting("quest.name.textColor", Color.NORMAL)
 RegisterUISetting("quest.name.mediaFont", FontType("DejaVuSansCondensed Bold", 10))
 RegisterUISetting("quest.name.textTransform", "NONE")
 RegisterUISetting("quest.level.mediaFont", FontType("PT Sans Caption Bold", 10))
+RegisterUISetting("quest.enablePOI", true)
+
+GenerateUISettings("dungeonQuest", "quest", function(generatedSettings)
+  if generatedSettings["dungeonQuest.backgroundColor"] then 
+     generatedSettings["dungeonQuest.backgroundColor"].default = { r = 0, g = 72/255, b = 124/255, a = 0.73 }
+  end
+end)
+
+GenerateUISettings("raidQuest", "quest", function(generatedSettings)
+  if generatedSettings["raidQuest.backgroundColor"] then 
+     generatedSettings["raidQuest.backgroundColor"].default = { r = 0, g = 84/255, b = 2/255, a = 0.73}
+  end
+end)
+
+GenerateUISettings("legendaryQuest", "quest", function(generatedSettings)
+  if generatedSettings["legendaryQuest.backgroundColor"] then 
+     generatedSettings["legendaryQuest.backgroundColor"].default = { r = 35/255, g = 40/255, b = 46/255, a = 0.73}
+  end
+end)
 -------------------------------------------------------------------------------
 --                              Observables                                  --
 -------------------------------------------------------------------------------
@@ -416,6 +469,15 @@ function FromObjectivesLocation()
     }
   end)
 end
+
+function FromQuestContentLocation()
+  return FromUISetting("quest.enablePOI"):Map(function(enablePOI)
+    return {
+      Anchor("TOPLEFT", enablePOI and 26 or 0, 0),
+      Anchor("TOPRIGHT")
+    }
+  end)
+end
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
@@ -448,6 +510,7 @@ Style.UpdateSkin("Default", {
     minResize                         = { width = 0, height = 24},
     autoAdjustHeight                  = true,
     registerForClicks                 = { "LeftButtonDown", "RightButtonDown" },
+    enablePOI                         = FromUISetting("quest.enablePOI"),
 
     Content = {
       height                          = 24,
@@ -479,10 +542,11 @@ Style.UpdateSkin("Default", {
         },
   
         Name = {
-          text = FromUIProperty("QuestName"),
-          justifyV = "MIDDLE",
-          mediaFont = FromUISetting("quest.name.mediaFont"),
-          textTransform = FromUISetting("quest.name.textTransform"),
+          text                        = FromUIProperty("QuestName"),
+          textColor                   = FromUISetting("quest.name.textColor"),
+          justifyV                    = "MIDDLE",
+          mediaFont                   = FromUISetting("quest.name.mediaFont"),
+          textTransform               = FromUISetting("quest.name.textTransform"),
           location = {
             Anchor("LEFT", 0, 0, "Tag", "RIGHT"),
             Anchor("RIGHT", 0, 0, "Level", "LEFT"),
@@ -536,10 +600,7 @@ Style.UpdateSkin("Default", {
         }
       },
 
-      location = {
-          Anchor("TOPLEFT", 26, 0),
-          Anchor("TOPRIGHT")
-      }
+      location = FromQuestContentLocation()
     },
 
   },
@@ -552,18 +613,39 @@ Style.UpdateSkin("Default", {
 
   [LegendaryQuestView] = {
     Content = {
-      backdropColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
+      backdropColor                   = FromUISetting("legendaryQuest.backgroundColor"),
+      backdropBorderColor             = FromUISetting("legendaryQuest.borderColor"),
+
+      Header = {
+        Name = {
+          textColor                     = FromUISetting("legendaryQuest.name.textColor"),
+        }
+      }
     }
   },
 
   [RaidQuestView] = {
     Content = {
-      backdropColor = { r = 0, g = 84/255, b = 2/255, a = 0.73}
+      backdropColor                   = FromUISetting("raidQuest.backgroundColor"),
+      backdropBorderColor             = FromUISetting("raidQuest.borderColor"),
+
+      Header = {
+        Name = {
+          textColor                     = FromUISetting("raidQuest.name.textColor"),
+        }
+      }
     }
   },
   [DungeonQuestView] = {
     Content = {
-      backdropColor = { r = 0, g = 72/255, b = 124/255, a = 0.73 }
+      backdropColor                   = FromUISetting("dungeonQuest.backgroundColor"),
+      backdropBorderColor             = FromUISetting("dungeonQuest.borderColor"),
+
+      Header = {
+        Name = {
+          textColor                     = FromUISetting("dungeonQuest.name.textColor"),
+        }
+      }
     }
   },
 

@@ -169,11 +169,19 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     scaleSlider:SetMinMaxValues(0.4, 10)
     self.GeneralTabControls.scaleSlider = scaleSlider
     ---------------------------------------------------------------------------
+    --- Show Minimise Button
+    ---------------------------------------------------------------------------
+    local showMinimizeButtonCkeckBox = Widgets.SettingsCheckBox.Acquire(false, self)
+    showMinimizeButtonCkeckBox:SetID(50)
+    showMinimizeButtonCkeckBox:SetLabel("Show Minimize Button")
+    showMinimizeButtonCkeckBox:BindTrackerSetting(trackerID, "showMinimizeButton")
+    self.GeneralTabControls.showMinimizeButtonCkeckBox = showMinimizeButtonCkeckBox
+    ---------------------------------------------------------------------------
     --- Background Section
     ---------------------------------------------------------------------------
     local backgroundSection = Widgets.ExpandableSection.Acquire(false, self)
     backgroundSection:SetExpanded(false)
-    backgroundSection:SetID(50)
+    backgroundSection:SetID(60)
     backgroundSection:SetTitle("Background")
     Style[backgroundSection].marginTop = 10
     self.GeneralTabControls.backgroundSection = backgroundSection
@@ -194,7 +202,7 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     ---------------------------------------------------------------------------
     local borderSection = Widgets.ExpandableSection.Acquire(false, self)
     borderSection:SetExpanded(false)
-    borderSection:SetID(60)
+    borderSection:SetID(70)
     borderSection:SetTitle("Border")
     self.GeneralTabControls.borderSection = borderSection
 
@@ -222,7 +230,7 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     ---------------------------------------------------------------------------
     local scrollBarSection = Widgets.ExpandableSection.Acquire(false, self)
     scrollBarSection:SetExpanded(false)
-    scrollBarSection:SetID(70)
+    scrollBarSection:SetID(80)
     scrollBarSection:SetTitle("Scroll Bar")
     self.GeneralTabControls.scrollBarSection = scrollBarSection
 

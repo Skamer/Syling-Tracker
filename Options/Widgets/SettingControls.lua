@@ -756,11 +756,6 @@ class "SettingsExpandableSection" (function(_ENV)
   -----------------------------------------------------------------------------
   function UpdateVisibility(self)
     local button = self:GetChild("Button")
-    if self.Expanded then 
-      Style[button].ExpandTexture.atlas = AtlasType("UI-HUD-Minimap-Zoom-Out", true)
-    else 
-      Style[button].ExpandTexture.atlas = AtlasType("UI-HUD-Minimap-Zoom-In", true)
-    end
     
     for name, frame in self:GetChilds() do
       if Class.IsObjectType(frame, Frame) and frame:GetID() > 0 then 
@@ -799,6 +794,7 @@ class "SettingsExpandableSection" (function(_ENV)
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------  
+  __Observable__()
   property "Expanded" {
     type = Boolean,
     default = false,
@@ -1027,7 +1023,9 @@ Style.UpdateSkin("Default", {
       },
 
       ExpandTexture = {
-        atlas = AtlasType("UI-HUD-Minimap-Zoom-Out", true),
+        atlas = Wow.FromUIProperty("Expanded"):Map(function(expanded)
+          return expanded and AtlasType("UI-HUD-Minimap-Zoom-Out", true) or AtlasType("UI-HUD-Minimap-Zoom-In", true)
+        end),
         location = {
           Anchor("LEFT", 0, 0, nil, "CENTER")
         }

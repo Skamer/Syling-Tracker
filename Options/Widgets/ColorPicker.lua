@@ -57,7 +57,7 @@ class "ColorPicker" (function(_ENV)
 		end
 
 
-    local r, g, b, a = self.r, self.g, self.g, self.a
+    local r, g, b, a = self.r, self.g, self.b, self.a
 
     if self.HasAlpha then 
       ColorPickerFrame.opacity = 1 - (a or 0)

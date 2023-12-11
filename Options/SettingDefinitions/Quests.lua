@@ -19,11 +19,11 @@ class "SettingDefinitions.Quests" (function(_ENV)
   --                   [General] Tab Builder                                 --
   -----------------------------------------------------------------------------
   function BuildGeneralTab(self)
-    local enableTrackerCheckBox = Widgets.SettingsCheckBox.Acquire(false, self)
-    enableTrackerCheckBox:SetID(10)
-    enableTrackerCheckBox:SetLabel("Include the campaign quests in the quests content")
-    -- enableTrackerCheckBox:BindTrackerSetting(trackerID, "enabled")
-    self.GeneralTabControls.enableTrackerCheckBox = enableTrackerCheckBox
+    local enablePOICheckBox = Widgets.SettingsCheckBox.Acquire(false, self)
+    enablePOICheckBox:SetID(10)
+    enablePOICheckBox:SetLabel("Enable POI")
+    enablePOICheckBox:BindUISetting("quest.enablePOI")
+    self.GeneralTabControls.enablePOICheckBox = enablePOICheckBox
 
     -- ---------------------------------------------------------------------------
     -- --- Background Section
@@ -94,9 +94,7 @@ class "SettingDefinitions.Quests" (function(_ENV)
     showHeaderCheckBox:SetID(10)
     showHeaderCheckBox:SetLabel("Show")
     showHeaderCheckBox:BindUISetting("quests.showHeader")
-    -- enableTrackerCheckBox:BindTrackerSetting(trackerID, "enabled")
-    self.HeaderTabControls.showHeaderCheckBox = showHeaderCheckBox 
-
+    self.HeaderTabControls.showHeaderCheckBox = showHeaderCheckBox
     ---------------------------------------------------------------------------
     --- Background Section
     ---------------------------------------------------------------------------
@@ -202,7 +200,7 @@ class "SettingDefinitions.Quests" (function(_ENV)
   function BuildCategoryTab(self)
     local showCategories = Widgets.SettingsCheckBox.Acquire(false, self)
     showCategories:SetID(10)
-    showCategories:SetLabel("Show the quests by category (need /reload after change)")
+    showCategories:SetLabel("Show the quests by category")
     showCategories:BindUISetting("quests.showCategories")
     -- enableTrackerCheckBox:BindTrackerSetting(trackerID, "enabled")
     self.CategoryTabControls.showCategories = showCategories
@@ -276,11 +274,38 @@ class "SettingDefinitions.Quests" (function(_ENV)
     showBackgroundCheckBox:BindUISetting("quest.showBackground")
     self.QuestTabControls.showBackgroundCheckBox = showBackgroundCheckBox
 
-    local backgroundColorPicker = Widgets.SettingsColorPicker.Acquire(false, backgroundSection)
-    backgroundColorPicker:SetID(20)
-    backgroundColorPicker:SetLabel("Color")
-    backgroundColorPicker:BindUISetting("quest.backgroundColor")
-    self.QuestTabControls.backgroundColorPicker = backgroundColorPicker
+    local backgroundColorsSection = Widgets.SettingsExpandableSection.Acquire(false, backgroundSection)
+    backgroundColorsSection:SetID(20)
+    backgroundColorsSection:SetTitle("Colors")
+    self.QuestTabControls.backgroundColorsSection = backgroundColorsSection
+
+    local questBackgroundColorPicker = Widgets.SettingsColorPicker.Acquire(false, backgroundColorsSection)
+    questBackgroundColorPicker:SetID(10)
+    questBackgroundColorPicker:SetLabel(CreateAtlasMarkup("QuestNormal", 18, 18) .. " Normal Quest")
+    questBackgroundColorPicker:SetLabelStyle("small")
+    questBackgroundColorPicker:BindUISetting("quest.backgroundColor")
+    self.QuestTabControls.questBackgroundColorPicker = questBackgroundColorPicker
+
+    local dungeonQuestBackgroundColorPicker = Widgets.SettingsColorPicker.Acquire(false, backgroundColorsSection)
+    dungeonQuestBackgroundColorPicker:SetID(20)
+    dungeonQuestBackgroundColorPicker:SetLabel(CreateAtlasMarkup("Dungeon", 18, 18) .. " Dungeon Quest")
+    dungeonQuestBackgroundColorPicker:SetLabelStyle("small")
+    dungeonQuestBackgroundColorPicker:BindUISetting("dungeonQuest.backgroundColor")
+    self.QuestTabControls.dungeonQuestBackgroundColorPicker = dungeonQuestBackgroundColorPicker
+
+    local raidQuestBackgroundColorPicker = Widgets.SettingsColorPicker.Acquire(false, backgroundColorsSection)
+    raidQuestBackgroundColorPicker:SetID(30)
+    raidQuestBackgroundColorPicker:SetLabel(CreateAtlasMarkup("Raid", 18, 18) .. " Raid Quest")
+    raidQuestBackgroundColorPicker:SetLabelStyle("small")
+    raidQuestBackgroundColorPicker:BindUISetting("raidQuest.backgroundColor")
+    self.QuestTabControls.raidQuestBackgroundColorPicker = raidQuestBackgroundColorPicker
+
+    local legendaryQuestBackgroundColorPicker = Widgets.SettingsColorPicker.Acquire(false, backgroundColorsSection)
+    legendaryQuestBackgroundColorPicker:SetID(40)
+    legendaryQuestBackgroundColorPicker:SetLabel(CreateAtlasMarkup("quest-legendary-available", 18, 18) .. " Legendary Quest")
+    legendaryQuestBackgroundColorPicker:SetLabelStyle("small")
+    legendaryQuestBackgroundColorPicker:BindUISetting("legendaryQuest.backgroundColor")
+    self.QuestTabControls.legendaryQuestBackgroundColorPicker = legendaryQuestBackgroundColorPicker
     ---------------------------------------------------------------------------
     --- Border Section
     ---------------------------------------------------------------------------
@@ -296,11 +321,38 @@ class "SettingDefinitions.Quests" (function(_ENV)
     showBorderCheckBox:BindUISetting("quest.showBorder")
     self.QuestTabControls.showBorderCheckBox = showBorderCheckBox
 
-    local borderColorPicker = Widgets.SettingsColorPicker.Acquire(false, borderSection)
-    borderColorPicker:SetID(20)
-    borderColorPicker:SetLabel("Color")
-    borderColorPicker:BindUISetting("quest.borderColor")
-    self.QuestTabControls.borderColorPicker = borderColorPicker
+    local borderColorsSection = Widgets.SettingsExpandableSection.Acquire(false, borderSection)
+    borderColorsSection:SetID(20)
+    borderColorsSection:SetTitle("Colors")
+    self.QuestTabControls.borderColorsSection = borderColorsSection
+
+    local questBorderColorPicker = Widgets.SettingsColorPicker.Acquire(false, borderColorsSection)
+    questBorderColorPicker:SetID(10)
+    questBorderColorPicker:SetLabel(CreateAtlasMarkup("QuestNormal", 18, 18) .. " Normal Quest")
+    questBorderColorPicker:SetLabelStyle("small")
+    questBorderColorPicker:BindUISetting("quest.borderColor")
+    self.QuestTabControls.questBorderColorPicker = questBorderColorPicker
+
+    local dungeonQuestBorderColorPicker = Widgets.SettingsColorPicker.Acquire(false, borderColorsSection)
+    dungeonQuestBorderColorPicker:SetID(20)
+    dungeonQuestBorderColorPicker:SetLabel(CreateAtlasMarkup("Dungeon", 18, 18) .. " Dungeon Quest")
+    dungeonQuestBorderColorPicker:SetLabelStyle("small")
+    dungeonQuestBorderColorPicker:BindUISetting("dungeonQuest.borderColor")
+    self.QuestTabControls.dungeonQuestBorderColorPicker = dungeonQuestBorderColorPicker
+
+    local raidQuestBorderColorPicker = Widgets.SettingsColorPicker.Acquire(false, borderColorsSection)
+    raidQuestBorderColorPicker:SetID(30)
+    raidQuestBorderColorPicker:SetLabel(CreateAtlasMarkup("Raid", 18, 18) .. " Raid Quest")
+    raidQuestBorderColorPicker:SetLabelStyle("small")
+    raidQuestBorderColorPicker:BindUISetting("raidQuest.borderColor")
+    self.QuestTabControls.raidQuestBorderColorPicker = raidQuestBorderColorPicker
+
+    local legendaryQuestBorderColorPicker = Widgets.SettingsColorPicker.Acquire(false, borderColorsSection)
+    legendaryQuestBorderColorPicker:SetID(40)
+    legendaryQuestBorderColorPicker:SetLabel(CreateAtlasMarkup("quest-legendary-available", 18, 18) .. " Legendary Quest")
+    legendaryQuestBorderColorPicker:SetLabelStyle("small")
+    legendaryQuestBorderColorPicker:BindUISetting("legendaryQuest.borderColor")
+    self.QuestTabControls.legendaryQuestBorderColorPicker = legendaryQuestBorderColorPicker
 
     local borderSizeSlider = Widgets.SettingsSlider.Acquire(false, borderSection)
     borderSizeSlider:SetID(30)
@@ -338,7 +390,39 @@ class "SettingDefinitions.Quests" (function(_ENV)
         textTransform:SetEntries(TEXT_TRANSFORM_ENTRIES)
         textTransform:BindUISetting("quest.name.textTransform")
         self.QuestHeaderTitleTabControls.textTransform = textTransform
-      
+
+        local textColorsSection = Widgets.SettingsExpandableSection.Acquire(false, headertabControl)
+        textColorsSection:SetID(30)
+        textColorsSection:SetTitle("Text Colors")
+        self.QuestHeaderTitleTabControls.textColorsSection = textColorsSection
+    
+        local questTextColorPicker = Widgets.SettingsColorPicker.Acquire(false, textColorsSection)
+        questTextColorPicker:SetID(10)
+        questTextColorPicker:SetLabel(CreateAtlasMarkup("QuestNormal", 18, 18) .. " Normal Quest")
+        questTextColorPicker:SetLabelStyle("small")
+        questTextColorPicker:BindUISetting("quest.name.textColor")
+        self.QuestHeaderTitleTabControls.questTextColorPicker = questTextColorPicker
+    
+        local dungeonQuestTextColorPicker = Widgets.SettingsColorPicker.Acquire(false, textColorsSection)
+        dungeonQuestTextColorPicker:SetID(20)
+        dungeonQuestTextColorPicker:SetLabel(CreateAtlasMarkup("Dungeon", 18, 18) .. " Dungeon Quest")
+        dungeonQuestTextColorPicker:SetLabelStyle("small")
+        dungeonQuestTextColorPicker:BindUISetting("dungeonQuest.name.textColor")
+        self.QuestHeaderTitleTabControls.dungeonQuestTextColorPicker = dungeonQuestTextColorPicker
+    
+        local raidQuestTextColorPicker = Widgets.SettingsColorPicker.Acquire(false, textColorsSection)
+        raidQuestTextColorPicker:SetID(30)
+        raidQuestTextColorPicker:SetLabel(CreateAtlasMarkup("Raid", 18, 18) .. " Raid Quest")
+        raidQuestTextColorPicker:SetLabelStyle("small")
+        raidQuestTextColorPicker:BindUISetting("raidQuest.name.textColor")
+        self.QuestHeaderTitleTabControls.raidQuestTextColorPicker = raidQuestTextColorPicker
+    
+        local legendaryQuestTextColorPicker = Widgets.SettingsColorPicker.Acquire(false, textColorsSection)
+        legendaryQuestTextColorPicker:SetID(40)
+        legendaryQuestTextColorPicker:SetLabel(CreateAtlasMarkup("quest-legendary-available", 18, 18) .. " Legendary Quest")
+        legendaryQuestTextColorPicker:SetLabelStyle("small")
+        legendaryQuestTextColorPicker:BindUISetting("legendaryQuest.name.textColor")
+        self.QuestHeaderTitleTabControls.legendaryQuestTextColorPicker = legendaryQuestTextColorPicker
       end,
       onRelease = function()  
         for index, control in pairs(self.QuestHeaderTitleTabControls) do 
@@ -399,11 +483,11 @@ class "SettingDefinitions.Quests" (function(_ENV)
   function BuildSettingControls(self)
     local tabControl = Widgets.TabControl.Acquire(false, self)
     tabControl:SetID(1)
-    -- tabControl:AddTabPage({
-    --   name = "General",
-    --   onAcquire = function() self:BuildGeneralTab() end,
-    --   onRelease = function() self:ReleaseGeneralTab() end,
-    -- })
+    tabControl:AddTabPage({
+      name = "General",
+      onAcquire = function() self:BuildGeneralTab() end,
+      onRelease = function() self:ReleaseGeneralTab() end,
+    })
     
     tabControl:AddTabPage({
       name = "Header",

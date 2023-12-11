@@ -1,4 +1,19 @@
-# 2.0.3
+# 2.0.4
+
+**NEW**
+
+- Added an option for hiding the minimize button for trackers.
+- Added an option for disabling the quest POIs.
+- Added options for changing the background, border and name colors for dungeon quests, raid quests and legendary quests.
+
+**FIXES**
+
+- Fixed an issue where the color picker wasn't loaded with the right color.
+- Fixed an issue where the icon of expandable section wasn't correct at the first time.
+
+---
+
+## 2.0.3
 
 - Re-added the death counter for the mythic +.
 - The timers will now be updated every 0.5s (instead to be every frame) for reducing performance cost.
