@@ -10,6 +10,8 @@
 
 - Fixed an issue where the color picker wasn't loaded with the right color.
 - Fixed an issue where the icon of expandable section wasn't correct at the first time.
+- Fixed an issue where the mythic + timer could be reseted when the player leaves then re-enters in the instance.
+- Fixed performance issue after a mythic + is finished.
 
 ---
 
