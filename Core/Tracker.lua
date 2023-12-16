@@ -17,7 +17,6 @@ export {
 
   -- Wow API
   IsInInstance                        = IsInInstance,
-  GetActiveKeystoneInfo               = C_ChallengeMode.GetActiveKeystoneInfo,
   SecureCmdOptionParse                = SecureCmdOptionParse
 }
 

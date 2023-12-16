@@ -40,7 +40,7 @@ class "SettingDefinitions.Objective" (function(_ENV)
 
     local textColorSection = Widgets.SettingsExpandableSection.Acquire(false, self)
     textColorSection:SetID(20)
-    textColorSection:SetTitle("Text Color")
+    textColorSection:SetTitle("Text Colors")
     self.TabSettingControls.textColorSection = textColorSection
 
     local textColorProgressColorPicker = Widgets.SettingsColorPicker.Acquire(false, textColorSection)

@@ -5,7 +5,6 @@
   <Script file="UI\Components\ProgressBar.lua" />
   <Script file="UI\Components\Timer.lua" />
   <Script file="UI\Components\POIButton.lua" />
-  <Script file="UI\Components\UIWidgets.lua" />
 
   <Script file="UI\Views\ListView.lua" />
   <Script file="UI\Views\ObjectiveView.lua" />

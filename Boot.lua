@@ -19,7 +19,7 @@ export {
 SLT_LOGO           = [[Interface\AddOns\SylingTracker\Media\logo]]
 
 SECURE_HANDLER_FRAME = CreateFrame("Frame", "SylingTracker_SecureHandlerFrame", UIParent, "SecureHandlerBaseTemplate")
-SECURE_HANDLER_FRAME:SetFrameRef("ObjectiveTrackerFrame", ObjectiveTrackerFrame)
+SECURE_HANDLER_FRAME:SetFrameRef("ObjectiveTrackerFrame", WatchFrame)
 
 function OnLoad(self)
   _DB:SetDefault{ dbVersion = 2 }

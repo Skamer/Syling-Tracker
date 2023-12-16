@@ -68,9 +68,32 @@ __Static__() function Utils.HasTasks(self)
 end
 
 
+-- __Arguments__ { Number }
+-- function GetQuestPOINumber(questID)
+--   -- local poiButton = ObjectiveTrackerFrame.BlocksFrame:FindButtonByQuestID(questID) or QuestScrollFrame.Contents:FindButtonByQuestID(questID)
+--   -- return  poiButton and poiButton.index
+--   return 1
+-- end
+
 __Arguments__ { Number }
 function GetQuestPOINumber(questID)
-  local poiButton = ObjectiveTrackerFrame.BlocksFrame:FindButtonByQuestID(questID) or QuestScrollFrame.Contents:FindButtonByQuestID(questID)
-  return  poiButton and poiButton.index
+  local objectiveFrameNumericPOIs = WatchFrameLines.poiTable and WatchFrameLines.poiTable["numeric"]
+  if objectiveFrameNumericPOIs then 
+    for index, poiButton in pairs(objectiveFrameNumericPOIs) do 
+      if poiButton.questID == questID then
+        return index 
+      end
+    end
+  end
+
+  local questLogNumericPOIs = QuestScrollFrame.Contents.poiTable and QuestScrollFrame.Contents.poiTable["numeric"]
+  if questLogNumericPOIs then 
+    for index, poiButton in pairs(questLogNumericPOIs) do 
+      if poiButton.questID == questID then 
+        return index 
+      end
+    end
+  end
 end
+
 Utils.GetQuestPOINumber = GetQuestPOINumber

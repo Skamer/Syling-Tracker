@@ -1024,7 +1024,7 @@ Style.UpdateSkin("Default", {
 
       ExpandTexture = {
         atlas = Wow.FromUIProperty("Expanded"):Map(function(expanded)
-          return expanded and AtlasType("UI-HUD-Minimap-Zoom-Out", true) or AtlasType("UI-HUD-Minimap-Zoom-In", true)
+          return expanded and AtlasType("poi-door-arrow-up", true) or AtlasType("poi-door-arrow-down", true)
         end),
         location = {
           Anchor("LEFT", 0, 0, nil, "CENTER")

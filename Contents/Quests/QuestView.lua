@@ -20,11 +20,11 @@ export {
   GetFrame                              = Wow.GetFrame,
 
   -- Wow API & Utils
-  GetSuperTrackedQuestID                = C_SuperTrack.GetSuperTrackedQuestID,
+  -- GetSuperTrackedQuestID                = C_SuperTrack.GetSuperTrackedQuestID,
   GetNextWaypoint                       = C_QuestLog.GetNextWaypoint,
   GetQuestPOINumber                     = Utils.GetQuestPOINumber,
   Secure_OpenToQuestDetails             = Utils.Secure_OpenToQuestDetails,
-  ShouldQuestIconsUseCampaignAppearance = QuestUtil.ShouldQuestIconsUseCampaignAppearance
+  -- ShouldQuestIconsUseCampaignAppearance = QuestUtil.ShouldQuestIconsUseCampaignAppearance
 }
 
 __UIElement__()
@@ -55,7 +55,7 @@ class "QuestItemIcon" (function(_ENV)
       return 
     end
 
-    local questLogIndex = C_QuestLog.GetLogIndexForQuestID(questID)
+    local questLogIndex = GetLogIndexForQuestID(questID)
 
     if questLogIndex then 
       local start, duration, enable = GetQuestLogSpecialItemCooldown(questLogIndex)
@@ -175,9 +175,7 @@ class "QuestView" (function(_ENV)
     local questID = data.questID
     local isWaypoint = data.isWaypoint -- TODO: Check and add isWaypoint
     local isComplete = data.isComplete
-    local isSuperTracked = questID == GetSuperTrackedQuestID()
     local hasLocalPOI = data.hasLocalPOI
-
 
     if data.objectives then
       Style[self].Content.Objectives.visible = true
@@ -231,23 +229,27 @@ class "QuestView" (function(_ENV)
     local questID = data.questID
     local isWaypoint = data.isWaypoint -- TODO: Check and add isWaypoint
     local isComplete = data.isComplete
-    local isSuperTracked = questID == GetSuperTrackedQuestID()
+    -- local isSuperTracked = questID == GetSuperTrackedQuestID()
     local hasLocalPOI = data.hasLocalPOI
+    local isOnMap = data.isOnMap
+    local numObjectives = data.numObjectives
+
+    if numObjectives and numObjectives == 0 then 
+      isComplete = true
+    end
 
 
     local showPOI = false 
     if isComplete then 
       showPOI = true
-    elseif hasLocalPOI or (isSuperTracked and GetNextWaypoint(questID) ~= nil) then 
+    elseif hasLocalPOI or isOnMap then 
       showPOI = true 
     end
 
     if showPOI then
       Style[self].POI.visible = true
       local poiButton = self:GetPropertyChild("POI")
-      if isWaypoint then
-        poiButton:SetStyle(POIButton.Style.Waypoint)
-      elseif isComplete then 
+      if isComplete then 
         poiButton:SetStyle(POIButton.Style.QuestComplete)
       else
         poiButton:SetStyle(POIButton.Style.Numeric)
@@ -257,18 +259,7 @@ class "QuestView" (function(_ENV)
         end
       end
 
-
-      if ShouldQuestIconsUseCampaignAppearance(questID) then
-        poiButton:SetQuestType(POIButton.QuestType.Campaign)
-      elseif data.isCalling then 
-        poiButton:SetQuestType(POIButton.QuestType.Calling)
-      elseif data.isImportant then 
-        poiButton:SetQuestType(POIButton.QuestType.Important)
-      else
-        poiButton:SetQuestType(POIButton.QuestType.Normal)
-      end
-
-      poiButton:SetSelected(isSuperTracked)
+      poiButton:SetQuestType(POIButton.QuestType.Normal)
       poiButton:SetQuestID(questID)
     else 
       Style[self].POI = NIL

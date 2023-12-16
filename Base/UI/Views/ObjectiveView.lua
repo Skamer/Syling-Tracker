@@ -133,7 +133,8 @@ class "ObjectiveView" (function(_ENV)
   __Template__ {
     Icon = Texture,
     Text = TextFrame,
-  } 
+  }
+  __InstantApplyStyle__()
   function __ctor(self)
   end
 end)

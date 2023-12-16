@@ -1,4 +1,4 @@
-## Interface: 100200
+## Interface: 30403
 ## Title: |cffff6a00Syling Tracker|r [|cff0094ffOptions|r]
 ## Version: @project-version@
 ## Author: Skamer
@@ -7,7 +7,6 @@
 
 Environment.lua
 WidgetAttribute.lua
-
 
 ### Load the widgets
 Widgets\__load.xml

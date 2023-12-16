@@ -11,7 +11,7 @@ Syling                 "SylingTracker.Features.HelperWindow"                 ""
 DESCRIPTION_TEXT_FORMAT = "Wowhead may help you to find your way for completing this %s"
 ACHIEVEMENT_TEXT        = "achievement"
 QUEST_TEXT              = "quest"
-WOWHEAD_LINK_FORMAT     = "https://www.wowhead.com/%s=%i"
+WOWHEAD_LINK_FORMAT     = "https://www.wowhead.com/wotlk/%s=%i"
 -- ========================================================================= --
 __UIElement__()
 class "HelperWindow" (function(_ENV)

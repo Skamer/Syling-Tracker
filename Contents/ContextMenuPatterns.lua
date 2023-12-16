@@ -15,27 +15,19 @@ export {
   ChatFrame_OpenChat                  = ChatFrame_OpenChat,
 
   -- Quest 
-  GetSuperTrackedQuestID              = C_SuperTrack.GetSuperTrackedQuestID,
-  SetSuperTrackedQuestID              = C_SuperTrack.SetSuperTrackedQuestID,
-  ShowQuestComplete                   = ShowQuestComplete,
-  QuestLogPopupDetailFrame_Show       = QuestLogPopupDetailFrame_Show,
+  GetQuestLogIndexByID                = GetQuestLogIndexByID,
   GetQuestLink                        = GetQuestLink,
-  LFGListUtil_FindQuestGroup          = LFGListUtil_FindQuestGroup,
-  RemoveQuestWatch                    = C_QuestLog.RemoveQuestWatch,
-  QuestMapQuestOptions_AbandonQuest   = QuestMapQuestOptions_AbandonQuest,
+  RemoveQuestWatch                    = RemoveQuestWatch,
+  SetAbandonQuest                     = SetAbandonQuest,
+  SelectQuestLogEntry                 = SelectQuestLogEntry,
+  GetAbandonQuestItems                = GetAbandonQuestItems,
+  GetQuestLogSelection                = GetQuestLogSelection,
+  QuestLog_OpenToQuest                = QuestLog_OpenToQuest,
+  QuestLogControlPanel_UpdateState    = QuestLogControlPanel_UpdateState,
 
   -- Achievement
    GetAchievementLink                 = GetAchievementLink,
-
-   -- Recipe Tracker
-  SetRecipeTracked                    = C_TradeSkillUI.SetRecipeTracked,
-
-  -- Activity
-  RemoveTrackedPerksActivity          = C_PerksActivities.RemoveTrackedPerksActivity,
-
-  -- Collections
-  EContentTrackingType                = _G.Enum.ContentTrackingType,
-  EContentTrackingStopType            = _G.Enum.ContentTrackingStopType,
+   RemoveTrackedAchievement           = RemoveTrackedAchievement,
 
   -- Helper 
   ShowHelperWindow                    = API.ShowHelperWindow
@@ -44,26 +36,6 @@ export {
 --                    Quest Context Menu Pattern                             --
 -------------------------------------------------------------------------------
 RegisterContextMenuPattern("quest", {
-  {
-    id = "supertrackQuest",
-    text = "Supertrack",
-    type = "action",
-    order = 10,
-    icon = { atlas = AtlasType("Target-Tracker")},
-    isShown = function(questID)
-      local supertrackQuestID = GetSuperTrackedQuestID()
-      if supertrackQuestID and supertrackQuestID == questID then 
-        return false 
-      end 
-
-      return true 
-    end,
-    handler = function(questID) SetSuperTrackedQuestID(questID) end
-  },
-  {
-    order = 15,
-    type = "separator"
-  },
   {
     id = "linkQuestToChat",
     text = "Link to chat",
@@ -77,12 +49,10 @@ RegisterContextMenuPattern("quest", {
     order = 30,
     icon = { atlas = AtlasType("adventureguide-icon-whatsnew") },
     handler = function(questID)
-      local quest = QuestCache:Get(questID)
-      if quest.isAutoComplete and quest:IsComplete() then 
-        ShowQuestComplete(questID)
-      else 
-        QuestLogPopupDetailFrame_Show(quest:GetQuestLogIndex())
-      end
+      local questLogIndex = GetQuestLogIndexByID(questID)
+
+      QuestLog_OpenToQuest(questLogIndex)
+      QuestLogControlPanel_UpdateState()
     end
   },
   {
@@ -90,29 +60,40 @@ RegisterContextMenuPattern("quest", {
     type = "separator"
   },
   {
-    id = "findAGroup",
-    text = "Find a group",
-    order = 40,
-    icon = { atlas = AtlasType("socialqueuing-icon-group")},
-    handler = function(questID) LFGListUtil_FindQuestGroup(questID) end
-  },
-  {
-    order = 45;
-    type = "separator"
-  },
-  {
     id = "stopWatchingQuest",
     text = "Stop Watching",
     order = 50,
     icon = { atlas = AtlasType("transmog-icon-hidden") },
-    handler = function(questID) RemoveQuestWatch(questID) end
+    handler = function(questID) 
+      local questLogIndex = GetQuestLogIndexByID(questID)
+
+      RemoveQuestWatch(questLogIndex) 
+      WatchFrame_Update()
+      QuestLog_Update()
+    end
   },
   {
     id = "abandonQuest",
     text = "Abandon",
     order = 60,
     icon = { atlas = AtlasType("transmog-icon-remove") },
-    handler = function(questID)  QuestMapQuestOptions_AbandonQuest(questID) end
+    handler = function(questID)
+      local questLogIndex = GetQuestLogIndexByID(questID)
+      local lastQuest = GetQuestLogSelection()
+      SelectQuestLogEntry(questLogIndex)
+      SetAbandonQuest()
+
+      local items = GetAbandonQuestItems()
+      if ( items ) then
+        StaticPopup_Hide("ABANDON_QUEST")
+        StaticPopup_Show("ABANDON_QUEST_WITH_ITEMS", GetAbandonQuestName(), items)
+      else
+        StaticPopup_Hide("ABANDON_QUEST_WITH_ITEMS")
+        StaticPopup_Show("ABANDON_QUEST", GetAbandonQuestName())
+      end
+
+      SelectQuestLogEntry(lastQuest)
+    end 
   },
   {
     order = 65,
@@ -167,7 +148,7 @@ RegisterContextMenuPattern("achievement", {
     order = 30,
     icon = { atlas = AtlasType("transmog-icon-hidden")},
     handler = function(achievementID)
-      C_ContentTracking.StopTracking(_G.Enum.ContentTrackingType.Achievement, achievementID, _G.Enum.ContentTrackingStopType.Manual)
+      RemoveTrackedAchievement(achievementID)
     end
   },
   {
@@ -181,67 +162,6 @@ RegisterContextMenuPattern("achievement", {
     icon = { atlas = AtlasType("QuestTurnin")},
     handler = function(achievementID)
       ShowHelperWindow("achievement", achievementID)
-    end
-  }
-})
--------------------------------------------------------------------------------
---                   Profession Recipe Context Menu Pattern                  --
--------------------------------------------------------------------------------
-RegisterContextMenuPattern("recipe", {
-  {
-    id = "stopTrackingRecipe",
-    text = "Stop tracking",
-    order = 10,
-    icon = { atlas = AtlasType("transmog-icon-hidden") },
-    handler = function(recipeID, isRecraft)
-      SetRecipeTracked(recipeID, false, isRecraft)
-    end
-  }
-})
--------------------------------------------------------------------------------
---                     Activity Context Menu Pattern                         --
--------------------------------------------------------------------------------
-RegisterContextMenuPattern("activity", {
-  {
-    id = "showDetails",
-    text = "Show details",
-    order = 10,
-    icon = { atlas = AtlasType("adventureguide-icon-whatsnew") },
-    handler = function(activityID)
-      MonthlyActivitiesObjectiveTracker_OpenFrameToActivity(activityID)
-    end
-  },
-  {
-    id = "stopTrackingActivity",
-    text = "Stop tracking",
-    order = 20,
-    icon = { atlas = AtlasType("transmog-icon-hidden") },
-    handler = function(activityID)
-      RemoveTrackedPerksActivity(activityID)
-    end
-  }
-})
--------------------------------------------------------------------------------
---                   Collection Context Menu Pattern                         --
--------------------------------------------------------------------------------
-RegisterContextMenuPattern("collection", {
-  {
-    id = "openCollection",
-    text = "Open Collections",
-    order = 10,
-    icon = { atlas = AtlasType("adventureguide-icon-whatsnew") },
-    isShown = function(collectableID, collectableType) return collectableType == EContentTrackingType.Appearance end,
-    handler = function(collectableID, collectableType)
-      TransmogUtil.OpenCollectionToItem(collectableID)
-    end
-  },
-  {
-    id = "stopTrackingCollectable",
-    text = "Stop tracking",
-    order = 20,
-    icon = { atlas = AtlasType("transmog-icon-hidden") },
-    handler = function(collectableID, collectableType)
-      C_ContentTracking.StopTracking(collectableType, collectableID, EContentTrackingStopType.Manual)
     end
   }
 })

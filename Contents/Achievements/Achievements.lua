@@ -15,26 +15,25 @@ export {
   RegisterObservableContent           = API.RegisterObservableContent, 
 
   -- Wow API & Utils
-  AchievementContentTrackingType      = _G.Enum.ContentTrackingType.Achievement,
+  GetTrackedAchievements              = GetTrackedAchievements,
   GetAchievementInfo                  = GetAchievementInfo,
   GetAchievementNumCriteria           = GetAchievementNumCriteria,
-  GetAchievementCategory              = GetAchievementCategory,
   GetAchievementCriteriaInfo          = GetAchievementCriteriaInfo,
-  GetAchievementsTracked              = Utils.GetAchievementsTracked,
   HasAchievements                     = Utils.HasAchievements,
   IsAchievementEligible               = IsAchievementEligible,
 }
 
+ACHIEVEMENTS_CACHE = {}
 ACHIEVEMENTS_CONTENT_SUBJECT = RegisterObservableContent("achievements", AchievementsContentSubject)
 
-__ActiveOnEvents__ "PLAYER_ENTERING_WORLD" "TRACKED_ACHIEVEMENT_LIST_CHANGED" "CONTENT_TRACKING_UPDATE"
+__ActiveOnEvents__ "PLAYER_ENTERING_WORLD" "TRACKED_ACHIEVEMENT_LIST_CHANGED"
 function BecomeActiveOn(self, event)
   return HasAchievements()
 end
 
 function OnActive(self)
   if self:IsActivateByEvent("PLAYER_ENTERING_WORLD") then 
-    CONTENT_TRACKING_LIST_UPDATE()
+    self:LoadAchievements()
   end
 end
 
@@ -95,23 +94,32 @@ function UpdateAchievement(self, achievementID)
   achievementData:StopObjectivesCounter()
 end
 
-__SystemEvent__()
-function CONTENT_TRACKING_UPDATE(contentType, id, isTracked)
-  if not (contentType == AchievementContentTrackingType) then 
-    return 
-  end
-
-  if isTracked then 
-    _M:UpdateAchievement(id)
-  else
-    ACHIEVEMENTS_CONTENT_SUBJECT.achievements[id] = nil
+function LoadAchievements()
+  local trackedAchievements = { GetTrackedAchievements() }
+  for i = 1, #trackedAchievements do 
+    local achievementID = trackedAchievements[i]
+    TRACKED_ACHIEVEMENT_LIST_CHANGED(achievementID, true)
   end
 end
 
 __SystemEvent__()
-function CONTENT_TRACKING_LIST_UPDATE()
-  local trackedAchievements = GetAchievementsTracked()
-  for _, achievementID in ipairs(trackedAchievements) do 
+function TRACKED_ACHIEVEMENT_LIST_CHANGED(achievementID, isAdded)
+  if achievementID then 
+    if isAdded then 
+      _M:UpdateAchievement(achievementID)
+      ACHIEVEMENTS_CACHE[achievementID] = true
+    else
+      ACHIEVEMENTS_CONTENT_SUBJECT.achievements[achievementID] = nil
+      ACHIEVEMENTS_CACHE[achievementID] = nil
+    end
+  end
+end
+
+__SystemEvent__()
+function TRACKED_ACHIEVEMENT_UPDATE(achievementID)
+  -- NOTE: We need to check the achievement is tracked for avoiding to add 
+  -- untracked achievements. 
+  if ACHIEVEMENTS_CACHE[achievementID] then 
     _M:UpdateAchievement(achievementID)
   end
 end

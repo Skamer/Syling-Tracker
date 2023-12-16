@@ -9,10 +9,11 @@
 Syling                     "SylingTracker.UI.POIButton"                      ""
 -- ========================================================================= --
 export {
-  IsLegendaryQuest                    = C_QuestLog.IsLegendaryQuest,
-  GetThreatPOIIcon                    = QuestUtil.GetThreatPOIIcon,
-  SetSuperTrackedQuestID              = C_SuperTrack.SetSuperTrackedQuestID,
-  GetSuperTrackedQuestID              = C_SuperTrack.GetSuperTrackedQuestID,
+  -- IsLegendaryQuest                    = C_QuestLog.IsLegendaryQuest,
+  -- GetThreatPOIIcon                    = QuestUtil.GetThreatPOIIcon,
+  -- SetSuperTrackedQuestID              = C_SuperTrack.SetSuperTrackedQuestID,
+  -- GetSuperTrackedQuestID              = C_SuperTrack.GetSuperTrackedQuestID,
+  GetQuestUiMapID =  GetQuestUiMapID
 }
 
 -- POI text colors (offsets into texture)
@@ -55,6 +56,12 @@ local PUSHED_SELECTED_MEDIA_TEXTURE = {
   texCoords = { left = 0.375, right = 0.500, top = 0.375, bottom = 0.5 }
 }
 
+
+local COMPLETED_NORMAL_TEXTURE = {
+  file = [[Interface\WorldMap\UI-QuestPoi-NumberIcons]],
+  texCoords = { left = 0.5, right = 0.625, top = 0.875, bottom = 1 }
+}
+
 local CAMPAIGN_NORMAL_MEDIA_TEXTURE = { atlas = AtlasType("UI-QuestPoiCampaign-QuestNumber")}
 local CAMPAIGN_NORMAL_SELECTED_MEDIA_TEXTURE = { atlas = AtlasType("UI-QuestPoiCampaign-QuestNumber-SuperTracked")}
 local CAMPAIGN_PUSHED_MEDIA_TEXTURE = { atlas = AtlasType("UI-QuestPoiCampaign-QuestNumber-Pressed")}
@@ -92,7 +99,10 @@ class "POIButton" (function(_ENV)
   local function OnClickHandler(self)
     local questID = self.QuestID 
     if questID then
-      SetSuperTrackedQuestID(questID)
+      local mapID = GetQuestUiMapID(questID)
+
+      OpenQuestMapLog(mapID)
+      QuestMapFrame_ShowQuestDetails(questID)
     end
   end
   -----------------------------------------------------------------------------
@@ -212,25 +222,12 @@ function FromDisplayMediaTexture()
       end
 
       if not questType or questType == POIButton.QuestType.Normal then
-        local isLegendaryQuest = questID and IsLegendaryQuest(questID) or false
-
-        return isLegendaryQuest and {
-          atlas = AtlasType("UI-QuestPoiLegendary-QuestBangTurnIn"),
-          size = { width = 24, height = 24}
-        } or {
-          atlas = AtlasType("UI-QuestIcon-TurnIn-Normal"),
-          size = { width = 24, height = 24}
+        return {
+          file = [[Interface/WorldMap/UI-WorldMap-QuestIcon]],
+          size = { width = 24, height = 24},
+          texCoords = { left = 0, right = 0.5, top = 0, bottom = 0.5 }
         }
-      end 
-
-     if questType == POIButton.QuestType.Campaign then 
-        return { atlas = AtlasType("UI-QuestPoiCampaign-QuestBangTurnIn"), size = { width = 32, height = 32 }}
-      elseif questType == POIButton.QuestType.Calling then 
-        return { atlas = AtlasType("UI-DailyQuestPoiCampaign-QuestBangTurnIn"), size = { width = 32, height = 32}}
-      elseif questType == POIButton.QuestType.Important then 
-        return { atlas = AtlasType("UI-QuestPoiImportant-QuestBangTurnIn"), size = { width = 32, height = 36}}
       end
-      -- return { file = [[Interface/WorldMap/UI-QuestPoi-NumberIcons]] }
     end)
 end
 
@@ -240,24 +237,12 @@ function FromNormalMediaTexture()
     :Map(function(style, questType, selected)
       -- Numeric Style
       if style == POIButton.Style.Numeric then 
-        if questType == POIButton.QuestType.Campaign or questType == POIButton.QuestType.Calling then
-          return selected and CAMPAIGN_NORMAL_SELECTED_MEDIA_TEXTURE or CAMPAIGN_NORMAL_MEDIA_TEXTURE
-        elseif questType == POIButton.QuestType.Important then 
-          return selected and IMPORTANT_NORMAL_SELECTED_MEDIA_TEXTURE or IMPORTANT_NORMAL_MEDIA_TEXTURE
-        else
-           return selected and NORMAL_SELECTED_MEDIA_TEXTURE or NORMAL_MEDIA_TEXTURE
-        end
+        return selected and NORMAL_SELECTED_MEDIA_TEXTURE or NORMAL_MEDIA_TEXTURE
       elseif style == POIButton.Style.ContentTracking then
         return selected and CONTENT_TRACKING_SELECTED_MEDIA_TEXTURE or CONTENT_TRACKING_MEDIA_TEXTURE
       end 
-
-      if not questType or questType == POIButton.QuestType.Normal then
-        return selected and NORMAL_SELECTED_MEDIA_TEXTURE or NORMAL_MEDIA_TEXTURE
-      elseif questType == POIButton.QuestType.Important then 
-        return selected and IMPORTANT_NORMAL_SELECTED_MEDIA_TEXTURE or IMPORTANT_NORMAL_MEDIA_TEXTURE
-      else 
-        return selected and CAMPAIGN_NORMAL_SELECTED_MEDIA_TEXTURE or CAMPAIGN_NORMAL_MEDIA_TEXTURE
-      end
+      
+      return selected and NORMAL_SELECTED_MEDIA_TEXTURE or NORMAL_MEDIA_TEXTURE
     end)
 end
 
@@ -267,24 +252,12 @@ function FromPushedMediaTexture()
     :Map(function(style, questType, selected)
       -- Numeric Style
       if style == POIButton.Style.Numeric then 
-        if questType == POIButton.QuestType.Campaign or questType == POIButton.QuestType.Calling then
-          return selected and CAMPAIGN_PUSHED_SELECTED_MEDIA_TEXTURE or CAMPAIGN_PUSHED_MEDIA_TEXTURE
-        elseif questType == POIButton.QuestType.Important then 
-          return selected and IMPORTANT_PUSHED_SELECTED_MEDIA_TEXTURE or IMPORTANT_PUSHED_MEDIA_TEXTURE
-        else
-           return selected and PUSHED_SELECTED_MEDIA_TEXTURE or PUSHED_MEDIA_TEXTURE
-        end
+        return selected and PUSHED_SELECTED_MEDIA_TEXTURE or PUSHED_MEDIA_TEXTURE
       elseif style == POIButton.Style.ContentTracking then
         return selected and CONTENT_TRACKING_SELECTED_MEDIA_TEXTURE or CONTENT_TRACKING_MEDIA_TEXTURE
       end 
 
-      if not questType or questType == POIButton.QuestType.Normal then
-        return selected and PUSHED_SELECTED_MEDIA_TEXTURE or PUSHED_MEDIA_TEXTURE
-      elseif questType == POIButton.QuestType.Important then 
-        return selected and IMPORTANT_PUSHED_SELECTED_MEDIA_TEXTURE or IMPORTANT_PUSHED_MEDIA_TEXTURE
-      else 
-        return selected and CAMPAIGN_PUSHED_SELECTED_MEDIA_TEXTURE or CAMPAIGN_PUSHED_SELECTED_MEDIA_TEXTURE
-      end
+      return selected and PUSHED_SELECTED_MEDIA_TEXTURE or PUSHED_MEDIA_TEXTURE
     end)
 end
 
