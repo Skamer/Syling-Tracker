@@ -1,34 +1,30 @@
-## Interface: 30400
+## Interface: 100200
 ## Title: |cffff6a00Syling Tracker|r
 ## Version: @project-version@
 ## Author: Skamer
 ## SavedVariables: SylingTrackerDB
 ## Dependencies: Scorpio
-## OptionalDeps: ViragDevTool
+## OptionalDeps: LibSharedMedia-3.0, ViragDevTool
 
 ## X-Curse-Project-ID: 398177
+## X-Wago-ID: Qb6m146P
 
 # Embed libs
 embeds.xml
 
-# Module Type file
 SylingModule.lua
+Environment.lua
 
-# Localization files
-Locales\__load.xml
-
-# Utils file
+# Utilities files 
 Utils\__load.xml
 
 # Core files
 Core\__load.xml
 
-# UI Element files
-UI\__load.xml
+# Base files
+Base\__load.xml
 
-# Main file
-SylingTracker.lua
-
-# Content files
+# Contents files 
 Contents\__load.xml
 
+Boot.lua

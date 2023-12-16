@@ -9,67 +9,210 @@
 Syling          "SylingTracker_Options.SettingDefinitions.ItemBar"           ""
 -- ========================================================================= --
 export {
-  ItemBarIsLocked = SLT.API.ItemBarIsLocked,
-  LockItemBar     = SLT.API.LockItemBar,
-  UnlockItemBar   = SLT.API.UnlockItemBar,
-  ItemBarIsShown  = SLT.API.ItemBarIsShown,
-  ShowItemBar     = SLT.API.ShowItemBar,
-  HideItemBar     = SLT.API.HideItemBar
+  newtable                      = Toolset.newtable,
 }
 
 __Widget__()
-class "SLT.SettingDefinitions.ItemBar" (function(_ENV)
+class "SettingDefinitions.ItemBar" (function(_ENV)
   inherit "Frame"
+  -----------------------------------------------------------------------------
+  --                   [General] Tab Builder                                 --
+  -----------------------------------------------------------------------------
+  _ORIENTATION_ENTRIES = Array[Widgets.EntryData]()
+  _ORIENTATION_ENTRIES:Insert({ text = "Vertical", value = Orientation.VERTICAL})
+  _ORIENTATION_ENTRIES:Insert({ text = "Horizontal", value = Orientation.HORIZONTAL})
 
-  local function OnLockCheckBoxClick(self, checkBox)
-    local lock = checkBox:IsChecked()
-    if lock then 
-      LockItemBar()
-    else
-      UnlockItemBar()
+  function BuildGeneralTab(self)
+    ---------------------------------------------------------------------------
+    --- Enable
+    ---------------------------------------------------------------------------
+    local enableCheckBox = Widgets.SettingsCheckBox.Acquire(false, self)
+    enableCheckBox:SetID(10)
+    enableCheckBox:SetLabel("Enable")
+    enableCheckBox:BindItemBarSetting("enabled")
+    self.GeneralTabControls.enableCheckBox = enableCheckBox
+    ---------------------------------------------------------------------------
+    --- Lock
+    ---------------------------------------------------------------------------
+    local lockCheckBox = Widgets.SettingsCheckBox.Acquire(false, self)
+    lockCheckBox:SetID(20)
+    lockCheckBox:SetLabel("Lock")
+    lockCheckBox:BindItemBarSetting("locked")
+    self.GeneralTabControls.lockCheckBox = lockCheckBox
+    ---------------------------------------------------------------------------
+    --- Column Count
+    ---------------------------------------------------------------------------
+    local columnCountSlider = Widgets.SettingsSlider.Acquire(false, self)
+    columnCountSlider:SetID(30)
+    columnCountSlider:SetLabel("Column Count")
+    columnCountSlider:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
+    columnCountSlider:BindItemBarSetting("columnCount")
+    columnCountSlider:SetMinMaxValues(1, 12)
+    self.GeneralTabControls.columnCountSlider = columnCountSlider
+    ---------------------------------------------------------------------------
+    --- Row Count
+    ---------------------------------------------------------------------------    
+    local rowCountSlider = Widgets.SettingsSlider.Acquire(false, self)
+    rowCountSlider:SetID(40)
+    rowCountSlider:SetLabel("Row Count")
+    rowCountSlider:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
+    rowCountSlider:BindItemBarSetting("rowCount")
+    rowCountSlider:SetMinMaxValues(1, 12)
+    self.GeneralTabControls.rowCountSlider = rowCountSlider
+    ---------------------------------------------------------------------------
+    --- Margin Left
+    ---------------------------------------------------------------------------
+    local marginLeftSlider = Widgets.SettingsSlider.Acquire(false, self)
+    marginLeftSlider:SetID(50)
+    marginLeftSlider:SetLabel("Margin Left")
+    marginLeftSlider:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
+    marginLeftSlider:BindItemBarSetting("marginLeft")
+    marginLeftSlider:SetMinMaxValues(0, 50)
+    self.GeneralTabControls.marginLeftSlider = marginLeftSlider
+    ---------------------------------------------------------------------------
+    --- Margin Right
+    ---------------------------------------------------------------------------    
+    local marginRightSlider = Widgets.SettingsSlider.Acquire(false, self)
+    marginRightSlider:SetID(60)
+    marginRightSlider:SetLabel("Margin Right")
+    marginRightSlider:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
+    marginRightSlider:BindItemBarSetting("marginRight")
+    marginRightSlider:SetMinMaxValues(0, 50)
+    self.GeneralTabControls.marginRightSlider = marginRightSlider
+    ---------------------------------------------------------------------------
+    --- Margin Top
+    ---------------------------------------------------------------------------
+    local marginTopSlider = Widgets.SettingsSlider.Acquire(false, self)
+    marginTopSlider:SetID(70)
+    marginTopSlider:SetLabel("Margin Top")
+    marginTopSlider:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
+    marginTopSlider:BindItemBarSetting("marginTop")
+    marginTopSlider:SetMinMaxValues(0, 50)
+    self.GeneralTabControls.marginTopSlider = marginTopSlider
+    ---------------------------------------------------------------------------
+    --- Margin Bottom
+    ---------------------------------------------------------------------------
+    local marginBottomSlider = Widgets.SettingsSlider.Acquire(false, self)
+    marginBottomSlider:SetID(80)
+    marginBottomSlider:SetLabel("Margin Bottom")
+    marginBottomSlider:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
+    marginBottomSlider:BindItemBarSetting("marginBottom")
+    marginBottomSlider:SetMinMaxValues(0, 50)
+    self.GeneralTabControls.marginBottomSlider = marginBottomSlider
+    ---------------------------------------------------------------------------
+    --- Orientation
+    ---------------------------------------------------------------------------
+    local orientationDropDown = Widgets.SettingsDropDown.Acquire(false, self)
+    orientationDropDown:SetID(90)
+    orientationDropDown:SetLabel("Orientation")
+    orientationDropDown:SetEntries(_ORIENTATION_ENTRIES)
+    orientationDropDown:BindItemBarSetting("orientation")
+    self.GeneralTabControls.orientationDropDown = orientationDropDown
+    ---------------------------------------------------------------------------
+    --- Left to Right
+    ---------------------------------------------------------------------------
+    local leftToRightCheckBox = Widgets.SettingsCheckBox.Acquire(false, self)
+    leftToRightCheckBox:SetID(100)
+    leftToRightCheckBox:SetLabel("Left to Right")
+    leftToRightCheckBox:BindItemBarSetting("leftToRight")
+    self.GeneralTabControls.leftToRightCheckBox = leftToRightCheckBox
+    ---------------------------------------------------------------------------
+    --- Top to Bottom
+    ---------------------------------------------------------------------------
+    local topToBottomCheckBox = Widgets.SettingsCheckBox.Acquire(false, self)
+    topToBottomCheckBox:SetID(110)
+    topToBottomCheckBox:SetLabel("Top to Bottom")
+    topToBottomCheckBox:BindItemBarSetting("topToBottom")
+    self.GeneralTabControls.topToBottomCheckBox = topToBottomCheckBox
+    ---------------------------------------------------------------------------
+    --- Sort by Distance
+    ---------------------------------------------------------------------------
+    local sortByDistanceCheckBox = Widgets.SettingsCheckBox.Acquire(false, self)
+    sortByDistanceCheckBox:SetID(120)
+    sortByDistanceCheckBox:SetLabel("Sort by distance")
+    self.GeneralTabControls.sortByDistanceCheckBox = sortByDistanceCheckBox
+  end
+  -----------------------------------------------------------------------------
+  --                    [General] Tab Release                                --
+  -----------------------------------------------------------------------------
+  function ReleaseGeneralTab(self)
+    for index, control in pairs(self.GeneralTabControls) do 
+      control:Release()
+      self.GeneralTabControls[index] = nil
     end
   end
+  -----------------------------------------------------------------------------
+  --                   [General] Item Builder                                --
+  -----------------------------------------------------------------------------
+  function BuildItemTab(self)
+    local widthSlider = Widgets.SettingsSlider.Acquire(false, self)
+    widthSlider:SetID(10)
+    widthSlider:SetLabel("Width")
+    widthSlider:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
+    widthSlider:BindItemBarSetting("elementWidth")
+    widthSlider:SetMinMaxValues(6, 92)
+    self.ItemTabControls.widthSlider = widthSlider
+    
+    local heightSlider = Widgets.SettingsSlider.Acquire(false, self)
+    heightSlider:SetID(20)
+    heightSlider:SetLabel("Height")
+    heightSlider:BindItemBarSetting("elementHeight")
+    heightSlider:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
+    heightSlider:SetMinMaxValues(6, 92)
+    self.ItemTabControls.heightSlider = heightSlider
 
-  local function OnShowCheckBoxClick(self, checkBox)
-    local show = checkBox:IsChecked()
-    if show then 
-      ShowItemBar()
-    else
-      HideItemBar()
+    local hSpacingSlider = Widgets.SettingsSlider.Acquire(false, self)
+    hSpacingSlider:SetID(30)
+    hSpacingSlider:SetLabel("Horizontal Spacing")
+    hSpacingSlider:BindItemBarSetting("hSpacing")
+    hSpacingSlider:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
+    hSpacingSlider:SetMinMaxValues(0, 24)
+    self.ItemTabControls.hSpacingSlider = hSpacingSlider
+    
+    local vSpacingSlider = Widgets.SettingsSlider.Acquire(false, self)
+    vSpacingSlider:SetID(40)
+    vSpacingSlider:SetLabel("Vertical Spacing")
+    vSpacingSlider:BindItemBarSetting("vSpacing")
+    vSpacingSlider:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
+    vSpacingSlider:SetMinMaxValues(0, 24)
+    self.ItemTabControls.vSpacingSlider = vSpacingSlider
+  end
+  -----------------------------------------------------------------------------
+  --                    [General] Tab Release                                --
+  -----------------------------------------------------------------------------
+  function ReleaseItemTab(self)
+    for index, control in pairs(self.ItemTabControls) do 
+      control:Release()
+      self.ItemTabControls[index] = nil
     end
   end
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
   function BuildSettingControls(self)
-    local lockItemBar = SUI.SettingsCheckBox.Acquire(false, self)
-    lockItemBar:SetID(10)
-    lockItemBar:SetLabel("Lock")
-    lockItemBar:SetChecked(ItemBarIsLocked())
-    lockItemBar.OnCheckBoxClick = lockItemBar.OnCheckBoxClick + self.OnLockCheckBoxClick
-    self.SettingControls.lockItemBar = lockItemBar
+    local tabControl = Widgets.TabControl.Acquire(false, self)
+    tabControl:SetID(1)
+    tabControl:AddTabPage({
+      name = "General",
+      onAcquire = function() self:BuildGeneralTab() end,
+      onRelease = function() self:ReleaseGeneralTab() end, 
+    })
 
-    local showItemBar = SUI.SettingsCheckBox.Acquire(false, self)
-    showItemBar:SetID(20)
-    showItemBar:SetLabel("Show")
-    showItemBar:SetChecked(ItemBarIsShown())
-    showItemBar.OnCheckBoxClick = showItemBar.OnCheckBoxClick + self.OnShowCheckBoxClick
-    self.SettingControls.showItemBar = showItemBar
+    tabControl:AddTabPage({
+      name = "Item",
+      onAcquire = function() self:BuildItemTab() end,
+      onRelease = function() self:ReleaseItemTab() end 
+    })
+
+    tabControl:Refresh()
+    tabControl:SelectTab(1)
+
+    self.SettingControls.tabControl = tabControl
   end
 
   function ReleaseSettingControls(self)
-    for index, control in pairs(self.SettingControls) do 
-      --- Remove the specific event handlers 
-      if index == "lockItemBar" then 
-        control.OnCheckBoxClick = control.OnCheckBoxClick - self.OnLockCheckBoxClick
-      elseif index == "showItemBar" then 
-        control.OnCheckBoxClick = control.OnCheckBoxClick - self.OnShowCheckBoxClick
-      end
-
-      --- Release the control 
-      control:Release()
-      self.SettingControls[index] = nil
-    end
+    self.SettingControls.tabControl:Release()
+    self.SettingControls.tabControl = nil
   end
 
   function OnBuildSettings(self)
@@ -77,29 +220,38 @@ class "SLT.SettingDefinitions.ItemBar" (function(_ENV)
   end
 
   function OnRelease(self)
+    self:SetID(0)
+    self:SetParent()
+    self:ClearAllPoints()
+    self:Hide()
+
     self:ReleaseSettingControls()
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
-  --- Contains all controls
   property "SettingControls" {
     set = false,
-    default = function() return Toolset.newtable(false, true) end
+    default = function() return newtable(false, true) end 
   }
-  -----------------------------------------------------------------------------
-  --                            Constructors                                 --
-  -----------------------------------------------------------------------------
-  function __ctor(self)
-    self.OnLockCheckBoxClick = function(...) OnLockCheckBoxClick(self, ...) end
-    self.OnShowCheckBoxClick = function(...) OnShowCheckBoxClick(self, ...) end
-  end
+
+  property "GeneralTabControls" {
+    set = false, 
+    default = function() return newtable(false, true) end
+  }
+
+  property "ItemTabControls" {
+    set = false, 
+    default = function() return newtable(false, true) end
+  }
+
 end)
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
-  [SLT.SettingDefinitions.ItemBar] = {
-    layoutManager = Layout.VerticalLayoutManager(true, true)
-  }
+  [SettingDefinitions.ItemBar] = {
+    height = 1,
+    layoutManager = Layout.VerticalLayoutManager(true, true),
+  },
 })
