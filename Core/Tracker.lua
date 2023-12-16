@@ -1466,6 +1466,21 @@ function SylingTracker_SHOW_TRACKER(trackerID)
 end
 
 __SystemEvent__()
+function SylingTracker_TOGGLE_SHOW_TRACKER(trackerID)
+  if not trackerID then 
+    return 
+  end
+
+  local defaultVisibility = GetTrackerSetting(trackerID, "visibilityRules", "defaultVisibility")
+
+  if not defaultVisibility or defaultVisibility == "show" then 
+    SetTrackerSetting(trackerID, "visibilityRules", "hide", nil, "defaultVisibility")
+  else
+    SetTrackerSetting(trackerID, "visibilityRules", "show", nil, "defaultVisibility")
+  end
+end
+
+__SystemEvent__()
 function SylingTracker_HIDE_TRACKER(trackerID)
   if not trackerID then 
     return 
@@ -1491,4 +1506,14 @@ function SylingTracker_UNLOCK_TRACKER(trackerID)
 
   SetTrackerSetting(trackerID, "locked", false)
 end
+
+__SystemEvent__()
+function SylingTracker_RESET_POSITION_TRACKER(trackerID)
+  if not trackerID then 
+    return 
+  end
+
+  SetTrackerSetting(trackerID, "position")
+end
+
 
