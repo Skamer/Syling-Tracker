@@ -19,6 +19,7 @@ export {
   ItemBar_SetItemDistance             = API.ItemBar_SetItemDistance,
 
   --- WoW API & Utils
+  EQuestTag                           = _G.Enum.QuestTag,
   GetNumQuestLogEntries               = GetNumQuestLogEntries,
   GetNumQuestWatches                  = GetNumQuestWatches,
   GetQuestLogTitle                    = GetQuestLogTitle,
@@ -143,6 +144,21 @@ function UpdateQuest(self, questID)
   local numObjectives = GetNumQuestLeaderBoards(questLogIndex)
   local requiredMoney = GetQuestLogRequiredMoney(questLogIndex)
   local tag           = GetQuestTagInfo(questID)
+
+
+  local isDungeon = false
+  local isRaid = false 
+  local isLegendary = false 
+
+  if tag then 
+    if tag == EQuestTag.Dungeon then 
+      isDungeon = true 
+    elseif tag == EQuestTag.Legendary then 
+      isLegendary = true 
+    elseif tag == EQuestTag.Raid or tag == EQuestTag.Raid10 or tag == EQuestTag.Raid25 then 
+      isRaid = true 
+    end
+  end
   
   local title, level, questTag, isHeader, isCollapsed, 
   isComplete, frequency, questID, startEvent, displayQuestID, 
@@ -185,11 +201,11 @@ function UpdateQuest(self, questID)
   questData.isAutoComplete = nil
   questData.suggestedGroup = nil
   questData.distance = distance
-  questData.isDungeon = nil 
-  questData.isRaid = nil
-  questData.isLegendary = nil
   questData.isImportant = nil
   questData.isCalling = nil
+  questData.isDungeon = isDungeon 
+  questData.isRaid = isRaid
+  questData.isLegendary = isLegendary
 
   -- Is the quest has an item quest ?
   local itemLink, itemTexture

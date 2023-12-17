@@ -216,7 +216,7 @@ class "QuestView" (function(_ENV)
     self.QuestID = data.questID
     self.QuestName = data.name 
     self.QuestLevel = data.level
-    self.QuestTagID = data.tag and data.tag.tagID
+    self.QuestTagID = data.tag
   end
 
   function UpdatePOI(self)
@@ -518,12 +518,18 @@ Style.UpdateSkin("Default", {
         height                        = 24,
   
         Tag = {
-          atlas = FromUIProperty("QuestTagID"):Map(function(tagID)
+          visible = FromUIProperty("QuestTagID"):Map(function(tagID) return tagID and true or false end),
+          file = [[Interface\QuestFrame\QuestTypeIcons]],
+          texCoords = FromUIProperty("QuestTagID"):Map(function(tagID)
             if not tagID then 
               return 
             end
-  
-            return { atlas = QUEST_TAG_ATLAS[tagID] }
+
+            local left, right, top, bottom = unpack(QUEST_TAG_TCOORDS[tagID])
+
+            if left and right and top and bottom then 
+              return { left = left, right = right, top = top, bottom = bottom }
+            end
           end),
           height = 18,
           width = 18,
