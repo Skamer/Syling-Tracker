@@ -15,8 +15,6 @@ export {
   ResetStyles = SylingTracker.Utils.ResetStyles,
 }
 
-local BLZ_EXPANDABLE_SECTION_FILE = [[Interface\AddOns\SylingTracker_Options\Media\BLZ_OptionsExpandListButton]]
-
 __Widget__()
 class "ExpandableSection" (function(_ENV)
   inherit "Frame"
@@ -34,12 +32,9 @@ class "ExpandableSection" (function(_ENV)
   function UpdateVisibility(self)
     local button = self:GetChild("Button")
     if self.Expanded then 
-      --- Options_ListExpand_Right_Expanded, true
-      Style[button].RightBGTexture.texCoords = { left = 0.03125, right = 0.90625, top = 0.4453125, bottom = 0.6484375}
-
+      Style[button].RightBGTexture.atlas = AtlasType("Options_ListExpand_Right_Expanded", true)
     else 
-      --- Options_ListExpand_Right, true
-      Style[button].RightBGTexture.texCoords = { left = 0.03125, right = 0.90625, top = 0.2265625, bottom = 0.4296875}
+      Style[button].RightBGTexture.atlas = AtlasType("Options_ListExpand_Right", true)
     end
 
     for name, frame in self:GetChilds() do
@@ -128,33 +123,21 @@ Style.UpdateSkin("Default", {
       },
 
       LeftBGTexture = {
-        --- Options_ListExpand_Left, true
-        file = BLZ_EXPANDABLE_SECTION_FILE,
-        width = 12,
-        height = 26,
-        texCoords = { left = 0.03125, right = 0.40625, top = 0.6640625, bottom = 0.8671875},
+        atlas = AtlasType("Options_ListExpand_Left", true),
         drawLayer = "BACKGROUND",
         location = {
           Anchor("TOPLEFT")
         }
       },
       RightBGTexture = {
-        --- Options_ListExpand_Right, true
-        file = BLZ_EXPANDABLE_SECTION_FILE,
-        width = 28,
-        height = 26,
-        texCoords = { left = 0.03125, right = 0.90625, top = 0.2265625, bottom = 0.4296875},
+        atlas = AtlasType("Options_ListExpand_Right", true),
         drawLayer = "BACKGROUND",
         location = {
           Anchor("TOPRIGHT")
         }
       },
       MiddleBGTexture = {
-        --- _Options_ListExpand_Middle, true
-        file = BLZ_EXPANDABLE_SECTION_FILE,
-        height = 26,
-        texCoords = { left = 0, right = 0.03125, top = 0.0078125, bottom = 0.2109375},
-        horizTile = true,
+        atlas = AtlasType("_Options_ListExpand_Middle", true),
         drawLayer = "BACKGROUND",
         location = {
           Anchor("TOPLEFT", 0, 0, "LeftBGTexture", "TOPRIGHT"),

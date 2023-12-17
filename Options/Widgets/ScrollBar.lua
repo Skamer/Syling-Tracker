@@ -13,13 +13,98 @@ namespace               "SylingTracker.Options.Widgets"
 
 LEFT_BUTTON_NAME = "LeftButton"
 
-
-BLZ_SCROLLBAR_FILE = [[Interface\AddOns\SylingTracker\Media\Textures\BLZ_MinimalScrollbarProportional]]
-BLZ_SCROLLBAR_VERTICAL_FILE = [[Interface\AddOns\SylingTracker\Media\Textures\BLZ_MinimalScrollbarVertical]]
-
 __Widget__()
 class "ScrollBarThumb" (function(_ENV)
   inherit "Button"
+  -----------------------------------------------------------------------------
+  --                               Methods                                   --
+  -----------------------------------------------------------------------------
+  function GetAtlas(self)
+    if self:IsEnabled() then 
+      if self.MouseDown then 
+        return self.DownTopAtlas, self.DownMiddleAtlas, self.DownBottomAtlas
+      elseif self.MouseOver then 
+        return self.OverTopAtlas, self.OverMiddleAtlas, self.OverBottomAtlas
+      end 
+    end 
+
+    return self.UpTopAtlas, self.UpMiddleAtlas, self.UpBottomAtlas
+  end
+
+  function RefreshAtlas(self)
+    local topAtlas, middleAtlas, bottomAtlas = self:GetAtlas() 
+    Style[self].TopBGTexture.atlas = topAtlas
+    Style[self].MiddleBGTexture.atlas = middleAtlas
+    Style[self].BottomBGTexture.atlas = bottomAtlas
+  end
+  -----------------------------------------------------------------------------
+  --                               Properties                                --
+  -----------------------------------------------------------------------------
+  property "UpTopAtlas" {
+    type    = AtlasType,
+    default = AtlasType("minimal-scrollbar-thumb-top", true)
+  }
+
+  property "UpMiddleAtlas" {
+    type    = AtlasType,
+    default = AtlasType("minimal-scrollbar-thumb-middle", true)
+  }
+
+  property "UpBottomAtlas" {
+    type    = AtlasType,
+    default = AtlasType("minimal-scrollbar-thumb-bottom", true)
+  }
+
+  property "OverTopAtlas" {
+    type    = AtlasType,
+    default = AtlasType("minimal-scrollbar-thumb-top-over", true)
+  }
+
+  property "OverMiddleAtlas" {
+    type    = AtlasType,
+    default = AtlasType("minimal-scrollbar-thumb-middle-over", true)
+  }
+
+  property "OverBottomAtlas" {
+    type    = AtlasType,
+    default = AtlasType("minimal-scrollbar-thumb-bottom-over", true)
+  }
+
+  property "DownTopAtlas" {
+    type    = AtlasType,
+    default = AtlasType("minimal-scrollbar-thumb-top-down", true)
+  }
+
+  property "DownMiddleAtlas" {
+    type    = AtlasType,
+    default = AtlasType("minimal-scrollbar-thumb-middle-down", true)
+  }
+
+  property "DownBottomAtlas" {
+    type = AtlasType,
+    default = AtlasType("minimal-scrollbar-thumb-bottom-down", true) 
+  }
+
+  --- Used internally
+  property "MouseOver" {
+    type = Boolean,
+    handler = function(self) self:RefreshAtlas() end
+  }
+
+  --- Used internally
+  property "MouseDown" {
+    type = Boolean,
+    handler = function(self) self:RefreshAtlas() end 
+  }
+  -----------------------------------------------------------------------------
+  --                            Constructors                                 --
+  -----------------------------------------------------------------------------
+  function __ctor(self) 
+    self.OnEnter = self.OnEnter + function() self.MouseOver = true end
+    self.OnLeave = self.OnLeave + function() self.MouseOver = false end 
+    self.OnMouseDown = self.OnMouseDown + function() self.MouseDown = true end 
+    self.OnMouseUp = self.OnMouseUp + function() self.MouseDown = false end
+  end
 end)
 
 __Widget__()
@@ -367,11 +452,7 @@ Style.UpdateSkin("Default", {
         },
 
         TopBGTexture = {
-          --- minimal-scrollbar-thumb-top, true
-          file = BLZ_SCROLLBAR_FILE,
-          width = 8,
-          height = 8,
-          texCoords = { left = 0.609375, right = 0.734375, top = 0.015625, bottom = 0.140625},
+          atlas = AtlasType("minimal-scrollbar-thumb-top", true),
           drawLayer = "BACKGROUND",
           subLevel = 2,
           location = {
@@ -380,11 +461,7 @@ Style.UpdateSkin("Default", {
         },
         
         BottomBGTexture = {
-          --- minimal-scrollbar-thumb-bottom, true
-          file = BLZ_SCROLLBAR_FILE,
-          width = 8,
-          height = 36,
-          texCoords = { left = 0.625, right = 0.75, top = 0.421875, bottom = 0.984375},
+          atlas = AtlasType("minimal-scrollbar-thumb-bottom", true),
           drawLayer = "BACKGROUND",
           subLevel = 2,
           location = {
@@ -393,10 +470,7 @@ Style.UpdateSkin("Default", {
         },
                 
         MiddleBGTexture = {
-          --- minimal-scrollbar-thumb-middle, true
-          file = BLZ_SCROLLBAR_VERTICAL_FILE,
-          width = 8,
-          texCoords = { left = 0.484375, right = 0.609375, top = 0.0009765625, bottom = 0.69921875},
+          atlas = AtlasType("minimal-scrollbar-thumb-middle", true),
           drawLayer = "BACKGROUND",
           subLevel = 1,
           location = {
@@ -418,11 +492,7 @@ Style.UpdateSkin("Default", {
       },
 
       TopBGTexture = {
-        --- minimal-scrollbar-track-top, true
-        file = BLZ_SCROLLBAR_FILE,
-        width = 8,
-        height = 8,
-        texCoords = { left = 0.609375, right = 0.734375, top = 0.21875, bottom = 0.34375},
+        atlas = AtlasType("minimal-scrollbar-track-top", true),
         drawLayer = "ARTWORK",
         location = {
           Anchor("TOPLEFT")
@@ -430,11 +500,7 @@ Style.UpdateSkin("Default", {
       },
       
       BottomBGTexture = {
-        --- minimal-scrollbar-track-bottom, true
-        file = BLZ_SCROLLBAR_FILE,
-        width = 8,
-        height = 8,
-        texCoords = { left = 0.765625, right = 0.890625, top = 0.015625, bottom = 0.140625},
+        atlas = AtlasType("minimal-scrollbar-track-bottom", true),
         drawLayer = "ARTWORK",
         location = {
           Anchor("BOTTOMLEFT")
@@ -442,11 +508,7 @@ Style.UpdateSkin("Default", {
       },
               
       MiddleBGTexture = {
-        --- !minimal-scrollbar-track-middle, true
-        width = 8,
-        file = BLZ_SCROLLBAR_VERTICAL_FILE,
-        texCoords = { left = 0.015625, right = 0.140625, top = 0, bottom = 0.0009765625},
-        vertTile = true,
+        atlas = AtlasType("!minimal-scrollbar-track-middle", true),
         drawLayer = "ARTWORK",
         location = {
           Anchor("TOPLEFT", 0, 0, "TopBGTexture", "BOTTOMLEFT"),
