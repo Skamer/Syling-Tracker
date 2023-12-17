@@ -1,4 +1,16 @@
-# 2.0.4
+# 2.0.5
+
+**NEW**
+
+- Added new slash commands: 'tshow' and 'resetpos'.
+
+**FIXES**
+
+- Fixed an case where sometimes the quests wasn't added in the right category.
+
+---
+
+## 2.0.4
 
 **NEW**
 

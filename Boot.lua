@@ -181,6 +181,20 @@ function ShowElementCommand(args)
   end
 end
 
+--- `/slt tshow tracker main` toggle show only the main tracker 
+--- `/slt tshow tracker second` toggle show only the tracker with for id: second
+__SlashCmd__ "slt" "tshow"
+function ToggleShowElementCommand(args)
+  local arg1, arg2 = strsplit(" ", args)
+  if arg1 == "" or arg1 == "all" then 
+    -- TODO
+  elseif arg1 == "itembar" then 
+    -- TODO
+  elseif arg1 == "tracker" then 
+    _M:FireSystemEvent("SylingTracker_TOGGLE_SHOW_TRACKER", arg2)
+  end
+end
+
 --- `/slt hide` show all the trackers and the item bar 
 --- `/slt hide all` the same as above 
 --- `/slt hide itembar` hide only the item bar 
@@ -241,5 +255,19 @@ function UnlockElementCommand(args)
     _M:FireSystemEvent("SylingTracker_UNLOCK_TRACKERS")
   elseif arg1 == "tracker" then 
     _M:FireSystemEvent("SylingTracker_UNLOCK_TRACKER", arg2)
+  end
+end
+
+--- `/slt resetpos tracker main` reset only the tracker position for main
+--- `/slt resetpos tracker second` reset only the tracker position with for id: second 
+__SlashCmd__ "slt" "resetpos"
+function ResetPosElementCommand(args)
+  local arg1, arg2 = strsplit(" ", args)
+  if arg1 == "" or arg1 == "all" then 
+    -- TODO
+  elseif arg1 == "itembar" then 
+    -- TODO
+  elseif arg1 == "tracker" then 
+    _M:FireSystemEvent("SylingTracker_RESET_POSITION_TRACKER", arg2)
   end
 end

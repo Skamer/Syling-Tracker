@@ -491,7 +491,7 @@ function GetQuestHeader(self, qID)
   local numEntries, numQuests = GetNumQuestLogEntries()
 
   for i = 1, numEntries do 
-    local data = GetInfo(1)
+    local data = GetInfo(i)
     if data.isHeader then 
       currentHeader = data.title 
     elseif data.questID == qID then 
