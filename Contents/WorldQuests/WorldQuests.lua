@@ -35,6 +35,10 @@ function OnActive(self)
   self:LoadWorldQuests()
 end
 
+function OnInactive(self)
+  WORLD_QUESTS_CONTENT_SUBJECT:ResetDataProperties()
+end
+
 function LoadWorldQuests()
   local tasks = GetTasksTable()
   for _, questID in ipairs(tasks) do 

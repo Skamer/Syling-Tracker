@@ -25,6 +25,7 @@ export {
   IsAchievementEligible               = IsAchievementEligible,
 }
 
+ACHIEVEMENTS_CACHE           = {}
 ACHIEVEMENTS_CONTENT_SUBJECT = RegisterObservableContent("achievements", AchievementsContentSubject)
 
 __ActiveOnEvents__ "PLAYER_ENTERING_WORLD" "TRACKED_ACHIEVEMENT_LIST_CHANGED" "CONTENT_TRACKING_UPDATE"
@@ -101,9 +102,11 @@ function CONTENT_TRACKING_UPDATE(contentType, id, isTracked)
     return 
   end
 
-  if isTracked then 
+  if isTracked then
+    ACHIEVEMENTS_CACHE[id] = true
     _M:UpdateAchievement(id)
   else
+    ACHIEVEMENTS_CACHE[id] = nil
     ACHIEVEMENTS_CONTENT_SUBJECT.achievements[id] = nil
   end
 end
@@ -111,7 +114,17 @@ end
 __SystemEvent__()
 function CONTENT_TRACKING_LIST_UPDATE()
   local trackedAchievements = GetAchievementsTracked()
-  for _, achievementID in ipairs(trackedAchievements) do 
+  for _, achievementID in ipairs(trackedAchievements) do
+    ACHIEVEMENTS_CACHE[achievementID] = true
+    _M:UpdateAchievement(achievementID)
+  end
+end
+
+__SystemEvent__()
+function TRACKED_ACHIEVEMENT_UPDATE(achievementID)
+  -- TRACKED_ACHIEVEMENT_UPDATE can be triggered on achievements are not tracked,
+  -- so we need to check it.
+  if ACHIEVEMENTS_CACHE[achievementID] then 
     _M:UpdateAchievement(achievementID)
   end
 end

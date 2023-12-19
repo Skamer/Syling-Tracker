@@ -1,4 +1,13 @@
-# 2.0.5
+# 2.0.6
+
+**FIXES**
+
+- Fixed an issue where the world quests wasn't removed when the player teleport out of the zone.
+- Fixed an issue where the achievements wasn't updated.
+
+---
+
+## 2.0.5
 
 **NEW**
 
