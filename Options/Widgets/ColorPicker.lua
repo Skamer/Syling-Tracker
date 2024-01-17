@@ -10,6 +10,7 @@ Syling              "SylingTracker_Options.Widgets.ColorPicker"              ""
 -- ========================================================================= --
 namespace               "SylingTracker.Options.Widgets"
 -- ========================================================================= --
+COLOR_PICKER_CONFIRM_BUTTON_HOOKED    = false 
 
 __Widget__()
 class "ColorPicker" (function(_ENV)
@@ -32,45 +33,105 @@ class "ColorPicker" (function(_ENV)
   	ColorPickerFrame:SetFrameLevel(self:GetFrameLevel() + 10)
 		ColorPickerFrame:SetClampedToScreen(true)
 
-    ColorPickerFrame.func = function()
-      local r,g,b = ColorPickerFrame:GetColorRGB()
-      local a = self.HasAlpha and (1 - OpacitySliderFrame:GetValue()) or 1
-      if ColorPickerFrame:IsVisible() then 
-        self:OnColorChanged(r, g, b, a)
+    -- 10.2.5 color picker change
+    if ColorPickerFrame.SetupColorPickerAndShow then
+      local pR, pG, pB, pA = self.r, self.g, self.b, self.a
+
+      local info = {
+        swatchFunc = function()
+          local r, g, b = ColorPickerFrame:GetColorRGB()
+          local a =  ColorPickerFrame:GetColorAlpha()
+
+          if ColorPickerFrame:IsVisible() then 
+            self:OnColorChanged(r, g, b, a)
+          end
+
+          self:SetColor(r, g, b, a)
+        end,
+        hasOpacity = self.HasAlpha,
+        opacityFunc = function()
+          local r, g, b = ColorPickerFrame:GetColorRGB()
+          local a =  ColorPickerFrame:GetColorAlpha()
+          if ColorPickerFrame:IsVisible() then
+            self:OnColorChanged(r, g, b, a)
+          end
+
+          self:SetColor(r, g, b, a)          
+        end,
+        r = pR,
+        g = pG, 
+        b = pB,
+        opacity = pA,
+        extraInfo = { isSyling = true, colorPicker = self },
+
+        cancelFunc = function()
+          self:OnColorConfirmed(pR, pG, pB, pA)
+          self:SetColor(pR, pG, pB, pA)
+        end
+      }
+
+      -- We post hook the "OkayButton" to know if the user has confirm the color
+      -- As the Hook remains until to next reload, we need to check a hook has been 
+      -- yet registered for avoiding useless duplicate calls.
+      if not COLOR_PICKER_CONFIRM_BUTTON_HOOKED then 
+        ColorPickerFrame.Footer.OkayButton:HookScript("OnClick", function()
+          local extraInfo = ColorPickerFrame:GetExtraInfo()
+          if extraInfo.isSyling then 
+            local colorPicker = extraInfo.colorPicker
+
+            if colorPicker then 
+              local r, g, b = ColorPickerFrame:GetColorRGB()
+              local a =  ColorPickerFrame:GetColorAlpha()
+              colorPicker:OnColorConfirmed(r, g, b, a)
+            end
+          end
+        end)
+
+        COLOR_PICKER_CONFIRM_BUTTON_HOOKED = true
       end
 
-      self:SetColor(r, g, b, a)
-    end
-    ColorPickerFrame.hasOpacity = self.HasAlpha
-  	ColorPickerFrame.opacityFunc = function()
-		  local r, g, b = ColorPickerFrame:GetColorRGB()
-			local a = self.HasAlpha and (1 - OpacitySliderFrame:GetValue()) or 1
-      --- ColorPickerFrame call the callback after it's closed. 
-      --- opacity callback is called even if the hasOpacity is false, so 
-      --- it's the best to confirm a color. 
-      if ColorPickerFrame:IsVisible() then 
-        self:OnColorChanged(r, g, b, a)
-      else 
+      ColorPickerFrame:SetupColorPickerAndShow(info)
+    else
+      ColorPickerFrame.func = function()
+        local r,g,b = ColorPickerFrame:GetColorRGB()
+        local a = self.HasAlpha and (1 - OpacitySliderFrame:GetValue()) or 1
+        if ColorPickerFrame:IsVisible() then 
+          self:OnColorChanged(r, g, b, a)
+        end
+
+        self:SetColor(r, g, b, a)
+      end
+      ColorPickerFrame.hasOpacity = self.HasAlpha
+      ColorPickerFrame.opacityFunc = function()
+        local r, g, b = ColorPickerFrame:GetColorRGB()
+        local a = self.HasAlpha and (1 - OpacitySliderFrame:GetValue()) or 1
+        --- ColorPickerFrame call the callback after it's closed. 
+        --- opacity callback is called even if the hasOpacity is false, so 
+        --- it's the best to confirm a color. 
+        if ColorPickerFrame:IsVisible() then 
+          self:OnColorChanged(r, g, b, a)
+        else 
+          self:OnColorConfirmed(r, g, b, a)
+        end
+        self:SetColor(r, g, b, a)
+      end
+
+
+      local r, g, b, a = self.r, self.g, self.b, self.a
+
+      if self.HasAlpha then 
+        ColorPickerFrame.opacity = 1 - (a or 0)
+      end
+
+      ColorPickerFrame:SetColorRGB(r, g, b)
+
+      ColorPickerFrame.cancelFunc = function()
         self:OnColorConfirmed(r, g, b, a)
+        self:SetColor(r, g, b, a)
       end
-      self:SetColor(r, g, b, a)
-		end
 
-
-    local r, g, b, a = self.r, self.g, self.b, self.a
-
-    if self.HasAlpha then 
-      ColorPickerFrame.opacity = 1 - (a or 0)
+      ColorPickerFrame:Show()
     end
-
-    ColorPickerFrame:SetColorRGB(r, g, b)
-
-  	ColorPickerFrame.cancelFunc = function()
-      self:OnColorConfirmed(r, g, b, a)
-      self:SetColor(r, g, b, a)
-		end
-
-    ColorPickerFrame:Show()
   end
   -----------------------------------------------------------------------------
   --                               Methods                                   --

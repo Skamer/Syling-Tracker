@@ -1,4 +1,14 @@
-# 2.0.6
+# 2.0.7
+
+- Bumped the toc version for 10.2.5
+
+**FIXES**
+
+- Fixed the ColorPicker for options.
+
+---
+
+## 2.0.6
 
 **FIXES**
 

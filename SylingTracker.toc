@@ -1,4 +1,4 @@
-## Interface: 100200
+## Interface: 100205
 ## Title: |cffff6a00Syling Tracker|r
 ## Version: @project-version@
 ## Author: Skamer
