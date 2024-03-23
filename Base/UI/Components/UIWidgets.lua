@@ -172,7 +172,7 @@ UI_WIDGETS_CLASSES = {
   [UIWidgetVisualizationType.UnitPowerBar] = nil, -- 23
   [UIWidgetVisualizationType.FillUpFrames] = nil, -- 24
   [UIWidgetVisualizationType.TextWithSubtext] = nil, -- 25
-  [UIWidgetVisualizationType.WorldLootObject] = nil, -- 26
+  [UIWidgetVisualizationType.MapPinAnimation] = nil, -- 26
   [UIWidgetVisualizationType.ItemDisplay] = nil, -- 27
   [UIWidgetVisualizationType.TugOfWar] = nil, -- 28
 }

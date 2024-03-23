@@ -1,4 +1,14 @@
-# 2.0.7
+# 2.0.8
+
+- Bumped the toc version for 10.2.6
+
+**FIXES**
+
+- Fixed [ticket #89](https://github.com/Skamer/Syling-Tracker/issues/89) : an error lua at start.
+
+---
+
+## 2.0.7
 
 - Bumped the toc version for 10.2.5
 
@@ -54,7 +64,7 @@
 **FIXES**
 
 - Fixed a case where an error is triggered in the options with the font settings.
-- Fixed [ticker #81](https://github.com/Skamer/Syling-Tracker/issues/81) : an "script too long" error triggered during a Mythic +.
+- Fixed [ticket #81](https://github.com/Skamer/Syling-Tracker/issues/81) : an "script too long" error triggered during a Mythic +.
 
 ---
 
