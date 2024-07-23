@@ -1,4 +1,10 @@
-# 2.0.8
+# 2.1.0
+
+- Updated for The War Within
+
+---
+
+## 2.0.8
 
 - Bumped the toc version for 10.2.6
 

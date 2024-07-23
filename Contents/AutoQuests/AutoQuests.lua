@@ -72,17 +72,31 @@ function QUEST_AUTOCOMPLETE(questID)
   _M:AddAutoQuest(questID, "COMPLETE")
 end
 
+-- QuestObjectiveTracker.AddAutoQuestPopUp
+
 -- For these below hooks, don't need calling AddAutoQuestPopUP or RemoveAutoQuestPopUp
 -- as it's already done by original function. 
-__SecureHook__()
-function AutoQuestPopupTracker_AddPopUp(questID, popupType)
+-- __SecureHook__()
+-- function AutoQuestPopupTracker_AddPopUp(questID, popupType)
+--   _M:AddAutoQuest(questID, popupType)
+-- end
+
+__SecureHook__(QuestObjectiveTracker, "AddAutoQuestPopUp")
+function Hook_AddAutoQuestPopUp(questID, popupType, itemID)
   _M:AddAutoQuest(questID, popupType)
 end
 
-__SecureHook__()
-function AutoQuestPopupTracker_RemovePopUp(questID)
+__SecureHook__(QuestObjectiveTracker, "RemoveAutoQuestPopUp")
+function Hook_RemoveAutoQuestPopUp(questID)
   _M:RemoveAutoQuest(questID)
 end
+
+
+
+-- __SecureHook__()
+-- function AutoQuestPopupTracker_RemovePopUp(questID)
+--   _M:RemoveAutoQuest(questID)
+-- end
 -- ========================================================================= --
 -- Debug Utils Tools
 -- ========================================================================= --

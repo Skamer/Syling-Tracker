@@ -409,7 +409,7 @@ end
 
 __SystemEvent__()
 function QUEST_POI_UPDATE()
-  QuestSuperTracking_OnPOIUpdate()
+  -- QuestSuperTracking_OnPOIUpdate()
 
   _M:UpdateDistance()
 end

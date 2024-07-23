@@ -32,10 +32,12 @@ class "AutoQuestView" (function(_ENV)
     -- not triggered, and the popup won't removed from SylingTracker.
     if questType == "OFFER" then 
       ShowQuestOffer(questID)
-      AutoQuestPopupTracker_RemovePopUp(questID)
+      -- AutoQuestPopupTracker_RemovePopUp(questID)
+      QuestObjectiveTracker:RemoveAutoQuest(questID)
     elseif questType == "COMPLETE" then 
       ShowQuestComplete(questID)
-      AutoQuestPopupTracker_RemovePopUp(questID)
+      -- AutoQuestPopupTracker_RemovePopUp(questID)
+      QuestObjectiveTracker:RemoveAutoQuest(questID)
     end
   end
   -----------------------------------------------------------------------------

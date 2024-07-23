@@ -70,7 +70,8 @@ end
 
 __Arguments__ { Number }
 function GetQuestPOINumber(questID)
-  local poiButton = ObjectiveTrackerFrame.BlocksFrame:FindButtonByQuestID(questID) or QuestScrollFrame.Contents:FindButtonByQuestID(questID)
+  -- local poiButton = ObjectiveTrackerFrame.BlocksFrame:FindButtonByQuestID(questID) or QuestScrollFrame.Contents:FindButtonByQuestID(questID)
+  local poiButton = QuestScrollFrame.Contents:FindButtonByQuestID(questID)
   return  poiButton and poiButton.index
 end
 Utils.GetQuestPOINumber = GetQuestPOINumber
