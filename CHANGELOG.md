@@ -1,4 +1,16 @@
-# 2.1.0
+# 2.1.1
+
+- Reupdate the toc number.
+
+**FIXES**
+
+- Fixed an issue where the Blizzard objective tracker was displayed when not intended.
+- Testing a fix for an issue where there is sometimes a delay for displaying the context menu background.
+- Testing a fix for an issue where there is sometimes a delay for displaying the thumb of sliders in the options.
+
+---
+
+## 2.1.0
 
 - Updated for The War Within
 

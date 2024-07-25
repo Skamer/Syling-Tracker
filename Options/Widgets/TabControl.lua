@@ -76,7 +76,7 @@ class "TabButton" (function(_ENV)
     Text = FontString
   }
   function __ctor(self)
-    self:InstantApplyStyle()
+    -- self:InstantApplyStyle()
 
     local text = self:GetChild("Text")
     Style[self].width = text:GetStringWidth() + 60

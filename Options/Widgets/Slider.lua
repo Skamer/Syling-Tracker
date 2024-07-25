@@ -147,7 +147,7 @@ class "Slider" (function(_ENV)
   end
 
   function OnAcquire(self)
-    self:InstantApplyStyle()
+    -- self:InstantApplyStyle()
   end
 
   function OnRelease(self)
@@ -187,6 +187,7 @@ class "Slider" (function(_ENV)
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
   -----------------------------------------------------------------------------
+  __InstantApplyStyle__()
   __Template__ {
     Slider = MinimalSlider,
     Back = Button,
@@ -211,6 +212,7 @@ class "Slider" (function(_ENV)
         slider:SetValue(value - step)
 	    end
     end
+
 
     back.OnClick = back.OnClick + function() OnStepperClicked(false) end 
     forward.OnClick = forward.OnClick + function() OnStepperClicked(true) end

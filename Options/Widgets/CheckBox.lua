@@ -18,7 +18,7 @@ class "CheckBox" (function(_ENV)
   --                               Methods                                   --
   -----------------------------------------------------------------------------
   function OnAcquire(self)
-    self:InstantApplyStyle()
+    -- self:InstantApplyStyle()
   end
 
   function OnRelease(self)

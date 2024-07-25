@@ -136,7 +136,7 @@ class "SettingsSectionHeader" (function(_ENV)
   end
 
   function OnAcquire(self)
-    self:InstantApplyStyle()
+    -- self:InstantApplyStyle()
   end
 
   -- function OnRelease(self)
@@ -166,7 +166,7 @@ class "SettingsText" (function(_ENV)
   end
 
   function OnAcquire(self)
-    self:InstantApplyStyle()
+    -- self:InstantApplyStyle()
   end
 
   function OnRelease(self)
@@ -203,7 +203,7 @@ class "SettingsEditBox" (function(_ENV)
   end
 
   function OnAcquire(self)
-    self:InstantApplyStyle()
+    -- self:InstantApplyStyle()
   end
 
   function GetValue(self)
@@ -277,7 +277,7 @@ class "SettingsCheckBox" (function(_ENV)
   end
 
   function OnAcquire(self)
-    self:InstantApplyStyle()
+    -- self:InstantApplyStyle()
   end
 
   function OnRelease(self)
@@ -378,7 +378,7 @@ class "SettingsDropDown" (function(_ENV)
   end
 
   function OnAcquire(self)
-    self:InstantApplyStyle()
+    -- self:InstantApplyStyle()
   end
 
   function OnRelease(self)
@@ -467,7 +467,7 @@ class "SettingsSlider" (function(_ENV)
   end
 
   function OnAcquire(self)
-    self:InstantApplyStyle()
+    -- self:InstantApplyStyle()
   end
 
   function OnRelease(self)
@@ -551,7 +551,7 @@ class "SettingsColorPicker" (function(_ENV)
   end
 
   function OnAcquire(self)
-    self:InstantApplyStyle()
+    -- self:InstantApplyStyle()
   end
 
   function OnRelease(self)
@@ -664,7 +664,7 @@ class "SettingsMediaFont" (function(_ENV)
         self:GetChild("FontSetting"):SelectByValue(value.font)
       end
 
-      if value.height then 
+      if value.height then
         self:GetChild("FontHeightSetting"):SetValue(value.height)
       end
 
@@ -707,7 +707,7 @@ class "SettingsMediaFont" (function(_ENV)
     fontSetting:SetMediaType("font")
 
     local fontHeightSetting = self:GetChild("FontHeightSetting")
-    fontHeightSetting:InstantApplyStyle()
+    -- fontHeightSetting:InstantApplyStyle()
     fontHeightSetting:SetMinMaxValues(6, 48)
     fontHeightSetting:SetValueStep(1)
     fontHeightSetting:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
@@ -778,7 +778,7 @@ class "SettingsExpandableSection" (function(_ENV)
   end
 
   function OnAcquire(self)
-    self:InstantApplyStyle()
+    -- self:InstantApplyStyle()
   end
 
   function OnRelease(self)

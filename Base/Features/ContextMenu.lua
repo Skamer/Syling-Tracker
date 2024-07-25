@@ -232,6 +232,9 @@ __Static__() function API.ContextMenu_Show(patternID, frameToAnchor, ...)
     CONTEXT_MENU:SetPoint("TOPRIGHT", frameToAnchor, "TOPLEFT", -15, 0)
   end
 
+  -- HACK: For fixing an issue with the background not appear sometimes.
+  CONTEXT_MENU:InstantApplyStyle()
+
   CONTEXT_MENU:Show()
 end
 

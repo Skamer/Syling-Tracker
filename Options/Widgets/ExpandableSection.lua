@@ -58,7 +58,7 @@ class "ExpandableSection" (function(_ENV)
   end
 
   function OnAcquire(self)
-    self:InstantApplyStyle()
+    -- self:InstantApplyStyle()
   end
 
   function OnRelease(self)

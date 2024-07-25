@@ -48,7 +48,7 @@ class "PanelCategoryEntryButton" (function(_ENV)
   end
 
   function OnAcquire(self)
-    self:InstantApplyStyle()
+    -- self:InstantApplyStyle()
   end
 
   function OnRelease(self)
@@ -70,6 +70,7 @@ class "PanelCategoryEntryButton" (function(_ENV)
     handler   = RefreshState
   }
 
+  __InstantApplyStyle__()
   __Template__ {
     Label     = FontString,
     Texture   = Texture,

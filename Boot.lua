@@ -19,7 +19,8 @@ export {
 SLT_LOGO           = [[Interface\AddOns\SylingTracker\Media\logo]]
 
 SECURE_HANDLER_FRAME = CreateFrame("Frame", "SylingTracker_SecureHandlerFrame", UIParent, "SecureHandlerBaseTemplate")
-SECURE_HANDLER_FRAME:SetFrameRef("ObjectiveTrackerFrame", ObjectiveTrackerFrame)
+-- In the 11.0, we use "UIParentRightManagedFrameContainer" instead of "ObjectiveTrackerFrame" as this one is still redisplayed for every event.
+SECURE_HANDLER_FRAME:SetFrameRef("ObjectiveTrackerFrame", UIParentRightManagedFrameContainer)
 
 function OnLoad(self)
   _DB:SetDefault{ dbVersion = 2 }
