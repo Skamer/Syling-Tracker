@@ -177,11 +177,44 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     showMinimizeButtonCkeckBox:BindTrackerSetting(trackerID, "showMinimizeButton")
     self.GeneralTabControls.showMinimizeButtonCkeckBox = showMinimizeButtonCkeckBox
     ---------------------------------------------------------------------------
+    --- Position Section
+    ---------------------------------------------------------------------------
+    local positionSection = Widgets.SettingsExpandableSection.Acquire(false, self)
+    positionSection:SetExpanded(false)
+    positionSection:SetID(60)
+    positionSection:SetTitle("Position")
+    self.GeneralTabControls.positionSection = positionSection
+
+    local positionSliders = Widgets.SettingsPosition.Acquire(true, positionSection)
+    positionSliders:SetID(10)
+    positionSliders:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
+    positionSliders:SetXLabel("Offset X")
+    positionSliders:SetYLabel("Offset Y")
+    positionSliders:BindTrackerSetting(trackerID, "position")
+    positionSliders:SetXMinMaxValues(-GetScreenWidth() / 2 , GetScreenWidth() / 2)
+    positionSliders:SetYMinMaxValues(-GetScreenHeight() / 2 , GetScreenHeight() / 2)
+    self.GeneralTabControls.positionSliders = positionSliders
+
+    local relativePositionAnchorDropDown = Widgets.SettingsDropDown.Acquire(true, positionSection)
+    relativePositionAnchorDropDown:SetID(20)
+    relativePositionAnchorDropDown:SetLabel("Relative Anchor")
+    relativePositionAnchorDropDown:AddEntry({ text = "BOTTOM", value = "BOTTOM"})
+    relativePositionAnchorDropDown:AddEntry({ text = "BOTTOMLEFT", value = "BOTTOMLEFT"})
+    relativePositionAnchorDropDown:AddEntry({ text = "BOTTOMRIGHT", value = "BOTTOMRIGHT"})
+    relativePositionAnchorDropDown:AddEntry({ text = "CENTER", value = "CENTER"})
+    relativePositionAnchorDropDown:AddEntry({ text = "LEFT", value = "LEFT"})
+    relativePositionAnchorDropDown:AddEntry({ text = "RIGHT", value = "RIGHT"})
+    relativePositionAnchorDropDown:AddEntry({ text = "TOP", value = "TOP"})
+    relativePositionAnchorDropDown:AddEntry({ text = "TOPLEFT", value = "TOPLEFT"})
+    relativePositionAnchorDropDown:AddEntry({ text = "TOPRIGHT", value = "TOPRIGHT"})
+    relativePositionAnchorDropDown:BindTrackerSetting(trackerID, "relativePositionAnchor")
+    self.GeneralTabControls.relativePositionAnchorDropDown = relativePositionAnchorDropDown
+    ---------------------------------------------------------------------------
     --- Background Section
     ---------------------------------------------------------------------------
     local backgroundSection = Widgets.ExpandableSection.Acquire(false, self)
     backgroundSection:SetExpanded(false)
-    backgroundSection:SetID(60)
+    backgroundSection:SetID(70)
     backgroundSection:SetTitle("Background")
     Style[backgroundSection].marginTop = 10
     self.GeneralTabControls.backgroundSection = backgroundSection
@@ -202,7 +235,7 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     ---------------------------------------------------------------------------
     local borderSection = Widgets.ExpandableSection.Acquire(false, self)
     borderSection:SetExpanded(false)
-    borderSection:SetID(70)
+    borderSection:SetID(80)
     borderSection:SetTitle("Border")
     self.GeneralTabControls.borderSection = borderSection
 
@@ -230,7 +263,7 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     ---------------------------------------------------------------------------
     local scrollBarSection = Widgets.ExpandableSection.Acquire(false, self)
     scrollBarSection:SetExpanded(false)
-    scrollBarSection:SetID(80)
+    scrollBarSection:SetID(90)
     scrollBarSection:SetTitle("Scroll Bar")
     self.GeneralTabControls.scrollBarSection = scrollBarSection
 

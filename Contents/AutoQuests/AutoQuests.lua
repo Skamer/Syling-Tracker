@@ -82,12 +82,12 @@ end
 -- end
 
 __SecureHook__(QuestObjectiveTracker, "AddAutoQuestPopUp")
-function Hook_AddAutoQuestPopUp(questID, popupType, itemID)
+function Hook_AddAutoQuestPopUp(_, questID, popupType, itemID)
   _M:AddAutoQuest(questID, popupType)
 end
 
 __SecureHook__(QuestObjectiveTracker, "RemoveAutoQuestPopUp")
-function Hook_RemoveAutoQuestPopUp(questID)
+function Hook_RemoveAutoQuestPopUp(_, questID)
   _M:RemoveAutoQuest(questID)
 end
 

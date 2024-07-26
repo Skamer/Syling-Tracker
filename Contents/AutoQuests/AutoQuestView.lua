@@ -33,11 +33,11 @@ class "AutoQuestView" (function(_ENV)
     if questType == "OFFER" then 
       ShowQuestOffer(questID)
       -- AutoQuestPopupTracker_RemovePopUp(questID)
-      QuestObjectiveTracker:RemoveAutoQuest(questID)
+      QuestObjectiveTracker:RemoveAutoQuestPopUp(questID)
     elseif questType == "COMPLETE" then 
       ShowQuestComplete(questID)
       -- AutoQuestPopupTracker_RemovePopUp(questID)
-      QuestObjectiveTracker:RemoveAutoQuest(questID)
+      QuestObjectiveTracker:RemoveAutoQuestPopUp(questID)
     end
   end
   -----------------------------------------------------------------------------

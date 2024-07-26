@@ -1,4 +1,17 @@
-# 2.1.1
+# 2.1.2
+
+**NEW**
+
+- Added an option for changing the anchor where the tracker is relatively positioned (by default: "BOTTOMLEFT").
+
+**FIXES**
+
+- Fixed an error was triggered when an auto quest was present at first loading.
+- Fixed an error was triggered when an auto quest was clicked.
+
+---
+
+## 2.1.1
 
 - Reupdate the toc number.
 

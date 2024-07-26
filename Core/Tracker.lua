@@ -441,8 +441,30 @@ TRACKER_SETTINGS  = {}
 local function OnTrackerStopMoving(tracker)
   local left = tracker:GetLeft()
   local top = tracker:GetTop()
+  local relAnchor = GetTrackerSetting(tracker.id, "relativePositionAnchor") or "BOTTOMLEFT"
 
-
+  if relAnchor == "TOPRIGHT" then 
+    left = left - GetScreenWidth()
+    top = top - GetScreenHeight()
+  elseif relAnchor == "TOPLEFT" then 
+    top = top - GetScreenHeight()
+  elseif relAnchor == "BOTTOMRIGHT" then 
+    left = left - GetScreenWidth()
+  elseif relAnchor == "RIGHT" then 
+    left = left - GetScreenWidth()
+    top = top - GetScreenHeight() / 2
+  elseif relAnchor == "TOP" then 
+    left = left - GetScreenWidth() / 2
+    top = top - GetScreenHeight()
+  elseif relAnchor == "LEFT" then 
+    top = top - GetScreenHeight() / 2
+  elseif relAnchor == "BOTTOM" then 
+    left = left - GetScreenWidth() / 2
+  elseif relAnchor == "CENTER" then 
+    left = left - GetScreenWidth() / 2
+    top = top - GetScreenHeight() / 2
+  end 
+  
   SetTrackerSetting(tracker.id, "position", Position(left, top), false)
 end
 
@@ -1114,6 +1136,7 @@ RegisterTrackerSetting({ id = "enabled", default = true, handler = private__SetE
 RegisterTrackerSetting({ id = "locked", default = false })
 RegisterTrackerSetting({ id = "scale", default = 1})
 RegisterTrackerSetting({ id = "position"})
+RegisterTrackerSetting({ id = "relativePositionAnchor", default = "BOTTOMLEFT"})
 RegisterTrackerSetting({ id = "size", default = Size(300, 325) })
 RegisterTrackerSetting({ id = "showBackground", default = false})
 RegisterTrackerSetting({ id = "showBorder", default = false})
@@ -1206,12 +1229,12 @@ function FromVisible()
 end
 
 function FromLocation()
-  return FromTrackerSetting("position"):Map(function(pos, tracker)
-    if pos then
-      return  { Anchor("TOPLEFT", pos.x or 0, pos.y or 0, nil, "BOTTOMLEFT") }
-    end
-    
-    return tracker.id == "main" and { Anchor("RIGHT", -40, 0) } or { Anchor("CENTER") }
+  return FromTrackerSetting("position"):CombineLatest(FromTrackerSetting("relativePositionAnchor")):Map(function(pos, tracker, relativePosAnchor) 
+      if pos then 
+        return { Anchor("TOPLEFT", pos.x or 0, pos.y or 0, nil, relativePosAnchor or "BOTTOMLEFT") }
+      end
+      
+      return tracker.id == "main" and { Anchor("RIGHT", -40, 0) } or { Anchor("CENTER") }
   end)
 end
 

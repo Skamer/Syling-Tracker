@@ -81,6 +81,7 @@ interface "IBindSetting" (function(_ENV)
 
   function TriggerSetSetting(self, setting, value, notify)
     local settingType = self.SettingType
+
     if settingType == "setting" then 
       SetSetting(setting, value, nil, unpack(self.SettingExtraArgs))
     elseif settingType == "uiSetting" then 
@@ -500,6 +501,121 @@ class "SettingsSlider" (function(_ENV)
   }
   function __ctor(self)
     self.OnValueChanged = self.OnValueChanged + OnValueChangedHandler 
+  end
+end)
+
+__Widget__()
+class "SettingsPosition"(function(_ENV)
+  inherit "Frame" extend "IBindSetting"
+  -----------------------------------------------------------------------------
+  --                               Events                                    --
+  -----------------------------------------------------------------------------
+  event "OnPositionChanged"
+  -----------------------------------------------------------------------------
+  --                               Handlers                                  --
+  -----------------------------------------------------------------------------
+  local function OnXPosChanged(self, slider, value)
+    if self.Position then 
+      OnPositionChanged(self, Position(value, self.Position.y))
+    end
+  end
+
+  local function OnYPosChanged(self, slider, value)
+    if self.Position then 
+      OnPositionChanged(self, Position(self.Position.x, value))
+    end
+  end
+
+  local function OnPositionChangedHandler(self, pos)
+    local setting = self.Setting
+    if setting then
+      self:TriggerSetSetting(setting, pos)
+    end
+
+    self.Position.x = pos.x 
+    self.Position.y = pos.y
+  end
+  -----------------------------------------------------------------------------
+  --                               Methods                                   --
+  -----------------------------------------------------------------------------
+  function SetXLabel(self, text)
+    Style[self].XSlider.Label.text = text
+  end
+
+  function SetYLabel(self, text)
+    Style[self].YSlider.Label.text = text
+  end
+
+  function SetXMinMaxValues(self, ...) 
+    self:GetChild("XSlider"):SetMinMaxValues(...)
+  end
+
+  function SetYMinMaxValues(self, ...)
+    self:GetChild("YSlider"):SetMinMaxValues(...)
+  end
+
+  function SetMinMaxValues(self, ...)
+    self:GetChild("XSlider"):SetMinMaxValues(...)
+    self:GetChild("YSlider"):SetMinMaxValues(...)
+  end
+
+  function SetValueStep(self, ...)
+    self:GetChild("XSlider"):SetValueStep(...)
+    self:GetChild("YSlider"):SetValueStep(...)
+  end
+
+  function SetValue(self, ...)
+    self:GetChild("XSlider"):SetValue(...)
+    self:GetChild("YSlider"):SetValue(...)
+  end
+
+  function SetSliderLabelFormatter(self, ...)
+    self:GetChild("XSlider"):SetSliderLabelFormatter(...)
+    self:GetChild("YSlider"):SetSliderLabelFormatter(...)
+  end
+  
+  function PrepareFromSetting(self, value, hasDefault, defaultValue)
+    if value then
+      self:GetChild("XSlider"):SetValue(value.x or 0)
+      self:GetChild("YSlider"):SetValue(value.y or 0)
+    end
+
+    self.Position = value
+  end
+
+  function OnRelease(self)
+    self:BindSetting()
+  end
+  -----------------------------------------------------------------------------
+  --                               Properties                                --
+  -----------------------------------------------------------------------------
+  property "Default" {
+    type = Any
+  }
+
+  property "Position" {
+    type = Position
+  }
+  -----------------------------------------------------------------------------
+  --                            Constructors                                 --
+  -----------------------------------------------------------------------------
+  __Template__{
+    XSlider = SettingsSlider,
+    YSlider = SettingsSlider,
+  }
+  function __ctor(self)
+    local xSlider = self:GetChild("XSlider")
+    local ySlider = self:GetChild("YSlider")
+
+    xSlider.OnValueChanged = xSlider.OnValueChanged + function(...)
+      OnXPosChanged(self, ...)
+    end
+
+    ySlider.OnValueChanged = ySlider.OnValueChanged + function(...)
+      OnYPosChanged(self, ...)
+    end
+
+    self.OnPositionChanged = self.OnPositionChanged + OnPositionChangedHandler
   end
 end)
 
@@ -939,6 +1055,28 @@ Style.UpdateSkin("Default", {
       location = {
         Anchor("LEFT", 0, 0, "Label", "RIGHT")
       } 
+    }
+  },
+
+  [SettingsPosition] = {
+    height = 70,
+    marginRight = 0,
+
+    XSlider = {
+      Label = { text = "X"},
+      location = {
+        Anchor("TOP"),
+        Anchor("LEFT"),
+        Anchor("RIGHT")
+      }
+    },
+
+    YSlider = {
+      Label = { text = "Y"},
+      location = {
+        Anchor("TOPLEFT", 0, 0, "XSlider", "BOTTOMLEFT"),
+        Anchor("TOPRIGHT", 0, 0, "XSlider", "BOTTOMRIGHT")
+      }
     }
   },
 
