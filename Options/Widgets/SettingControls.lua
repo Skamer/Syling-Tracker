@@ -72,7 +72,9 @@ interface "IBindSetting" (function(_ENV)
       value = defaultValue
     end
 
-    self:PrepareFromSetting(value, hasDefault, defaultValue)
+    if setting then 
+      self:PrepareFromSetting(value, hasDefault, defaultValue)
+    end
 
     self.Setting        = setting
     self.SettingType    = settingType
@@ -575,16 +577,27 @@ class "SettingsPosition"(function(_ENV)
   end
   
   function PrepareFromSetting(self, value, hasDefault, defaultValue)
-    if value then
-      self:GetChild("XSlider"):SetValue(value.x or 0)
-      self:GetChild("YSlider"):SetValue(value.y or 0)
-    end
+    local x = value and value.x or 0
+    local y = value and value.y or 0
 
-    self.Position = value
+
+    self:GetChild("XSlider"):SetValue(x)
+    self:GetChild("YSlider"):SetValue(y)
+
+
+    self.Position = Position(x, y)
   end
 
   function OnRelease(self)
+    ResetStyles(self, true)
+
     self:BindSetting()
+    --- It's important these functions are called after Setting has been set 
+    --- to nil for avoiding the setting value is updated by an incorrect value
+    self:SetValue(0)
+    self:SetValueStep(1)
+    self:SetMinMaxValues(0, 100)
+
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
@@ -823,7 +836,6 @@ class "SettingsMediaFont" (function(_ENV)
     fontSetting:SetMediaType("font")
 
     local fontHeightSetting = self:GetChild("FontHeightSetting")
-    -- fontHeightSetting:InstantApplyStyle()
     fontHeightSetting:SetMinMaxValues(6, 48)
     fontHeightSetting:SetValueStep(1)
     fontHeightSetting:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
