@@ -55,14 +55,12 @@ function LoadAndUpdate(self)
   DUNGEON_CONTENT_SUBJECT:StartObjectivesCounter()
   if numObjectives > 0 then 
     for index = 1, numObjectives do 
-      local description, criteriaType, completed, quantity, totalQuantity,
-      flags, assetID, quantityString, criteriaID, duration, elapsed,
-      failed, isWeightProgress = GetCriteriaInfo(index)
+      local criteriaInfo = GetCriteriaInfo(index)
 
       local objectiveData = DUNGEON_CONTENT_SUBJECT:AcquireObjective()
 
-      objectiveData.text = description
-      objectiveData.isCompleted = completed
+      objectiveData.text = criteriaInfo.description
+      objectiveData.isCompleted = criteriaInfo.completed
     end
   end
   DUNGEON_CONTENT_SUBJECT:StopObjectivesCounter()

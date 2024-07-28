@@ -1,4 +1,12 @@
-# 2.1.2
+# 2.1.3
+
+**FIXES**
+
+- Fixed the Dungeon, Keystone (Mythic +) and Scenario were broken due by an api changes.
+
+---
+
+## 2.1.2
 
 **NEW**
 

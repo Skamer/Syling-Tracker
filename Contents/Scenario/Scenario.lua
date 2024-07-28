@@ -102,10 +102,17 @@ function UpdateScenario(self)
       objectiveData.progressText  = PERCENTAGE_STRING:format(scenarioStepInfo.weightedProgress)
     else
       if scenarioData.numCriteria > 0 then
-        for index = 1, scenarioStepInfo.numCriteria do 
-          local description, criteriaType, completed, quantity, totalQuantity,
-          flags, assetID, quantityString, criteriaID, duration, elapsed,
-          failed, isWeightedProgress = GetCriteriaInfo(index)
+        for index = 1, scenarioStepInfo.numCriteria do
+          local criteriaInfo = GetCriteriaInfo(index)
+
+          local description = criteriaInfo.description
+          local completed = criteriaInfo.completed
+          local quantity = criteriaInfo.quantity
+          local totalQuantity = criteriaInfo.totalQuantity
+          local duration = criteriaInfo.duration
+          local elapsed = criteriaInfo.elapsed
+          local failed = criteriaInfo.failed
+          local isWeightedProgress = criteriaInfo.isWeightedProgress
 
           local objectiveData = scenarioData:AcquireObjective()
 
@@ -146,7 +153,6 @@ function UpdateScenario(self)
     end
     scenarioData:StopObjectivesCounter()
 
-
     -- Bonus objectives bonusObjectives
     scenarioData:StartBonusObjectivesCounter()
     local tblBonusSteps = GetBonusSteps()
@@ -155,9 +161,16 @@ function UpdateScenario(self)
 
       for index = 1, numBonusObjectives do 
         local bonusStepIndex = tblBonusSteps[index]
-        local criteriaString, criteriaType, criteriaCompleted, quantity, totalQuantity, 
-        flags, assetID, quantityString, criteriaID, duration, elapsed, 
-        criteriaFailed, isWeightedProgress = C_Scenario.GetCriteriaInfoByStep(bonusStepIndex, 1)
+        local criteriaInfo =  C_ScenarioInfo.GetCriteriaInfoByStep(bonusStepIndex, 1)
+
+        local criteriaString = criteriaInfo.description
+        local criteriaCompleted = criteriaInfo.completed
+        local quantity = criteriaInfo.quantity
+        local totalQuantity = criteriaInfo.totalQuantity
+        local duration = criteriaInfo.duration
+        local elapsed = criteriaInfo.elapsed
+        local criteriaFailed = criteriaInfo.failed
+        local isWeightedProgress = criteriaInfo.isWeightedProgress
 
         local bonusObjectiveData = scenarioData:AcquireBonusObjective()
 

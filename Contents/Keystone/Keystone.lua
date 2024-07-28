@@ -71,15 +71,19 @@ function UpdateObjectives(self)
       flags, assetID, quantityString, criteriaID, duration, elapsed,
       failed, isWeightProgress = GetCriteriaInfo(index)
 
-      if not isWeightProgress then 
+      local criteriaInfo = GetCriteriaInfo(index)
+
+      if not criteriaInfo.isWeightedProgress then 
         local objectiveData = KEYSTONE_CONTENT_SUBJECT:AcquireObjective()
-        objectiveData.text = description
-        objectiveData.isCompleted = completed
+        objectiveData.text = criteriaInfo.description
+        objectiveData.isCompleted = criteriaInfo.completed
       else 
-        -- if there is weight progress, we can say this is 'Enemy Forces'
-        local quantity = tonumber(strsub(quantityString, 1, -2))
+        -- IMPORTANT: Since the 11.0, we don't have a way to get the current count so in waiting it will
+        -- be added (or not depending of blizzard), we calculate the current count based on the current percent.
+        local quantity = criteriaInfo.quantity * criteriaInfo.totalQuantity / 100
+
         KEYSTONE_CONTENT_SUBJECT.enemyForcesQuantity = quantity
-        KEYSTONE_CONTENT_SUBJECT.enemyForcesTotalQuantity = totalQuantity
+        KEYSTONE_CONTENT_SUBJECT.enemyForcesTotalQuantity = criteriaInfo.totalQuantity
       end
     end
   end

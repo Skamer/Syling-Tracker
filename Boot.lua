@@ -19,8 +19,8 @@ export {
 SLT_LOGO           = [[Interface\AddOns\SylingTracker\Media\logo]]
 
 SECURE_HANDLER_FRAME = CreateFrame("Frame", "SylingTracker_SecureHandlerFrame", UIParent, "SecureHandlerBaseTemplate")
--- In the 11.0, we use "UIParentRightManagedFrameContainer" instead of "ObjectiveTrackerFrame" as this one is still redisplayed for every event.
-SECURE_HANDLER_FRAME:SetFrameRef("ObjectiveTrackerFrame", UIParentRightManagedFrameContainer)
+SECURE_HANDLER_FRAME:Hide()
+SECURE_HANDLER_FRAME:SetFrameRef("ObjectiveTrackerFrame", ObjectiveTrackerFrame)
 
 function OnLoad(self)
   _DB:SetDefault{ dbVersion = 2 }
@@ -64,15 +64,24 @@ function BLIZZARD_TRACKER_VISIBLITY_CHANGED(isVisible)
   NoCombat()
 
   -- We use the secure snippet for avoiding to taint the entire blizzard objective tracker
-  if isVisible then 
+  if isVisible then
+
+    if OPARENT then 
+      ObjectiveTrackerFrame:SetParent(OPARENT)
+    end
+
     SECURE_HANDLER_FRAME:Execute([[
       ObjectiveTrackerFrame = self:GetFrameRef("ObjectiveTrackerFrame")
-      ObjectiveTrackerFrame:Show()   
+      ObjectiveTrackerFrame:Show()
     ]])
   else
+
+    -- since the 11.0, we need to change its parent for avoiding to be reshown due an event.
+    OPARENT = ObjectiveTrackerFrame:GetParent()
     SECURE_HANDLER_FRAME:Execute([[
       ObjectiveTrackerFrame = self:GetFrameRef("ObjectiveTrackerFrame")
-      ObjectiveTrackerFrame:Hide()    
+      ObjectiveTrackerFrame:Hide()
+      ObjectiveTrackerFrame:SetParent(self)
     ]])
   end
 end
