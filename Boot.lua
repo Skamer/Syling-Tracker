@@ -18,9 +18,20 @@ export {
 
 SLT_LOGO           = [[Interface\AddOns\SylingTracker\Media\logo]]
 
-SECURE_HANDLER_FRAME = CreateFrame("Frame", "SylingTracker_SecureHandlerFrame", UIParent, "SecureHandlerBaseTemplate")
-SECURE_HANDLER_FRAME:Hide()
+-- Since the 11.0, the ObjectiveTrackerFrame is reshown on some events.
+-- The goal is to rehide when it's reshown, in addition to keep a secure environment for avoiding to taint it. 
+-- 
+-- We create our secure handler as child of blizzard objective tracker frame, and we wrap its "OnShow" script, indirectly saying when the blizzard objective tracker
+-- is reshown.
+SECURE_HANDLER_FRAME = CreateFrame("Frame", "SylingTracker_SecureHandlerFrame", ObjectiveTrackerFrame, "SecureHandlerBaseTemplate")
 SECURE_HANDLER_FRAME:SetFrameRef("ObjectiveTrackerFrame", ObjectiveTrackerFrame)
+SECURE_HANDLER_FRAME:WrapScript(SECURE_HANDLER_FRAME, "OnShow", [[
+  local hidden = self:GetAttribute("hidden")
+
+  if hidden then 
+    self:GetParent():Hide()
+  end
+]])
 
 function OnLoad(self)
   _DB:SetDefault{ dbVersion = 2 }
@@ -65,23 +76,20 @@ function BLIZZARD_TRACKER_VISIBLITY_CHANGED(isVisible)
 
   -- We use the secure snippet for avoiding to taint the entire blizzard objective tracker
   if isVisible then
-
-    if OPARENT then 
-      ObjectiveTrackerFrame:SetParent(OPARENT)
-    end
-
     SECURE_HANDLER_FRAME:Execute([[
+      self:SetAttribute("hidden", nil)
+
       ObjectiveTrackerFrame = self:GetFrameRef("ObjectiveTrackerFrame")
       ObjectiveTrackerFrame:Show()
+      ObjectiveTrackerFrame:SetAlpha(1)
     ]])
   else
-
-    -- since the 11.0, we need to change its parent for avoiding to be reshown due an event.
-    OPARENT = ObjectiveTrackerFrame:GetParent()
     SECURE_HANDLER_FRAME:Execute([[
       ObjectiveTrackerFrame = self:GetFrameRef("ObjectiveTrackerFrame")
       ObjectiveTrackerFrame:Hide()
-      ObjectiveTrackerFrame:SetParent(self)
+      ObjectiveTrackerFrame:SetAlpha(0)
+
+      self:SetAttribute("hidden", true)
     ]])
   end
 end

@@ -1,4 +1,12 @@
-# 2.1.3
+# 2.1.4
+
+**FIXES**
+
+- Fixed again an issue where the Blizzard objective tracker was displayed when not intended.
+
+---
+
+## 2.1.3
 
 **FIXES**
 
