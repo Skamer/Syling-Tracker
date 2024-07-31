@@ -1,4 +1,12 @@
-# 2.1.4
+# 2.1.5
+
+**FIXES**
+
+- Fixed an issue where in some condition the quest distance updater could be run multiple times.
+
+---
+
+## 2.1.4
 
 **FIXES**
 

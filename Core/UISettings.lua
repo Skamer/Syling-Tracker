@@ -196,7 +196,7 @@ class "UISetting" (function(_ENV)
   }
 
   property "ResolvedSetting" {
-    type = UiSetting
+    type = UISetting
   }
 end)
 -------------------------------------------------------------------------------

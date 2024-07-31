@@ -37,12 +37,12 @@ interface "IObjectData" (function(_ENV)
     return self.__parent
   end
 
-  __Arguments__ { ObjectData }
+  __Arguments__ { IObjectData }
   function AddChild(self, child)
     self.Children[child] = true
   end
 
-  __Arguments__ { ObjectData }
+  __Arguments__ { IObjectData }
   function RemoveChild(self, child)
     self.Children[child] = nil
   end

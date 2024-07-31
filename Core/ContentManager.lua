@@ -355,7 +355,7 @@ struct "ContentConfig" {
   { name = "formattedName", type = String },
   { name = "description", type = String },
   { name = "data", type = IObservable },
-  { name = "viewClass", type = View },
+  { name = "viewClass", type = -IView },
   { name = "order", type = Number },
   { name = "events", type = Table + String },
   { name = "statusFunc", type = Callable + String },

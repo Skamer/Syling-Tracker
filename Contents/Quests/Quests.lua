@@ -503,28 +503,39 @@ function GetQuestHeader(self, qID)
   return currentHeader
 end
 
+DISTANCE_UPDATER_TOKEN = 0
+DISTANCE_UPDATER_ENABLED = false
+
 __Async__()
 __SystemEvent__()
 function PLAYER_STARTED_MOVING()
+  if DISTANCE_UPDATER_ENABLED then 
+    return 
+  end
+
   if IsInInstance() then 
     return 
   end
 
   DISTANCE_UPDATER_ENABLED = true
-  while DISTANCE_UPDATER_ENABLED do 
-    _M:UpdateDistance()
 
+  local token = DISTANCE_UPDATER_TOKEN + 1
+  DISTANCE_UPDATER_TOKEN = token 
+
+  while DISTANCE_UPDATER_ENABLED and token == DISTANCE_UPDATER_TOKEN do
+    _M:UpdateDistance()
     Delay(5)
   end
 end
 
 __SystemEvent__()
 function PLAYER_STOPPED_MOVING()
-  if IsInInstance() then 
+  DISTANCE_UPDATER_ENABLED = false
+
+  if IsInInstance() then
     return 
   end
 
-  DISTANCE_UPDATER_ENABLED = false 
 
   _M:UpdateDistance()
 end

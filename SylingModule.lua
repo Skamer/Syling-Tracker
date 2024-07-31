@@ -25,7 +25,6 @@ PLoop(function(_ENV)
       return false
     end
 
-
     function GetActivatingEvent(self)
       return self._ActiveByEvent
     end
@@ -43,8 +42,6 @@ PLoop(function(_ENV)
       end
       return false
     end
-
-
 
     __Arguments__ { String }
     function IsActiveByEvent(self, evt)
@@ -124,7 +121,7 @@ PLoop(function(_ENV)
 
           -- NOTE: _eventActiveChanged is here for avoiding to call two cond
           -- handler in same event.
-          if self._Active and not self._eventActiveChanged then
+          if self._Active and not self._EventActiveChanged then
             local active
             
             if self._InactiveOnHandler and self:HasInactiveEvent(evt) then
@@ -139,7 +136,7 @@ PLoop(function(_ENV)
             end
           end
 
-          self._eventActiveChanged = nil
+          self._EventActiveChanged = nil
         end
         super.RegisterEvent(self, evt, newHandler)
     end
@@ -154,15 +151,21 @@ PLoop(function(_ENV)
     property "_Active" { TYPE = Boolean, DEFAULT = true, HANDLER = function(self, new)
       if new then
         self:OnActive()
-        self._eventActiveChanged = true
+        self._EventActiveChanged = true
       else
         self:OnInactive()
       end
     end }
-
+    
     -- Ready only, avoid to edit this property
     property "_Inactive" { TYPE = Boolean, GET = function(self) return not self._Active end }
 
+    -- internal properties
+    property "_EventActiveChanged" { TYPE = Boolean }
+    property "_InactiveOnHandler" { TYPE = Any }
+    property "_ActiveOnHandler" { TYPE = Any}
+    property "_ActiveOnEvents" { TYPE = List }
+    property "_InactiveOnEvents" { TYPE = List }
   end)
     ---------------------------------------------------------------------------
     --                                                                       --
