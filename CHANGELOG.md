@@ -1,4 +1,12 @@
-# 2.2.0
+# 2.2.1
+
+**FIXES**
+
+- Fixed errors due a missing api function on wow live version.
+
+---
+
+## 2.2.0
 
 **NEW**
 

@@ -162,6 +162,13 @@ end
 
 DELVE_WIDGET_ID = 6183
 function IsInDelve()
+
+  -- NOTE: The live version doesn't have GetScenarioHeaderDelvesWidgetVisualizationInfo function, this is for prevent
+  -- the errors in this version.
+  if not C_UIWidgetManager.GetScenarioHeaderDelvesWidgetVisualizationInfo then 
+    return false
+  end 
+
   -- NOTE: For unknow reason, sometimes after login directly in a delve C_DelvesUI.HasActiveDelve returns 
   -- false even if there a active delve. This is why we chose to check from the Delve widget id for knowning 
   -- if a delve is active, and seems more reliable.
