@@ -233,6 +233,7 @@ Style.UpdateSkin("Default", {
         atlas                         = AtlasType("groupfinder-background-scenarios"), -- 615222
         texCoords                     = { left = 0.1,  right = 0.9, top = 0.1, bottom = 0.9 } ,
         setAllPoints                  = true,
+        drawLayer                     = "BACKGROUND",
       },
 
       ScenarioName = {

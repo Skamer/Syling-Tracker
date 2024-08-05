@@ -66,7 +66,7 @@ function UpdateTask(self, questID)
 
 
   taskData:StartObjectivesCounter()
-  if not isComplete and numObjectives > 0 then 
+  if not isComplete and numObjectives and numObjectives > 0 then 
     for index = 1, numObjectives do
       local objectiveData = taskData:AcquireObjective()
       local text, oType, finished = GetQuestObjectiveInfo(questID, index, false)

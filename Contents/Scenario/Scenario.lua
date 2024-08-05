@@ -15,6 +15,7 @@ export {
   RegisterObservableContent           = API.RegisterObservableContent,
   
   -- Wow API & Utils
+  IsInDelve                         = Utils.IsInDelve,
   IsInScenario                      = C_Scenario.IsInScenario,
   IsInJailersTower                  = IsInJailersTower,
   GetCriteriaInfo                   = C_Scenario.GetCriteriaInfo,
@@ -29,8 +30,8 @@ SCENARIO_CONTENT_SUBJECT = RegisterObservableContent("scenario", ScenarioContent
 
 __ActiveOnEvents__ "PLAYER_ENTERING_WORLD" "SCENARIO_POI_UPDATE" "SCENARIO_UPDATE"
 function BecomeActiveOn(self)
-  -- Prevent the scenario content to be active in torghast
-  if IsInJailersTower() then
+  -- Prevent the scenario content to be active in torghast and in the delve
+  if IsInJailersTower() or IsInDelve() then
     return false 
   end
 

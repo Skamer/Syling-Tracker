@@ -44,6 +44,10 @@
   <Script file="Scenario\ScenarioData.lua" />
   <Script file="Scenario\ScenarioContentView.lua" />
   <Script file="Scenario\Scenario.lua" />
+  <!-- Delve -->
+  <Script file="Delve\DelveData.lua" />
+  <Script file="Delve\DelveContentView.lua" />
+  <Script file="Delve\Delve.lua" />
   <!-- Dungeons -->
   <Script file="Dungeon\DungeonContentSubject.lua" />
   <Script file="Dungeon\DungeonContentView.lua" />

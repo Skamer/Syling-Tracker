@@ -55,6 +55,20 @@ RegisterContent({
   statusFunc = function(data) return (data and data.scenario) and true or false end
 })
 -------------------------------------------------------------------------------
+--                              Delve                                        --
+-------------------------------------------------------------------------------
+RegisterContent({
+  id = "delve",
+  name = "Delve",
+  formattedName = CreateAtlasMarkup("delves-regular", 16, 16) .. " Delve",
+  description = "DELVE_PH_DESC",
+  icon = { atlas = AtlasType("delves-regular") },
+  order = 25,
+  viewClass = DelveContentView,
+  data = GetObservableContent("delve"),
+  statusFunc = function(data) return (data and data.name) and true or false end
+})
+-------------------------------------------------------------------------------
 --                             Dungeon                                       --
 -------------------------------------------------------------------------------
 RegisterContent({

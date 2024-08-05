@@ -160,5 +160,19 @@ function GetInstanceTextureFileID(mapID)
   return 337493 -- random dungeons
 end
 
+DELVE_WIDGET_ID = 6183
+function IsInDelve()
+  -- NOTE: For unknow reason, sometimes after login directly in a delve C_DelvesUI.HasActiveDelve returns 
+  -- false even if there a active delve. This is why we chose to check from the Delve widget id for knowning 
+  -- if a delve is active, and seems more reliable.
+  local widgetInfo = GetScenarioHeaderDelvesWidgetVisualizationInfo(DELVE_WIDGET_ID)
+  if widgetInfo and widgetInfo.shownState == 1 then 
+    return true 
+  end 
+
+  return false
+end
+
 -- Export the functions in Utils
 Utils.GetInstanceTextureFileID = GetInstanceTextureFileID
+Utils.IsInDelve = IsInDelve

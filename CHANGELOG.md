@@ -1,4 +1,17 @@
-# 2.1.5
+# 2.2.0
+
+**NEW**
+
+- The Delve (new content from The War Within) is now fully supported.
+
+**FIXES**
+
+- Fixed an error lua sometimes triggered by tasks and causing the addon to be broken.
+- Fixed the border which wasn't displayed when it should be for the scenario.
+
+---
+
+## 2.1.5
 
 **FIXES**
 

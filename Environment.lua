@@ -35,5 +35,9 @@ __Arguments__ { Any, String}
 __Static__() function DebugTools.TrackData(data, dataName)
   if ViragDevTool and ViragDevTool.AddData then
     local status, err = pcall(ViragDevTool.AddData, ViragDevTool, data, "|cffff0000Syling Tracker|r - " .. dataName)
+  end 
+
+  if DevTool and DevTool.AddData then 
+    pcall(DevTool.AddData, DevTool, data, "|cffff0000Syling Tracker|r - " .. dataName)
   end
 end
