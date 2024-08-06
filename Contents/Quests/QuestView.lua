@@ -115,10 +115,40 @@ class "QuestItemIcon" (function(_ENV)
   end
 end)
 
-
 __UIElement__()
 class "QuestViewContent"(function(_ENV)
-  inherit "Frame"
+  inherit "Button"
+  -----------------------------------------------------------------------------
+  --                               Handlers                                  --
+  -----------------------------------------------------------------------------
+  local function OnClickHandler(self, mouseButton)
+    local parent = self:GetParent()
+    local questID = parent.QuestID
+    local contextMenuPattern = parent.ContextMenuPattern
+    local data = parent and parent.Data
+
+    if mouseButton == "RightButton" then
+      if questID and contextMenuPattern then 
+        ContextMenu_Show(contextMenuPattern, parent, questID)
+      end
+    else 
+      if data.isAutoComplete and data.isComplete then 
+        AutoQuestPopupTracker_RemovePopUp(questID)
+        ShowQuestComplete(questID)
+      else
+        -- The quest details won't be shown if the player is in combat.
+        Secure_OpenToQuestDetails(questID)
+      end
+    end
+  end
+
+  local function OnEnablePOIHandler(self, enable)
+    if enable then 
+      self:UpdatePOI()
+    else
+      Style[self].POI = NIL 
+    end
+  end
   -----------------------------------------------------------------------------
   --                              Constructors                               --
   -----------------------------------------------------------------------------
@@ -132,12 +162,14 @@ class "QuestViewContent"(function(_ENV)
       }
     }
   }
-  function __ctor(self) end
+  function __ctor(self) 
+    self.OnClick = self.OnClick + OnClickHandler
+  end
 end)
 
 __UIElement__()
 class "QuestView" (function(_ENV)
-  inherit "Button" extend "IView" 
+  inherit "Frame" extend "IView" 
   -----------------------------------------------------------------------------
   --                               Handlers                                  --
   -----------------------------------------------------------------------------
@@ -235,41 +267,47 @@ class "QuestView" (function(_ENV)
     local hasLocalPOI = data.hasLocalPOI
 
 
-    local showPOI = false 
-    if isComplete then 
-      showPOI = true
-    elseif hasLocalPOI or (isSuperTracked and GetNextWaypoint(questID) ~= nil) then 
-      showPOI = true 
-    end
+    local showPOI = true 
+    -- if isComplete then 
+    --   showPOI = true
+    -- elseif hasLocalPOI or (isSuperTracked and GetNextWaypoint(questID) ~= nil) then 
+    --   showPOI = true 
+    -- end
 
     if showPOI then
       Style[self].POI.visible = true
       local poiButton = self:GetPropertyChild("POI")
-      if isWaypoint then
-        poiButton:SetStyle(POIButton.Style.Waypoint)
-      elseif isComplete then 
-        poiButton:SetStyle(POIButton.Style.QuestComplete)
-      else
-        poiButton:SetStyle(POIButton.Style.Numeric)
-        local poiNumber = GetQuestPOINumber(questID)
-        if poiNumber then 
-          poiButton:SetNumber(poiNumber)
-        end
-      end
 
+      local style = POIButtonUtil.GetStyle(questID)
+      poiButton:SetStyle(style)
 
-      if ShouldQuestIconsUseCampaignAppearance(questID) then
-        poiButton:SetQuestType(POIButton.QuestType.Campaign)
-      elseif data.isCalling then 
-        poiButton:SetQuestType(POIButton.QuestType.Calling)
-      elseif data.isImportant then 
-        poiButton:SetQuestType(POIButton.QuestType.Important)
-      else
-        poiButton:SetQuestType(POIButton.QuestType.Normal)
-      end
+      -- if isWaypoint then
+      --   poiButton:SetStyle(POIButton.Style.Waypoint)
+      -- elseif isComplete then 
+      --   poiButton:SetStyle(POIButton.Style.QuestComplete)
+      -- else
+      --   -- poiButton:SetStyle(POIButton.Style.Numeric)
+      --   -- local poiNumber = GetQuestPOINumber(questID)
+      --   -- if poiNumber then 
+      --   --   poiButton:SetNumber(poiNumber)
+      --   -- end
+      -- end
+
+      -- poiButton:SetQuestID()
+
+      -- if ShouldQuestIconsUseCampaignAppearance(questID) then
+      --   poiButton:SetQuestType(POIButton.QuestType.Campaign)
+      -- elseif data.isCalling then 
+      --   poiButton:SetQuestType(POIButton.QuestType.Calling)
+      -- elseif data.isImportant then 
+      --   poiButton:SetQuestType(POIButton.QuestType.Important)
+      -- else
+      --   poiButton:SetQuestType(POIButton.QuestType.Normal)
+      -- end
 
       poiButton:SetSelected(isSuperTracked)
       poiButton:SetQuestID(questID)
+      poiButton:Update()
     else 
       Style[self].POI = NIL
     end
@@ -340,9 +378,7 @@ class "QuestView" (function(_ENV)
   __Template__ {
     Content = QuestViewContent
   }
-  function __ctor(self)
-    self.OnClick = self.OnClick + OnClickHandler
-  end   
+  function __ctor(self) end   
 end)
 
 -- Optional Children for QuestView 
@@ -509,12 +545,12 @@ Style.UpdateSkin("Default", {
     height                            = 24,
     minResize                         = { width = 0, height = 24},
     autoAdjustHeight                  = true,
-    registerForClicks                 = { "LeftButtonDown", "RightButtonDown" },
     enablePOI                         = FromUISetting("quest.enablePOI"),
-
+    
     Content = {
       height                          = 24,
       minResize                       = { width = 0, height = 24},
+      registerForClicks               = { "LeftButtonDown", "RightButtonDown" },
       autoAdjustHeight                = true,
       backdrop                        = FromBackdrop(),
       showBackground                  = FromUISetting("quest.showBackground"),
