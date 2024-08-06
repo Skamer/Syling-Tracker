@@ -1,4 +1,10 @@
-# 2.2.1
+# 2.3.0
+
+- Update the POI Buttons.
+
+---
+
+## 2.2.1
 
 **FIXES**
 
