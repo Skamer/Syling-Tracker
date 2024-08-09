@@ -22,11 +22,13 @@ function GetQuestLocation(questID)
     local questsOnMap = C_QuestLog.GetQuestsOnMap(mapID)
     local x, y 
 
-    for i, info in ipairs(questsOnMap) do 
-        if info.questID == questID then 
-            x = info.x 
-            y = info.y
-            break 
+    if questsOnMap then 
+        for i, info in ipairs(questsOnMap) do 
+            if info.questID == questID then 
+                x = info.x 
+                y = info.y
+                break 
+            end
         end
     end
 
