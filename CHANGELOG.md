@@ -1,4 +1,12 @@
-# 2.3.0
+# 2.3.1
+
+**NEW**
+
+- Added TomTom integration as experimental feature (can be enabled from the options).
+
+---
+
+## 2.3.0
 
 - Update the POI Buttons.
 

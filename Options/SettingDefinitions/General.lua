@@ -30,6 +30,13 @@ class "SettingDefinitions.General" (function(_ENV)
     showBlizzardObjectiveTrackerCheckBox:SetLabel("Show Blizzard Objective Tracker")
     showBlizzardObjectiveTrackerCheckBox:BindSetting("showBlizzardObjectiveTracker")
     self.SettingControls.showBlizzardObjectiveTrackerCheckBox = showBlizzardObjectiveTrackerCheckBox
+
+
+    local enableTomTomCheckBox = Widgets.SettingsCheckBox.Acquire(false, self)
+    enableTomTomCheckBox:SetID(20)
+    enableTomTomCheckBox:SetLabel("|cffff7f00(Experimental)|r Enable TomTom Integration")
+    enableTomTomCheckBox:BindSetting("enableTomTom")
+    self.SettingControls.enableTomTomCheckBox = enableTomTomCheckBox
   end
 
 
