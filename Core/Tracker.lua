@@ -491,7 +491,7 @@ function private__NewTracker(id)
   -- an instant apply style is called. 
   for setting, subject in tracker:IterateSettingSubjects() do
     local value = GetTrackerSettingWithDefault(id, setting)
-    subject:OnNext(value, tracker)
+    subject:OnNext(value)
   end
 
   -- NOTE: The contents tracked will be handled later. 
@@ -638,7 +638,7 @@ function RegisterTrackerSetting(settingInfo)
   TRACKER_SETTINGS[settingInfo.id] = settingInfo
 end
 
---- Create an obsersable will read a setting value of tracker.
+--- Create an observable will read a setting value of tracker.
 --- it can be used by the style system.
 ---
 --- @param setting the setting where the value will be fetched.
@@ -665,12 +665,31 @@ function FromTrackerSetting(setting, ...)
           value = TRACKER_SETTINGS[setting] and TRACKER_SETTINGS[setting].default
         end
 
-        subject:OnNext(value, tracker)
+        subject:OnNext(value)
       end
       
       subject:Subscribe(observer)
     end
   end)
+end
+
+--- Create an observable which combined multiple settings
+--- @param ... the settings are combined
+__Arguments__()
+__Arguments__ { String * 0 }
+function FromTrackerSettings(...)
+  local observable
+  for i = 1, select("#", ...) do 
+    local setting = select(i, ...)
+    observable = observable and observable:CombineLatest(FromTrackerSetting(setting)) or FromTrackerSetting(setting)
+  end
+
+  return observable
+end
+
+--- Get the current tracker in an observable
+function GetCurrentTargetTracker()
+  return GetNearestFrameForType(GetCurrentTarget(), Tracker)
 end
 
 --- Get the setting value for a tracker 
@@ -812,7 +831,7 @@ function SetTrackerSetting(trackerID, setting, value, notify, ...)
       -- say none is interested to be notified by this setting.
       local subject = tracker:AcquireSettingSubject(setting, false)
       if subject then
-        subject:OnNext(value, tracker, ...)
+        subject:OnNext(value)
       end
     end
   end
@@ -1115,6 +1134,7 @@ API.GetTrackerSetting = GetTrackerSetting
 API.GetTrackerSettingWithDefault = GetTrackerSettingWithDefault 
 API.SetTrackerSetting = SetTrackerSetting
 API.FromTrackerSetting = FromTrackerSetting
+API.GetCurrentTargetTracker = GetCurrentTargetTracker
 
 __UIElement__()
 __ChildProperty__(Tracker, "Mover")
@@ -1146,6 +1166,8 @@ RegisterTrackerSetting({ id = "borderSize", default = 1})
 RegisterTrackerSetting({ id = "showScrollBar", default = true})
 RegisterTrackerSetting({ id = "scrollBarPosition", default = "RIGHT"})
 RegisterTrackerSetting({ id = "scrollBarThumbColor", default =  ColorType(1, 199/255, 0, 0.75)})
+RegisterTrackerSetting({ id = "scrollBarPositionOffsetX", default = 15 })
+RegisterTrackerSetting({ id = "scrollBarUseTrackerHeight", default = false })
 RegisterTrackerSetting({ id = "showMinimizeButton", default = true})
 
 RegisterTrackerSetting({
@@ -1229,12 +1251,13 @@ function FromVisible()
 end
 
 function FromLocation()
-  return FromTrackerSetting("position"):CombineLatest(FromTrackerSetting("relativePositionAnchor")):Map(function(pos, tracker, relativePosAnchor) 
-      if pos then 
-        return { Anchor("TOPLEFT", pos.x or 0, pos.y or 0, nil, relativePosAnchor or "BOTTOMLEFT") }
-      end
-      
-      return tracker.id == "main" and { Anchor("RIGHT", -40, 0) } or { Anchor("CENTER") }
+  return FromTrackerSetting("position"):CombineLatest(FromTrackerSetting("relativePositionAnchor")):Map(function(pos, relativePosAnchor)
+    if pos then 
+      return { Anchor("TOPLEFT", pos.x or 0, pos.y or 0, nil, relativePosAnchor or "BOTTOMLEFT") }
+    end
+    
+      local tracker = GetCurrentTargetTracker()
+      return tracker and tracker.id == "main" and { Anchor("RIGHT", -40, 0) } or { Anchor("CENTER") }
   end)
 end
 
@@ -1291,12 +1314,21 @@ function FromScrollFrameLocation()
 end
 
 function FromScrollBarLocation()
-  return FromTrackerSetting("scrollBarPosition"):Map(function(position)
-    if position == "LEFT" then
-      return { Anchor("RIGHT", -15, 0, nil, "LEFT") }
-    end
-    
-    return { Anchor("LEFT", 15, 0, nil, "RIGHT") }
+  return FromTrackerSettings("scrollBarPosition", "scrollBarPositionOffsetX", "scrollBarUseTrackerHeight")
+    :Map(function(position, offsetX, useTrackerHeight)
+      if position == "LEFT" then
+        if useTrackerHeight then 
+          return { Anchor("TOPRIGHT", -offsetX, 19, nil, "TOPLEFT"), Anchor("BOTTOMRIGHT", -offsetX, -19, nil, "BOTTOMLEFT")}
+        else 
+          return { Anchor("RIGHT", -offsetX, 0, nil, "LEFT") } -- -15
+        end
+      end
+
+      if useTrackerHeight then 
+        return { Anchor("TOPLEFT", offsetX, 19, nil, "TOPRIGHT"), Anchor("BOTTOMLEFT", offsetX, -19, nil, "BOTTOMRIGHT")}
+      end
+
+      return { Anchor("LEFT", offsetX, 0, nil, "RIGHT") } -- 15
   end)
 end
 

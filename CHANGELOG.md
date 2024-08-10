@@ -1,4 +1,13 @@
-# 2.3.1
+# 2.4.0
+
+**NEW**
+
+- Added a new option for setting a offset for the position of scrollbar tracker.
+- Added a new option for using the tracker height for the height of scrollbar tracker.
+
+--
+
+## 2.3.1
 
 **NEW**
 

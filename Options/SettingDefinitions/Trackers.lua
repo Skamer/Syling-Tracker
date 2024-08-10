@@ -281,11 +281,26 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     scrollBarPositionDropDown:BindTrackerSetting(trackerID, "scrollBarPosition")
     self.GeneralTabControls.scrollBarPositionDropDown = scrollBarPositionDropDown
 
+    local scrollBarPositionOffsetXSlider = Widgets.SettingsSlider.Acquire(true, scrollBarSection)
+    scrollBarPositionOffsetXSlider:SetID(25)
+    scrollBarPositionOffsetXSlider:SetLabel("Position Offset X")
+    scrollBarPositionOffsetXSlider:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
+    scrollBarPositionOffsetXSlider:BindTrackerSetting(trackerID, "scrollBarPositionOffsetX")
+    scrollBarPositionOffsetXSlider:SetValueStep(1)
+    scrollBarPositionOffsetXSlider:SetMinMaxValues(-50, 100)
+    self.GeneralTabControls.scrollBarPositionOffsetXSlider = scrollBarPositionOffsetXSlider
+
     local scrollBarThumbColorPicker = Widgets.SettingsColorPicker.Acquire(false, scrollBarSection)
     scrollBarThumbColorPicker:SetID(30)
     scrollBarThumbColorPicker:SetLabel("Thumb Color")
     scrollBarThumbColorPicker:BindTrackerSetting(trackerID, "scrollBarThumbColor")
     self.GeneralTabControls.scrollBarThumbColorPicker = scrollBarThumbColorPicker
+
+    local scrollBarUseTrackerHeightCheckBox = Widgets.SettingsCheckBox.Acquire(false, scrollBarSection)
+    scrollBarUseTrackerHeightCheckBox:SetID(10)
+    scrollBarUseTrackerHeightCheckBox:SetLabel("Use Tracker Height")
+    scrollBarUseTrackerHeightCheckBox:BindTrackerSetting(trackerID, "scrollBarUseTrackerHeight")
+    self.GeneralTabControls.scrollBarUseTrackerHeightCheckBox = scrollBarUseTrackerHeightCheckBox
     ---------------------------------------------------------------------------
     --- Danger Zone Section
     ---------------------------------------------------------------------------
