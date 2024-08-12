@@ -173,8 +173,8 @@ Style.UpdateSkin("Default", {
 
     [TaskView.Item] = {
       location                        = {
-                                        Anchor("TOPLEFT", 0, 0, "Objectives", "BOTTOMLEFT"),
-                                        Anchor("TOPRIGHT", 0, 0, "Objectives", "BOTTOMRIGHT"),
+                                        Anchor("TOP", 0, -5, "Header", "BOTTOM"),
+                                        Anchor("RIGHT", -5, 0)
                                       }
     }
   },

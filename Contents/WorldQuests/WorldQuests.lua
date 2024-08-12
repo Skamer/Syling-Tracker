@@ -13,8 +13,9 @@ _Active                             = false
 export {
   -- Addon API 
   RegisterObservableContent           = API.RegisterObservableContent,
-
   HasWorldQuests                      = Utils.HasWorldQuests,
+  ItemBar_AddItem                     = API.ItemBar_AddItem,
+  ItemBar_RemoveItem                  = API.ItemBar_RemoveItem,
 
   RequestLoadQuestByID                =  C_QuestLog.RequestLoadQuestByID,
   IsWorldQuest                        = QuestUtils_IsQuestWorldQuest,
@@ -129,7 +130,7 @@ function QUEST_REMOVED(questID)
   if not IsWorldQuest(questID) then 
     return 
   end
-  
+
   if WORLD_QUESTS_WITH_ITEMS[questID] then 
     ItemBar_RemoveItem(questID)
     WORLD_QUESTS_WITH_ITEMS[questID] = nil 
