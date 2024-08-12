@@ -501,7 +501,7 @@ function FromObjectivesLocation()
     return {
       Anchor("TOP", 0, -5, "Header", "BOTTOM"),
       Anchor("LEFT"),
-      Anchor("RIGHT", hasItem and -37 or 0, 0)
+      Anchor("RIGHT", hasItem and -29 or 0, 0)
     }
   end)
 end
@@ -519,8 +519,8 @@ end
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
   [QuestItemIcon] = {
-    height                            = 32,
-    width                             = 32,
+    height                            = 24,
+    width                             = 24,
     backdrop                          = FromBackdrop(),
     showBackground                    = false,
     showBorder                        = true, 

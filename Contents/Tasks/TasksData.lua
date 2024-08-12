@@ -16,10 +16,10 @@ __DataProperties__ {
   { name = "isOnMap", type = Boolean},
   { name = "isComplete", type = Boolean},
   { name = "displayAsObjective", type = Boolean },
-  { name = "objectives", type = ObjectiveData, isArray = true, singularName = "objective"}
+  { name = "objectives", type = ObjectiveData, isArray = true, singularName = "objective"},
+  { name = "item", type = QuestItemData }
 }
 class "TaskData" { ObjectData }
-
 
 __DataProperties__ {
   { name = "quests", type = TaskData, isMap = true, singularName = "quest" }

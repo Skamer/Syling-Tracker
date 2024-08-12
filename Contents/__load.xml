@@ -6,7 +6,7 @@
   <Script file="AutoQuests\AutoQuestsData.lua" />
   <Script file="AutoQuests\AutoQuestView.lua"/>
   <Script file="AutoQuests\AutoQuestsContentView.lua"/>
-  <Script file="AutoQuests\AutoQuests.lua"/>qz
+  <Script file="AutoQuests\AutoQuests.lua"/>
   <!-- Achievements -->
   <Script file="Achievements\AchievementsData.lua" />
   <Script file="Achievements\AchievementView.lua"/>

@@ -13,6 +13,8 @@ _Active                             = false
 export {
   -- Addon API
   RegisterObservableContent           = API.RegisterObservableContent,
+  ItemBar_AddItem                     = API.ItemBar_AddItem,
+  ItemBar_RemoveItem                  = API.ItemBar_RemoveItem,
 
   HasTasks                            = Utils.HasTasks,
   IsQuestComplete                     = C_QuestLog.IsComplete,
@@ -27,6 +29,7 @@ export {
 
 TASKS_CONTENT_SUBJECT = RegisterObservableContent("tasks", TasksContentSubject)
 TASKS_CACHE = {}
+TASKS_WITH_ITEMS = {}
 
 __ActiveOnEvents__ "PLAYER_ENTERING_WORLD" "QUEST_ACCEPTED" "QUEST_REMOVED"
 function ActivateOn(self, event)
@@ -64,6 +67,29 @@ function UpdateTask(self, questID)
   taskData.isComplete = isComplete
   taskData.displayAsObjective = displayAsObjective
 
+
+  -- Is the task has an item quest ? 
+  local itemLink, itemTexture
+
+  local questLogIndex = GetLogIndexForQuestID(questID)
+  -- We check if the quest log index is valid before fetching as sometimes for 
+  -- unknown reason this can be nil 
+  if questLogIndex then 
+    itemLink, itemTexture = GetQuestLogSpecialItemInfo(questLogIndex)
+  end
+
+  if itemLink and itemTexture then 
+    local itemData = taskData.item
+
+    itemData.link = itemLink
+    itemData.texture = itemTexture
+
+    -- We don't need to check if the item has been already added, as it's done 
+    -- internally, and in this case the call is ignored. 
+    ItemBar_AddItem(questID, itemLink, itemTexture, 1)
+
+    TASKS_WITH_ITEMS[questID] = true
+  end
 
   taskData:StartObjectivesCounter()
   if not isComplete and numObjectives and numObjectives > 0 then 
@@ -128,6 +154,11 @@ __SystemEvent__()
 function QUEST_REMOVED(questID)
   if not TASKS_CACHE[questID] then 
     return 
+  end
+
+  if TASKS_WITH_ITEMS[questID] then 
+    ItemBar_RemoveItem(questID)
+    TASKS_WITH_ITEMS[questID] = nil 
   end
 
   TASKS_CACHE[questID] = nil 

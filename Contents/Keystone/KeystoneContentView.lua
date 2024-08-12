@@ -74,7 +74,7 @@ class "KeystoneAffixes" (function(_ENV)
     if affixesData then 
       self.AffixesCount = #affixesData 
 
-      for i = 1, 3 do 
+      for i = 1, 4 do 
         local affixData = affixesData[i]
         local affix = self:GetChild("Affix"..i)
         if affixData then 
@@ -105,6 +105,7 @@ class "KeystoneAffixes" (function(_ENV)
     Affix1 = KeystoneAffixe,
     Affix2 = KeystoneAffixe,
     Affix3 = KeystoneAffixe,
+    Affix4 = KeystoneAffixe,
   }
   function __ctor(self) end
 end)
@@ -644,8 +645,8 @@ API.UpdateBaseSkin({
   },
 
   [KeystoneAffixes] = {
-    height = 24,
-    width = 72,
+    height = 16,
+    width = 79,
   },
 
   [KeystoneEnemyForces] = {
@@ -701,7 +702,8 @@ API.UpdateBaseSkin({
 
       DungeonIcon = {
         fileID                        = FromUIProperty("DungeonTextureFileID"),
-        setAllPoints                  = true
+        setAllPoints                  = true,
+        drawLayer                     = "BACKGROUND",
       },
 
       Level = {
@@ -798,6 +800,11 @@ API.UpdateDefaultSkin({
       location = {
         Anchor("LEFT", 5, 0, "Affix2", "RIGHT")
       }
+    },
+    Affix4 = {
+      location = {
+        Anchor("LEFT", 5, 0, "Affix3", "RIGHT")
+      }
     }
   },
 
@@ -871,7 +878,7 @@ API.UpdateDefaultSkin({
 
       DungeonName = {
         location = {
-          Anchor("LEFT", 70, 0),
+          Anchor("LEFT", 79, 0),
           Anchor("TOP"),
           Anchor("BOTTOM"),
           Anchor("RIGHT", -45, 0)

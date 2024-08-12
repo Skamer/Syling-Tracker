@@ -45,6 +45,19 @@ class "TaskView" (function(_ENV)
 
     self.TaskName = data.name
     self.QuestID = data.questID
+
+    if data.item then 
+      Style[self].Item.visible = true 
+      local itemIcon = self:GetPropertyChild("Item")
+      itemIcon.ItemTexture = data.item.texture 
+      itemIcon.ItemLink = data.item.link
+      itemIcon.id = data.questID
+
+      self.HasItem = true 
+    else 
+      Style[self].Item = NIL
+      self.HasItem = false
+    end
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
@@ -57,6 +70,12 @@ class "TaskView" (function(_ENV)
 
   property "QuestID" {
     type = Number
+  }
+
+  __Observable__()
+  property "HasItem" {
+    type = Boolean,
+    default = false 
   }
 
   property "ContextMenuPattern" {
@@ -82,6 +101,12 @@ end)
 -- Optional Children for QuestView 
 __ChildProperty__(TaskView, "Objectives")
 class(tostring(TaskView) .. ".Objectives") { ObjectiveListView }
+
+__ChildProperty__(TaskView, "Item")
+class(tostring(TaskView) .. ".Item") { SylingTracker.QuestItemIcon }
+
+__UIElement__()
+class "TaskListView" { ListView }
 -------------------------------------------------------------------------------
 --                              UI Settings                                  --
 -------------------------------------------------------------------------------
@@ -93,8 +118,18 @@ RegisterUISetting("task.borderSize", 1)
 RegisterUISetting("task.name.mediaFont", FontType("DejaVuSansCondensed Bold", 10))
 RegisterUISetting("task.name.textTransform", "NONE")
 RegisterUISetting("task.name.textColor", Color(1, 106/255, 0))
-__UIElement__()
-class "TaskListView" { ListView }
+-------------------------------------------------------------------------------
+--                              Observables                                  --
+-------------------------------------------------------------------------------
+function FromObjectivesLocation()
+  return FromUIProperty("HasItem"):Map(function(hasItem)
+    return {
+      Anchor("TOP", 0, -5, "Header", "BOTTOM"),
+      Anchor("LEFT"),
+      Anchor("RIGHT", hasItem and -29 or 0, 0)
+    }
+  end)
+end
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
@@ -133,9 +168,13 @@ Style.UpdateSkin("Default", {
 
     [TaskView.Objectives] = {
       spacing                         = 5,
+      location                        = FromObjectivesLocation(),
+    },
+
+    [TaskView.Item] = {
       location                        = {
-                                        Anchor("TOPLEFT", 0, -5, "Header", "BOTTOMLEFT"),
-                                        Anchor("TOPRIGHT", 0, -5, "Header", "BOTTOMRIGHT")
+                                        Anchor("TOPLEFT", 0, 0, "Objectives", "BOTTOMLEFT"),
+                                        Anchor("TOPRIGHT", 0, 0, "Objectives", "BOTTOMRIGHT"),
                                       }
     }
   },

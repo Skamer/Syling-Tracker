@@ -25,6 +25,7 @@ export {
 WORLD_QUESTS_CONTENT_SUBJECT = RegisterObservableContent("worldQuests", QuestsContentSubject)
 
 WORLD_QUESTS_CACHE                  = {}
+WORLD_QUESTS_WITH_ITEMS             = {}
 
 __ActiveOnEvents__ "PLAYER_ENTERING_WORLD" "QUEST_ACCEPTED" "QUEST_REMOVED"
 function BecomeActiveOn(self)
@@ -62,6 +63,30 @@ function UpdateWorldQuest(self, questID)
   worldQuestData.title = questName
   worldQuestData.name = questName
   worldQuestData.numObjectives = numObjectives
+
+  -- Is the task has an item quest ? 
+  local itemLink, itemTexture
+
+  local questLogIndex = GetLogIndexForQuestID(questID)
+  -- We check if the quest log index is valid before fetching as sometimes for 
+  -- unknown reason this can be nil 
+  if questLogIndex then 
+    itemLink, itemTexture = GetQuestLogSpecialItemInfo(questLogIndex)
+  end
+
+  if itemLink and itemTexture then 
+    local itemData = worldQuestData.item
+
+    itemData.link = itemLink
+    itemData.texture = itemTexture
+
+    -- We don't need to check if the item has been already added, as it's done 
+    -- internally, and in this case the call is ignored. 
+    ItemBar_AddItem(questID, itemLink, itemTexture, 1)
+
+    WORLD_QUESTS_WITH_ITEMS[questID] = true
+  end
+
 
   worldQuestData:StartObjectivesCounter()
   if numObjectives and numObjectives > 0 then
@@ -103,6 +128,11 @@ __SystemEvent__()
 function QUEST_REMOVED(questID)
   if not IsWorldQuest(questID) then 
     return 
+  end
+  
+  if WORLD_QUESTS_WITH_ITEMS[questID] then 
+    ItemBar_RemoveItem(questID)
+    WORLD_QUESTS_WITH_ITEMS[questID] = nil 
   end
 
   WORLD_QUESTS_CACHE[questID] = nil 
