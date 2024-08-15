@@ -147,6 +147,16 @@ INSTANCE_TEXTURE_FILES_ID = {
   [2521] = 4880618, -- Ruby Life Pools
   [2527] = 4880617, -- Halls of Infusion
   [2579] = 5221805, -- Dawn of the Infinite
+
+  -- The War Within instances 
+  [2648] = 5912526, -- The Rookery
+  [2649] = 5912524, -- Priory of the Sacred Flame
+  [2651] = 5912522, -- Darkflame Cleft
+  [2652] = 5912527, -- The Stonevault
+  [2660] = 5912519, -- Ara-Kara, City of Echoes
+  [2661] = 5912520, -- Cinderbrew Meadery 
+  [2662] = 5912525, -- The Dawnbreaker
+  [2669] = 5912521, -- City of Threads
 }
 
 __Arguments__{ Number/0}

@@ -26,8 +26,6 @@ class "DropDownPopoutButton" (function(ENV)
   --                               Methods                                   --
   -----------------------------------------------------------------------------
   function RefreshState(self)
-    super.RefreshState(self)
-
     if self.Mouseover then 
       Style[self].Arrow.vertexColor = Color(1, 1, 0, 0.75)
       Style[self].Arrow.visible = true
@@ -36,7 +34,6 @@ class "DropDownPopoutButton" (function(ENV)
       Style[self].Arrow.visible = false
     end
   end
-
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
   -----------------------------------------------------------------------------

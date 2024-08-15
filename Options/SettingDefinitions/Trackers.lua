@@ -148,7 +148,6 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     enableTrackerCheckBox:SetLabel("Enable")
     enableTrackerCheckBox:BindTrackerSetting(trackerID, "enabled")
     self.GeneralTabControls.enableTrackerCheckBox = enableTrackerCheckBox
-
     ---------------------------------------------------------------------------
     --- Lock Tracker
     ---------------------------------------------------------------------------
@@ -163,19 +162,10 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     local scaleSlider = Widgets.SettingsSlider.Acquire(false, self)
     scaleSlider:SetID(40)
     scaleSlider:SetLabel("Scale")
-    scaleSlider:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
-    scaleSlider:BindTrackerSetting(trackerID, "scale")
     scaleSlider:SetValueStep(0.01)
-    scaleSlider:SetMinMaxValues(0.4, 10)
+    scaleSlider:SetMinMaxValues(0.8, 1.5)
+    scaleSlider:BindTrackerSetting(trackerID, "scale")
     self.GeneralTabControls.scaleSlider = scaleSlider
-    ---------------------------------------------------------------------------
-    --- Show Minimise Button
-    ---------------------------------------------------------------------------
-    local showMinimizeButtonCkeckBox = Widgets.SettingsCheckBox.Acquire(false, self)
-    showMinimizeButtonCkeckBox:SetID(50)
-    showMinimizeButtonCkeckBox:SetLabel("Show Minimize Button")
-    showMinimizeButtonCkeckBox:BindTrackerSetting(trackerID, "showMinimizeButton")
-    self.GeneralTabControls.showMinimizeButtonCkeckBox = showMinimizeButtonCkeckBox
     ---------------------------------------------------------------------------
     --- Position Section
     ---------------------------------------------------------------------------
@@ -184,39 +174,75 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     positionSection:SetID(60)
     positionSection:SetTitle("Position")
     self.GeneralTabControls.positionSection = positionSection
-
-    local positionSliders = Widgets.SettingsPosition.Acquire(true, positionSection)
-    positionSliders:SetID(10)
-    positionSliders:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
-    positionSliders:SetXLabel("Offset X")
-    positionSliders:SetYLabel("Offset Y")
-    positionSliders:BindTrackerSetting(trackerID, "position")
-    positionSliders:SetXMinMaxValues(-GetScreenWidth() / 2 , GetScreenWidth() / 2)
-    positionSliders:SetYMinMaxValues(-GetScreenHeight() / 2 , GetScreenHeight() / 2)
-    self.GeneralTabControls.positionSliders = positionSliders
-
-    local relativePositionAnchorDropDown = Widgets.SettingsDropDown.Acquire(true, positionSection)
-    relativePositionAnchorDropDown:SetID(20)
-    relativePositionAnchorDropDown:SetLabel("Relative Anchor")
-    relativePositionAnchorDropDown:AddEntry({ text = "BOTTOM", value = "BOTTOM"})
-    relativePositionAnchorDropDown:AddEntry({ text = "BOTTOMLEFT", value = "BOTTOMLEFT"})
-    relativePositionAnchorDropDown:AddEntry({ text = "BOTTOMRIGHT", value = "BOTTOMRIGHT"})
-    relativePositionAnchorDropDown:AddEntry({ text = "CENTER", value = "CENTER"})
-    relativePositionAnchorDropDown:AddEntry({ text = "LEFT", value = "LEFT"})
-    relativePositionAnchorDropDown:AddEntry({ text = "RIGHT", value = "RIGHT"})
-    relativePositionAnchorDropDown:AddEntry({ text = "TOP", value = "TOP"})
-    relativePositionAnchorDropDown:AddEntry({ text = "TOPLEFT", value = "TOPLEFT"})
-    relativePositionAnchorDropDown:AddEntry({ text = "TOPRIGHT", value = "TOPRIGHT"})
+    
+    local relativePositionAnchorDropDown = Widgets.SettingsFramePointPicker.Acquire(true, positionSection)
+    relativePositionAnchorDropDown:SetID(10)
+    relativePositionAnchorDropDown:SetText("To Screen")
     relativePositionAnchorDropDown:BindTrackerSetting(trackerID, "relativePositionAnchor")
     self.GeneralTabControls.relativePositionAnchorDropDown = relativePositionAnchorDropDown
+
+    local positionSliders = Widgets.SettingsPosition.Acquire(true, positionSection)
+    local screenWidth = floor(GetScreenWidth() + 0.5)
+    local screenHeight = floor(GetScreenHeight() + 0.5)
+
+    positionSliders:SetID(20)
+    positionSliders:SetXLabel("Offset X")
+    positionSliders:SetYLabel("Offset Y")
+    positionSliders:SetXMinMaxValues(-screenWidth, screenWidth)
+    positionSliders:SetYMinMaxValues(-screenHeight, screenHeight)
+    positionSliders:BindTrackerSetting(trackerID, "position")
+    self.GeneralTabControls.positionSliders = positionSliders
+    ---------------------------------------------------------------------------
+    --- Show Minimise Button
+    ---------------------------------------------------------------------------
+    local minimizeButtonSection = Widgets.ExpandableSection.Acquire(false, self)
+    minimizeButtonSection:SetExpanded(false)
+    minimizeButtonSection:SetID(70)
+    minimizeButtonSection:SetTitle("Minimize Button")
+    Style[minimizeButtonSection].marginTop = 10
+    self.GeneralTabControls.minimizeButtonSection = minimizeButtonSection
+
+    local showMinimizeButtonCkeckBox = Widgets.SettingsCheckBox.Acquire(false, minimizeButtonSection)
+    showMinimizeButtonCkeckBox:SetID(10)
+    showMinimizeButtonCkeckBox:SetLabel("Show Minimize Button")
+    showMinimizeButtonCkeckBox:BindTrackerSetting(trackerID, "showMinimizeButton")
+    self.GeneralTabControls.showMinimizeButtonCkeckBox = showMinimizeButtonCkeckBox
+
+    local minimizeButtonPositionSection = Widgets.SettingsExpandableSection.Acquire(false, minimizeButtonSection)
+    minimizeButtonPositionSection:SetExpanded(false)
+    minimizeButtonPositionSection:SetID(60)
+    minimizeButtonPositionSection:SetTitle("Position")
+    self.GeneralTabControls.minimizeButtonPositionSection = minimizeButtonPositionSection
+
+    local minimizeButtonFramePointPickerPosition = Widgets.SettingsFramePointPicker.Acquire(true, minimizeButtonPositionSection)
+    minimizeButtonFramePointPickerPosition:SetID(10)
+    minimizeButtonFramePointPickerPosition:SetText("To Screen")
+    minimizeButtonFramePointPickerPosition:DisablePoint("CENTER")
+    minimizeButtonFramePointPickerPosition:BindTrackerSetting(trackerID, "minimizeButtonPosition")
+    self.GeneralTabControls.minimizeButtonFramePointPickerPosition = minimizeButtonFramePointPickerPosition
+
+    local minimizeButtonPositionOffsetXSlider = Widgets.SettingsSlider.Acquire(false, minimizeButtonPositionSection)
+    minimizeButtonPositionOffsetXSlider:SetID(20)
+    minimizeButtonPositionOffsetXSlider:SetLabel("Offset X")
+    minimizeButtonPositionOffsetXSlider:SetValueStep(1)
+    minimizeButtonPositionOffsetXSlider:SetMinMaxValues(-50, 50)
+    minimizeButtonPositionOffsetXSlider:BindTrackerSetting(trackerID, "minimizeButtonPositionOffsetX")
+    self.GeneralTabControls.minimizeButtonPositionOffsetXSlider = minimizeButtonPositionOffsetXSlider
+
+    local minimizeButtonPositionOffsetYSlider = Widgets.SettingsSlider.Acquire(false, minimizeButtonPositionSection)
+    minimizeButtonPositionOffsetYSlider:SetID(30)
+    minimizeButtonPositionOffsetYSlider:SetLabel("Offset Y")
+    minimizeButtonPositionOffsetYSlider:SetValueStep(1)
+    minimizeButtonPositionOffsetYSlider:SetMinMaxValues(-50, 50)
+    minimizeButtonPositionOffsetYSlider:BindTrackerSetting(trackerID, "minimizeButtonPositionOffsetY")
+    self.GeneralTabControls.minimizeButtonPositionOffsetYSlider = minimizeButtonPositionOffsetYSlider
     ---------------------------------------------------------------------------
     --- Background Section
     ---------------------------------------------------------------------------
     local backgroundSection = Widgets.ExpandableSection.Acquire(false, self)
     backgroundSection:SetExpanded(false)
-    backgroundSection:SetID(70)
+    backgroundSection:SetID(80)
     backgroundSection:SetTitle("Background")
-    Style[backgroundSection].marginTop = 10
     self.GeneralTabControls.backgroundSection = backgroundSection
 
     local showBackgroundCheckBox = Widgets.SettingsCheckBox.Acquire(false, backgroundSection)
@@ -235,7 +261,7 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     ---------------------------------------------------------------------------
     local borderSection = Widgets.ExpandableSection.Acquire(false, self)
     borderSection:SetExpanded(false)
-    borderSection:SetID(80)
+    borderSection:SetID(90)
     borderSection:SetTitle("Border")
     self.GeneralTabControls.borderSection = borderSection
 
@@ -254,16 +280,15 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     local borderSizeSlider = Widgets.SettingsSlider.Acquire(false, borderSection)
     borderSizeSlider:SetID(30)
     borderSizeSlider:SetLabel("Size")
-    borderSizeSlider:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
-    borderSizeSlider:BindTrackerSetting(trackerID, "borderSize")
     borderSizeSlider:SetMinMaxValues(1, 10)
+    borderSizeSlider:BindTrackerSetting(trackerID, "borderSize")
     self.GeneralTabControls.borderSizeSlider = borderSizeSlider
     ---------------------------------------------------------------------------
     --- Scroll Bar Section
     ---------------------------------------------------------------------------
     local scrollBarSection = Widgets.ExpandableSection.Acquire(false, self)
     scrollBarSection:SetExpanded(false)
-    scrollBarSection:SetID(90)
+    scrollBarSection:SetID(100)
     scrollBarSection:SetTitle("Scroll Bar")
     self.GeneralTabControls.scrollBarSection = scrollBarSection
 
@@ -284,10 +309,9 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     local scrollBarPositionOffsetXSlider = Widgets.SettingsSlider.Acquire(true, scrollBarSection)
     scrollBarPositionOffsetXSlider:SetID(25)
     scrollBarPositionOffsetXSlider:SetLabel("Position Offset X")
-    scrollBarPositionOffsetXSlider:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
-    scrollBarPositionOffsetXSlider:BindTrackerSetting(trackerID, "scrollBarPositionOffsetX")
     scrollBarPositionOffsetXSlider:SetValueStep(1)
     scrollBarPositionOffsetXSlider:SetMinMaxValues(-50, 100)
+    scrollBarPositionOffsetXSlider:BindTrackerSetting(trackerID, "scrollBarPositionOffsetX")
     self.GeneralTabControls.scrollBarPositionOffsetXSlider = scrollBarPositionOffsetXSlider
 
     local scrollBarThumbColorPicker = Widgets.SettingsColorPicker.Acquire(false, scrollBarSection)

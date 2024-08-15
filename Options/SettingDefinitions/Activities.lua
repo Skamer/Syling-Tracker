@@ -86,9 +86,8 @@ class "SettingDefinitions.Activities" (function(_ENV)
     local borderSizeSlider = Widgets.SettingsSlider.Acquire(false, borderSection)
     borderSizeSlider:SetID(30)
     borderSizeSlider:SetLabel("Size")
-    borderSizeSlider:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
-    borderSizeSlider:BindUISetting("activities.header.borderSize")
     borderSizeSlider:SetMinMaxValues(1, 10)
+    borderSizeSlider:BindUISetting("activities.header.borderSize")
     self.HeaderTabControls.borderSizeSlider = borderSizeSlider
     ---------------------------------------------------------------------------
     --- Title Section
@@ -189,9 +188,8 @@ class "SettingDefinitions.Activities" (function(_ENV)
     local borderSizeSlider = Widgets.SettingsSlider.Acquire(false, borderSection)
     borderSizeSlider:SetID(30)
     borderSizeSlider:SetLabel("Size")
-    borderSizeSlider:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
-    borderSizeSlider:BindUISetting("activity.borderSize")
     borderSizeSlider:SetMinMaxValues(1, 10)
+    borderSizeSlider:BindUISetting("activity.borderSize")
     self.ActivityTabControls.borderSizeSlider = borderSizeSlider
     ---------------------------------------------------------------------------
     --- Header Section

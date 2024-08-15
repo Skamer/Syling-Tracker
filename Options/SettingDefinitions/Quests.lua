@@ -70,7 +70,6 @@ class "SettingDefinitions.Quests" (function(_ENV)
     -- local borderSizeSlider = Widgets.SettingsSlider.Acquire(false, borderSection)
     -- borderSizeSlider:SetID(30)
     -- borderSizeSlider:SetLabel("Border Size")
-    -- borderSizeSlider:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
     -- -- borderSizeSlider:BindTrackerSetting(trackerID, "borderSize")
     -- borderSizeSlider:SetMinMaxValues(1, 10)
     -- self.GeneralTabControls.borderSizeSlider = borderSizeSlider
@@ -140,9 +139,8 @@ class "SettingDefinitions.Quests" (function(_ENV)
     local borderSizeSlider = Widgets.SettingsSlider.Acquire(false, borderSection)
     borderSizeSlider:SetID(30)
     borderSizeSlider:SetLabel("Size")
-    borderSizeSlider:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
-    borderSizeSlider:BindUISetting("quests.header.borderSize")
     borderSizeSlider:SetMinMaxValues(1, 10)
+    borderSizeSlider:BindUISetting("quests.header.borderSize")
     self.HeaderTabControls.borderSizeSlider = borderSizeSlider
     ---------------------------------------------------------------------------
     --- Title Section
@@ -357,9 +355,8 @@ class "SettingDefinitions.Quests" (function(_ENV)
     local borderSizeSlider = Widgets.SettingsSlider.Acquire(false, borderSection)
     borderSizeSlider:SetID(30)
     borderSizeSlider:SetLabel("Size")
-    borderSizeSlider:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
-    borderSizeSlider:BindUISetting("quest.borderSize")
     borderSizeSlider:SetMinMaxValues(1, 10)
+    borderSizeSlider:BindUISetting("quest.borderSize")
     self.QuestTabControls.borderSizeSlider = borderSizeSlider
     ---------------------------------------------------------------------------
     --- Header Section

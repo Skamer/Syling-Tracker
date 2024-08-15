@@ -84,9 +84,8 @@ class "SettingDefinitions.Dungeon" (function(_ENV)
     local borderSizeSlider = Widgets.SettingsSlider.Acquire(false, borderSection)
     borderSizeSlider:SetID(30)
     borderSizeSlider:SetLabel("Size")
-    borderSizeSlider:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
-    borderSizeSlider:BindUISetting("dungeon.header.borderSize")
     borderSizeSlider:SetMinMaxValues(1, 10)
+    borderSizeSlider:BindUISetting("dungeon.header.borderSize")
     self.HeaderTabControls.borderSizeSlider = borderSizeSlider
     ---------------------------------------------------------------------------
     --- Title Section
@@ -187,7 +186,6 @@ class "SettingDefinitions.Dungeon" (function(_ENV)
     -- local borderSizeSlider = Widgets.SettingsSlider.Acquire(false, borderSection)
     -- borderSizeSlider:SetID(30)
     -- borderSizeSlider:SetLabel("Size")
-    -- borderSizeSlider:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
     -- borderSizeSlider:BindUISetting("scenario.topInfo.borderSize")
     -- borderSizeSlider:SetMinMaxValues(1, 10)
     -- self.TopInfoTabControls.borderSizeSlider = borderSizeSlider

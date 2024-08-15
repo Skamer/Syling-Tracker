@@ -64,7 +64,6 @@ class "SettingDefinitions.Tasks" (function(_ENV)
     -- local borderSizeSlider = Widgets.SettingsSlider.Acquire(false, borderSection)
     -- borderSizeSlider:SetID(30)
     -- borderSizeSlider:SetLabel("Border Size")
-    -- borderSizeSlider:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
     -- -- borderSizeSlider:BindTrackerSetting(trackerID, "borderSize")
     -- borderSizeSlider:SetMinMaxValues(1, 10)
     -- self.GeneralTabControls.borderSizeSlider = borderSizeSlider
@@ -136,9 +135,8 @@ class "SettingDefinitions.Tasks" (function(_ENV)
     local borderSizeSlider = Widgets.SettingsSlider.Acquire(false, borderSection)
     borderSizeSlider:SetID(30)
     borderSizeSlider:SetLabel("Size")
-    borderSizeSlider:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
-    borderSizeSlider:BindUISetting("tasks.header.borderSize")
     borderSizeSlider:SetMinMaxValues(1, 10)
+    borderSizeSlider:BindUISetting("tasks.header.borderSize")
     self.HeaderTabControls.borderSizeSlider = borderSizeSlider
     ---------------------------------------------------------------------------
     --- Title Section
@@ -239,9 +237,8 @@ class "SettingDefinitions.Tasks" (function(_ENV)
     local borderSizeSlider = Widgets.SettingsSlider.Acquire(false, borderSection)
     borderSizeSlider:SetID(30)
     borderSizeSlider:SetLabel("Size")
-    borderSizeSlider:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
-    borderSizeSlider:BindUISetting("task.borderSize")
     borderSizeSlider:SetMinMaxValues(1, 10)
+    borderSizeSlider:BindUISetting("task.borderSize")
     self.TaskTabControls.borderSizeSlider = borderSizeSlider
     ---------------------------------------------------------------------------
     --- Header Section

@@ -10,6 +10,9 @@ Syling                "SylingTracker_Options.Widgets.Button"                 ""
 -- ========================================================================= --
 namespace               "SylingTracker.Options.Widgets"
 -- ========================================================================= --
+export {
+  FromUIProperty   = Wow.FromUIProperty
+}
 
 __Widget__()
 class "PushButton" (function(_ENV)
@@ -17,13 +20,7 @@ class "PushButton" (function(_ENV)
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
-  function RefreshState(self)
-    if self.Mouseover then 
-      Style[self].backdropBorderColor = Color(1, 1, 0, 0.75)
-    else
-      Style[self].backdropBorderColor = self.__normalBorderColor
-    end
-  end
+  __Abstract__() function RefreshState(self) end
 
   __Arguments__ { String/""}
   function SetText(self, text)
@@ -41,20 +38,16 @@ class "PushButton" (function(_ENV)
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
+  __Observable__()
   property "Mouseover" {
     type = Boolean,
     default = false,
-    handler = function(self, new)
-      if new then 
-        self.__normalBorderColor = Style[self].backdropBorderColor
-      end
+    handler = function(self, new) self:RefreshState() end
+  }
 
-      self:RefreshState()
-
-      if not new then 
-        self.__normalBorderColor = nil 
-      end
-    end
+  property "MouseoverBorderColor" {
+    type = Color,
+    default = Color(1, 1, 0, 0.75)
   }
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
@@ -66,6 +59,7 @@ class "PushButton" (function(_ENV)
     self.OnEnter = self.OnEnter + function() self.Mouseover = true end 
     self.OnLeave = self.OnLeave + function() self.Mouseover = false end
   end
+
 end)
 
 __Widget__()
@@ -73,6 +67,21 @@ class "DangerPushButton" { PushButton }
 
 __Widget__()
 class "SuccessPushButton" { PushButton }
+-------------------------------------------------------------------------------
+--                              Observables                                  --
+-------------------------------------------------------------------------------
+__Arguments__ { ColorType/Color(0.35, 0.35, 0.35, 0.5), ColorType/Color(1, 1, 0, 0.75) }
+function FromBorderColor(normalColor, mouseoverColor)
+  if normalColor == mouseoverColor then 
+    return Observable.Just(normalColor)
+  end
+
+  return FromUIProperty("Mouseover"):Map(function(mouseover)
+    return mouseover and mouseoverColor or normalColor
+  end)
+end
+
+PushButton.FromBorderColor = FromBorderColor
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
@@ -88,7 +97,7 @@ Style.UpdateSkin("Default", {
       edgeSize            = 1   
     },
     backdropColor       = { r = 0.35, g = 0.35, b = 0.35, a = 0.5},
-    backdropBorderColor = { r = 0.35, g = 0.35, b = 0.35, a = 0.75},
+    backdropBorderColor = FromBorderColor(),
   
     Text = {
       setAllPoints = true,
@@ -101,11 +110,12 @@ Style.UpdateSkin("Default", {
 
   [DangerPushButton] = {   
     backdropColor       = { r = 0.65, g = 0, b = 0, a = 0.5},
-    backdropBorderColor = { r = 0.65, g = 0, b = 0, a = 0.75},    
+    backdropBorderColor = FromBorderColor({ r = 0.65, g = 0, b = 0, a = 0.75}),    
   },
   [SuccessPushButton] = {
   
     backdropColor       = { r = 0, g = 0.65, b = 0, a = 0.5},
-    backdropBorderColor = { r = 0, g = 0.65, b = 0, a = 0.75},    
+    backdropBorderColor = FromBorderColor({ r = 0, g = 0.65, b = 0, a = 0.75}),    
   },
 })
+

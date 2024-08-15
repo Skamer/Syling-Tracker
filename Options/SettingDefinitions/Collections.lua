@@ -86,9 +86,8 @@ class "SettingDefinitions.Collections" (function(_ENV)
     local borderSizeSlider = Widgets.SettingsSlider.Acquire(false, borderSection)
     borderSizeSlider:SetID(30)
     borderSizeSlider:SetLabel("Size")
-    borderSizeSlider:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
-    borderSizeSlider:BindUISetting("collections.header.borderSize")
     borderSizeSlider:SetMinMaxValues(1, 10)
+    borderSizeSlider:BindUISetting("collections.header.borderSize")
     self.HeaderTabControls.borderSizeSlider = borderSizeSlider
     ---------------------------------------------------------------------------
     --- Title Section
@@ -189,9 +188,8 @@ class "SettingDefinitions.Collections" (function(_ENV)
     local borderSizeSlider = Widgets.SettingsSlider.Acquire(false, borderSection)
     borderSizeSlider:SetID(30)
     borderSizeSlider:SetLabel("Size")
-    borderSizeSlider:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
-    borderSizeSlider:BindUISetting("collectable.borderSize")
     borderSizeSlider:SetMinMaxValues(1, 10)
+    borderSizeSlider:BindUISetting("collectable.borderSize")
     self.CollectableTabControls.borderSizeSlider = borderSizeSlider
     ---------------------------------------------------------------------------
     --- Header Section

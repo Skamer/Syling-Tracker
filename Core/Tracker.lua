@@ -1169,6 +1169,9 @@ RegisterTrackerSetting({ id = "scrollBarThumbColor", default =  ColorType(1, 199
 RegisterTrackerSetting({ id = "scrollBarPositionOffsetX", default = 15 })
 RegisterTrackerSetting({ id = "scrollBarUseTrackerHeight", default = false })
 RegisterTrackerSetting({ id = "showMinimizeButton", default = true})
+RegisterTrackerSetting({ id = "minimizeButtonPosition", default = "TOPRIGHT"})
+RegisterTrackerSetting({ id = "minimizeButtonPositionOffsetX", default = 5})
+RegisterTrackerSetting({ id = "minimizeButtonPositionOffsetY", default = 0})
 
 RegisterTrackerSetting({
   id = "contentsTracked",
@@ -1297,6 +1300,14 @@ function FromMinizeButtonAtlas(normal)
   end)
 end
 
+function FromMinimizeButtonLocation()
+  return FromTrackerSettings("minimizeButtonPosition", "minimizeButtonPositionOffsetX", "minimizeButtonPositionOffsetY")
+    :Map(function(position, offsetX, offsetY)
+      local directionalOffsetX, directionalOffsetY = Utils.GetDirectionalOffset(position, offsetX, offsetY, false)
+      return { Anchor(Utils.GetOppositePoint(position), directionalOffsetX, directionalOffsetY, nil, position) }
+    end)
+end
+
 function FromScrollFrameLocation()
   return GetFrame("OnBackdropChanged"):Map(function(tracker)
     local showBorder = tracker.ShowBorder
@@ -1400,7 +1411,7 @@ Style.UpdateSkin("Default", {
 
     MinimizeButton = {
       visible                         = FromTrackerSetting("showMinimizeButton"),
-      location                        = { Anchor("BOTTOMLEFT", 5, 0, nil, "TOPRIGHT") }
+      location                        = FromMinimizeButtonLocation()
     },
 
     ScrollBar = {
@@ -1485,7 +1496,6 @@ function SylingTracker_LOCK_TRACKERS()
     SetTrackerSetting(trackerID, "locked", true)
   end  
 end
-
 
 __SystemEvent__()
 function SylingTracker_UNLOCK_TRACKERS()

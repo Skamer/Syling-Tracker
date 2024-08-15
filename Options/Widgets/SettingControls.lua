@@ -72,13 +72,14 @@ interface "IBindSetting" (function(_ENV)
       value = defaultValue
     end
 
-    if setting then 
-      self:PrepareFromSetting(value, hasDefault, defaultValue)
-    end
-
+    
     self.Setting        = setting
     self.SettingType    = settingType
     self.Default        = defaultValue
+
+    if setting then 
+      self:PrepareFromSetting(value, hasDefault, defaultValue)
+    end
   end
 
   function TriggerSetSetting(self, setting, value, notify)
@@ -385,6 +386,7 @@ class "SettingsDropDown" (function(_ENV)
   end
 
   function OnRelease(self)
+    self:BindSetting()
     -- self:SetID(0)
     -- self:Hide()
     -- self:ClearAllPoints()
@@ -427,7 +429,11 @@ class "SettingsSlider" (function(_ENV)
   -----------------------------------------------------------------------------
   --                               Handlers                                  --
   -----------------------------------------------------------------------------
-  local function OnValueChangedHandler(self, value)
+  local function OnValueChangedHandler(self, value, userInput)
+    if not userInput then 
+      return 
+    end
+
     local setting = self.Setting
     if setting then
       self:TriggerSetSetting(setting, value)
@@ -443,7 +449,7 @@ class "SettingsSlider" (function(_ENV)
 
   __Arguments__ { Number, Number }
   function SetMinMaxValues(self, min, max)
-    self:GetChild("Slider"):SetMinMaxValues(MinMax(min, max))
+    self:GetChild("Slider"):SetMinMaxValues(min, max)
   end
 
   __Arguments__ { Number }
@@ -452,17 +458,10 @@ class "SettingsSlider" (function(_ENV)
   end
 
   __Arguments__ { Number }
-  function SetValue(self, value)
-    self:GetChild("Slider"):SetValue(value)
-  end
-
-  __Arguments__ { Slider.Label, Any/nil }
-  function SetSliderLabelFormatter(self, labelType, value)
-    self:GetChild("Slider"):SetLabelFormatter(labelType, value)
-  end
+  function SetValue(self, value) self:GetChild("Slider"):SetValue(value) end
 
   function PrepareFromSetting(self, value, hasDefault, defaultValue)
-    if value then 
+    if value ~= nil then
       self:SetValue(value)
     elseif hasDefault then
       self:SetValue(defaultValue)
@@ -478,12 +477,11 @@ class "SettingsSlider" (function(_ENV)
     -- self:Hide()
     -- self:ClearAllPoints()
     -- self:SetParent(nil)
-
-    ResetStyles(self, true)
-
+    
     self:BindSetting()
     --- It's important these functions are called after Setting has been set 
     --- to nil for avoiding the setting value is updated by an incorrect value
+    ResetStyles(self, true)
     self:SetValue(0)
     self:SetValueStep(1)
     self:SetMinMaxValues(0, 100)
@@ -502,7 +500,10 @@ class "SettingsSlider" (function(_ENV)
     Slider  = Slider
   }
   function __ctor(self)
-    self.OnValueChanged = self.OnValueChanged + OnValueChangedHandler 
+    self.OnValueChanged = self.OnValueChanged + OnValueChangedHandler
+
+    self:SetMinMaxValues(0, 100)
+    self:SetValueStep(1)
   end
 end)
 
@@ -516,19 +517,23 @@ class "SettingsPosition"(function(_ENV)
   -----------------------------------------------------------------------------
   --                               Handlers                                  --
   -----------------------------------------------------------------------------
-  local function OnXPosChanged(self, slider, value)
+  local function OnXPosChanged(self, slider, value, userInput)
     if self.Position then 
-      OnPositionChanged(self, Position(value, self.Position.y))
+      OnPositionChanged(self, Position(value, self.Position.y), userInput)
     end
   end
 
-  local function OnYPosChanged(self, slider, value)
+  local function OnYPosChanged(self, slider, value, userInput)
     if self.Position then 
-      OnPositionChanged(self, Position(self.Position.x, value))
+      OnPositionChanged(self, Position(self.Position.x, value), userInput)
     end
   end
 
-  local function OnPositionChangedHandler(self, pos)
+  local function OnPositionChangedHandler(self, pos, userInput)
+    if not userInput then 
+      return 
+    end
+
     local setting = self.Setting
     if setting then
       self:TriggerSetSetting(setting, pos)
@@ -571,15 +576,9 @@ class "SettingsPosition"(function(_ENV)
     self:GetChild("YSlider"):SetValue(...)
   end
 
-  function SetSliderLabelFormatter(self, ...)
-    self:GetChild("XSlider"):SetSliderLabelFormatter(...)
-    self:GetChild("YSlider"):SetSliderLabelFormatter(...)
-  end
-  
   function PrepareFromSetting(self, value, hasDefault, defaultValue)
     local x = value and value.x or 0
     local y = value and value.y or 0
-
 
     self:GetChild("XSlider"):SetValue(x)
     self:GetChild("YSlider"):SetValue(y)
@@ -589,15 +588,15 @@ class "SettingsPosition"(function(_ENV)
   end
 
   function OnRelease(self)
-    ResetStyles(self, true)
-
     self:BindSetting()
+
     --- It's important these functions are called after Setting has been set 
     --- to nil for avoiding the setting value is updated by an incorrect value
+    ResetStyles(self, true)
+
     self:SetValue(0)
     self:SetValueStep(1)
     self:SetMinMaxValues(0, 100)
-
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
@@ -629,6 +628,62 @@ class "SettingsPosition"(function(_ENV)
     end
 
     self.OnPositionChanged = self.OnPositionChanged + OnPositionChangedHandler
+  end
+end)
+
+__Widget__()
+class "SettingsFramePointPicker" (function(_ENV)
+  inherit "Frame" extend "IBindSetting"
+  -----------------------------------------------------------------------------
+  --                               Events                                    --
+  -----------------------------------------------------------------------------
+  __Bubbling__ { FramePointPicker = "OnValueChanged" }
+  event "OnValueChanged"
+  -----------------------------------------------------------------------------
+  --                               Handlers                                  --
+  -----------------------------------------------------------------------------
+  local function OnValueChangedHandler(self, new, old)
+    local setting = self.Setting
+    if setting then
+      self:TriggerSetSetting(setting, new)
+    end
+  end
+  -----------------------------------------------------------------------------
+  --                               Methods                                   --
+  -----------------------------------------------------------------------------
+  function PrepareFromSetting(self, value, hasDefault, defaultValue)
+    if value then 
+      self:SetValue(value)
+    end
+  end
+
+  function SetValue(self, ...) self:GetChild("FramePointPicker"):SetValue(...) end
+  function SetText(self, ...) self:GetChild("FramePointPicker"):SetText(...) end
+  function DisablePoint(self, ...) self:GetChild("FramePointPicker"):DisablePoint(...) end
+  function EnablePoint(self, ...) self:GetChild("FramePointPicker"):EnablePoint(...) end
+  function DisablePoints(self, ...) self:GetChild("FramePointPicker"):DisablePoints(...) end
+  function EnablePoints(self, ...) self:GetChild("FramePointPicker"):EnablePoints(...) end
+
+  function OnRelease(self)
+    self:SetID(0)
+    self:Hide()
+    self:SetParent(nil)
+
+    self:BindSetting()
+
+    ResetStyles(self, true)
+
+
+    self:SetValue()
+  end
+  -----------------------------------------------------------------------------
+  --                            Constructors                                 --
+  -----------------------------------------------------------------------------
+  __Template__ {
+    FramePointPicker = FramePointPicker
+  }
+  function __ctor(self)
+    self.OnValueChanged = self.OnValueChanged + OnValueChangedHandler
   end
 end)
 
@@ -684,6 +739,8 @@ class "SettingsColorPicker" (function(_ENV)
   end
 
   function OnRelease(self)
+    self:BindSetting()
+
     self:SetID(0)
     self:Hide()
     -- self:ClearAllPoints()
@@ -691,7 +748,6 @@ class "SettingsColorPicker" (function(_ENV)
 
     ResetStyles(self, true)
 
-    self:BindSetting()
 
     self:SetColor()
   end
@@ -838,7 +894,6 @@ class "SettingsMediaFont" (function(_ENV)
     local fontHeightSetting = self:GetChild("FontHeightSetting")
     fontHeightSetting:SetMinMaxValues(6, 48)
     fontHeightSetting:SetValueStep(1)
-    fontHeightSetting:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
 
     local fontOutlineSetting = self:GetChild("FontOutlineSetting")
     fontOutlineSetting:AddEntry({ text = "NONE", value = "NONE"})
@@ -1065,7 +1120,8 @@ Style.UpdateSkin("Default", {
 
     Slider = {
       location = {
-        Anchor("LEFT", 0, 0, "Label", "RIGHT")
+        Anchor("LEFT", 0, 0, "Label", "RIGHT"),
+        Anchor("RIGHT")
       } 
     }
   },
@@ -1088,6 +1144,17 @@ Style.UpdateSkin("Default", {
       location = {
         Anchor("TOPLEFT", 0, 0, "XSlider", "BOTTOMLEFT"),
         Anchor("TOPRIGHT", 0, 0, "XSlider", "BOTTOMRIGHT")
+      }
+    }
+  },
+
+  [SettingsFramePointPicker] = {
+    height = 105,
+    marginRight = 0,
+    
+    FramePointPicker = {
+      location = {
+        Anchor("CENTER")
       }
     }
   },

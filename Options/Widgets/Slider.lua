@@ -10,17 +10,83 @@ Syling              "SylingTracker_Options.Widgets.Slider"                   ""
 -- ========================================================================= --
 namespace               "SylingTracker.Options.Widgets"
 -- ========================================================================= --
-
 export {
-  FromUIProperty  = Wow.FromUIProperty,
+  FromUIProperty = Wow.FromUIProperty,
 
   GetDecimalCount = SylingTracker.Utils.GetDecimalCount,
   TruncateDecimal = SylingTracker.Utils.TruncateDecimal
 }
 
 __Widget__()
-class "MinimalSlider"  { Slider }
+class "MinimalSlider"(function(_ENV)
+  inherit "Scorpio.UI.Slider"
 
+  SLIDERS_PREVIOUS_VALUE = {}
+  -----------------------------------------------------------------------------
+  --                               Events                                    --
+  -----------------------------------------------------------------------------
+  --- As "OnValueChanged" may send value like "0.20000117" while the real value is 0.2
+  ---  and be fired multiple times even when there are no change,
+  --- "OnSanitizeValueChanged" is here for fixing these issues. 
+  event "OnSanitizeValueChanged"
+  -----------------------------------------------------------------------------
+  --                               Handlers                                  --
+  -----------------------------------------------------------------------------
+  local function OnValueChangedHandler(self, value, ...)
+    local shouldRaiseEvent = true 
+    local previousValue = SLIDERS_PREVIOUS_VALUE[self]
+
+    -- (e.g, if the user sets the value to "0.2", the value given may be "0.1999999")
+    -- so we need to truncate the decimals, and round it. 
+    --- the amount of decimal truncated is based on the value step. 
+    -- For example:
+    -- value step    number of decimal keeped
+    --   0.2                 1
+    --   0.25                2
+    --   0.002               3
+    --   0.200               1 
+    local decimalCount = self.DecimalCount
+    local sanitizeValue = decimalCount > 0 and TruncateDecimal(value, decimalCount, true) or floor(value)
+    
+    if previousValue ~= nil and previousValue == sanitizeValue then 
+      shouldRaiseEvent = false 
+    else 
+      SLIDERS_PREVIOUS_VALUE[self] = sanitizeValue 
+    end
+    
+    if shouldRaiseEvent then 
+      self:OnSanitizeValueChanged(sanitizeValue, ...)
+    end
+  end
+  -----------------------------------------------------------------------------
+  --                               Methods                                   --
+  -----------------------------------------------------------------------------
+  function SetValueStep(self, step)
+    self.DecimalCount = GetDecimalCount(step)
+
+    super.SetValueStep(self, step)
+  end
+
+  function GetValue(self)
+    local value = super.GetValue(self)
+    local decimalCount = self.DecimalCount
+    local sanitizeValue = decimalCount > 0 and TruncateDecimal(value, decimalCount, true) or floor(value)
+    return sanitizeValue
+  end
+  -----------------------------------------------------------------------------
+  --                               Properties                                --
+  -----------------------------------------------------------------------------
+  property "DecimalCount" {
+    type = Number,
+    default = 0
+  }
+  -----------------------------------------------------------------------------
+  --                            Constructors                                 --
+  -----------------------------------------------------------------------------
+  function __ctor(self)
+    self.OnValueChanged = self.OnValueChanged + OnValueChangedHandler
+  end
+end)
 
 __Widget__()
 class "Slider" (function(_ENV)
@@ -28,319 +94,164 @@ class "Slider" (function(_ENV)
   -----------------------------------------------------------------------------
   --                               Events                                    --
   -----------------------------------------------------------------------------
-  --- NOTE: This is not the original "OnValueChanged" of slider, but an event build
-  --- around of it. The reason is the original may give the value 0.199999 if the 
-  --- user sets to 0.2 for example. This may also cause the event to be triggered 
-  --- multiple time.
-
-  --- The build event will fix these issues where the real value is given, and triggered 
-  --- only when it has changed.
+  __Bubbling__ { Slider = "OnSanitizeValueChanged"}
   event "OnValueChanged"
-  -----------------------------------------------------------------------------
-  --                              Enumerations                               --
-  -----------------------------------------------------------------------------
-  enum "Label" {
-    Left    = "LeftText",
-    Right   = "RightText",
-    Top     = "TopText",
-    Min     = "MinText",
-    Max     = "MaxText"
-  }
-  -----------------------------------------------------------------------------
-  --                          Helper functions                               --
-  -----------------------------------------------------------------------------
-  local function NoModification(value)
-	  return value
-  end
   -----------------------------------------------------------------------------
   --                               Handlers                                  --
   -----------------------------------------------------------------------------
-
-  local function OnSliderValueChanged(self, new)
-    --- (e.g, if the user sets the value to "0.2", the value given may be "0.1999999")
-    --- so we need to truncate the decimals, and round it. 
-    --- the amount of decimal truncated is based on the value step. 
-    --- For example:
-    --- value step    number of decimal keeped
-    ---   0.2                 1
-    ---   0.25                2
-    ---   0.002               3
-    ---   0.200               1 
-    local valueRounded = TruncateDecimal(new, self.DecimalCount, true)
-
-    self.Value = valueRounded
-  end
-  
-  local function OnValueChangedHandler(self, new)
-    self:GetChild("Slider"):SetValue(new, false)
-    self:FormatValue(new)
-    self:OnValueChanged(new)
+  local function OnValueChangedHandler(self, value, ...)
+    self:FormatText(value)
   end
 
-  local function OnValueStepChangedHandler(self, new)
-    self.DecimalCount = GetDecimalCount(new)
+  local function OnStepperClicked(slider, forward)
+    local value = slider:GetValue()
+    local step = slider:GetValueStep()
+    
+    if forward then
+      slider:SetValue(value + step, true)
+    else
+      slider:SetValue(value - step, true)
+    end
+  end
+
+  local function OnTextBoxTextSetHandler(textBox, ...)
+    textBox:SetCursorPosition(0)
+  end
+
+  local function OnTextBoxEnterPressed(textBox)
+    local slider = textBox:GetParent():GetChild("Slider")
+    local value = textBox:GetText()
+
+    slider:SetValue(value, true)
+    textBox:ClearFocus()
+  end
+
+  local function OnTextBoxEscapePressed(textBox)
+    textBox:ClearFocus()
+  end
+
+  local function OnTextBoxEditFocusLost(textBox, ...)
+    local parent = textBox:GetParent()
+    local slider = parent:GetChild("Slider")
+    parent:FormatText(slider:GetValue())
   end
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
-
-  __Arguments__ { Label, Any/nil }
-  function SetLabelFormatter(self, labelType, value)
-    if not self.formatters then 
-      self.formatters = {}
+  function FormatText(self, value)
+    local formatter = self.TextFormatter
+    if formatter then 
+      value = formatter(value)
     end
 
-    local formatter = nil 
-    if value == nil then
-      formatter = NoModification
-    elseif type(value) == "function" then 
-      formatter = value
-    else 
-      formatter = function(v)
-        return value 
-      end
-    end
-
-    self.formatters[labelType] = formatter
+    self:GetChild("TextBox"):SetText(tostring(value))
   end
 
-  function FormatValue(self, value)
-    if not self.formatters then 
-      return 
-    end
-
-    for labelName, formatter in pairs(self.formatters) do 
-      local label = self:GetChild(labelName)
-      label:SetText(formatter(value))
-      Style[label].visible = true
-    end 
-  end
-
-  __Arguments__ { Number }
-  function SetValue(self, value)
-    --- (e.g, if the user sets the value to "0.2", the value given may be "0.1999999")
-    --- so we need to truncate the decimals, and round it. 
-    --- the amount of decimal truncated is based on the value step. 
-    --- For example:
-    --- value step    number of decimal keeped
-    ---   0.2                 1
-    ---   0.25                2
-    ---   0.002               3
-    ---   0.200               1 
-    local valueRounded = TruncateDecimal(value, self.DecimalCount, true)
-
-    self.Value = valueRounded
-  end
-
-  function GetValue(self)
-    return self.Value
-  end
-
-  __Arguments__ {  MinMax }
-  function SetMinMaxValues(self, minMaxValues)
-    self.MinMaxValues = minMaxValues
-  end
-
-  __Arguments__ { Number  }
-  function SetValueStep(self, valueStep)
-    self.ValueStep = valueStep
-  end
-
-  function OnAcquire(self)
-    -- self:InstantApplyStyle()
-  end
-
-  function OnRelease(self)
-    -- Reset the properties 
-    self.Value = nil
-    self.MinMaxValues = nil
-    self.ValueStep = nil
-    self.DecimalCount = nil
-  end
+  function SetValue(self, ...) self:GetChild("Slider"):SetValue(...)  end 
+  function GetValue(self) return self:GetChild("Slider"):GetValue() end
+  function SetMinMaxValues(self, ...) self:GetChild("Slider"):SetMinMaxValues(...) end
+  function SetValueStep(self, ...) self:GetChild("Slider"):SetValueStep(...) end
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
-  property "Value" {
-    type = Number,
-    default = 0,
-    handler = OnValueChangedHandler
-  }
-
-
-  __Observable__()
-  property "MinMaxValues" {
-    type = MinMax,
-    default = MinMax(0, 100),
-  }
-
-  __Observable__()
-  property "ValueStep" {
-    type    = Number,
-    default = 1,
-    handler = OnValueStepChangedHandler
-  }
-
-  property "DecimalCount" {
-    type    = Number,
-    default = 0
+  property "TextFormatter" {
+    Type = Function
   }
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
   -----------------------------------------------------------------------------
-  __InstantApplyStyle__()
   __Template__ {
-    Slider = MinimalSlider,
-    Back = Button,
+    Slider  = MinimalSlider,
+    Back    = Button,
     Forward = Button,
-    LeftText = FontString,
-    RightText = FontString,
-    TopText = FontString,
-    MinText = FontString,
-    MaxText = FontString
+    TextBox = Scorpio.UI.EditBox,
   }
-  function __ctor(self) 
+  function __ctor(self)
     local slider = self:GetChild("Slider")
     local back = self:GetChild("Back")
     local forward = self:GetChild("Forward")
+    local textBox = self:GetChild("TextBox")
 
-    local function OnStepperClicked(forward)
-      local value = slider:GetValue()
-      local step = slider:GetValueStep()
-      if forward then
-        slider:SetValue(value + step)
-      else
-        slider:SetValue(value - step)
-	    end
-    end
+    -- local slider = self:GetChild("Slider")
+    back.OnClick = back.OnClick + function() OnStepperClicked(slider, false) end
+    forward.OnClick = forward.OnClick + function() OnStepperClicked(slider, true) end 
+    self.OnValueChanged = self.OnValueChanged + OnValueChangedHandler
 
-
-    back.OnClick = back.OnClick + function() OnStepperClicked(false) end 
-    forward.OnClick = forward.OnClick + function() OnStepperClicked(true) end
-
-    self.OnSliderValueChanged = function(slider, value) 
-      OnSliderValueChanged(self, value)
-    end
-
-    slider.OnValueChanged = slider.OnValueChanged + self.OnSliderValueChanged
-  end 
+    textBox:SetNumericFullRange(true) -- full range -> include decimal and negative numbers
+    textBox.OnTextSet = textBox.OnTextSet + OnTextBoxTextSetHandler
+    textBox.OnEnterPressed = textBox.OnEnterPressed + OnTextBoxEnterPressed
+    textBox.OnEscapePressed = textBox.OnEscapePressed + OnTextBoxEscapePressed
+    textBox.OnEditFocusLost = textBox.OnEditFocusLost + OnTextBoxEditFocusLost
+  end
 end)
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
   [MinimalSlider] = {
-    width = 200,
-    height = 10,
-    orientation = "HORIZONTAL",
-    enableMouse = true,
-    obeyStepOnDrag = true,
-
-
-    LeftBGTexture = {
-      atlas = AtlasType("Minimal_SliderBar_Left", true),
-      location = {
-        Anchor("LEFT")
-      }
-    },
-    RightBGTexture = {
-      atlas = AtlasType("Minimal_SliderBar_Right", true),
-      location = {
-        Anchor("RIGHT")
-      }
-    },
-    MiddleBGTexture = {
-      atlas = AtlasType("_Minimal_SliderBar_Middle", true),
-      location = {
-        Anchor("LEFT", 0, 0, "LeftBGTexture", "RIGHT"),
-        Anchor("RIGHT", 0, 0, "RightBGTexture", "LEFT")
-      }
-    },
+    width                             = 200,
+    height                            = 8,
+    orientation                       = "HORIZONTAL",
+    enableMouse                       = true,
+    obeyStepOnDrag                    = true,
+    backdrop                          = {
+                                        bgFile    = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
+                                        edgeFile  = [[Interface\Buttons\WHITE8X8]],
+                                        edgeSize  = 1   
+                                      },
+    backdropColor                     = { r = 0.1, g = 0.1, b = 0.1, a = 0.75},
+    backdropBorderColor               = { r = 0.45, g = 0.45, b = 0.45, a = 0.75},
+    hitRectInsets                     = { top = -4, left = 0, bottom = -4, right = 0 },
 
     ThumbTexture = {
-      atlas = AtlasType("Minimal_SliderBar_Button", true)
+      color                           = { r = 240/255, g = 181/255, b = 0, a = 0.75},
+      width                           = 18,
+      height                          = 6,
     }
   },
-
+  
   [Slider] = {
-    width   = 250,
-    height  = 40,
+    width                             = 250,
+    height                            = 40,
 
     Slider = {
-      minMaxValues = FromUIProperty("MinMaxValues"),
-      valueStep = FromUIProperty("ValueStep"),
-
-
-      location = {
-        Anchor("TOPLEFT", 19, 0),
-        Anchor("BOTTOMRIGHT", -19, 0)
-      }
+      location                        = { Anchor("LEFT") }
     },
 
     Back = {
-      size = Size(11, 19),
-      location = {
-        Anchor("RIGHT", -4, 0, "Slider", "LEFT")
-      },
+      size                            = Size(16, 16),
+      location                        = { Anchor("RIGHT", -6, 0, "Slider", "LEFT") },
 
       BackgroundTexture = {
-        atlas = AtlasType("Minimal_SliderBar_Button_Left", true),
-        drawLayer = "BACKGROUND",
-        setAllPoints = true
-      }
+        atlas                         = AtlasType("common-icon-backarrow"),
+        drawLayer                     = "BACKGROUND",
+        vertexColor                   = Color(0.8, 0.8, 0.8, 1),
+        setAllPoints                  = true,
+      },
+      hitRectInsets                   = { top = -2, left = -2, bottom = -2, right = -2 },
     },
 
     Forward = {
-      size = Size(9, 18),
-      location = {
-        Anchor("LEFT", 4, 0, "Slider", "RIGHT")
-      },
+      size                            = Size(16, 16),
+      location                        = { Anchor("LEFT", 6, 0, "Slider", "RIGHT") },
 
       BackgroundTexture = {
-        atlas = AtlasType("Minimal_SliderBar_Button_Right", true),
-        drawLayer = "BACKGROUND",
-        setAllPoints = true
-      }
+        atlas                         = AtlasType("common-icon-forwardarrow"),
+        drawLayer                     = "BACKGROUND",
+        vertexColor                   = Color(0.8, 0.8, 0.8, 1),
+        setAllPoints                  = true,
+      },
+      hitRectInsets                   = { top = -2, left = -2, bottom = -2, right = -2 }, 
     },
 
-    LeftText = {
-      visible = false,
-      fontObject = GameFontNormal,
-      drawLayer = "OVERLAY",
-      location = {
-        Anchor("RIGHT", -25, 0, "Slider", "LEFT")
-      }
-    },
-    RightText = {
-      visible = false,
-      fontObject = GameFontNormal,
-      drawLayer = "OVERLAY",
-      location = {
-        Anchor("LEFT", 25, 0, "Slider", "RIGHT")
-      }
-    },
-    TopText = {
-      visible = false,
-      fontObject = GameFontNormal,
-      drawLayer = "OVERLAY",
-      location = {
-        Anchor("BOTTOM", 0, -9, "Slider", "TOP")
-      }
-    },
-    MinText = {
-      visible = false,
-      fontObject = GameFontNormal,
-      drawLayer = "OVERLAY",
-      location = {
-        Anchor("TOP", 0, 6, "Slider", "BOTTOMLEFT")
-      }
-    },
-    MaxText = {
-      visible = false,
-      fontObject = GameFontNormal,
-      drawLayer = "OVERLAY",
-      location = {
-        Anchor("TOP", 0, 6, "Slider", "BOTTOMRIGHT")
-      }
+    TextBox = {
+      height                          = 30,
+      width                           = 50,
+      autoFocus                       = false,
+      fontObject                      = GameFontNormal,
+      textColor                       = Color.WHITE,
+      historyLines                    = 1,
+      location                        = { Anchor("LEFT", 25, 0, "Slider", "RIGHT") }
     }
   }
 })

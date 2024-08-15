@@ -45,9 +45,8 @@ class "SettingDefinitions.ItemBar" (function(_ENV)
     local columnCountSlider = Widgets.SettingsSlider.Acquire(false, self)
     columnCountSlider:SetID(30)
     columnCountSlider:SetLabel("Column Count")
-    columnCountSlider:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
-    columnCountSlider:BindItemBarSetting("columnCount")
     columnCountSlider:SetMinMaxValues(1, 12)
+    columnCountSlider:BindItemBarSetting("columnCount")
     self.GeneralTabControls.columnCountSlider = columnCountSlider
     ---------------------------------------------------------------------------
     --- Row Count
@@ -55,9 +54,8 @@ class "SettingDefinitions.ItemBar" (function(_ENV)
     local rowCountSlider = Widgets.SettingsSlider.Acquire(false, self)
     rowCountSlider:SetID(40)
     rowCountSlider:SetLabel("Row Count")
-    rowCountSlider:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
-    rowCountSlider:BindItemBarSetting("rowCount")
     rowCountSlider:SetMinMaxValues(1, 12)
+    rowCountSlider:BindItemBarSetting("rowCount")
     self.GeneralTabControls.rowCountSlider = rowCountSlider
     ---------------------------------------------------------------------------
     --- Margin Left
@@ -65,9 +63,8 @@ class "SettingDefinitions.ItemBar" (function(_ENV)
     local marginLeftSlider = Widgets.SettingsSlider.Acquire(false, self)
     marginLeftSlider:SetID(50)
     marginLeftSlider:SetLabel("Margin Left")
-    marginLeftSlider:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
-    marginLeftSlider:BindItemBarSetting("marginLeft")
     marginLeftSlider:SetMinMaxValues(0, 50)
+    marginLeftSlider:BindItemBarSetting("marginLeft")
     self.GeneralTabControls.marginLeftSlider = marginLeftSlider
     ---------------------------------------------------------------------------
     --- Margin Right
@@ -75,9 +72,8 @@ class "SettingDefinitions.ItemBar" (function(_ENV)
     local marginRightSlider = Widgets.SettingsSlider.Acquire(false, self)
     marginRightSlider:SetID(60)
     marginRightSlider:SetLabel("Margin Right")
-    marginRightSlider:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
-    marginRightSlider:BindItemBarSetting("marginRight")
     marginRightSlider:SetMinMaxValues(0, 50)
+    marginRightSlider:BindItemBarSetting("marginRight")
     self.GeneralTabControls.marginRightSlider = marginRightSlider
     ---------------------------------------------------------------------------
     --- Margin Top
@@ -85,9 +81,8 @@ class "SettingDefinitions.ItemBar" (function(_ENV)
     local marginTopSlider = Widgets.SettingsSlider.Acquire(false, self)
     marginTopSlider:SetID(70)
     marginTopSlider:SetLabel("Margin Top")
-    marginTopSlider:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
-    marginTopSlider:BindItemBarSetting("marginTop")
     marginTopSlider:SetMinMaxValues(0, 50)
+    marginTopSlider:BindItemBarSetting("marginTop")
     self.GeneralTabControls.marginTopSlider = marginTopSlider
     ---------------------------------------------------------------------------
     --- Margin Bottom
@@ -95,7 +90,6 @@ class "SettingDefinitions.ItemBar" (function(_ENV)
     local marginBottomSlider = Widgets.SettingsSlider.Acquire(false, self)
     marginBottomSlider:SetID(80)
     marginBottomSlider:SetLabel("Margin Bottom")
-    marginBottomSlider:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
     marginBottomSlider:BindItemBarSetting("marginBottom")
     marginBottomSlider:SetMinMaxValues(0, 50)
     self.GeneralTabControls.marginBottomSlider = marginBottomSlider
@@ -148,33 +142,29 @@ class "SettingDefinitions.ItemBar" (function(_ENV)
     local widthSlider = Widgets.SettingsSlider.Acquire(false, self)
     widthSlider:SetID(10)
     widthSlider:SetLabel("Width")
-    widthSlider:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
-    widthSlider:BindItemBarSetting("elementWidth")
     widthSlider:SetMinMaxValues(6, 92)
+    widthSlider:BindItemBarSetting("elementWidth")
     self.ItemTabControls.widthSlider = widthSlider
     
     local heightSlider = Widgets.SettingsSlider.Acquire(false, self)
     heightSlider:SetID(20)
     heightSlider:SetLabel("Height")
-    heightSlider:BindItemBarSetting("elementHeight")
-    heightSlider:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
     heightSlider:SetMinMaxValues(6, 92)
+    heightSlider:BindItemBarSetting("elementHeight")
     self.ItemTabControls.heightSlider = heightSlider
 
     local hSpacingSlider = Widgets.SettingsSlider.Acquire(false, self)
     hSpacingSlider:SetID(30)
     hSpacingSlider:SetLabel("Horizontal Spacing")
-    hSpacingSlider:BindItemBarSetting("hSpacing")
-    hSpacingSlider:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
     hSpacingSlider:SetMinMaxValues(0, 24)
+    hSpacingSlider:BindItemBarSetting("hSpacing")
     self.ItemTabControls.hSpacingSlider = hSpacingSlider
     
     local vSpacingSlider = Widgets.SettingsSlider.Acquire(false, self)
     vSpacingSlider:SetID(40)
     vSpacingSlider:SetLabel("Vertical Spacing")
-    vSpacingSlider:BindItemBarSetting("vSpacing")
-    vSpacingSlider:SetSliderLabelFormatter(Widgets.Slider.Label.Right)
     vSpacingSlider:SetMinMaxValues(0, 24)
+    vSpacingSlider:BindItemBarSetting("vSpacing")
     self.ItemTabControls.vSpacingSlider = vSpacingSlider
   end
   -----------------------------------------------------------------------------

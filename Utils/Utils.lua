@@ -105,13 +105,17 @@ __Static__() function Utils.Frame_TryToComputeHeightFromChildren(frame, iter, fi
 end
 
 --- Get the nearest frame of type given. 
---- The function will first check the frame given, then if the type mot matches 
+--- The function will first check the frame given, then if the type not matches 
 --- the frame type will iterate its parent until to have parent maches the type given.
 --- May return nil if the frame and all its parents don't match the type. 
 ---
 --- @param frame the frame to check and the start point. 
 --- @param cls the type to check. 
 __Static__() function Utils.GetNearestFrameForType(frame, cls)
+  if not frame then 
+    return 
+  end
+
   if IsObjectType(frame, cls) then 
     return frame 
   end
@@ -125,3 +129,60 @@ __Static__() function Utils.GetNearestFrameForType(frame, cls)
     frame = frame:GetParent()
   end
 end
+
+OPPOSITE_POINTS = {
+  ["TOPLEFT"] = "BOTTOMRIGHT",
+  ["TOPRIGHT"] = "BOTTOMLEFT",
+  ["TOP"] = "BOTTOM",
+  ["LEFT"] = "RIGHT",
+  ["RIGHT"] = "LEFT",
+  ["CENTER"] = "CENTER",
+  ["BOTTOMLEFT"] = "TOPRIGHT",
+  ["BOTTOMRIGHT"] = "TOPLEFT",
+  ["BOTTOM"] = "TOP"
+}
+
+TOWARD_CENTER_OFFSET_POINT_INVERT_X = {
+  ["TOPLEFT"] = false,
+  ["TOPRIGHT"] = true,
+  ["TOP"] = false,
+  ["LEFT"] = false,
+  ["RIGHT"] = true,
+  ["CENTER"] = false,
+  ["BOTTOMLEFT"] = false,
+  ["BOTTOMRIGHT"] = true,
+  ["BOTTOM"] = false
+}
+
+TOWARD_CENTER_OFFSET_POINT_INVERT_Y = {
+  ["TOPLEFT"] = true,
+  ["TOPRIGHT"] = true,
+  ["TOP"] = true,
+  ["LEFT"] = false,
+  ["RIGHT"] = false,
+  ["CENTER"] = false,
+  ["BOTTOMLEFT"] = false,
+  ["BOTTOMRIGHT"] = false,
+  ["BOTTOM"] = false
+}
+
+__Arguments__ { FramePoint }
+function GetOppositePoint(point)
+    return OPPOSITE_POINTS[point]
+end
+
+__Arguments__ { FramePoint, Number, Number, Boolean/true}
+function GetDirectionalOffset(point, x, y, towardCenter)
+  if towardCenter then 
+    x = TOWARD_CENTER_OFFSET_POINT_INVERT_X[point] and x * -1 or x 
+    y = TOWARD_CENTER_OFFSET_POINT_INVERT_Y[point] and y * -1 or y
+  else
+    x = not TOWARD_CENTER_OFFSET_POINT_INVERT_X[point] and x * -1 or x 
+    y = not TOWARD_CENTER_OFFSET_POINT_INVERT_Y[point] and y * -1 or y
+  end
+
+  return x, y
+end
+
+Utils.GetOppositePoint = GetOppositePoint
+Utils.GetDirectionalOffset = GetDirectionalOffset
