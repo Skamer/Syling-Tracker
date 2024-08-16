@@ -12,6 +12,7 @@ export {
   newtable                            = System.Toolset.newtable,
   FromUIProperty                      = Wow.FromUIProperty,
   GetFrameByType                      = Wow.GetFrameByType,
+  FromBackdrop                        = Frame.FromBackdrop
 }
 -- ========================================================================= --
 ITEM_BAR                              = nil
@@ -20,6 +21,7 @@ ITEMS_INFO_LIST                       = List()
 ITEM_APPEARANCE_ORDER                 = 0
 ITEMBAR_ENABLED                       = false
 SORT_BY_DISTANCE                      = true
+VISIBILITY_RULES_CACHE                = {}
 -- ========================================================================= --
 __UIElement__()
 class "ItemButton"(function(_ENV)
@@ -103,12 +105,48 @@ class "ItemButton"(function(_ENV)
   end
 end)
 
+struct "ItemBarVisibilityRulesType" {
+  { name = "defaultVisibility",               type = String,  default = "show"},
+  { name = "enableAdvancedRules",             type = Boolean, default = false},
+  { name = "inDungeonVisibility",             type = String,  default = "show"},
+  { name = "inKeystoneVisibility",            type = String,  default = "show"},
+  { name = "inRaidVisibility",                type = String,  default = "show"},
+  { name = "inScenarioVisibility",            type = String,  default = "show"},
+  { name = "inArenaVisibility",               type = String,  default = "show"},
+  { name = "inBattlegroundVisibility",        type = String,  default = "show"},
+  { name = "inPartyVisibility",               type = String,  default = "show"},
+  { name = "inRaidGroupVisibility",           type = String,  default = "show"},
+  { name = "macroVisibility",                 type = String;  default = "" },
+  { name = "evaluateMacroVisibilityAtFirst",  type = Boolean, default = false}
+}
+
+__SecureTemplate__ "SecureHandlerStateTemplate"
 class "ItemBar" (function(_ENV)
   inherit "SecurePanel"
   -----------------------------------------------------------------------------
   --                               Events                                    --
   -----------------------------------------------------------------------------
   event "OnStopMoving"
+  -----------------------------------------------------------------------------
+  --                               Properties                                --
+  -----------------------------------------------------------------------------
+  property "ShowBackground" {
+    type = Boolean,
+    default = false,
+    event = "OnBackdropChanged"
+  }
+
+  property "ShowBorder" {
+    type = Boolean,
+    default = false,
+    event = "OnBackdropChanged"
+  }
+
+  property "BorderSize" {
+    type = Number,
+    default = 1,
+    event = "OnBackdropChanged"
+  }
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
@@ -133,7 +171,9 @@ struct "ItemBarSettingInfoType" {
   { name = "handler", type = Function},
   { name = "saveHandler", type = Function},
   { name = "ignoreDefault", type = Boolean, default = false},
-  { name = "getHandler", type = Function}
+  { name = "getHandler", type = Function},
+  { name = "defaultHandler", type = Function},
+  { name = "structType", type = StructType },
 }
 
 __Arguments__ { ItemBarSettingInfoType }
@@ -157,14 +197,33 @@ function GetItemBarSetting(setting, ...)
   local getHandler 
 
   local settingInfo = SETTINGS[setting]
+
   if settingInfo then 
-    defaultValue = settingInfo.default
-    getHandler  = settingInfo.getHandler
+    defaultHandler = settingInfo.defaultHandler
+    structType = settingInfo.structType
+    getHandler = settingInfo.getHandler
     hasDefaultValue = not settingInfo.ignoreDefault
+
+    if defaultHandler then 
+      defaultValue = defaultHandler(trackerID, ...)
+    elseif structType then
+      local subSetting = ...
+      local structMember = Struct.GetMember(structType, subSetting)
+      defaultValue = structMember and structMember:GetDefault()
+    else
+      defaultValue = settingInfo.default
+    end
   end
 
   if getHandler then
     dbValue = getHandler(...)
+  elseif structType then 
+    local subSetting = ...
+    if subSetting then
+      dbValue = SavedVariables.Profile().Path("itemBar", setting).GetValue(subSetting)
+    else 
+      dbValue = SavedVariables.Profile().Path("itemBar").GetValue(setting)
+    end
   else
     dbValue = SavedVariables.Profile().Path("itemBar").GetValue(setting)
   end
@@ -199,28 +258,55 @@ function SetItemBarSetting(setting, value, notify, ...)
   local default = nil 
   local ignoreDefault = false 
   local handler = nil 
-  local saveHandler = nil 
+  local saveHandler = nil
+  local structType = nil 
 
   local settingInfo = SETTINGS[setting]
+
   if settingInfo then 
-    default       = settingInfo.default
-    ignoreDefault = settingInfo.ignoreDefault
-    handler       = settingInfo.handler
-    saveHandler   = settingInfo.saveHandler
+    ignoreDefault   = settingInfo.ignoreDefault
+    defaultHandler  = settingInfo.defaultHandler
+    handler         = settingInfo.handler
+    saveHandler     = settingInfo.saveHandler
+    structType      = settingInfo.structType
+  
+    if defaultHandler then 
+      default = defaultHandler(...)
+    elseif structType then
+      local subSetting = ...
+      local structMember = Struct.GetMember(structType, subSetting)
+      default = structMember and structMember:GetDefault()
+    else
+      default = settingInfo.default
+    end
   end
 
-  if value == nil and not ignoreDefault then
-    value = default
-  end
-
-  if saveHandler then 
-    saveHandler(value, ...)
-  else
-    if value == nil or value == default then 
+  if value == nil or value == default then
+    if saveHandler then 
+      saveHandler(nil, ...)
+    elseif structType then 
+      local subSetting = ...
+      if subSetting then 
+        SavedVariables.Profile().Path("itemBar", setting).SetValue(subSetting, nil)
+      end
+    else
       SavedVariables.Profile().Path("itemBar").SetValue(setting, nil)
+    end
+  else
+    if saveHandler then 
+      saveHandler(value, ...)
+    elseif structType then
+      local subSetting = ...
+      if subSetting then 
+        SavedVariables.Profile().Path("itemBar", setting).SaveValue(subSetting, value)
+      end
     else
       SavedVariables.Profile().Path("itemBar").SaveValue(setting, value)
     end
+  end
+  
+  if value == nil and not ignoreDefault then 
+    value = default
   end
 
   if notify then 
@@ -281,8 +367,8 @@ function private__SetLocked(locked)
     if locked then  
       Style[ITEM_BAR].Mover = NIL
       
-      ITEM_BAR.KeepRowSize = false
-      ITEM_BAR.KeepColumnSize = false
+      ITEM_BAR.KeepRowSize = true
+      ITEM_BAR.KeepColumnSize = true
     else
       Style[ITEM_BAR].Mover.visible = true
       
@@ -314,6 +400,140 @@ local function OnItemBarElementRemove(itemBar, element)
   element:UnregisterSystemEvent("BAG_UPDATE_COOLDOWN")
 end
 
+
+function private__EvaluateNonMacroVisibilityRules()
+  local result
+  local inInstance, instanceType = IsInInstance()
+  local isInKeystone = GetActiveKeystoneInfo() > 0
+
+  if isInKeystone then 
+    result = VISIBILITY_RULES_CACHE.inKeystoneVisibility
+  elseif instanceType == "party" then
+    result = VISIBILITY_RULES_CACHE.inDungeonVisibility
+  elseif instanceType == "raid" then 
+    result = VISIBILITY_RULES_CACHE.inRaidVisibility
+  elseif instanceType == "scenario" then 
+    result = VISIBILITY_RULES_CACHE.inScenarioVisibility  
+  elseif instanceType == "arena" then 
+    result = VISIBILITY_RULES_CACHE.inArenaVisibility
+  elseif instanceType == "pvp" then 
+    result = VISIBILITY_RULES_CACHE.inBattlegroundVisibility
+  else
+    result = "ignore"
+  end
+
+  if result and result ~= "ignore" then 
+    return result
+  end
+
+  if IsInRaid()  then 
+    result = VISIBILITY_RULES_CACHE.inRaidGroupVisibility
+  elseif IsInGroup() then 
+    result = VISIBILITY_RULES_CACHE.inPartyVisibility
+  else 
+    result = "ignore"
+  end
+
+  return result
+end
+
+__AsyncSingle__(true)
+function UPDATE_VISIBILITY()
+  NoCombat()
+
+  local enableAdvancedRules = VISIBILITY_RULES_CACHE.enableAdvancedRules
+  local nonMacroResult
+  if enableAdvancedRules then
+    nonMacroResult = private__EvaluateNonMacroVisibilityRules()
+    if VISIBILITY_RULES_CACHE.macroVisibility ~= "" then
+      ITEM_BAR:SetAttribute("nonMacroVisibilityResult", nonMacroResult)
+      return 
+    end
+  end
+  
+  local defaultVisibility = VISIBILITY_RULES_CACHE.defaultVisibility
+  local show = defaultVisibility ~= "hide"
+
+  if enableAdvancedRules then 
+    if nonMacroResult == "show" then 
+      show = true 
+    elseif nonMacroResult == "hide" then 
+      show = false 
+    end 
+  end 
+
+  if show then 
+    ITEM_BAR:Show()
+  else 
+    ITEM_BAR:Hide()
+  end 
+end
+
+VISIBILITY_RULES_EVENT_REGISTERED = false
+function private__RegisterAdvancedVisibilityRulesEvents()
+  if not VISIBILITY_RULES_EVENT_REGISTERED then 
+    _M:RegisterEvent("PLAYER_ENTERING_WORLD", UPDATE_VISIBILITY)
+    VISIBILITY_RULES_EVENT_REGISTERED = true 
+  end
+end
+
+function private__UnRegisterAdvancedVisibilityRulesEvent()
+  if VISIBILITY_RULES_EVENT_REGISTERED then 
+    _M:UnregisterEvent("PLAYER_ENTERING_WORLD")
+
+    VISIBILITY_RULES_EVENT_REGISTERED = false 
+  end
+end
+
+SECURE_SNIPPET_UPDATE_VISIBILITY = [[
+  local evaluateMacroAtFirst = self:GetAttribute("evaluateMacroVisibilityAtFirst")
+  local nonMacroVisibilityResult = self:GetAttribute("nonMacroVisibilityResult")
+  local defaultVisibility = self:GetAttribute("defaultVisibility")
+  local result = nil
+  local skipEvaluate = false
+
+  if evaluateMacroAtFirst then
+    result = newstate
+    skipEvaluate = result == "show" or result == "hide" or result == "default"
+  end
+
+  if not skipEvaluate then 
+    result = nonMacroVisibilityResult
+    skipEvaluate = result == "show" or result == "hide" or result == "default"
+  end 
+
+  if not evaluateMacroAtFirst and not skipEvaluate then 
+    result = newstate
+  end
+
+  if result == "show" then
+    return self:Show()
+  elseif result == "hide" then 
+    return self:Hide()
+  end
+
+  if defaultVisibility == "hide" then
+    return self:Hide()
+  end
+
+  self:Show()
+]]
+
+__AsyncSingle__(true)
+function private__SetEnabledAdvancedMacroVisiblity(enabled)
+  NoCombat()
+
+  if enabled then 
+    ITEM_BAR:SetAttribute("_onstate-macro", SECURE_SNIPPET_UPDATE_VISIBILITY)
+    ITEM_BAR:SetAttribute("evaluateMacroVisibilityAtFirst", VISIBILITY_RULES_CACHE.evaluateMacroVisibilityAtFirst)
+    ITEM_BAR:SetAttribute("defaultVisibility", VISIBILITY_RULES_CACHE.defaultVisibility)
+    ITEM_BAR:RegisterStateDriver("macro", VISIBILITY_RULES_CACHE.macroVisibility)
+  else 
+    ITEM_BAR:SetAttribute("_onstate-macro", nil)
+    ITEM_BAR:UnregisterStateDriver("macro")
+  end
+end
+
 __AsyncSingle__(true)
 function private__SetEnabled(enabled)
   NoCombat()
@@ -321,25 +541,44 @@ function private__SetEnabled(enabled)
   if enabled then 
     if not ITEM_BAR then 
       ITEM_BAR = ItemBar("SylingTracker_ItemBar", UIParent)
+      ITEM_BAR:Hide()
       ITEM_BAR:InstantApplyStyle()
      
       ITEM_BAR.OnElementAdd     = ITEM_BAR.OnElementAdd + OnItemBarElementAdd
       ITEM_BAR.OnElementRemove  = ITEM_BAR.OnElementRemove + OnItemBarElementRemove
       ITEM_BAR.OnStopMoving     = ITEM_BAR.OnStopMoving + OnItemBarStopMoving
+
+      local visibilityRules = GetItemBarSetting("visibilityRules")
+      for _, prop in Struct.GetMembers(ItemBarVisibilityRulesType) do 
+        local propName = prop:GetName()
+        VISIBILITY_RULES_CACHE[propName] = visibilityRules and visibilityRules[propName] or prop:GetDefault()
+      end
     end
 
-    ITEM_BAR:Show()
+    if VISIBILITY_RULES_CACHE.enableAdvancedRules then 
+      private__RegisterAdvancedVisibilityRulesEvents()
+
+      if VISIBILITY_RULES_CACHE.macroVisibility ~= "" then 
+        private__SetEnabledAdvancedMacroVisiblity(true)
+      end
+    end 
+
+    UPDATE_VISIBILITY()
 
     private__Update()
   else
     if ITEM_BAR then
+      if VISIBILITY_RULES_CACHE.enableAdvancedRules then 
+        private__SetEnabledAdvancedMacroVisiblity(false)
+        private__UnRegisterAdvancedVisibilityRulesEvent()
+      end
+
       ITEM_BAR:Hide()
     end
   end
 
   ITEMBAR_ENABLED = enabled
 end
-
 
 __AsyncSingle__()
 function private__Update()
@@ -415,7 +654,6 @@ function ItemBar_RemoveItem(id)
 
   ITEMS_INFO[id] = nil 
 
-
   if ITEMS_INFO_LIST.Count == 0 then 
     ITEM_APPEARANCE_ORDER = 0
   else 
@@ -452,6 +690,11 @@ API.ItemBar_Update                = ItemBar_Update
 RegisterItemBarSetting({ id = "enabled", default = true, handler = private__SetEnabled })
 RegisterItemBarSetting({ id = "locked", default = false, handler = private__SetLocked})
 RegisterItemBarSetting({ id = "position"})
+RegisterItemBarSetting({ id = "showBackground", default = false})
+RegisterItemBarSetting({ id = "showBorder", default = false})
+RegisterItemBarSetting({ id = "backgroundColor", default = Color.BLACK})
+RegisterItemBarSetting({ id = "borderColor", default = Color.BLACK})
+RegisterItemBarSetting({ id = "borderSize", default = 1})
 RegisterItemBarSetting({ id = "columnCount", default = 10})
 RegisterItemBarSetting({ id = "rowCount", default = 1})
 RegisterItemBarSetting({ id = "leftToRight", default = true})
@@ -465,31 +708,56 @@ RegisterItemBarSetting({ id = "marginLeft", default = 5})
 RegisterItemBarSetting({ id = "marginRight", default = 5})
 RegisterItemBarSetting({ id = "marginTop", default = 5})
 RegisterItemBarSetting({ id = "marginBottom", default = 5})
+
+RegisterItemBarSetting({
+  id = "visibilityRules",
+  structType = ItemBarVisibilityRulesType,
+  handler = function(value, subSetting)
+    -- if ITEMBAR_ENABLED then 
+    VISIBILITY_RULES_CACHE[subSetting] = value
+
+    if not ITEMBAR_ENABLED then
+      return 
+    end
+
+    local enableAdvancedRules = VISIBILITY_RULES_CACHE.enableAdvancedRules
+    if enableAdvancedRules then
+      local useMacroVisiblity = VISIBILITY_RULES_CACHE.macroVisibility ~= ""
+      private__SetEnabledAdvancedMacroVisiblity(useMacroVisiblity)
+      private__RegisterAdvancedVisibilityRulesEvents()
+    else 
+      private__UnRegisterAdvancedVisibilityRulesEvent()
+      private__SetEnabledAdvancedMacroVisiblity(false)
+    end
+
+    UPDATE_VISIBILITY()
+  end
+})
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
   [ItemButton] = {
-    registerForClicks = { "AnyDown", "AnyUp"},
-     backdrop = { 
-      bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
-    },
-    backdropColor = { r = 1,  g = 40/255, b = 46/255, a = 0},
+    registerForClicks                 = { "AnyDown", "AnyUp"},
+     backdrop                         = { 
+                                        bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
+                                      },
+    backdropColor                     = { r = 1,  g = 40/255, b = 46/255, a = 0},
 
     Keybind = {
-      visible = false,
-      mediaFont = FontType("PT Sans Narrow Bold", 14, "NORMAL"),
-      text = "",
-      setAllPoints = true,
-      justifyV = "TOP",
-      justifyH = "LEFT",
+      visible                         = false,
+      mediaFont                       = FontType("PT Sans Narrow Bold", 14, "NORMAL"),
+      text                            = "",
+      setAllPoints                    = true,
+      justifyV                        = "TOP",
+      justifyH                        = "LEFT",
     },
 
     Icon = {
-      file = FromUIProperty("ItemTexture"),
-      setAllPoints = true,
-      texCoords = { left = 0.07, right = 0.93, top = 0.07, bottom = 0.93 },
-      vertexColor = FromUIProperty("ItemUsable"):Map(function(usable)
+      file                            = FromUIProperty("ItemTexture"),
+      setAllPoints                    = true,
+      texCoords                       = { left = 0.07, right = 0.93, top = 0.07, bottom = 0.93 },
+      vertexColor                     = FromUIProperty("ItemUsable"):Map(function(usable)
         if usable then 
           return { r = 1, g = 1, b = 1 }
         end 
@@ -500,46 +768,56 @@ Style.UpdateSkin("Default", {
   },
 
   [ItemBar] = {
-     movable = true,
+     movable                          = true,
+     backdrop                         = FromBackdrop(),
+     showBackground                   = FromItemBarSetting("showBackground"),
+     showBorder                       = FromItemBarSetting("showBorder"),
+     backdropColor                    = FromItemBarSetting("backgroundColor"),
+     backdropBorderColor              = FromItemBarSetting("borderColor"),
+     borderSize                       = FromItemBarSetting("borderSize"), 
      
-     [Mover] = {
-      backdrop = {
-        bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]]
-      },
-
-      backdropColor = { r = 0, g = 1, b = 0, a = 0.3},
-      location = {
-        Anchor("BOTTOMLEFT", 0, 0, nil, "TOPLEFT"),
-        Anchor("BOTTOMRIGHT", 0, 0, nil, "TOPRIGHT"),
-      },
-     },
-
-     elementType = ItemButton,
-     columnCount = FromItemBarSetting("columnCount"),
-     rowCount = FromItemBarSetting("rowCount"),
-     leftToRight = FromItemBarSetting("leftToRight"),
-     topToBottom = FromItemBarSetting("topToBottom"),
-     orientation = FromItemBarSetting("orientation"),
-     elementWidth = FromItemBarSetting("elementWidth"),
-     elementHeight = FromItemBarSetting("elementHeight"),
-     hSpacing = FromItemBarSetting("hSpacing"),
-     vSpacing = FromItemBarSetting("vSpacing"),
-     marginLeft = FromItemBarSetting("marginLeft"),
-     marginRight = FromItemBarSetting("marginRight"),
-     marginTop = FromItemBarSetting("marginTop"),
-     marginBottom = FromItemBarSetting("marginBottom"),
-     backdrop = { 
-      bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],
-    },
-    backdropColor = { r = 35/255, g = 40/255, b = 46/255, a = 0.73},
+     elementType                      = ItemButton,
+     columnCount                      = FromItemBarSetting("columnCount"),
+     rowCount                         = FromItemBarSetting("rowCount"),
+     leftToRight                      = FromItemBarSetting("leftToRight"),
+     topToBottom                      = FromItemBarSetting("topToBottom"),
+     orientation                      = FromItemBarSetting("orientation"),
+     elementWidth                     = FromItemBarSetting("elementWidth"),
+     elementHeight                    = FromItemBarSetting("elementHeight"),
+     hSpacing                         = FromItemBarSetting("hSpacing"),
+     vSpacing                         = FromItemBarSetting("vSpacing"),
+     marginLeft                       = FromItemBarSetting("marginLeft"),
+     marginRight                      = FromItemBarSetting("marginRight"),
+     marginTop                        = FromItemBarSetting("marginTop"),
+     marginBottom                     = FromItemBarSetting("marginBottom"),
 
     location = FromItemBarSetting("position"):Map(function(position)
       if position then 
         return { Anchor("TOPLEFT", position.x or 0, position.y or 0, nil, "BOTTOMLEFT") }
       end
-
+      
       return { Anchor("CENTER") }
-    end)
+    end),
+
+    [Mover] = {
+      backdrop                        = {
+                                        bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]]
+                                      },
+      backdropColor                   = { r = 0, g = 1, b = 0, a = 0.3},
+                                      
+      Label = {
+        setAllPoints                  = true,
+        fontObject                    = GameFontHighlightSmall,
+        textColor                     = Color.YELLOW,
+        text                          = "SylingTracker - Item Bar",
+        justifyH                      = "CENTER",
+     },
+
+     location                         = {
+                                        Anchor("BOTTOMLEFT", 0, 0, nil, "TOPLEFT"),
+                                        Anchor("BOTTOMRIGHT", 0, 0, nil, "TOPRIGHT"),
+                                      },
+    },
   }
 })
 
