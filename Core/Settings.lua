@@ -97,7 +97,7 @@ __Static__() function API.SetSetting(id, value, useHandler, passValue)
   end
 
   if newValue ~= oldValue then 
-    Scorpio.FireSystemEvent("SylingTracker_SETTING_CHANGED", id, newValue, oldValue)
+    _M:FireSystemEvent("SylingTracker_SETTING_CHANGED", id, newValue, oldValue)
 
     -- We notify the observers if needed 
     local subject = SETTING_SUBJECTS[id]

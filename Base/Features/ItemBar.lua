@@ -233,6 +233,8 @@ function SetItemBarSetting(setting, value, notify, ...)
       subject:OnNext(value, ...)
     end
   end
+
+  _M:FireSystemEvent("SylingTracker_ITEMBAR_SETTING_UPDATED", setting, value)
 end
 
 --- Create an observable will read the item bar setting 

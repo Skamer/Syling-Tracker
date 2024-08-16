@@ -11,7 +11,7 @@ Syling                     "SylingTracker.UI.POIButton"                   ""
 
 __UIElement__()
 class "POIButton" (function(_ENV)
-    inherit "Scorpio.UI.Frame"
+    inherit "Frame"
     -----------------------------------------------------------------------------
     --                               Methods                                   --
     -----------------------------------------------------------------------------
@@ -49,9 +49,8 @@ class "POIButton" (function(_ENV)
         self:SetSize(26, 26)
         
         poiButton.shouldShowGlow = false
-        poiButton:SetAllPoints()
+        poiButton:SetPoint("CENTER")
         poiButton:Show()
-    
-        self:SetScale(0.9)
+        poiButton:SetScale(0.8)
     end
 end)

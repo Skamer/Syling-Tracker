@@ -267,13 +267,13 @@ class "QuestView" (function(_ENV)
     local hasLocalPOI = data.hasLocalPOI
 
 
-    local showPOI = true 
+    local showPOI = self.EnablePOI
     -- if isComplete then 
     --   showPOI = true
     -- elseif hasLocalPOI or (isSuperTracked and GetNextWaypoint(questID) ~= nil) then 
     --   showPOI = true 
     -- end
-
+    
     if showPOI then
       Style[self].POI.visible = true
       local poiButton = self:GetPropertyChild("POI")
@@ -509,8 +509,9 @@ end
 function FromQuestContentLocation()
   return FromUISetting("quest.enablePOI"):Map(function(enablePOI)
     return {
-      Anchor("TOPLEFT", enablePOI and 26 or 0, 0),
-      Anchor("TOPRIGHT")
+      Anchor("TOP"),
+      Anchor("LEFT", enablePOI and 26 or 0, 0),
+      Anchor("RIGHT")
     }
   end)
 end
@@ -526,6 +527,7 @@ Style.UpdateSkin("Default", {
     showBorder                        = true, 
     backdropBorderColor               = Color(0, 0, 0, 0.4),
     borderSize                        = 1,
+    autoAdjustHeight = true,
     
     Icon = {
       file = FromUIProperty("ItemTexture"),
@@ -639,13 +641,13 @@ Style.UpdateSkin("Default", {
       location = FromQuestContentLocation()
     },
 
+    [QuestView.POI] = {
+      location = {
+        Anchor("LEFT")
+      }
+    },
   },
 
-  [QuestView.POI] = {
-    location = {
-      Anchor("LEFT")
-    }
-  },
 
   [LegendaryQuestView] = {
     Content = {

@@ -40,10 +40,13 @@ enum "BindSettingType" {
 }
 
 interface "IBindSetting" (function(_ENV)
+  LAST_SET_SETTINGS_TIME = {}
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
   __Abstract__() function PrepareFromSetting(self, value, hasDefault, defaultValue) end
+
+  __Abstract__() function SyncFromOutside(self, value) end
 
   __Arguments__ { String/nil, BindSettingType/"setting", Any * 0}
   function BindSetting(self, setting, settingType, ...)
@@ -63,9 +66,12 @@ interface "IBindSetting" (function(_ENV)
       elseif settingType == "tracker" then
         local trackerID = ...
         value, hasDefault, defaultValue = GetTrackerSetting(trackerID, setting, select(2, ...))
+        self:RegisterSyncEvents()
       elseif settingType == "itemBar" then 
         value, hasDefault, defaultValue = GetItemBarSetting(setting, ...)
       end
+    else 
+      self:UnregisterSyncEvents()
     end
     
     if value == nil and hasDefault then 
@@ -79,11 +85,14 @@ interface "IBindSetting" (function(_ENV)
 
     if setting then 
       self:PrepareFromSetting(value, hasDefault, defaultValue)
+      self:RegisterSyncEvents()
     end
   end
 
   function TriggerSetSetting(self, setting, value, notify)
     local settingType = self.SettingType
+
+    LAST_SET_SETTINGS_TIME[self] = GetTime()
 
     if settingType == "setting" then 
       SetSetting(setting, value, nil, unpack(self.SettingExtraArgs))
@@ -110,6 +119,70 @@ interface "IBindSetting" (function(_ENV)
   __Arguments__ { String/nil, Any * 0 }
   function BindItemBarSetting(self, setting, ... )
     return self:BindSetting(setting, "itemBar", ...)
+  end
+
+  function OnSystemEvent(self, event, setting, ...)
+    local bindSetting = self.Setting 
+    if not bindSetting or bindSetting ~= setting then 
+      return 
+    end
+
+    --  This is to prevent the widget to react on its own event. 
+    local lastSetSettingTIme = LAST_SET_SETTINGS_TIME[self]
+    if lastSetSettingTIme and (GetTime() - lastSetSettingTIme) <= 0.05 then 
+      return 
+    end
+
+    if event == "SylingTracker_SETTING_CHANGED" then 
+      local value = ...
+      self:SyncFromOutside(value)
+    elseif event == "SylingTracker_UI_SETTING_CHANGED" then
+      local value = ...
+      self:SyncFromOutside(value)
+    elseif event == "SylingTracker_TRACKER_SETTING_UPDATED" then 
+      local eventTrackerID, value = ...
+      local bindTrackerID = self.SettingExtraArgs[1]
+      if bindTrackerID and eventTrackerID and bindTrackerID == eventTrackerID then
+        self:SyncFromOutside(value)
+      end
+    elseif event == "SylingTracker_ITEMBAR_SETTING_UPDATED" then
+      local value = ...
+      self:SyncFromOutside(value)
+    end
+  end
+
+  function RegisterSyncEvents(self)
+    local settingType = self.SettingType
+    if not self.RegisterSystemEvent and settingType then
+      return 
+    end
+
+    if settingType == "setting" then 
+      self:RegisterSystemEvent("SylingTracker_SETTING_CHANGED")
+    elseif settingType == "uiSetting" then 
+      self:RegisterSystemEvent("SylingTracker_UI_SETTING_CHANGED")
+    elseif settingType == "tracker" then 
+      self:RegisterSystemEvent("SylingTracker_TRACKER_SETTING_UPDATED")
+    elseif settingType == "itemBar" then
+      self:RegisterSystemEvent("SylingTracker_ITEMBAR_SETTING_UPDATED")
+    end
+  end
+
+  function UnregisterSyncEvents(self)
+    local settingType = self.SettingType
+    if not self.UnegisterSystemEvent and settingType then 
+      return 
+    end
+
+    if settingType == "setting" then 
+      self:UnegisterSystemEvent("SylingTracker_SETTING_CHANGED")
+    elseif settingType == "uiSetting" then 
+      self:UnegisterSystemEvent("SylingTracker_UI_SETTING_CHANGED")
+    elseif settingType == "tracker" then 
+      self:UnegisterSystemEvent("SylingTracker_TRACKER_SETTING_UPDATED")
+    elseif settingType == "itemBar" then
+      self:UnegisterSystemEvent("SylingTracker_ITEMBAR_SETTING_UPDATED")
+    end
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
@@ -468,6 +541,10 @@ class "SettingsSlider" (function(_ENV)
     end
   end
 
+  function SyncFromOutside(self, value)
+    self:SetValue(value)
+  end
+
   function OnAcquire(self)
     -- self:InstantApplyStyle()
   end
@@ -587,6 +664,11 @@ class "SettingsPosition"(function(_ENV)
     self.Position = Position(x, y)
   end
 
+  function SyncFromOutside(self, value)
+    self:GetChild("XSlider"):SetValue(value.x)
+    self:GetChild("YSlider"):SetValue(value.y)
+  end
+
   function OnRelease(self)
     self:BindSetting()
 
@@ -642,7 +724,11 @@ class "SettingsFramePointPicker" (function(_ENV)
   -----------------------------------------------------------------------------
   --                               Handlers                                  --
   -----------------------------------------------------------------------------
-  local function OnValueChangedHandler(self, new, old)
+  local function OnValueChangedHandler(self, new, old, userInput)
+    if not userInput then 
+      return 
+    end
+
     local setting = self.Setting
     if setting then
       self:TriggerSetSetting(setting, new)

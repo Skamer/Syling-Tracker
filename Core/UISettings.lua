@@ -127,6 +127,8 @@ class "UISetting" (function(_ENV)
     if subject then
       subject:OnNext(resolvedValue)
     end
+
+    _M:FireSystemEvent("SylingTracker_UI_SETTING_CHANGED", id, resolvedValue)
   end
 
   --- Get the value. By default, if there no value, this will get from parent side, 

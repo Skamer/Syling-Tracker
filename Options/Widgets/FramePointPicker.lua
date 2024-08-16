@@ -61,7 +61,7 @@ class "FramePointPicker"(function(_ENV)
   -----------------------------------------------------------------------------
     local function OnFramePointClick(self)
         local point = self.Value
-        self:GetParent():SetValue(point)
+        self:GetParent():SetValue(point, true)
     end
 
     local function OnValueChangedHandler(self, new, old)
@@ -74,16 +74,16 @@ class "FramePointPicker"(function(_ENV)
         end
 
         
-        self:OnValueChanged(new, old)
+        self:OnValueChanged(new, old, self.TreatAsMouseEvent)
     end
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
-    __Arguments__ { FramePoint/nil, Boolean/true}
-    function SetValue(self, value, preventEvent)
-        self.PreventEvent = preventEvent
-        self.Value = value
-        self.PreventEvent = false
+    __Arguments__ { FramePoint/nil, Boolean/false}
+    function SetValue(self, value, treatAsMouseEvent)
+        self.TreatAsMouseEvent  = treatAsMouseEvent
+        self.Value              = value
+        self.TreatAsMouseEvent  = nil
     end
 
     __Abstract__ { FramePoint }
@@ -148,7 +148,7 @@ class "FramePointPicker"(function(_ENV)
         default = ""
     }
 
-    property "PreventEvent" {
+    property "TreatAsMouseEvent" {
         type    = Boolean,
         default = false
     } 

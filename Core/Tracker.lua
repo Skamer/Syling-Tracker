@@ -824,7 +824,7 @@ function SetTrackerSetting(trackerID, setting, value, notify, ...)
     if handler then 
       handler(trackerID, value, ...)
     end
-    
+
     local tracker = TRACKERS[trackerID]
     if tracker then 
       -- We don't want to create a subject if the setting don't have one because this 
@@ -835,6 +835,8 @@ function SetTrackerSetting(trackerID, setting, value, notify, ...)
       end
     end
   end
+  
+  _M:FireSystemEvent("SylingTracker_TRACKER_SETTING_UPDATED", setting,  trackerID, value)
 end
 
 __Arguments__ { String , Boolean/nil }
