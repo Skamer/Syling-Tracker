@@ -128,7 +128,8 @@ class "UISetting" (function(_ENV)
       subject:OnNext(resolvedValue)
     end
 
-    _M:FireSystemEvent("SylingTracker_UI_SETTING_CHANGED", id, resolvedValue)
+    -- NOTE: We are in the class, not in the module itself, so _M cannot be used directly.
+    Scorpio.FireSystemEvent("SylingTracker_UI_SETTING_CHANGED", id, resolvedValue)
   end
 
   --- Get the value. By default, if there no value, this will get from parent side, 

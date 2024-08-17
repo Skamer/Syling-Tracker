@@ -2,10 +2,30 @@
 
 **NEW**
 
-- Added a new option for setting a offset for the position of tracker scrollbar.
+- Added the support of 4th affix for mythic +.
+- Added the textures for The War Within dungeons.
+- Added a new option for setting an offset for the position of tracker scrollbar.
 - Added a new option for using the tracker height for the height of tracker scrollbar.
+- Added a new option for changing the background and border for the item bar.
+- Added a new option for changing the position of tracker minimize button.
+- Added [ticket #90](https://github.com/Skamer/Syling-Tracker/issues/90) : the visibility rules for the item bar in the options.
 
---
+**CHANGES**
+
+- Reduced the size for item icon.
+- Redesigned the sliders in the options.
+- In the options, the settings concerning a position or a location will now use a new widget.
+- In the options, the value of setting controls will now be sync.
+
+**FIXES**
+
+- Fixed an issue where sometimes the tracker will change its position when navigating in the options.
+- Fixed an issue where the items in the item bar weren't in the correct location after locked the item bar.
+- Fixed an issue where the world quest items and task items were not added in the item bar.
+- Fixed a visual bug caused by POI buttons when scrolling the tracker.
+- In the options, fixed an issue where the setting controls executed their callbacks without user events.
+
+---
 
 ## 2.3.1
 
