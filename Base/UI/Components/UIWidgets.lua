@@ -10,10 +10,15 @@ Syling                 "SylingTracker.UI.UIWidgets"                          ""
 -- ========================================================================= --
 export {
   FromUIProperty                      = Wow.FromUIProperty,
+  Tooltip                             = API.GetTooltip(),
 
   -- Wow API
   UIWidgetVisualizationType           = _G.Enum.UIWidgetVisualizationType,
-  GetAllWidgetsBySetID                = C_UIWidgetManager.GetAllWidgetsBySetID
+  GetAllWidgetsBySetID                = C_UIWidgetManager.GetAllWidgetsBySetID,
+
+  -- Status Bar
+  StatusBarValueTextType              = _G.Enum.StatusBarValueTextType,
+  StatusBarOverrideBarTextShownType   = _G.Enum.StatusBarOverrideBarTextShownType
 }
 
 function GetWidgetTypeInfo(...)
@@ -47,8 +52,32 @@ interface "IUIWidget"(function(_ENV)
 end)
 
 __UIElement__()
+class "UIWidgetStatusBarPartition" { Texture }
+
+__UIElement__()
 class "UIWidgetStatusBar"(function(_ENV)
   inherit "ProgressBar" extend "IUIWidget"
+  -----------------------------------------------------------------------------
+  --                               Handlers                                  --
+  -----------------------------------------------------------------------------
+  local function OnEnterHandler(self)
+    local tooltip = self.Tooltip
+    if tooltip then
+      Tooltip:SetOwner(self, "ANCHOR_BOTTOMLEFT")
+      Tooltip:SetText(tooltip)
+      Tooltip:Show()
+    end
+  end
+
+  local function OnLeaveHandler(self)
+    if self.Tooltip then 
+      Tooltip:Hide()
+    end
+  end
+
+  local function OnSizeChangedHandler(self, width)
+    self:UpdateParitionsPosition(width)
+  end
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
@@ -57,6 +86,92 @@ class "UIWidgetStatusBar"(function(_ENV)
     self.BarMin     = widgetData.barMin
     self.BarValue   = widgetData.barValue
     self.TextureKit = widgetData.textureKit
+    self.OverrideBarTextShownType = widgetData.overrideBarTextShownType
+    self.OverrideBarText = widgetData.overrideBarText
+    self.Tooltip  = widgetData.tooltip
+
+    -- Bar Text
+    local barValueTextType = widgetData.barValueTextType
+    local maxTimeCount
+
+    if barValueTextType == StatusBarValueTextType.Time then 
+      maxTimeCount = 2
+    elseif barValueTextType == StatusBarValueTextType.TimeShowOneLevelOnly then 
+      maxTimeCount = 1
+    end
+
+    if maxTimeCount then
+      self.BarText = SecondsToTime(self.BarValue, false, true, maxTimeCount, true)
+    elseif barValueTextType == StatusBarValueTextType.Value then
+      self.BarText = tostring(self.BarValue)
+    elseif barValueTextType == StatusBarValueTextType.ValueOverMax then 
+      self.BarText = FormatFraction(self.BarValue, self.BarMax)
+    elseif barValueTextType == StatusBarValueTextType.ValueOverMaxNormalized then 
+      self.BarText = FormatFraction(self.BarValue - self.BarMin, self.BarMax - self.BarMin)
+    elseif barValueTextType == StatusBarValueTextType.Percentage then 
+      local barPercent = PercentageBetween(self.BarValue, self.BarMin, self.BarMax)
+      self.BarText = FormatPercentage(barPercent, true)
+    else 
+      self.BarText = ""
+    end
+
+    -- Partitions
+    self:InitPartitions(widgetData.partitionValues)
+    self:ReleaseUnusedPartitions()
+  end
+
+  function AcquirePartition(self, index)
+    local partition = self.Partitions[index]
+    if not partition then 
+      partition = UIWidgetStatusBarPartition.Acquire()
+      partition:SetParent(self)
+      partition:SetHeight(self:GetHeight())
+
+      self.Partitions[index] = partition
+    end
+
+    return partition
+  end
+
+  function InitPartitions(self, partitionValues)
+    wipe(self.PartitionsKeys)
+    if not partitionValues or (#partitionValues == 0) then 
+      return 
+    end
+
+    -- Can be 0, fallback with OnSizeChanged
+    local barWidth = self:GetWidth()
+
+    for index, partitionValue in ipairs(partitionValues) do 
+      local partition = self:AcquirePartition(index)
+      self:UpdatePartitionPosition(partition, partitionValue, barWidth)
+      partition:Show()
+
+      self.PartitionsKeys[index] = partitionValue
+    end
+  end
+
+  function UpdatePartitionPosition(self, partition, partitionValue, barWidth)
+    local partitionPercent = ClampedPercentageBetween(partitionValue, self.BarMin, self.BarMax)
+    local xOffset = barWidth * partitionPercent
+    partition:SetPoint("CENTER", self:GetStatusBarTexture(), "LEFT", xOffset, 0)
+  end
+
+  function UpdateParitionsPosition(self, barWidth)
+    for index, partition in ipairs(self.Partitions) do
+      local partitionValue = self.PartitionsKeys[index]
+      self:UpdatePartitionPosition(partition, partitionValue, barWidth)
+      partition:Show()
+    end
+  end
+
+  function ReleaseUnusedPartitions(self)
+    for key, partition in pairs(self.Partitions) do 
+      if not self.PartitionsKeys[key] then
+        partition:Release()
+        self.Partitions[key] = nil
+      end
+    end
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
@@ -78,13 +193,52 @@ class "UIWidgetStatusBar"(function(_ENV)
     type = Number,
     default = 0
   }
+  
+  __Observable__()
+  property "BarText" {
+    type = String,
+    default = ""
+  }
 
   __Observable__()
   property "TextureKit" {
     type = String,
   }
 
+  property "Tooltip" {
+    type = String
+  }
 
+  __Observable__()
+  property "OverrideBarText" {
+    type = String,
+    default = ""
+  }
+
+  __Observable__()
+  property "OverrideBarTextShownType" {
+    type = Number,
+    default = StatusBarOverrideBarTextShownType.Never
+  }
+
+  property "Partitions" {
+    set = false,
+    default = function() return Toolset.newtable(false, true) end 
+  }
+
+  property "PartitionsKeys" {
+    set = false,
+    default = function() return {} end
+  }
+  -----------------------------------------------------------------------------
+  --                              Constructors                               --
+  -----------------------------------------------------------------------------
+  __Template__ {}
+  function __ctor(self)
+    self.OnEnter = self.OnEnter + OnEnterHandler 
+    self.OnLeave = self.OnLeave + OnLeaveHandler
+    self.OnSizeChanged = self.OnSizeChanged + OnSizeChangedHandler
+  end
 end)
 
 __UIElement__()
@@ -177,136 +331,159 @@ UI_WIDGETS_CLASSES = {
   [UIWidgetVisualizationType.TugOfWar] = nil, -- 28
 }
 
-  __UIElement__()
-  class "UIWidgets" (function(_ENV)
-    inherit "Frame"
-    ---------------------------------------------------------------------------
-     --                               Methods                                --
-    ---------------------------------------------------------------------------
-    function ProcessWidget(self, widgetInfo)
-      local widgetID    = widgetInfo.widgetID
-      local widgetType  = widgetInfo.widgetType
-      local widgetClass = widgetType and UI_WIDGETS_CLASSES[widgetType]
-      
-      -- If no class, this is the addon not support yet, so we stop there for 
-      -- this widget 
-      if not widgetClass then
-        return 
-      end
+__UIElement__()
+class "UIWidgets" (function(_ENV)
+  inherit "Frame"
+  ---------------------------------------------------------------------------
+    --                               Methods                                --
+  ---------------------------------------------------------------------------
+  function ProcessWidget(self, widgetInfo)
+    local widgetID    = widgetInfo.widgetID
+    local widgetType  = widgetInfo.widgetType
+    local widgetClass = widgetType and UI_WIDGETS_CLASSES[widgetType]
   
-      local widgetTypeInfo = GetWidgetTypeInfo(widgetType)
-  
-      -- In case where we are unable to get the data function, stop there
-      if not widgetTypeInfo then
-        return 
-      end
-
-      local widgetData = widgetTypeInfo.visInfoDataFunction(widgetID)
-      if not widgetData then
-        return 
-      end
-  
-      -- Acquire the widget 
-      local widget = self.Widgets[widgetID]
-      if not widget then 
-        widget = widgetClass.Acquire()
-        widget:SetParent(self)
-  
-        widget.WidgetID     = widgetID
-        widget.WidgetType   = widgetType
-        widget.WidgetSetID  = widgetInfo.widgetSetID
-        widget.UnitToken    = widgetInfo.unitToken
-
-        self.Widgets[widgetID] = widget
-      end
-      
-  
-      widget:Setup(widgetData)
-
-      widget:SetID(widgetData.orderIndex + 1)
-
-      Style[widget].marginBottom = 5
-  
-      self.WidgetsKeys[widgetID] = true
-  
-      return widget
+    -- If no class, this is the addon not support yet, so we stop there for 
+    -- this widget
+    if not widgetClass then
+      return 
     end
 
-    function ProcessAllWidgets(self)
-      wipe(self.WidgetsKeys)
+    local widgetTypeInfo = GetWidgetTypeInfo(widgetType)
 
-      if self.WidgetSetID then 
-        local widgetsInfo = GetAllWidgetsBySetID(self.WidgetSetID)
-        for index, widgetInfo in ipairs(widgetsInfo) do
+    -- In case where we are unable to get the data function, stop there
+    if not widgetTypeInfo then
+      return 
+    end
+
+    local widgetData = widgetTypeInfo.visInfoDataFunction(widgetID)
+
+    if not widgetData then
+      return 
+    end
+
+    -- Acquire the widget 
+    local widget = self.Widgets[widgetID]
+    if not widget then 
+      widget = widgetClass.Acquire()
+      widget:SetParent(self)
+
+      widget.WidgetID     = widgetID
+      widget.WidgetType   = widgetType
+      widget.WidgetSetID  = widgetInfo.widgetSetID
+      widget.UnitToken    = widgetInfo.unitToken
+      self.Widgets[widgetID] = widget
+    end
+
+    widget:Setup(widgetData)
+
+    widget:SetID(widgetData.orderIndex + 1)
+
+    Style[widget].marginBottom = 5
+
+    self.WidgetsKeys[widgetID] = true
+
+    return widget
+  end
+
+  function ProcessAllWidgets(self)
+    wipe(self.WidgetsKeys)
+
+    if self.WidgetSetID then 
+      local widgetsInfo = GetAllWidgetsBySetID(self.WidgetSetID)
+      for index, widgetInfo in ipairs(widgetsInfo) do
+        self:ProcessWidget(widgetInfo)
+      end
+    end
+    self:ReleaseUnusedWidgets()
+  end
+
+  function OnSystemEvent(self, event, ...)
+    local widgetSetID = self.WidgetSetID
+    if widgetSetID then 
+      if event == "UPDATE_ALL_UI_WIDGETS" then 
+        self:ProcessAllWidgets()
+      elseif event == "UPDATE_UI_WIDGET" then 
+        local widgetInfo = ...
+        if widgetInfo and widgetInfo.widgetSetID == widgetSetID then
+          local widgetID = widgetInfo.widgetID
+          self.WidgetsKeys[widgetID] = nil -- TRY 
+
           self:ProcessWidget(widgetInfo)
-        end
-      end
-      self:ReleaseUnusedWidgets()
-    end
 
-    function OnSystemEvent(self, event, ...)
-      local widgetSetID = self.WidgetSetID
-      if widgetSetID then 
-        if event == "UPDATE_ALL_UI_WIDGETS" then 
-          self:ProcessAllWidgets()
-        elseif event == "UPDATE_UI_WIDGET" then 
-          local widgetInfo = ...
-          if widgetInfo and widgetInfo.widgetSetID == widgetSetID then 
-            self:ProcessWidget(widgetInfo)
+          if not self.WidgetsKeys[widgetID] then 
+            local widget = self.Widgets[widgetID]
+            if widget then 
+              widget:Release()
+              self.Widgets[widgetID] = nil 
+            end
           end
         end
       end
     end
+  end
 
-    function ReleaseUnusedWidgets(self)
-      for key, widget in pairs(self.Widgets) do 
-        if not self.WidgetsKeys[key] then
-          widget:Release()
-          self.Widgets[key] = nil
-        end
+  function ReleaseUnusedWidgets(self)
+    for key, widget in pairs(self.Widgets) do 
+      if not self.WidgetsKeys[key] then
+        widget:Release()
+        self.Widgets[key] = nil
       end
     end
+  end
 
-    function OnAcquire(self)
-      self:RegisterSystemEvents("UPDATE_ALL_UI_WIDGETS", "UPDATE_UI_WIDGET")
-    end
+  function OnAcquire(self)
+    self:RegisterSystemEvents("UPDATE_ALL_UI_WIDGETS", "UPDATE_UI_WIDGET")
+  end
 
-    function OnRelease(self)
-      self:UnregisterSystemEvents("UPDATE_ALL_UI_WIDGETS", "UPDATE_UI_WIDGET")
+  function OnRelease(self)
+    self:UnregisterSystemEvents("UPDATE_ALL_UI_WIDGETS", "UPDATE_UI_WIDGET")
 
-      wipe(self.WidgetsKeys)
-      self:ReleaseUnusedWidgets()
-    end
-    ---------------------------------------------------------------------------
-    --                               Properties                              --
-    ---------------------------------------------------------------------------
-    property "WidgetSetID" {
-      type = Number,
-      handler = function(self, new)
-        if new ~= nil then 
-          self:ProcessAllWidgets()
-        end
+    wipe(self.WidgetsKeys)
+    self:ReleaseUnusedWidgets()
+  end
+  ---------------------------------------------------------------------------
+  --                               Properties                              --
+  ---------------------------------------------------------------------------
+  property "WidgetSetID" {
+    type = Number,
+    handler = function(self, new)
+      if new ~= nil then 
+        self:ProcessAllWidgets()
       end
-    }
-
-    property "Widgets" {
-      set = false,
-      default = function() return Toolset.newtable(false, true) end 
-    }
-
-    property "WidgetsKeys" {
-      set = false,
-      default = function() return {} end
-
-    }
-
-    function __ctor(self)
-      self:OnAcquire()
     end
-  end)
+  }
+
+  property "Widgets" {
+    set = false,
+    default = function() return Toolset.newtable(false, true) end 
+  }
+
+  property "WidgetsKeys" {
+    set = false,
+    default = function() return {} end
+
+  }
+end)
 -------------------------------------------------------------------------------
 --                              Observables                                  --
 -------------------------------------------------------------------------------
+function FromUIWidgetStatusBarText()
+  return FromUIProperty("Mouseover", "BarText", "OverrideBarText", "OverrideBarTextShownType")
+    :Map(function(mouseover, barText, overrideBarText, overrideBarTextShownType)
+      local showOverrideBarText = overrideBarTextShownType == StatusBarOverrideBarTextShownType.Always
+
+      if not showOverrideBarText then
+        if mouseover then 
+          showOverrideBarText =  (overrideBarTextShownType == StatusBarOverrideBarTextShownType.OnlyOnMouseover)
+        else 
+          showOverrideBarText = (overrideBarTextShownType == StatusBarOverrideBarTextShownType.OnlyNotOnMouseover)
+        end
+      end
+
+      return showOverrideBarText and overrideBarText or barText
+    end)
+end
+
 function FromUIWidgetStatusBarColor()
   return FromUIProperty("TextureKit"):Map(function(textureKit)
     if textureKit == "Green" then 
@@ -337,12 +514,21 @@ end
     [UIWidgetScenarioHeaderTimer] = {
       showRemainingTime = true
     },
+
+    [UIWidgetStatusBarPartition] = {
+      color = Color.BLACK,
+      width = 1,
+    },
     [UIWidgetStatusBar] = {
       marginRight = 10,
       marginLeft = 10,
       minMaxValues                    = FromUIProperty("BarMin", "BarMax"):Map(function(min, max) return MinMax(min, max) end),
       value                           = FromUIProperty("BarValue"),
-      statusBarColor                  = FromUIWidgetStatusBarColor()
+      statusBarColor                  = FromUIWidgetStatusBarColor(),
+
+      Text = {
+        text                          = FromUIWidgetStatusBarText()
+      }
     },
     [UIWidgetTextWithState] = {
       autoAdjustHeight                = true,
