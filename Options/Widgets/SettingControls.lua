@@ -714,6 +714,127 @@ class "SettingsPosition"(function(_ENV)
 end)
 
 __Widget__()
+class "SettingsSize"(function(_ENV)
+  inherit "Frame" extend "IBindSetting"
+  -----------------------------------------------------------------------------
+  --                               Events                                    --
+  -----------------------------------------------------------------------------
+  event "OnValueChanged"
+  -----------------------------------------------------------------------------
+  --                               Handlers                                  --
+  -----------------------------------------------------------------------------
+  local function OnWidthChangedHandler(slider, value, userInput)
+    local parent = slider:GetParent()
+    if parent.Size then 
+      OnValueChanged(parent, Size(value, parent.Size.height), userInput)
+    end    
+  end
+
+  local function OnHeightChangedHandler(slider, value, userInput)
+    local parent = slider:GetParent()
+    if parent.Size then 
+      OnValueChanged(parent, Size(parent.Size.width, value), userInput)
+    end
+  end
+
+  local function OnValueChangedHandler(self, size, userInput)
+    if not userInput then 
+      return 
+    end
+
+    local setting = self.Setting
+    if setting then 
+      self:TriggerSetSetting(setting, size)
+    end
+
+    self.Size.width = size.width
+    self.Size.height = size.height
+  end
+  -----------------------------------------------------------------------------
+  --                               Methods                                   --
+  -----------------------------------------------------------------------------
+  function SetWidthLabel(self, text)
+    Style[self].WidthSlider.Label.text = text 
+  end
+
+  function SetHeightLabel(self, text)
+    Style[self].HeightSlider.Label.text = text
+  end
+
+  function SetWidthMinMaxValues(self, ...)
+    self:GetChild("WidthSlider"):SetMinMaxValues(...)
+  end
+
+  function SetHeightMinMaxValues(self, ...)
+    self:GetChild("HeightSlider"):SetMinMaxValues(...)
+  end
+
+  function SetMinMaxValues(self, ...)
+    self:SetWidthMinMaxValues(...)
+    self:SetHeightMinMaxValues(...)
+  end
+
+  function SetValueStep(self, ...)
+    self:GetChild("WidthSlider"):SetValueStep(...)
+    self:GetChild("HeightSlider"):SetValueStep(...)
+  end
+
+  function SetValue(self, ...)
+    self:GetChild("WidthSlider"):SetValue(...)
+    self:GetChild("HeightSlider"):SetValue(...)
+  end
+
+  function PrepareFromSetting(self, value, hasDefault, defaultValue)
+    local width = value and value.width or 0
+    local height = value and value.height or 0
+
+    self:GetChild("WidthSlider"):SetValue(width)
+    self:GetChild("HeightSlider"):SetValue(height)
+
+
+    self.Size = Size(width, height)
+  end
+
+  function OnRelease(self)
+    self:BindSetting()
+
+    --- It's important these functions are called after Setting has been set 
+    --- to nil for avoiding the setting value is updated by an incorrect value
+    ResetStyles(self, true)
+
+    self:SetValue(0)
+    self:SetValueStep(1)
+    self:SetMinMaxValues(0, 100)
+  end
+  -----------------------------------------------------------------------------
+  --                               Properties                                --
+  -----------------------------------------------------------------------------
+  property "Default" {
+    type = Any
+  }
+
+  property "Size" {
+    type = Size
+  }
+  -----------------------------------------------------------------------------
+  --                            Constructors                                 --
+  -----------------------------------------------------------------------------
+  __Template__ {
+    WidthSlider = SettingsSlider,
+    HeightSlider = SettingsSlider,
+  }
+  function __ctor(self)
+    local widthSlider = self:GetChild("WidthSlider")
+    local heightSlider = self:GetChild("HeightSlider")
+
+    widthSlider.OnValueChanged = widthSlider.OnValueChanged + OnWidthChangedHandler
+    heightSlider.OnValueChanged = heightSlider.OnValueChanged + OnHeightChangedHandler
+
+    self.OnValueChanged = self.OnValueChanged + OnValueChangedHandler
+  end
+end)
+
+__Widget__()
 class "SettingsFramePointPicker" (function(_ENV)
   inherit "Frame" extend "IBindSetting"
   -----------------------------------------------------------------------------
@@ -1230,6 +1351,27 @@ Style.UpdateSkin("Default", {
       location = {
         Anchor("TOPLEFT", 0, 0, "XSlider", "BOTTOMLEFT"),
         Anchor("TOPRIGHT", 0, 0, "XSlider", "BOTTOMRIGHT")
+      }
+    }
+  },
+  [SettingsSize] = {
+    height = 70,
+    marginRight = 0,
+
+    WidthSlider = {
+      Label = { text = "Width"},
+      location = {
+        Anchor("TOP"),
+        Anchor("LEFT"),
+        Anchor("RIGHT")
+      }
+    },
+
+    HeightSlider = {
+      Label = { text = "Height"},
+      location = {
+        Anchor("TOPLEFT", 0, 0, "WidthSlider", "BOTTOMLEFT"),
+        Anchor("TOPRIGHT", 0, 0, "WidthSlider", "BOTTOMRIGHT")
       }
     }
   },

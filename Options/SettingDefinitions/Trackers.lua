@@ -160,12 +160,29 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     --- Scale Tracker
     ---------------------------------------------------------------------------
     local scaleSlider = Widgets.SettingsSlider.Acquire(false, self)
-    scaleSlider:SetID(40)
+    scaleSlider:SetID(30)
     scaleSlider:SetLabel("Scale")
     scaleSlider:SetValueStep(0.01)
     scaleSlider:SetMinMaxValues(0.8, 1.5)
     scaleSlider:BindTrackerSetting(trackerID, "scale")
     self.GeneralTabControls.scaleSlider = scaleSlider
+    ---------------------------------------------------------------------------
+    --- Size Section
+    ---------------------------------------------------------------------------
+    local sizeSection = Widgets.SettingsExpandableSection.Acquire(false, self)
+    sizeSection:SetExpanded(false)
+    sizeSection:SetID(40)
+    sizeSection:SetTitle("Size")
+    self.GeneralTabControls.sizeSection = sizeSection
+    
+    local sizeSliders = Widgets.SettingsSize.Acquire(true, sizeSection)
+    local screenWidth = floor(GetScreenWidth() + 0.5)
+    local screenHeight = floor(GetScreenHeight() + 0.5)
+
+    sizeSliders:SetID(10)
+    sizeSliders:SetMinMaxValues(100, max(screenWidth, screenHeight))
+    sizeSliders:BindTrackerSetting(trackerID, "size")
+    self.GeneralTabControls.sizeSliders = sizeSliders
     ---------------------------------------------------------------------------
     --- Position Section
     ---------------------------------------------------------------------------
@@ -216,7 +233,7 @@ class "SettingDefinitions.Tracker" (function(_ENV)
 
     local minimizeButtonFramePointPickerPosition = Widgets.SettingsFramePointPicker.Acquire(true, minimizeButtonPositionSection)
     minimizeButtonFramePointPickerPosition:SetID(10)
-    minimizeButtonFramePointPickerPosition:SetText("To Screen")
+    minimizeButtonFramePointPickerPosition:SetText("To Tracker")
     minimizeButtonFramePointPickerPosition:DisablePoint("CENTER")
     minimizeButtonFramePointPickerPosition:BindTrackerSetting(trackerID, "minimizeButtonPosition")
     self.GeneralTabControls.minimizeButtonFramePointPickerPosition = minimizeButtonFramePointPickerPosition

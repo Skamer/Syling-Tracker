@@ -101,6 +101,7 @@ class "Tracker" (function(_ENV)
     else
       Style[self].movable         = true 
       Style[self].resizable       = true
+      Style[self].Resizer.visible = true
       Style[self].Mover.visible   = true
     end
   end
@@ -1423,10 +1424,14 @@ Style.UpdateSkin("Default", {
     },
 
     [TrackerMover] = {
-      location = {
-        Anchor("BOTTOMLEFT", 0, 0, nil, "TOPLEFT"),
-        Anchor("BOTTOMRIGHT", 0, 0, nil, "TOPRIGHT")
-      },
+      location                        = {
+                                        Anchor("BOTTOMLEFT", 0, 0, nil, "TOPLEFT"),
+                                        Anchor("BOTTOMRIGHT", 0, 0, nil, "TOPRIGHT")
+                                      },
+    },
+
+    [Resizer] = {
+      location                        = { Anchor("BOTTOMRIGHT", 16, -16) },
     }
   }
 })

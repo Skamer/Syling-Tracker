@@ -1,4 +1,16 @@
-# 2.4.1
+# 2.4.2
+
+**NEW**
+
+- Added a way for changing the tracker size from the options.
+
+**FIXES**
+
+- Fixed an issue where the resizer isn't displayed when the tracker is unlocked after a loading.
+
+---
+
+## 2.4.1
 
 - Finished the status bar for UIWidgets.
 
