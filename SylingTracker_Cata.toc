@@ -1,6 +1,6 @@
-## Interface: 110000, 110002
+## Interface: 40400
 ## Title: |cffff6a00Syling Tracker|r
-## Version:  @project-version@
+## Version: @project-version@
 ## Author: Skamer
 ## SavedVariables: SylingTrackerDB
 ## Dependencies: Scorpio
@@ -21,8 +21,8 @@ Utils\__load.xml
 # Core files
 Core\__load.xml
 
-# Retail files 
-Retail\__load.xml
+# Cataclysm files
+Cataclysm\__load.xml
 
 # Skin files 
 Skins\__load.xml

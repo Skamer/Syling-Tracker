@@ -17,9 +17,11 @@ export {
 
   -- Wow API
   IsInInstance                        = IsInInstance,
-  GetActiveKeystoneInfo               = C_ChallengeMode.GetActiveKeystoneInfo,
+  GetActiveKeystoneInfo               = IsRetail() and C_ChallengeMode.GetActiveKeystoneInfo,
   SecureCmdOptionParse                = SecureCmdOptionParse
 }
+
+
 
 __UIElement__()
 class "TrackerMinimizeButton" (function(_ENV)

@@ -13,6 +13,10 @@ export {
   GetFrameByType = Wow.GetFrameByType
 }
 
+if not IsRetail() then 
+  return 
+end
+
 API.RegisterCustomSkin("Eddy", {
   [KeystoneTimer] = {
     inherit = "default",

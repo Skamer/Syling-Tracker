@@ -51,7 +51,12 @@ class "ItemButton"(function(_ENV)
       return 
     end
 
-    local questLogIndex = C_QuestLog.GetLogIndexForQuestID(questID)
+    local questLogIndex
+    if IsRetail() then 
+      questLogIndex = C_QuestLog.GetLogIndexForQuestID(questID)
+    else 
+      questLogIndex = GetQuestLogIndexByID(questID)
+    end
 
     if questLogIndex then 
       local start, duration, enable = GetQuestLogSpecialItemCooldown(questLogIndex)
