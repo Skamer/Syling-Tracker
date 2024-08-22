@@ -1,3 +1,11 @@
+## 2.4.3
+
+**FIXES**
+
+- Fixed a case where an error is triggered when accepting a quest.
+
+---
+
 # 2.4.2
 
 **NEW**

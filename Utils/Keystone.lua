@@ -9,9 +9,9 @@
 Syling                  "SylingTracker.Utils.Keystone"                       ""
 -- ========================================================================= --
 -- Use the addon 'MythicDungeonTools' for getting the enemy counts.
-MDT                                   = _G.MDT 
-ENEMIES_PULL_COUNT                    = 0
-ENEMIES_PULL                          = {}
+local MDT                             = _G.MDT
+local ENEMIES_PULL_COUNT              = 0
+local ENEMIES_PULL                    = {}
 
 __Arguments__ { Number }
 function GetEnemyCount(npcID)

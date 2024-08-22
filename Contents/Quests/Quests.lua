@@ -20,7 +20,6 @@ export {
 
   --- WoW API & Utils
   AddQuestWatch                       = C_QuestLog.AddQuestWatch,
-  EnumQuestWatchType                  = _G.Enum.QuestWatchType,
   GetCampaignID                       = C_CampaignInfo.GetCampaignID,
   GetDistanceSqToQuest                = C_QuestLog.GetDistanceSqToQuest,
   GetInfo                             = C_QuestLog.GetInfo,
@@ -432,10 +431,7 @@ function QUEST_ACCEPTED(questID)
 
   -- Add it in the quest watched 
   if GetCVarBool("autoQuestWatch") and GetNumQuestWatches() < Constants.QuestWatchConsts.MAX_QUEST_WATCHES then
-    local wasWatched = AddQuestWatch(questID, EnumQuestWatchType.Automatic)
-    if wasWatched then 
-      QuestSuperTracking_OnQuestTracked(questID)
-    end 
+    AddQuestWatch(questID)
   end 
 end
 
