@@ -3,6 +3,7 @@
 **FIXES**
 
 - Fixed a case where an error is triggered when accepting a quest.
+- Fixed an error lua in the options when selecting the tracker category.
 
 ---
 

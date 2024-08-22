@@ -725,15 +725,15 @@ class "SettingsSize"(function(_ENV)
   -----------------------------------------------------------------------------
   local function OnWidthChangedHandler(slider, value, userInput)
     local parent = slider:GetParent()
-    if parent.Size then 
-      OnValueChanged(parent, Size(value, parent.Size.height), userInput)
+    if parent.HeightValue then 
+      OnValueChanged(parent, Size(value, parent.HeightValue), userInput)
     end    
   end
 
   local function OnHeightChangedHandler(slider, value, userInput)
     local parent = slider:GetParent()
-    if parent.Size then 
-      OnValueChanged(parent, Size(parent.Size.width, value), userInput)
+    if parent.WidthValue then 
+      OnValueChanged(parent, Size(parent.WidthValue, value), userInput)
     end
   end
 
@@ -747,8 +747,8 @@ class "SettingsSize"(function(_ENV)
       self:TriggerSetSetting(setting, size)
     end
 
-    self.Size.width = size.width
-    self.Size.height = size.height
+    self.WidthValue = size.width
+    self.HeightValue = size.height
   end
   -----------------------------------------------------------------------------
   --                               Methods                                   --
@@ -791,8 +791,8 @@ class "SettingsSize"(function(_ENV)
     self:GetChild("WidthSlider"):SetValue(width)
     self:GetChild("HeightSlider"):SetValue(height)
 
-
-    self.Size = Size(width, height)
+    self.WidthValue = width
+    self.HeightValue = height
   end
 
   function OnRelease(self)
@@ -813,8 +813,12 @@ class "SettingsSize"(function(_ENV)
     type = Any
   }
 
-  property "Size" {
-    type = Size
+  property "HeightValue" {
+    type = Number
+  }
+
+  property "WidthValue" {
+    type = Number
   }
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
