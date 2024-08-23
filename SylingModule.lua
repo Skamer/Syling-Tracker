@@ -35,6 +35,16 @@ PLoop(function(_ENV)
       end
     end
 
+    function GetInactivatingEvent(self)
+      return self._InactiveByEvent
+    end
+
+    function GetInactivatingEventArgs(self)
+      if self._InactivatingEventArgs then 
+        return unpack(self._InactivatingEventArgs) 
+      end 
+    end
+
     __Arguments__ { String }
     function IsActivateByEvent(self, evt)
       if self._ActiveByEvent and self._ActiveByEvent == evt then
@@ -132,6 +142,11 @@ PLoop(function(_ENV)
 
             -- skip if "nil" has been returned
             if active ~= nil then 
+              if not active then
+                self._InactiveByEvent = evt
+                self._InactivatingEventArgs = { ... }
+              end
+
               self._Active = active
             end
           end
@@ -148,14 +163,18 @@ PLoop(function(_ENV)
     ---------------------------------------------------------------------------
     --                         Properties                                    --
     ---------------------------------------------------------------------------
-    property "_Active" { TYPE = Boolean, DEFAULT = true, HANDLER = function(self, new)
-      if new then
-        self:OnActive()
-        self._EventActiveChanged = true
-      else
-        self:OnInactive()
-      end
-    end }
+    property "_Active" 
+    { 
+      TYPE = Boolean, DEFAULT = true, 
+      HANDLER = function(self, new)
+        if new then
+          self:OnActive()
+          self._EventActiveChanged = true
+        else
+          self:OnInactive()
+        end
+      end 
+    }
     
     -- Ready only, avoid to edit this property
     property "_Inactive" { TYPE = Boolean, GET = function(self) return not self._Active end }

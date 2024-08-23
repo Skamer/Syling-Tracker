@@ -1,4 +1,12 @@
-# 2.4.3
+# 2.4.4
+
+**FIXES**
+
+- Fixed an issue where the delve content isn't removed after leaving it.
+
+---
+
+## 2.4.3
 
 **FIXES**
 
