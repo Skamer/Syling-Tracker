@@ -1,4 +1,12 @@
-# 2.4.4
+# 2.4.5
+
+**FIXES**
+
+- Fixed an issue where the timer of some events isn't updated.
+
+---
+
+## 2.4.4
 
 **FIXES**
 
