@@ -28,8 +28,8 @@ export {
 DELVE_DATA = RegisterObservableContent("delve", DelveContentSubject)
 DELVE_WIDGET_ID = 6183
 
-__ActiveOnEvents__ "PLAYER_ENTERING_WORLD" "SCENARIO_POI_UPDATE" "SCENARIO_UPDATE"
-function BecomeActiveOn(self)
+__ActiveOnEvents__ "PLAYER_ENTERING_WORLD" "SCENARIO_POI_UPDATE" "SCENARIO_UPDATE" "ZONE_CHANGE" "ZONE_CHANGED_NEW_AREA"
+function BecomeActiveOn(self, event)
   return IsInDelve()
 end
 
