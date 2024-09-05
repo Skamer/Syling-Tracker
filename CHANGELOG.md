@@ -1,4 +1,15 @@
-# 2.4.5
+# 2.5.0
+
+- Restructured the addon to be able handling multiple game versions.
+- The addon now supports Classic Vanilla and Cataclysm (lot of work remain to be done but the base features should be here and working).
+
+**FIXES**
+
+- Fixed the context menu action "Show Details" for the quests.
+
+---
+
+## 2.4.5
 
 **FIXES**
 

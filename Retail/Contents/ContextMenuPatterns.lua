@@ -17,6 +17,7 @@ export {
   -- Quest 
   GetSuperTrackedQuestID              = C_SuperTrack.GetSuperTrackedQuestID,
   SetSuperTrackedQuestID              = C_SuperTrack.SetSuperTrackedQuestID,
+  OpenQuestDetails                    = QuestUtil.OpenQuestDetails,
   ShowQuestComplete                   = ShowQuestComplete,
   QuestLogPopupDetailFrame_Show       = QuestLogPopupDetailFrame_Show,
   GetQuestLink                        = GetQuestLink,
@@ -76,14 +77,7 @@ RegisterContextMenuPattern("quest", {
     text = "Show details",
     order = 30,
     icon = { atlas = AtlasType("adventureguide-icon-whatsnew") },
-    handler = function(questID)
-      local quest = QuestCache:Get(questID)
-      if quest.isAutoComplete and quest:IsComplete() then 
-        ShowQuestComplete(questID)
-      else 
-        QuestLogPopupDetailFrame_Show(quest:GetQuestLogIndex())
-      end
-    end
+    handler = function(questID)OpenQuestDetails(questID) end
   },
   {
     order = 35,
