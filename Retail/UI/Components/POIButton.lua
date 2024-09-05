@@ -44,7 +44,9 @@ class "POIButton" (function(_ENV)
     --                              Constructors                               --
     -----------------------------------------------------------------------------
     function __ctor(self)
-        local poiButton = CreateFrame("Button", nil, self, "POIButtonTemplate")
+        local inheritTemplate = IsRetail() and "POIButtonTemplate"
+
+        local poiButton = CreateFrame("Button", nil, self, inheritTemplate)
         self.Button = poiButton
         self:SetSize(26, 26)
         

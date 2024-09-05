@@ -9,14 +9,12 @@
 Syling                  "SylingTracker.Utils.Achievement"                    ""
 -- ========================================================================= --
 export {
-  GetContentTrackedID = C_ContentTracking.GetTrackedIDs
+  GetTrackedAchievements = GetTrackedAchievements
 }
 
-
-__Static__() function Utils.GetAchievementsTracked()
-  return C_ContentTracking.GetTrackedIDs(_G.Enum.ContentTrackingType.Achievement)
+function HasAchievements()
+  return GetTrackedAchievements() and true or false
 end
 
-__Static__() function Utils.HasAchievements()
-  return #Utils.GetAchievementsTracked() > 0
-end
+-- Export as utils functions
+Utils.HasAchievements                 = HasAchievements

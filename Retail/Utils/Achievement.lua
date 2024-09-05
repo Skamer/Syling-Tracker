@@ -6,16 +6,18 @@
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
 -- ========================================================================= --
-Syling                  "SylingTracker.Utils.Version"                        ""
+Syling                  "SylingTracker.Utils.Achievement"                    ""
 -- ========================================================================= --
 
-ADDON_VERSION     = GetAddOnMetadata("SylingTracker", "Version")
-SCORPIO_VERSION   = tonumber(GetAddOnMetadata("Scorpio", "Version"):match("%d+$"))
+export {
+  GetContentTrackedID = C_ContentTracking.GetTrackedIDs
+}
 
-function Utils.GetAddonVersion()
-  return ADDON_VERSION
+
+__Static__() function Utils.GetAchievementsTracked()
+  return C_ContentTracking.GetTrackedIDs(_G.Enum.ContentTrackingType.Achievement)
 end
 
-function Utils.GetScorpioVersion()
-  return SCORPIO_VERSION
+__Static__() function Utils.HasAchievements()
+  return #Utils.GetAchievementsTracked() > 0
 end

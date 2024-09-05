@@ -18,20 +18,35 @@ export {
 
 SLT_LOGO           = [[Interface\AddOns\SylingTracker\Media\logo]]
 
+BLIZZARD_OBJECTIVE_TRACKER = nil
+if IsVanilla() then 
+  BLIZZARD_OBJECTIVE_TRACKER = QuestWatchFrame
+elseif IsCataclysm() then 
+  BLIZZARD_OBJECTIVE_TRACKER = WatchFrame 
+else 
+  BLIZZARD_OBJECTIVE_TRACKER = ObjectiveTrackerFrame
+end
+
+-- ObjectiveTrackerFrame
+-- QuestWatchFrame
+
 -- Since the 11.0, the ObjectiveTrackerFrame is reshown on some events.
 -- The goal is to rehide when it's reshown, in addition to keep a secure environment for avoiding to taint it. 
 -- 
 -- We create our secure handler as child of blizzard objective tracker frame, and we wrap its "OnShow" script, indirectly saying when the blizzard objective tracker
 -- is reshown.
-SECURE_HANDLER_FRAME = CreateFrame("Frame", "SylingTracker_SecureHandlerFrame", ObjectiveTrackerFrame, "SecureHandlerBaseTemplate")
-SECURE_HANDLER_FRAME:SetFrameRef("ObjectiveTrackerFrame", ObjectiveTrackerFrame)
-SECURE_HANDLER_FRAME:WrapScript(SECURE_HANDLER_FRAME, "OnShow", [[
-  local hidden = self:GetAttribute("hidden")
+SECURE_HANDLER_FRAME = CreateFrame("Frame", "SylingTracker_SecureHandlerFrame", IsRetail() and BLIZZARD_OBJECTIVE_TRACKER or nil, "SecureHandlerBaseTemplate")
+SECURE_HANDLER_FRAME:SetFrameRef("ObjectiveTrackerFrame", BLIZZARD_OBJECTIVE_TRACKER)
 
-  if hidden then 
-    self:GetParent():Hide()
-  end
-]])
+if IsRetail() then 
+  SECURE_HANDLER_FRAME:WrapScript(SECURE_HANDLER_FRAME, "OnShow", [[
+    local hidden = self:GetAttribute("hidden")
+
+    if hidden then 
+      self:GetParent():Hide()
+    end
+  ]])
+end
 
 function OnLoad(self)
   _DB:SetDefault{ dbVersion = 2 }

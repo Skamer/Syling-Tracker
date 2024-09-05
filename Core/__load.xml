@@ -28,5 +28,18 @@
   <Script file="ScrollBar.lua" />
   <Script file="Tracker.lua" />
   <Script file="ContentManager.lua" />
+
+  <Script file="Data\ObjectiveData.lua" />
+
+  <Script file="UI\Components\ProgressBar.lua" />
+  <Script file="UI\Components\Timer.lua" />
+
+  <Script file="UI\Views\ListView.lua" />
+  <Script file="UI\Views\ObjectiveView.lua" />
+  <Script file="UI\Views\ContentView.lua" />
+
+  <Script file="Features\ContextMenu.lua" />
+  <Script file="Features\HelperWindow.lua" />
+  <Script file="Features\ItemBar.lua" />
 </Ui>
 
