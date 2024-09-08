@@ -134,18 +134,19 @@ function UpdateQuest(self, questID)
 
   local numObjectives = GetNumQuestLeaderBoards(questLogIndex)
   local requiredMoney = GetQuestLogRequiredMoney(questLogIndex)
-  local tag = GetQuestTagInfo(questID)
+  local tagID, tagName = GetQuestTagInfo(questID)
+  local tag = { tagID = tagID, tagName = tagName }
 
   local isDungeon = false
   local isRaid = false 
   local isLegendary = false 
 
-  if tag then 
-    if tag == EQuestTag.Dungeon then 
+  if tagID then
+    if tagID == EQuestTag.Dungeon or tagID == EQuestTag.Heroic then 
       isDungeon = true 
-    elseif tag == EQuestTag.Legendary then 
+    elseif tagID == EQuestTag.Legendary then 
       isLegendary = true 
-    elseif tag == EQuestTag.Raid or tag == EQuestTag.Raid10 or tag == EQuestTag.Raid25 then 
+    elseif tagID == EQuestTag.Raid or tag == EQuestTag.Raid10 or tag == EQuestTag.Raid25 then 
       isRaid = true 
     end
   end

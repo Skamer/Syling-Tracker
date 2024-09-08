@@ -1,4 +1,14 @@
-# 2.5.0
+# 2.5.1
+
+###### Cataclysm
+
+**FIXES**
+
+- Fixed [ticket #109](https://github.com/Skamer/Syling-Tracker/issues/109) : an error lua with tag.
+
+---
+
+## 2.5.0
 
 - Restructured the addon to be able handling multiple game versions.
 - The addon now supports Classic Vanilla and Cataclysm (lot of work remain to be done but the base features should be here and working).

@@ -415,6 +415,20 @@ function FromObjectivesLocation()
     }
   end)
 end
+
+function FromQuestTagIconTexCoords()
+  return FromUIProperty("QuestTagID"):Map(function(tagID)
+      if not tagID then 
+        return 
+      end
+
+      local left, right, top, bottom = unpack(QUEST_TAG_TCOORDS[tagID])
+
+      if left and right and top and bottom then 
+        return { left = left, right = right, top = top, bottom = bottom }
+      end
+    end)
+end
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
@@ -464,18 +478,12 @@ Style.UpdateSkin("Default", {
         height                        = 24,
   
         Tag = {
-          atlas = FromUIProperty("QuestTagID"):Map(function(tagID)
-            if not tagID then 
-              return 
-            end
-  
-            return { atlas = QUEST_TAG_ATLAS[tagID] }
-          end),
-          height = 18,
-          width = 18,
-          location = {
-            Anchor("LEFT", 3, 0)
-          }        
+          visible                     = FromUIProperty("QuestTagID"):Map(function(tagID) return tagID and true or false end),
+          file                        = [[Interface\QuestFrame\QuestTypeIcons]],
+          texCoords                   = FromQuestTagIconTexCoords(),
+          height                      = 18,
+          width                       = 18,
+          location                    = {Anchor("LEFT", 3, 0) }     
         },
   
         Name = {
@@ -553,7 +561,7 @@ Style.UpdateSkin("Default", {
 
       Header = {
         Name = {
-          textColor                     = FromUISetting("legendaryQuest.name.textColor"),
+          textColor                   = FromUISetting("legendaryQuest.name.textColor"),
         }
       }
     }
