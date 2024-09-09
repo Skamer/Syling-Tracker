@@ -36,47 +36,60 @@ class "__DataProperties__" (function(_ENV)
       local collectionIndex = "__" .. propertyName
       local collectionCounter = 0
 
+      local function PropertyTableGetFunction(self, idx)
+        return self[collectionIndex] and self[collectionIndex][idx]
+      end
+    
+      local function PropertyTableSetFunction(self, idx, value)
+        local collection = self[collectionIndex]
+    
+        if value == nil and not collection then 
+          return
+        end
+    
+        if value and not collection then 
+          collection = isArray and Array[propertyType]() or {}
+          self[collectionIndex] = collection
+        end
+    
+        local oldValue = collection[idx]
+        collection[idx] = value 
+    
+        if oldValue ~= value then 
+          self.DataChanged = true
+    
+          if Class.IsObjectType(oldValue, IObjectData) then
+            oldValue:SetParent(nil)
+          end
+    
+          if Class.IsObjectType(value, IObjectData) then 
+            value:SetParent(self)
+          end
+        end
+    
+        if recycle and value == nil and oldValue and oldValue.Release then 
+          oldValue:Release()
+        end
+      end
+
       -- Generate Properties
       Environment.Apply(manager, function(_ENV)
         if isArray or isMap then 
-          __Indexer__(Number)
-          property(propertyName) {
-            type = propertyType,
-            get = function(self, idx)
-              return self[collectionIndex] and self[collectionIndex][idx]
-            end,
-            set = function(self, idx, value)
-              local collection = self[collectionIndex]
-
-              if value == nil and not collection then 
-                return
-              end
-
-              if value and not collection then 
-                collection = isArray and Array[propertyType]() or {}
-                self[collectionIndex] = collection
-              end
-
-              local oldValue = collection[idx]
-              collection[idx] = value 
-
-              if oldValue ~= value then 
-                self.DataChanged = true
-
-                if Class.IsObjectType(oldValue, IObjectData) then
-                  oldValue:SetParent(nil)
-                end
-
-                if Class.IsObjectType(value, IObjectData) then 
-                  value:SetParent(self)
-                end
-              end
-
-              if recycle and value == nil and oldValue and oldValue.Release then 
-                oldValue:Release()
-              end
-            end
-          }
+          if isArray then 
+            __Indexer__(Number)
+            property(propertyName) {
+              type  = propertyType,
+              get   = PropertyTableGetFunction,
+              set   = PropertyTableSetFunction
+            }
+          else 
+            __Indexer__(Any)
+            property(propertyName) {
+              type  = propertyType,
+              get   = PropertyTableGetFunction,
+              set   = PropertyTableSetFunction
+            }    
+          end
         else
           if Class.IsSubType(propertyType, IObjectData) then
             property(propertyName) {

@@ -1,4 +1,10 @@
-# 2.5.1
+# 2.5.2
+
+- Updated the addon internal api.
+
+---
+
+## 2.5.1
 
 ###### Cataclysm
 
