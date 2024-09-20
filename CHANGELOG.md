@@ -2,7 +2,7 @@
 
 ##### Cataclysm
 
-###### Fixes
+###### FIXES
 
 - Trying a fix for [ticket #110](https://github.com/Skamer/Syling-Tracker/issues/110) : the auto quests were not working.
 
@@ -16,9 +16,9 @@
 
 ## 2.5.1
 
-###### Cataclysm
+##### Cataclysm
 
-**FIXES**
+###### FIXES
 
 - Fixed [ticket #109](https://github.com/Skamer/Syling-Tracker/issues/109) : an error lua with tag.
 
@@ -29,7 +29,7 @@
 - Restructured the addon to be able handling multiple game versions.
 - The addon now supports Classic Vanilla and Cataclysm (lot of work remain to be done but the base features should be here and working).
 
-**FIXES**
+###### FIXES
 
 - Fixed the context menu action "Show Details" for the quests.
 
@@ -37,7 +37,7 @@
 
 ## 2.4.5
 
-**FIXES**
+###### FIXES
 
 - Fixed an issue where the timer of some events isn't updated.
 
@@ -45,7 +45,7 @@
 
 ## 2.4.4
 
-**FIXES**
+###### FIXES
 
 - Fixed an issue where the delve content isn't removed after leaving it.
 
@@ -53,7 +53,7 @@
 
 ## 2.4.3
 
-**FIXES**
+###### FIXES
 
 - Fixed a case where an error is triggered when accepting a quest.
 - Fixed an error lua in the options when selecting the tracker category.
@@ -62,11 +62,11 @@
 
 ## 2.4.2
 
-**NEW**
+###### NEW
 
 - Added a way for changing the tracker size from the options.
 
-**FIXES**
+###### FIXES
 
 - Fixed an issue where the resizer isn't displayed when the tracker is unlocked after a loading.
 
@@ -80,7 +80,7 @@
 
 ## 2.4.0
 
-**NEW**
+###### NEW
 
 - Added the support of 4th affix for mythic +.
 - Added the textures for The War Within dungeons.
@@ -90,14 +90,14 @@
 - Added a new option for changing the position of tracker minimize button.
 - Added [ticket #90](https://github.com/Skamer/Syling-Tracker/issues/90) : the visibility rules for the item bar in the options.
 
-**CHANGES**
+###### CHANGES
 
 - Reduced the size for item icon.
 - Redesigned the sliders in the options.
 - In the options, the settings concerning a position or a location will now use a new widget.
 - In the options, the value of setting controls will now be sync.
 
-**FIXES**
+###### FIXES
 
 - Fixed an issue where sometimes the tracker will change its position when navigating in the options.
 - Fixed an issue where the items in the item bar weren't in the correct location after locked the item bar.
@@ -109,7 +109,7 @@
 
 ## 2.3.1
 
-**NEW**
+###### NEW
 
 - Added TomTom integration as experimental feature (can be enabled from the options).
 
@@ -123,7 +123,7 @@
 
 ## 2.2.1
 
-**FIXES**
+###### FIXES
 
 - Fixed errors due a missing api function on wow live version.
 
@@ -131,11 +131,11 @@
 
 ## 2.2.0
 
-**NEW**
+###### NEW
 
 - The Delve (new content from The War Within) is now fully supported.
 
-**FIXES**
+###### FIXES
 
 - Fixed an error lua sometimes triggered by tasks and causing the addon to be broken.
 - Fixed the border which wasn't displayed when it should be for the scenario.
@@ -144,7 +144,7 @@
 
 ## 2.1.5
 
-**FIXES**
+###### FIXES
 
 - Fixed an issue where in some condition the quest distance updater could be run multiple times.
 
@@ -152,7 +152,7 @@
 
 ## 2.1.4
 
-**FIXES**
+###### FIXES
 
 - Fixed again an issue where the Blizzard objective tracker was displayed when not intended.
 
@@ -160,7 +160,7 @@
 
 ## 2.1.3
 
-**FIXES**
+###### FIXES
 
 - Fixed the Dungeon, Keystone (Mythic +) and Scenario were broken due by an api changes.
 
@@ -168,11 +168,11 @@
 
 ## 2.1.2
 
-**NEW**
+###### NEW
 
 - Added an option for changing the anchor where the tracker is relatively positioned (by default: "BOTTOMLEFT").
 
-**FIXES**
+###### FIXES
 
 - Fixed an error was triggered when an auto quest was present at first loading.
 - Fixed an error was triggered when an auto quest was clicked.
@@ -183,7 +183,7 @@
 
 - Reupdate the toc number.
 
-**FIXES**
+###### FIXES
 
 - Fixed an issue where the Blizzard objective tracker was displayed when not intended.
 - Testing a fix for an issue where there is sometimes a delay for displaying the context menu background.
@@ -201,7 +201,7 @@
 
 - Bumped the toc version for 10.2.6
 
-**FIXES**
+###### FIXES
 
 - Fixed [ticket #89](https://github.com/Skamer/Syling-Tracker/issues/89) : an error lua at start.
 
@@ -211,7 +211,7 @@
 
 - Bumped the toc version for 10.2.5
 
-**FIXES**
+###### FIXES
 
 - Fixed the ColorPicker for options.
 
@@ -219,7 +219,7 @@
 
 ## 2.0.6
 
-**FIXES**
+###### FIXES
 
 - Fixed an issue where the world quests wasn't removed when the player teleport out of the zone.
 - Fixed an issue where the achievements wasn't updated.
@@ -228,11 +228,11 @@
 
 ## 2.0.5
 
-**NEW**
+###### NEW
 
 - Added new slash commands: 'tshow' and 'resetpos'.
 
-**FIXES**
+###### FIXES
 
 - Fixed an case where sometimes the quests wasn't added in the right category.
 
@@ -240,13 +240,13 @@
 
 ## 2.0.4
 
-**NEW**
+###### NEW
 
 - Added an option for hiding the minimize button for trackers.
 - Added an option for disabling the quest POIs.
 - Added options for changing the background, border and name colors for dungeon quests, raid quests and legendary quests.
 
-**FIXES**
+###### FIXES
 
 - Fixed an issue where the color picker wasn't loaded with the right color.
 - Fixed an issue where the icon of expandable section wasn't correct at the first time.
@@ -260,7 +260,7 @@
 - Re-added the death counter for the mythic +.
 - The timers will now be updated every 0.5s (instead to be every frame) for reducing performance cost.
 
-**FIXES**
+###### FIXES
 
 - Fixed a case where an error is triggered in the options with the font settings.
 - Fixed [ticket #81](https://github.com/Skamer/Syling-Tracker/issues/81) : an "script too long" error triggered during a Mythic +.
@@ -278,7 +278,7 @@
 - Left clicking on the quest will open again the quest log for this one.
 - The distance updater for quests will be disabled while the player is in instance.
 
-**FIXES**
+###### FIXES
 
 - Fixed a case where the text of objectives wasn't wrapped when using with some fonts and font sizes.
 
@@ -288,7 +288,7 @@
 
 Welcome to the v2. The addon has been rewritten from scratch with a new core.
 
-**NEW**
+###### NEW
 
 - New contents: Collections, Recipe Tracker and Activities.
 - Implemented POI icons.
@@ -301,6 +301,6 @@ Welcome to the v2. The addon has been rewritten from scratch with a new core.
 - The scenario now display widgets if needed : this should display the timer of some events.
 - Lot of new options have been added.
 
-**CHANGES**
+###### CHANGES
 
 - Some tuning has been done in the visual for various elements.
