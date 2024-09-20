@@ -15,6 +15,18 @@ export {
   CreateAtlasMarkup           = CreateAtlasMarkup,
 }
 -------------------------------------------------------------------------------
+--                             AutoQuests                                 --
+-------------------------------------------------------------------------------
+RegisterContent({
+  id = "autoQuests",
+  name = "Auto Quests PopUp",
+  description = "AUTO_QUESTS_PH_DESC",
+  order = 10,
+  viewClass = AutoQuestsContentView,
+  data = GetObservableContent("autoQuests"),
+  statusFunc = function(data) return (data and data.autoQuests) and true or false end,
+})
+-------------------------------------------------------------------------------
 --                             Achievements                                  --
 -------------------------------------------------------------------------------
 RegisterContent({

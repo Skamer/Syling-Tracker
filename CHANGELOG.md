@@ -1,4 +1,14 @@
-# 2.5.2
+# 2.5.3
+
+##### Cataclysm
+
+###### Fixes
+
+- Trying a fix for [ticket #110](https://github.com/Skamer/Syling-Tracker/issues/110) : the auto quests were not working.
+
+---
+
+## 2.5.2
 
 - Updated the addon internal api.
 

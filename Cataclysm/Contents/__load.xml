@@ -2,6 +2,11 @@
 ..\FrameXML\UI.xsd">
   <!-- Context Menu Patterns Loading -->
   <Script file="ContextMenuPatterns.lua" />
+  <!-- Auto Quests -->
+  <Script file="AutoQuests\AutoQuestsData.lua" />
+  <Script file="AutoQuests\AutoQuestView.lua"/>
+  <Script file="AutoQuests\AutoQuestsContentView.lua"/>
+  <Script file="AutoQuests\AutoQuests.lua"/>
   <!-- Achievements -->
   <Script file="Achievements\AchievementsData.lua" />
   <Script file="Achievements\AchievementView.lua"/>

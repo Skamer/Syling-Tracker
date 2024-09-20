@@ -29,6 +29,7 @@ export {
   GetQuestTagInfo                     = GetQuestTagInfo,
   GetQuestLogSpecialItemInfo          = GetQuestLogSpecialItemInfo,
   GetQuestLogCompletionText           = GetQuestLogCompletionText,
+  GetQuestLogIsAutoComplete           = GetQuestLogIsAutoComplete,
   IsQuestWatched                      = IsQuestWatched,
   AddQuestWatch                       = AddQuestWatch
 }
@@ -69,14 +70,15 @@ end
 function LoadQuests(self)
   local currentHeader         = "Misc"
 
-  -- IMPORTANT: Use 'GetNumQuestLogEntries()' for getting the quest entries is prefered but for unknow reasons, the values returned 
+  -- IMPORTANT: Use 'GetNumQuestLogEntries()' for getting the quest entries is prefered but for unknown reasons, the values returned 
   -- are incorrect after loading and until a 'QUEST_LOG_UPDATE' event is triggered. 
   --
-  -- This is the reason a while loop is used for fetching the quests data, iterating unil the title is nil. 
+  -- This is the reason a while loop is used for fetching the quests data, iterating until the title is nil.
   local i = 1
   local title, level, questTag, isHeader, isCollapsed, isComplete, 
   frequency, questID, startEvent, displayQuestID, isOnMap, 
   hasLocalPOI, isTask, isBounty, isStory, isHidden, isScaling = GetQuestLogTitle(i)
+  local isAutoComplete = GetQuestLogIsAutoComplete(i)
 
   while title and title ~= "" do
     if isHeader then 
@@ -111,7 +113,7 @@ function LoadQuests(self)
       questData.isOnMap = isOnMap
       questData.hasLocalPOI = hasLocalPOI
       questData.isHidden = isHeader
-      questData.isAutoComplete = nil -- TODO: Need check it
+      questData.isAutoComplete = isAutoComplete
       questData.overridesSortOrder = nil -- TODO: Need Check it
       questData.readyForTranslation = nil -- TODO: Need Check it
 
@@ -122,6 +124,7 @@ function LoadQuests(self)
     title, level, questTag, isHeader, isCollapsed, isComplete, 
     frequency, questID, startEvent, displayQuestID, isOnMap, 
     hasLocalPOI, isTask, isBounty, isStory, isHidden, isScaling = GetQuestLogTitle(i)
+    local isAutoComplete = GetQuestLogIsAutoComplete(i)
   end
 end
 
@@ -151,6 +154,7 @@ function UpdateQuest(self, questID)
     end
   end
 
+  local isAutoComplete = GetQuestLogIsAutoComplete(questLogIndex)
   local title, level, questTag, isHeader, isCollapsed, 
   isComplete, frequency, questID, startEvent, displayQuestID, 
   isOnMap, hasLocalPOI, isTask, isBounty, isStory, 
@@ -186,7 +190,7 @@ function UpdateQuest(self, questID)
   questData.tag = tag
   questData.isStory = isStory
   questData.startEvent = startEvent
-  questData.isAutoComplete = false
+  questData.isAutoComplete = isAutoComplete
   questData.suggestedGroup = nil
   questData.distance = 1
   questData.isDungeon = isDungeon
