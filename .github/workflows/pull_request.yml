@@ -28,4 +28,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: SylingTracker-pr${{ github.event.number }}
-          path: ./*
+          include-hidden-files: true
+          path: .release/
