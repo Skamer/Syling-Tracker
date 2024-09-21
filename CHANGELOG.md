@@ -1,4 +1,12 @@
-# 2.5.3
+# 2.5.4
+
+###### FIXES
+
+- In Mythic +, the percentage value will now redisplay a precise value.
+
+---
+
+## 2.5.3
 
 ##### Cataclysm
 
