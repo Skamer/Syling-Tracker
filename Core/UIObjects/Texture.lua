@@ -20,6 +20,7 @@ struct "MediaTextureType" {
   { name = "isMediaAtlas", type = Boolean },
   { name = "texCoords", type = RectType},
   { name = "color", type = ColorType },
+  { name = "size", type = Size} 
 }
 
 __UIElement__()

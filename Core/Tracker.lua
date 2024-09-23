@@ -1297,10 +1297,17 @@ __Arguments__ { Boolean/true}
 function FromMinizeButtonAtlas(normal)
   return FromUIProperty("Minimized"):Map(function(minimized)
     if minimized then 
-      return normal and AtlasType("common-button-dropdown-closed", false) or AtlasType("common-button-dropdown-closedpressed", false)
-
+      if IsRetail() then
+        return normal and AtlasType("common-button-dropdown-closed", false) or AtlasType("common-button-dropdown-closedpressed", false)
+      else
+        return normal and AtlasType("minimal-scrollbar-small-arrow-returntobottom", false) or AtlasType("minimal-scrollbar-small-arrow-returntobottom-down", false)
+      end
     else
-      return normal and AtlasType("common-button-dropdown-open", false) or AtlasType("common-button-dropdown-closedpressed", false)
+      if IsRetail() then
+        return normal and AtlasType("common-button-dropdown-open", false) or AtlasType("common-button-dropdown-closedpressed", false)
+      else
+        return normal and AtlasType("minimal-scrollbar-small-arrow-top", false) or AtlasType("minimal-scrollbar-small-arrow-top-down", false)
+      end
     end
   end)
 end
@@ -1372,7 +1379,7 @@ Style.UpdateSkin("Default", {
   },
 
   [TrackerMinimizeButton] = {
-    size                              = { width = 24, height = 24 },
+    size                              = { width = 24, height = IsRetail() and 24 or 16 },
     registerForClicks                 = { "AnyUp"},
     visible                           = FromUIProperty("Enabled"),
 

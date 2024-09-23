@@ -1,4 +1,20 @@
-# 2.5.4
+# 2.5.5
+
+##### Vanilla
+
+###### FIXES
+
+- Fixed [ticket #112](https://github.com/Skamer/Syling-Tracker/issues/112): an error lua triggered by quests with tags.
+
+##### Cataclysm
+
+###### FIXES
+
+- Fixed [ticket #113](https://github.com/Skamer/Syling-Tracker/issues/113): the minimize button on tracker and content headers weren't visible.
+
+---
+
+## 2.5.4
 
 ###### FIXES
 

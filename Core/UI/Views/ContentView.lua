@@ -90,6 +90,26 @@ __Sealed__() class "ContentView" (function(_ENV)
   end
 end)
 -------------------------------------------------------------------------------
+--                              Observables                                  --
+-------------------------------------------------------------------------------
+function FromNormalMediaTexture()
+  return FromUIProperty("Expanded"):Map(function(expanded)
+    if expanded then 
+      if IsRetail() then 
+        return { atlas = AtlasType("UI-HUD-Minimap-Zoom-Out") }
+      else
+        return { atlas = AtlasType("minimal-scrollbar-small-arrow-top")}
+      end
+    end
+
+    if IsRetail() then
+      return { atlas = AtlasType("UI-HUD-Minimap-Zoom-In") }
+    else
+      return { atlas = AtlasType("minimal-scrollbar-small-arrow-bottom") }
+    end
+  end)
+end
+-------------------------------------------------------------------------------
 --                              UI Settings                                  --
 -------------------------------------------------------------------------------
 RegisterUISetting("content.showHeader", true)
@@ -124,9 +144,9 @@ Style.UpdateSkin("Default", {
       backdropBorderColor             = FromUISetting("content.header.borderColor"),
       borderSize                      = FromUISetting("content.header.borderSize"),
       location                        = {
-                                      Anchor("TOP"),
-                                      Anchor("LEFT"),
-                                      Anchor("RIGHT")
+                                        Anchor("TOP"),
+                                        Anchor("LEFT"),
+                                        Anchor("RIGHT")
                                       },
 
       Icon = {
@@ -144,7 +164,12 @@ Style.UpdateSkin("Default", {
         justifyH                      = FromUISetting("content.header.label.justifyH"),
         justifyV                      = FromUISetting("content.header.label.justifyV"),
         textTransform                 = FromUISetting("content.header.label.textTransform"),
-        location                      = { Anchor("TOPLEFT"), Anchor("BOTTOMRIGHT") }
+        location                      = {
+                                        Anchor("TOP"),
+                                        Anchor("LEFT", 0, 0, "Icon", "RIGHT"),
+                                        Anchor("BOTTOM"),
+                                        Anchor("RIGHT", 0, 0, "Minimize", "LEFT")
+                                      }
       },
 
       Minimize = {
@@ -153,18 +178,11 @@ Style.UpdateSkin("Default", {
         width                         = 16,
 
         normalTexture = {
-          setAllPoints = true, 
-          mediaTexture = Wow.FromUIProperty("Expanded"):Map(function(expanded)
-            if expanded then 
-              return { atlas = AtlasType("UI-HUD-Minimap-Zoom-Out") }
-            end 
+          setAllPoints                = true, 
+          mediaTexture                = FromNormalMediaTexture()
+        },
 
-            return { atlas = AtlasType("UI-HUD-Minimap-Zoom-In") }
-          end)
-        }, 
-        location = {
-          Anchor("RIGHT", -6, 0)
-        }
+        location                      = { Anchor("RIGHT", -6, 0) }
       }
     }
   }
