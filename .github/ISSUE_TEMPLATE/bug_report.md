@@ -28,8 +28,7 @@ If applicable, add screenshots to help explain your problem.
 
 **What is the version of SylingTracker you use ?**
 
-**What are the versions of PLoop and Scorpio you use ?**
-- PLoop: 'Put the version here'
+**What is the version of Scorpio you use ?**
 - Scorpio: 'Put the version here'
 
 **Additional context**
