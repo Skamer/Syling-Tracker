@@ -206,9 +206,16 @@ __SystemEvent__()
 function CHALLENGE_MODE_DEATH_COUNT_UPDATED()
   _M:UpdateDeathCounter()
 
-  local _, elapsed, type = GetWorldElapsedTime(1)
-  -- We reduce the start time for advancing the timer of '5' seconds.
-  KEYSTONE_CONTENT_SUBJECT.startTime = KEYSTONE_CONTENT_SUBJECT.startTime - 5
+  local keystoneLevel = KEYSTONE_CONTENT_SUBJECT.level
+  local timeLostByDeath = 5 -- in seconds
+
+  -- From TWW, the 3rd afix (level 7+) removes 15 seconds by death on the timer. 
+  if keystoneLevel and keystoneLevel >= 7 then 
+    timeLostByDeath = 15
+  end
+
+  -- We reduce the start time for advancing the timer of '5 or 15' seconds.
+  KEYSTONE_CONTENT_SUBJECT.startTime = KEYSTONE_CONTENT_SUBJECT.startTime - timeLostByDeath
 end
 
 __SystemEvent__()

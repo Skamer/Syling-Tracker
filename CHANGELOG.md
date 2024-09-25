@@ -1,4 +1,12 @@
-# 2.5.5
+# 2.5.6
+
+###### FIXES
+
+- Fixed an issue where the timer wasn't correctly advanced on death players for Mythic + (level 7 and above).
+
+---
+
+## 2.5.5
 
 ##### Vanilla
 
