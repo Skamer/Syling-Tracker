@@ -206,6 +206,21 @@ __SystemEvent__()
 function CHALLENGE_MODE_DEATH_COUNT_UPDATED()
   _M:UpdateDeathCounter()
 
+  local startTime = KEYSTONE_CONTENT_SUBJECT.startTime
+  local timeLimit = KEYSTONE_CONTENT_SUBJECT.timeLimit
+
+  if not startTime or not timeLimit then 
+    return 
+  end
+
+  local depleted = GetTime() > (startTime + timeLimit)
+
+  -- We match the Blizzad timer where once the key is depleted, the timer will no longer
+  -- advance due to player deaths.
+  if depleted then 
+    return 
+  end
+
   local keystoneLevel = KEYSTONE_CONTENT_SUBJECT.level
   local timeLostByDeath = 5 -- in seconds
 

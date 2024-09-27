@@ -1,4 +1,16 @@
-# 2.5.6
+# 2.5.7
+
+###### NEW
+
+- In Mythic +, the key will now be automatically sloted.
+
+###### FIXES
+
+- Updated the Mythic + timer for matching the behavior of Blizzard timer: the death players will no longer advance the timer when the key is depleted.
+
+---
+
+## 2.5.6
 
 ###### FIXES
 

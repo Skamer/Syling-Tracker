@@ -53,6 +53,7 @@
   <Script file="Dungeon\DungeonContentView.lua" />
   <Script file="Dungeon\Dungeon.lua"/>
   <!-- Keystone -->
+  <Script file="Keystone\AutoSlotKey.lua" />
   <Script file="Keystone\KeystoneData.lua" />
   <Script file="Keystone\KeystoneContentView.lua" />
   <Script file="Keystone\Keystone.lua" />
