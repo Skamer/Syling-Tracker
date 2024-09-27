@@ -83,9 +83,10 @@ function OnInactive(self)
   wipe(QUESTS_WITH_ITEMS)
 end
 
-function LoadQuests(self)
+__Async__() function LoadQuests(self)
   local numEntries, numQuests = GetNumQuestLogEntries()
   local currentHeader         = "Misc"
+  local watchedQuests         = GetNumQuestWatches()
 
   for i = 1, numEntries do 
     local title, level, questTag, isHeader, isCollapsed, isComplete, 
@@ -125,6 +126,15 @@ function LoadQuests(self)
 
       self:UpdateQuest(questID)
     end
+  end
+
+  -- Sometimes, the values returned by GetNumQuestLogEntries returns 0, 0 even if the player has well quests. 
+  -- This issue often occurs on the first loading or when the cache folder has been deleted, probably the informations are not
+  -- available.
+  -- Strangely, GetNumQuestWatches() hasn't this issue, so we use it for detecting if we need to delay the quests loading.
+  if numQuests == 0 and watchedQuests > 0 then
+    Wait("QUEST_LOG_UPDATE")
+    self:LoadQuests()
   end
 end
 
