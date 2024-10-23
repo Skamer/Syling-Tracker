@@ -1,4 +1,16 @@
-# 2.5.7
+# 2.5.8
+
+- Bumped the toc version for 11.0.5
+
+##### Vanilla
+
+###### FIXES
+
+- Fixed the quests loading
+
+---
+
+## 2.5.7
 
 ###### NEW
 
