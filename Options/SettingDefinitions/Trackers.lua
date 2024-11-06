@@ -9,6 +9,7 @@
 Syling          "SylingTracker_Options.SettingDefinitions.Trackers"          ""
 -- ========================================================================= --
 export {
+  L                             = _Locale,
   newtable                      = Toolset.newtable,
   IterateContents               = SylingTracker.API.IterateContents,
   NewTracker                    = SylingTracker.API.NewTracker,
@@ -38,15 +39,15 @@ class "SettingDefinitions.CreateTracker" (function(_ENV)
     ---------------------------------------------------------------------------
     local trackerNameEditBox = Widgets.SettingsEditBox.Acquire(false, self)
     trackerNameEditBox:SetID(10)
-    trackerNameEditBox:SetLabel("Tracker Name")
-    trackerNameEditBox:SetInstructions("Enter the tracker name")
+    trackerNameEditBox:SetLabel(L.TRACKER_NAME)
+    trackerNameEditBox:SetInstructions(L.TRACKER_ENTER_NAME)
     self.SettingControls.trackerNameEditBox = trackerNameEditBox
     ---------------------------------------------------------------------------
     --- Contents Tracked Section Header 
     ---------------------------------------------------------------------------
     local contentsTrackedSectionHeader = Widgets.SettingsSectionHeader.Acquire(false, self)
     contentsTrackedSectionHeader:SetID(20)
-    contentsTrackedSectionHeader:SetTitle("Contents Tracked")
+    contentsTrackedSectionHeader:SetTitle(L.CONTENTS_TRACKED)
     self.SettingControls.contentsTrackedSectionHeader = contentsTrackedSectionHeader
     ---------------------------------------------------------------------------
     --- Contents Controls 
@@ -88,14 +89,12 @@ class "SettingDefinitions.CreateTracker" (function(_ENV)
     end
 
     local createButton = Widgets.SuccessPushButton.Acquire(false, self)
-    createButton:SetText("Create")
+    createButton:SetText(L.CREATE)
     createButton:SetPoint("BOTTOM")
     createButton:SetID(9999)
     Style[createButton].marginLeft = 0.35
     createButton:SetUserHandler("OnClick", OnCreateButtonClick)
     self.SettingControls.createButton = createButton
-
-
   end
 
   function ReleaseSettingControls(self)
@@ -145,7 +144,7 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     ---------------------------------------------------------------------------
     local enableTrackerCheckBox = Widgets.SettingsCheckBox.Acquire(false, self)
     enableTrackerCheckBox:SetID(10)
-    enableTrackerCheckBox:SetLabel("Enable")
+    enableTrackerCheckBox:SetLabel(L.ENABLE)
     enableTrackerCheckBox:BindTrackerSetting(trackerID, "enabled")
     self.GeneralTabControls.enableTrackerCheckBox = enableTrackerCheckBox
     ---------------------------------------------------------------------------
@@ -153,7 +152,7 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     ---------------------------------------------------------------------------
     local lockTrackerCkeckBox = Widgets.SettingsCheckBox.Acquire(false, self)
     lockTrackerCkeckBox:SetID(20)
-    lockTrackerCkeckBox:SetLabel("Lock")
+    lockTrackerCkeckBox:SetLabel(L.LOCK)
     lockTrackerCkeckBox:BindTrackerSetting(trackerID, "locked")
     self.GeneralTabControls.lockTrackerCkeckBox = lockTrackerCkeckBox
     ---------------------------------------------------------------------------
@@ -161,7 +160,7 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     ---------------------------------------------------------------------------
     local scaleSlider = Widgets.SettingsSlider.Acquire(false, self)
     scaleSlider:SetID(30)
-    scaleSlider:SetLabel("Scale")
+    scaleSlider:SetLabel(L.SCALE)
     scaleSlider:SetValueStep(0.01)
     scaleSlider:SetMinMaxValues(0.8, 1.5)
     scaleSlider:BindTrackerSetting(trackerID, "scale")
@@ -172,7 +171,7 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     local sizeSection = Widgets.SettingsExpandableSection.Acquire(false, self)
     sizeSection:SetExpanded(false)
     sizeSection:SetID(40)
-    sizeSection:SetTitle("Size")
+    sizeSection:SetTitle(L.SIZE)
     self.GeneralTabControls.sizeSection = sizeSection
     
     local sizeSliders = Widgets.SettingsSize.Acquire(true, sizeSection)
@@ -189,12 +188,12 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     local positionSection = Widgets.SettingsExpandableSection.Acquire(false, self)
     positionSection:SetExpanded(false)
     positionSection:SetID(60)
-    positionSection:SetTitle("Position")
+    positionSection:SetTitle(L.POSITION)
     self.GeneralTabControls.positionSection = positionSection
     
     local relativePositionAnchorDropDown = Widgets.SettingsFramePointPicker.Acquire(true, positionSection)
     relativePositionAnchorDropDown:SetID(10)
-    relativePositionAnchorDropDown:SetText("To Screen")
+    relativePositionAnchorDropDown:SetText(L.TO_SCREEN)
     relativePositionAnchorDropDown:BindTrackerSetting(trackerID, "relativePositionAnchor")
     self.GeneralTabControls.relativePositionAnchorDropDown = relativePositionAnchorDropDown
 
@@ -203,8 +202,8 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     local screenHeight = floor(GetScreenHeight() + 0.5)
 
     positionSliders:SetID(20)
-    positionSliders:SetXLabel("Offset X")
-    positionSliders:SetYLabel("Offset Y")
+    positionSliders:SetXLabel(L.OFFSET_X)
+    positionSliders:SetYLabel(L.OFFSET_Y)
     positionSliders:SetXMinMaxValues(-screenWidth, screenWidth)
     positionSliders:SetYMinMaxValues(-screenHeight, screenHeight)
     positionSliders:BindTrackerSetting(trackerID, "position")
@@ -215,32 +214,32 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     local minimizeButtonSection = Widgets.ExpandableSection.Acquire(false, self)
     minimizeButtonSection:SetExpanded(false)
     minimizeButtonSection:SetID(70)
-    minimizeButtonSection:SetTitle("Minimize Button")
+    minimizeButtonSection:SetTitle(L.MINIMIZE_BUTTON)
     Style[minimizeButtonSection].marginTop = 10
     self.GeneralTabControls.minimizeButtonSection = minimizeButtonSection
 
     local showMinimizeButtonCkeckBox = Widgets.SettingsCheckBox.Acquire(false, minimizeButtonSection)
     showMinimizeButtonCkeckBox:SetID(10)
-    showMinimizeButtonCkeckBox:SetLabel("Show Minimize Button")
+    showMinimizeButtonCkeckBox:SetLabel(L.SHOW_MINIMIZE_BUTTON)
     showMinimizeButtonCkeckBox:BindTrackerSetting(trackerID, "showMinimizeButton")
     self.GeneralTabControls.showMinimizeButtonCkeckBox = showMinimizeButtonCkeckBox
 
     local minimizeButtonPositionSection = Widgets.SettingsExpandableSection.Acquire(false, minimizeButtonSection)
     minimizeButtonPositionSection:SetExpanded(false)
     minimizeButtonPositionSection:SetID(60)
-    minimizeButtonPositionSection:SetTitle("Position")
+    minimizeButtonPositionSection:SetTitle(L.POSITION)
     self.GeneralTabControls.minimizeButtonPositionSection = minimizeButtonPositionSection
 
     local minimizeButtonFramePointPickerPosition = Widgets.SettingsFramePointPicker.Acquire(true, minimizeButtonPositionSection)
     minimizeButtonFramePointPickerPosition:SetID(10)
-    minimizeButtonFramePointPickerPosition:SetText("To Tracker")
+    minimizeButtonFramePointPickerPosition:SetText(L.TO_TRACKER)
     minimizeButtonFramePointPickerPosition:DisablePoint("CENTER")
     minimizeButtonFramePointPickerPosition:BindTrackerSetting(trackerID, "minimizeButtonPosition")
     self.GeneralTabControls.minimizeButtonFramePointPickerPosition = minimizeButtonFramePointPickerPosition
 
     local minimizeButtonPositionOffsetXSlider = Widgets.SettingsSlider.Acquire(false, minimizeButtonPositionSection)
     minimizeButtonPositionOffsetXSlider:SetID(20)
-    minimizeButtonPositionOffsetXSlider:SetLabel("Offset X")
+    minimizeButtonPositionOffsetXSlider:SetLabel(L.OFFSET_X)
     minimizeButtonPositionOffsetXSlider:SetValueStep(1)
     minimizeButtonPositionOffsetXSlider:SetMinMaxValues(-50, 50)
     minimizeButtonPositionOffsetXSlider:BindTrackerSetting(trackerID, "minimizeButtonPositionOffsetX")
@@ -248,7 +247,7 @@ class "SettingDefinitions.Tracker" (function(_ENV)
 
     local minimizeButtonPositionOffsetYSlider = Widgets.SettingsSlider.Acquire(false, minimizeButtonPositionSection)
     minimizeButtonPositionOffsetYSlider:SetID(30)
-    minimizeButtonPositionOffsetYSlider:SetLabel("Offset Y")
+    minimizeButtonPositionOffsetYSlider:SetLabel(L.OFFSET_Y)
     minimizeButtonPositionOffsetYSlider:SetValueStep(1)
     minimizeButtonPositionOffsetYSlider:SetMinMaxValues(-50, 50)
     minimizeButtonPositionOffsetYSlider:BindTrackerSetting(trackerID, "minimizeButtonPositionOffsetY")
@@ -259,18 +258,18 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     local backgroundSection = Widgets.ExpandableSection.Acquire(false, self)
     backgroundSection:SetExpanded(false)
     backgroundSection:SetID(80)
-    backgroundSection:SetTitle("Background")
+    backgroundSection:SetTitle(L.BACKGROUND)
     self.GeneralTabControls.backgroundSection = backgroundSection
 
     local showBackgroundCheckBox = Widgets.SettingsCheckBox.Acquire(false, backgroundSection)
     showBackgroundCheckBox:SetID(10)
-    showBackgroundCheckBox:SetLabel("Show")
+    showBackgroundCheckBox:SetLabel(L.SHOW)
     showBackgroundCheckBox:BindTrackerSetting(trackerID, "showBackground")
     self.GeneralTabControls.showBackgroundCheckBox = showBackgroundCheckBox
 
     local backgroundColorPicker = Widgets.SettingsColorPicker.Acquire(false, backgroundSection)
     backgroundColorPicker:SetID(20)
-    backgroundColorPicker:SetLabel("Color")
+    backgroundColorPicker:SetLabel(L.COLOR)
     backgroundColorPicker:BindTrackerSetting(trackerID, "backgroundColor")
     self.GeneralTabControls.backgroundColorPicker = backgroundColorPicker
     ---------------------------------------------------------------------------
@@ -279,24 +278,24 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     local borderSection = Widgets.ExpandableSection.Acquire(false, self)
     borderSection:SetExpanded(false)
     borderSection:SetID(90)
-    borderSection:SetTitle("Border")
+    borderSection:SetTitle(L.BORDER)
     self.GeneralTabControls.borderSection = borderSection
 
     local showBorderCheckBox = Widgets.SettingsCheckBox.Acquire(false, borderSection)
     showBorderCheckBox:SetID(10)
-    showBorderCheckBox:SetLabel("Show")
+    showBorderCheckBox:SetLabel(L.SHOW)
     showBorderCheckBox:BindTrackerSetting(trackerID, "showBorder")
     self.GeneralTabControls.showBorderCheckBox = showBorderCheckBox
 
     local borderColorPicker = Widgets.SettingsColorPicker.Acquire(false, borderSection)
     borderColorPicker:SetID(20)
-    borderColorPicker:SetLabel("Color")
+    borderColorPicker:SetLabel(L.COLOR)
     borderColorPicker:BindTrackerSetting(trackerID, "borderColor")
     self.GeneralTabControls.borderColorPicker = borderColorPicker
 
     local borderSizeSlider = Widgets.SettingsSlider.Acquire(false, borderSection)
     borderSizeSlider:SetID(30)
-    borderSizeSlider:SetLabel("Size")
+    borderSizeSlider:SetLabel(L.SIZE)
     borderSizeSlider:SetMinMaxValues(1, 10)
     borderSizeSlider:BindTrackerSetting(trackerID, "borderSize")
     self.GeneralTabControls.borderSizeSlider = borderSizeSlider
@@ -306,26 +305,26 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     local scrollBarSection = Widgets.ExpandableSection.Acquire(false, self)
     scrollBarSection:SetExpanded(false)
     scrollBarSection:SetID(100)
-    scrollBarSection:SetTitle("Scroll Bar")
+    scrollBarSection:SetTitle(L.SCROLL_BAR)
     self.GeneralTabControls.scrollBarSection = scrollBarSection
 
     local showScrollBarCheckBox = Widgets.SettingsCheckBox.Acquire(false, scrollBarSection)
     showScrollBarCheckBox:SetID(10)
-    showScrollBarCheckBox:SetLabel("Show")
+    showScrollBarCheckBox:SetLabel(L.SHOW)
     showScrollBarCheckBox:BindTrackerSetting(trackerID, "showScrollBar")
     self.GeneralTabControls.showScrollBarCheckBox = showScrollBarCheckBox
 
     local scrollBarPositionDropDown = Widgets.SettingsDropDown.Acquire(true, scrollBarSection)
     scrollBarPositionDropDown:SetID(20)
-    scrollBarPositionDropDown:SetLabel("Position")
-    scrollBarPositionDropDown:AddEntry({ text = "Left", value = "LEFT"})
-    scrollBarPositionDropDown:AddEntry({ text = "Right", value = "RIGHT"})
+    scrollBarPositionDropDown:SetLabel(L.POSITION)
+    scrollBarPositionDropDown:AddEntry({ text = L.LEFT, value = "LEFT"})
+    scrollBarPositionDropDown:AddEntry({ text = L.RIGHT, value = "RIGHT"})
     scrollBarPositionDropDown:BindTrackerSetting(trackerID, "scrollBarPosition")
     self.GeneralTabControls.scrollBarPositionDropDown = scrollBarPositionDropDown
 
     local scrollBarPositionOffsetXSlider = Widgets.SettingsSlider.Acquire(true, scrollBarSection)
     scrollBarPositionOffsetXSlider:SetID(25)
-    scrollBarPositionOffsetXSlider:SetLabel("Position Offset X")
+    scrollBarPositionOffsetXSlider:SetLabel(L.POSITION_OFFSET_X)
     scrollBarPositionOffsetXSlider:SetValueStep(1)
     scrollBarPositionOffsetXSlider:SetMinMaxValues(-50, 100)
     scrollBarPositionOffsetXSlider:BindTrackerSetting(trackerID, "scrollBarPositionOffsetX")
@@ -333,13 +332,13 @@ class "SettingDefinitions.Tracker" (function(_ENV)
 
     local scrollBarThumbColorPicker = Widgets.SettingsColorPicker.Acquire(false, scrollBarSection)
     scrollBarThumbColorPicker:SetID(30)
-    scrollBarThumbColorPicker:SetLabel("Thumb Color")
+    scrollBarThumbColorPicker:SetLabel(L.THUMB_COLOR)
     scrollBarThumbColorPicker:BindTrackerSetting(trackerID, "scrollBarThumbColor")
     self.GeneralTabControls.scrollBarThumbColorPicker = scrollBarThumbColorPicker
 
     local scrollBarUseTrackerHeightCheckBox = Widgets.SettingsCheckBox.Acquire(false, scrollBarSection)
     scrollBarUseTrackerHeightCheckBox:SetID(10)
-    scrollBarUseTrackerHeightCheckBox:SetLabel("Use Tracker Height")
+    scrollBarUseTrackerHeightCheckBox:SetLabel(L.USE_TRACKER_HEIGHT)
     scrollBarUseTrackerHeightCheckBox:BindTrackerSetting(trackerID, "scrollBarUseTrackerHeight")
     self.GeneralTabControls.scrollBarUseTrackerHeightCheckBox = scrollBarUseTrackerHeightCheckBox
     ---------------------------------------------------------------------------
@@ -350,7 +349,7 @@ class "SettingDefinitions.Tracker" (function(_ENV)
       local dangerZoneSection = Widgets.ExpandableSection.Acquire(false, self)
       dangerZoneSection:SetExpanded(false)
       dangerZoneSection:SetID(999)
-      dangerZoneSection:SetTitle("|cffff0000Danger Zone|r")
+      dangerZoneSection:SetTitle(("|cffff0000%s|r"):format(L.DANGER_ZONE))
       self.GeneralTabControls.dangerZoneSection = dangerZoneSection
       -------------------------------------------------------------------------
       --- Danger Zone -> Delete the tracker
@@ -360,7 +359,7 @@ class "SettingDefinitions.Tracker" (function(_ENV)
       end
 
       local deleteTrackerButton = Widgets.DangerPushButton.Acquire(false, dangerZoneSection)
-      deleteTrackerButton:SetText("Delete the tracker")
+      deleteTrackerButton:SetText(L.TRACKER_DELETE)
       deleteTrackerButton:SetID(10)
       deleteTrackerButton:SetUserHandler("OnClick", OnDeleteTrackerClick)
       Style[deleteTrackerButton].marginLeft = 0.35
@@ -387,7 +386,7 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     ---------------------------------------------------------------------------
     local contentsTrackedSectionHeader = Widgets.SettingsSectionHeader.Acquire(false, self)
     contentsTrackedSectionHeader:SetID(10)
-    contentsTrackedSectionHeader:SetTitle("Contents Tracked")
+    contentsTrackedSectionHeader:SetTitle(L.CONTENTS_TRACKED)
     self.ContentTabControls.contentsTrackedSectionHeader = contentsTrackedSectionHeader
     ---------------------------------------------------------------------------
     --- Contents Controls 
@@ -422,25 +421,25 @@ class "SettingDefinitions.Tracker" (function(_ENV)
   -- default  -> say to take the default value.
   -- ignore   -> say to ignore this condition, and check the next one.
   _ENTRIES_CONDITIONS_DROPDOWN = Array[Widgets.EntryData]()
-  _ENTRIES_CONDITIONS_DROPDOWN:Insert({ text = "|cffff0000Hide|r", value = "hide"})
-  _ENTRIES_CONDITIONS_DROPDOWN:Insert({ text = "|cff00ff00Show|r", value = "show"})
-  _ENTRIES_CONDITIONS_DROPDOWN:Insert({ text = "Default", value = "default"})
-  _ENTRIES_CONDITIONS_DROPDOWN:Insert({ text = "Ignore", value = "ignore"})
+  _ENTRIES_CONDITIONS_DROPDOWN:Insert({ text = ("|cffff0000%s|r"):format(L.HIDE), value = "hide"})
+  _ENTRIES_CONDITIONS_DROPDOWN:Insert({ text = ("|cff00ff00%s|r"):format(L.SHOW), value = "show"})
+  _ENTRIES_CONDITIONS_DROPDOWN:Insert({ text = L.DEFAULT, value = "default"})
+  _ENTRIES_CONDITIONS_DROPDOWN:Insert({ text = L.IGNORE, value = "ignore"})
 
   -- Contains below the info for every instance or group size condition option to 
   -- build 
   _INSTANCE_VISIBILITY_ROWS_INFO = {
-    [1] = { label = "Dungeon", setting = "inDungeonVisibility" },
-    [2] = { label = "Mythic +", setting = "inKeystoneVisibility"},
-    [3] = { label = "Raid", setting = "inRaidVisibility"}, 
-    [4] = { label = "Scenario", setting = "inScenarioVisibility"},
-    [5] = { label = "Arena", setting = "inArenaVisibility"},
-    [6] = { label = "Battleground", setting = "inBattlegroundVisibility"}
+    [1] = { label = L.DUNGEON, setting = "inDungeonVisibility" },
+    [2] = { label = L.KEYSTONE, setting = "inKeystoneVisibility"},
+    [3] = { label = L.RAID, setting = "inRaidVisibility"}, 
+    [4] = { label = L.SCENARIO, setting = "inScenarioVisibility"},
+    [5] = { label = L.ARENA, setting = "inArenaVisibility"},
+    [6] = { label = L.BATTLEGROUND, setting = "inBattlegroundVisibility"}
   }
 
   _GROUP_SIZE_VISIBILITY_ROWS_INFO = {
-    [1] = { label = "Party", setting = "inPartyVisibility"},
-    [2] = { label = "Raid Group", setting = "inRaidGroupVisibility" }
+    [1] = { label = L.PARTY, setting = "inPartyVisibility"},
+    [2] = { label = L.RAID_GROUP, setting = "inRaidGroupVisibility" }
   }
 
   function BuildVisibilityRulesTab(self)
@@ -450,9 +449,9 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     ---------------------------------------------------------------------------
     local defaultVisibilityDropDown = Widgets.SettingsDropDown.Acquire(false, self)
     defaultVisibilityDropDown:SetID(10)
-    defaultVisibilityDropDown:SetLabel("Default Visibility")
-    defaultVisibilityDropDown:AddEntry({ text = "|cffff0000Hidden|r", value = "hide"})
-    defaultVisibilityDropDown:AddEntry({ text = "|cff00ff00Show|r", value = "show"})
+    defaultVisibilityDropDown:SetLabel(L.DEFAULT_VISIBILITY)
+    defaultVisibilityDropDown:AddEntry({ text = ("|cffff0000%s|r"):format(L.HIDDEN), value = "hide"})
+    defaultVisibilityDropDown:AddEntry({ text = ("|cff00ff00%s|r"):format(L.SHOW), value = "show"})
     defaultVisibilityDropDown:BindTrackerSetting(trackerID, "visibilityRules", "defaultVisibility")
     self.VisibilityRulesControls.defaultVisibilityDropDown = defaultVisibilityDropDown
     ---------------------------------------------------------------------------
@@ -460,7 +459,7 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     ---------------------------------------------------------------------------
     local hideWhenEmptyCheckBox = Widgets.SettingsCheckBox.Acquire(false, self)
     hideWhenEmptyCheckBox:SetID(20)
-    hideWhenEmptyCheckBox:SetLabel("Hide when empty")
+    hideWhenEmptyCheckBox:SetLabel(L.HIDE_WHEN_EMPTY)
     hideWhenEmptyCheckBox:BindTrackerSetting(trackerID, "visibilityRules", "hideWhenEmpty")
     self.VisibilityRulesControls.hideWhenEmptyCheckBox = hideWhenEmptyCheckBox
     ---------------------------------------------------------------------------
@@ -468,14 +467,14 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     ---------------------------------------------------------------------------
     local advancedRulesSection = Widgets.SettingsExpandableSection.Acquire(false, self)
     advancedRulesSection:SetID(30)
-    advancedRulesSection:SetTitle("Advanced Rules")
+    advancedRulesSection:SetTitle(L.ADVANCED_RULES)
     self.VisibilityRulesControls.advancedRulesSection = advancedRulesSection
     ---------------------------------------------------------------------------
     ---  Enable Advanced Rules
     ---------------------------------------------------------------------------
     local enableAdvancedRulesCheckBox = Widgets.SettingsCheckBox.Acquire(false, advancedRulesSection)
     enableAdvancedRulesCheckBox:SetID(10)
-    enableAdvancedRulesCheckBox:SetLabel("Enable")
+    enableAdvancedRulesCheckBox:SetLabel(L.ENABLE)
     enableAdvancedRulesCheckBox:BindTrackerSetting(trackerID, "visibilityRules", "enableAdvancedRules")
     self.VisibilityRulesControls.enableAdvancedRulesCheckBox = enableAdvancedRulesCheckBox
     ---------------------------------------------------------------------------
@@ -483,7 +482,7 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     ---------------------------------------------------------------------------
     local instanceConditionHeader = Widgets.SettingsSectionHeader.Acquire(false, advancedRulesSection)
     instanceConditionHeader:SetID(100)
-    instanceConditionHeader:SetTitle("Instance")
+    instanceConditionHeader:SetTitle(L.INSTANCE)
     self.VisibilityRulesControls.instanceConditionHeader = instanceConditionHeader
     
     for index, info in ipairs(_INSTANCE_VISIBILITY_ROWS_INFO) do 
@@ -500,7 +499,7 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     ---------------------------------------------------------------------------
     local groupSizeConditionsHeader = Widgets.SettingsSectionHeader.Acquire(false, advancedRulesSection)
     groupSizeConditionsHeader:SetID(200)
-    groupSizeConditionsHeader:SetTitle("Group Size")
+    groupSizeConditionsHeader:SetTitle(L.GROUP_SIZE)
     self.VisibilityRulesControls.groupSizeConditionsHeader = groupSizeConditionsHeader
 
     for index, info in ipairs(_GROUP_SIZE_VISIBILITY_ROWS_INFO) do 
@@ -517,14 +516,14 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     ---------------------------------------------------------------------------
     local macroConditionsHeader = Widgets.SettingsSectionHeader.Acquire(false, advancedRulesSection)
     macroConditionsHeader:SetID(300)
-    macroConditionsHeader:SetTitle("Macro")
+    macroConditionsHeader:SetTitle(L.MACRO)
     self.VisibilityRulesControls.macroConditionsHeader = macroConditionsHeader
     ---------------------------------------------------------------------------
     --- Macro -> Evaluate Macro At First
     ---------------------------------------------------------------------------
     local evaluateMacroAtFirstCheckBox = Widgets.SettingsCheckBox.Acquire(false, advancedRulesSection)
     evaluateMacroAtFirstCheckBox:SetID(310)
-    evaluateMacroAtFirstCheckBox:SetLabel("Evaluate the macro at first")
+    evaluateMacroAtFirstCheckBox:SetLabel(L.EVALUATE_MACRO_FIRST)
     evaluateMacroAtFirstCheckBox:BindTrackerSetting(trackerID, "visibilityRules", "evaluateMacroVisibilityAtFirst")
     Style[evaluateMacroAtFirstCheckBox].marginLeft = 20
     self.VisibilityRulesControls.evaluateMacroAtFirstCheckBox = evaluateMacroAtFirstCheckBox
@@ -567,19 +566,19 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     local tabControl = Widgets.TabControl.Acquire(false, self)
     tabControl:SetID(1)
     tabControl:AddTabPage({
-      name = "General",
+      name = L.GENERAL,
       onAcquire = function() self:BuildGeneralTab() end,
       onRelease = function() self:ReleaseGeneralTab() end 
     })
 
     tabControl:AddTabPage({
-      name = "Contents Tracked",
+      name = L.CONTENTS_TRACKED,
       onAcquire = function() self:BuildContentsTrackedTab() end,
       onRelease = function() self:ReleaseContentsTrackedTab() end 
     })
 
     tabControl:AddTabPage({
-      name = "Visibility Rules",
+      name = L.VISIBILITY_RULES,
       onAcquire = function() self:BuildVisibilityRulesTab() end,
       onRelease = function() self:ReleaseVisibilityRulesTab() end
     })

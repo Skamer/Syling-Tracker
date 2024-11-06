@@ -9,6 +9,7 @@
 Syling                "SylingTracker_Options.Bootstrap"                      ""
 -- ========================================================================= --
 export {
+  L                             = _Locale,
   IterateTrackers               = SylingTracker.API.IterateTrackers,
   GetAddonVersion               = SylingTracker.Utils.GetAddonVersion
 }
@@ -24,40 +25,40 @@ __Async__() function SylingTracker_OPEN_OPTIONS()
     panel:SetParent(UIParent)
     panel:SetPoint("CENTER")
     panel:SetFrameStrata("HIGH")
-    panel:SetTitle("Syling Tracker Options")
+    panel:SetTitle("Syling Tracker " .. L.OPTIONS)
     panel:EnableMouse(true)
     panel:SetAddonVersion(GetAddonVersion())
     panel:SetAddonLogo(LOGO_WHITE)
     panel:InstantApplyStyle()
     
     --- Create categories
-    panel:CreateCategory("general", "General")
-    panel:CreateCategory("trackers", "My Trackers")
-    panel:CreateCategory("contents", "Contents")
+    panel:CreateCategory("general", L.GENERAL)
+    panel:CreateCategory("trackers", L.MY_TRACKERS)
+    panel:CreateCategory("contents", L.CONTENTS)
     -- panel:CreateCategory("advanced", "Advanced")
     -- panel:CreateCategory("userContents", "My Contents")
 
-    panel:AddCategoryEntry({ text = "Settings", value = SettingDefinitions.General }, "general")
+    panel:AddCategoryEntry({ text = L.SETTINGS, value = SettingDefinitions.General }, "general")
     -- panel:AddCategoryEntry({ text = "|cffabababMedia (NYI)|r"}, "general")
-    panel:AddCategoryEntry({ text = "Item Bar", value = SettingDefinitions.ItemBar }, "general")
+    panel:AddCategoryEntry({ text = L.ITEM_BAR, value = SettingDefinitions.ItemBar }, "general")
     -- panel:AddCategoryEntry({ text = "|cffabababContext Menu (NYI)|r"}, "general")
-    panel:AddCategoryEntry({ text = "Objective", value = SettingDefinitions.Objective}, "general")
+    panel:AddCategoryEntry({ text = L.OBJECTIVE, value = SettingDefinitions.Objective}, "general")
 
     -- My Trackers entries 
     _M:CreateTrackerEntries(panel)
 
     -- Contents entries
-    panel:AddCategoryEntry({ text = "Quests", value = SettingDefinitions.Quests}, "contents")
-    panel:AddCategoryEntry({ text = "Tasks", value = SettingDefinitions.Tasks}, "contents")
+    panel:AddCategoryEntry({ text = L.QUESTS, value = SettingDefinitions.Quests}, "contents")
+    panel:AddCategoryEntry({ text = L.TASKS, value = SettingDefinitions.Tasks}, "contents")
     -- panel:AddCategoryEntry({ text = "World Quests"}, "contents")
     -- panel:AddCategoryEntry({ text = "Bonus objectives"}, "contents")
-    panel:AddCategoryEntry({ text = "Scenario", value = SettingDefinitions.Scenario }, "contents")
-    panel:AddCategoryEntry({ text = Color.GRAY .. "Mythic + (NYI)"}, "contents")
-    panel:AddCategoryEntry({ text = "Dungeon", value = SettingDefinitions.Dungeon}, "contents")
-    panel:AddCategoryEntry({ text = "Achievements", value = SettingDefinitions.Achievements}, "contents")
-    panel:AddCategoryEntry({ text = "Profession", value = SettingDefinitions.Profession}, "contents")
-    panel:AddCategoryEntry({ text = "Activities", value = SettingDefinitions.Activities}, "contents")
-    panel:AddCategoryEntry({ text = "Collections", value = SettingDefinitions.Collections}, "contents")
+    panel:AddCategoryEntry({ text = L.SCENARIO, value = SettingDefinitions.Scenario}, "contents")
+    panel:AddCategoryEntry({ text = Color.GRAY .. L.KEYSTONE .. " (NYI)"}, "contents")
+    panel:AddCategoryEntry({ text = L.DUNGEON, value = SettingDefinitions.Dungeon}, "contents")
+    panel:AddCategoryEntry({ text = L.ACHIEVEMENTS, value = SettingDefinitions.Achievements}, "contents")
+    panel:AddCategoryEntry({ text = L.PROFESSION, value = SettingDefinitions.Profession}, "contents")
+    panel:AddCategoryEntry({ text = L.ACTIVITIES, value = SettingDefinitions.Activities}, "contents")
+    panel:AddCategoryEntry({ text = L.COLLECTIONS, value = SettingDefinitions.Collections}, "contents")
     -- panel:AddCategoryEntry({ text = "Torghast"}, "contents")
     -- panel:AddCategoryEntry({ text = "Quests"}, "contents")
 
@@ -111,7 +112,7 @@ function CreateTrackerEntries(self, panel)
   end
 
   panel:AddCategoryEntry({ 
-    text = "|A:tradeskills-icon-add:16:16|a |cff00ff00Create a tracker|r",
+    text = ("|A:tradeskills-icon-add:16:16|a |cff00ff00%s|r"):format(L.TRACKER_CREATE),
     value = SettingDefinitions.CreateTracker,
     styles = {
       marginTop = 10
@@ -136,19 +137,19 @@ function SylingTracker_TRACKER_DELETED(trackerID)
 end
 
 TEXT_TRANSFORM_ENTRIES = Array[Widgets.EntryData]()
-TEXT_TRANSFORM_ENTRIES:Insert({ text = "NONE", value = "NONE"})
-TEXT_TRANSFORM_ENTRIES:Insert({ text = "UPPERCASE", value = "UPPERCASE"})
-TEXT_TRANSFORM_ENTRIES:Insert({ text = "lowercase", value = "LOWERCASE"})
+TEXT_TRANSFORM_ENTRIES:Insert({ text = L.NONE, value = "NONE"})
+TEXT_TRANSFORM_ENTRIES:Insert({ text = L.TEXT_TRANSFORM_UPPERCASE, value = "UPPERCASE"})
+TEXT_TRANSFORM_ENTRIES:Insert({ text = L.TEXT_TRANSFORM_LOWERCASE, value = "LOWERCASE"})
 _Parent.TEXT_TRANSFORM_ENTRIES = TEXT_TRANSFORM_ENTRIES
 
 TEXT_JUSTIFY_H_ENTRIES = Array[Widgets.EntryData]()
-TEXT_JUSTIFY_H_ENTRIES:Insert({ text = "LEFT", value = "LEFT"})
-TEXT_JUSTIFY_H_ENTRIES:Insert({ text = "CENTER", value = "CENTER"})
-TEXT_JUSTIFY_H_ENTRIES:Insert({ text = "RIGHT", value = "RIGHT"})
+TEXT_JUSTIFY_H_ENTRIES:Insert({ text = L.TEXT_JUSITFY_H_LEFT, value = "LEFT"})
+TEXT_JUSTIFY_H_ENTRIES:Insert({ text = L.TEXT_JUSITFY_H_CENTER, value = "CENTER"})
+TEXT_JUSTIFY_H_ENTRIES:Insert({ text = L.TEXT_JUSITFY_H_RIGHT, value = "RIGHT"})
 _Parent.TEXT_JUSTIFY_H_ENTRIES = TEXT_JUSTIFY_H_ENTRIES
 
 TEXT_JUSTIFY_V_ENTRIES = Array[Widgets.EntryData]()
-TEXT_JUSTIFY_V_ENTRIES:Insert({ text = "TOP", value = "TOP"})
-TEXT_JUSTIFY_V_ENTRIES:Insert({ text = "MIDDLE", value = "MIDDLE"})
-TEXT_JUSTIFY_V_ENTRIES:Insert({ text = "BOTTOM", value = "BOTTOM"})
+TEXT_JUSTIFY_V_ENTRIES:Insert({ text = L.TEXT_JUSITFY_V_TOP, value = "TOP"})
+TEXT_JUSTIFY_V_ENTRIES:Insert({ text = L.TEXT_JUSITFY_V_MIDDLE, value = "MIDDLE"})
+TEXT_JUSTIFY_V_ENTRIES:Insert({ text = L.TEXT_JUSITFY_V_BOTTOM, value = "BOTTOM"})
 _Parent.TEXT_JUSTIFY_V_ENTRIES = TEXT_JUSTIFY_V_ENTRIES

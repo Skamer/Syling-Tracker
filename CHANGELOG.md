@@ -1,4 +1,10 @@
-# 2.5.8
+# 2.6.0
+
+- Added the localization support
+
+---
+
+## 2.5.8
 
 - Bumped the toc version for 11.0.5
 

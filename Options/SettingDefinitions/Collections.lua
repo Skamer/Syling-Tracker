@@ -9,6 +9,7 @@
 Syling         "SylingTracker_Options.SettingDefinitions.Collections"        ""
 -- ========================================================================= --
 export {
+  L                                   = _Locale,
   newtable                            = Toolset.newtable
 }
 
@@ -37,7 +38,7 @@ class "SettingDefinitions.Collections" (function(_ENV)
   function BuildHeaderTab(self)
     local showHeaderCheckBox = Widgets.SettingsCheckBox.Acquire(false, self)
     showHeaderCheckBox:SetID(10)
-    showHeaderCheckBox:SetLabel("Show")
+    showHeaderCheckBox:SetLabel(L.SHOW)
     showHeaderCheckBox:BindUISetting("collections.showHeader")
     self.HeaderTabControls.showHeaderCheckBox = showHeaderCheckBox
 
@@ -47,19 +48,19 @@ class "SettingDefinitions.Collections" (function(_ENV)
     local backgroundSection = Widgets.ExpandableSection.Acquire(false, self)
     backgroundSection:SetExpanded(false)
     backgroundSection:SetID(30)
-    backgroundSection:SetTitle("Background")
+    backgroundSection:SetTitle(L.BACKGROUND)
     Style[backgroundSection].marginTop = 10
     self.HeaderTabControls.backgroundSection = backgroundSection
 
     local showBackgroundCheckBox = Widgets.SettingsCheckBox.Acquire(false, backgroundSection)
     showBackgroundCheckBox:SetID(10)
-    showBackgroundCheckBox:SetLabel("Show")
+    showBackgroundCheckBox:SetLabel(L.SHOW)
     showBackgroundCheckBox:BindUISetting("collections.header.showBackground")
     self.HeaderTabControls.showBackgroundCheckBox = showBackgroundCheckBox
 
     local backgroundColorPicker = Widgets.SettingsColorPicker.Acquire(false, backgroundSection)
     backgroundColorPicker:SetID(20)
-    backgroundColorPicker:SetLabel("Color")
+    backgroundColorPicker:SetLabel(L.COLOR)
     backgroundColorPicker:BindUISetting("collections.header.backgroundColor")
     self.HeaderTabControls.backgroundColorPicker = backgroundColorPicker
     ---------------------------------------------------------------------------
@@ -68,24 +69,24 @@ class "SettingDefinitions.Collections" (function(_ENV)
     local borderSection = Widgets.ExpandableSection.Acquire(false, self)
     borderSection:SetExpanded(false)
     borderSection:SetID(40)
-    borderSection:SetTitle("Border")
+    borderSection:SetTitle(L.BORDER)
     self.HeaderTabControls.borderSection = borderSection
 
     local showBorderCheckBox = Widgets.SettingsCheckBox.Acquire(false, borderSection)
     showBorderCheckBox:SetID(10)
-    showBorderCheckBox:SetLabel("Show")
+    showBorderCheckBox:SetLabel(L.SHOW)
     showBorderCheckBox:BindUISetting("collections.header.showBorder")
     self.HeaderTabControls.showBorderCheckBox = showBorderCheckBox
 
     local borderColorPicker = Widgets.SettingsColorPicker.Acquire(false, borderSection)
     borderColorPicker:SetID(20)
-    borderColorPicker:SetLabel("Color")
+    borderColorPicker:SetLabel(L.COLOR)
     borderColorPicker:BindUISetting("collections.header.borderColor")
     self.HeaderTabControls.borderColorPicker = borderColorPicker
 
     local borderSizeSlider = Widgets.SettingsSlider.Acquire(false, borderSection)
     borderSizeSlider:SetID(30)
-    borderSizeSlider:SetLabel("Size")
+    borderSizeSlider:SetLabel(L.SIZE)
     borderSizeSlider:SetMinMaxValues(1, 10)
     borderSizeSlider:BindUISetting("collections.header.borderSize")
     self.HeaderTabControls.borderSizeSlider = borderSizeSlider
@@ -95,7 +96,7 @@ class "SettingDefinitions.Collections" (function(_ENV)
     local titleSection = Widgets.ExpandableSection.Acquire(false, self)
     titleSection:SetExpanded(false)
     titleSection:SetID(60)
-    titleSection:SetTitle("Title")
+    titleSection:SetTitle(L.TITLE)
     self.HeaderTabControls.titleSection = titleSection
 
     local titleFont = Widgets.SettingsMediaFont.Acquire(false, titleSection)
@@ -105,27 +106,27 @@ class "SettingDefinitions.Collections" (function(_ENV)
 
     local textColorPicker = Widgets.SettingsColorPicker.Acquire(false, titleSection)
     textColorPicker:SetID(20)
-    textColorPicker:SetLabel("Text Color")
+    textColorPicker:SetLabel(L.TEXT_COLOR)
     textColorPicker:BindUISetting("collections.header.label.textColor")
     self.HeaderTabControls.textColorPicker = textColorPicker
 
     local textTransform = Widgets.SettingsDropDown.Acquire(false, titleSection)
     textTransform:SetID(30)
-    textTransform:SetLabel("Text Transform")
+    textTransform:SetLabel(L.TEXT_TRANSFORM)
     textTransform:SetEntries(TEXT_TRANSFORM_ENTRIES)
     textTransform:BindUISetting("collections.header.label.textTransform")
     self.HeaderTabControls.textTransform = textTransform
 
     local textJustifyV = Widgets.SettingsDropDown.Acquire(false, titleSection)
     textJustifyV:SetID(40)
-    textJustifyV:SetLabel("Text Justify V")
+    textJustifyV:SetLabel(L.TEXT_JUSITFY_V)
     textJustifyV:SetEntries(TEXT_JUSTIFY_V_ENTRIES)
     textJustifyV:BindUISetting("collections.header.label.justifyV")
     self.HeaderTabControls.textJustifyV = textJustifyV
 
     local textJustifyH = Widgets.SettingsDropDown.Acquire(false, titleSection)
     textJustifyH:SetID(50)
-    textJustifyH:SetLabel("Text Justify H")
+    textJustifyH:SetLabel(L.TEXT_JUSITFY_H)
     textJustifyH:SetEntries(TEXT_JUSTIFY_H_ENTRIES)
     textJustifyH:BindUISetting("collections.header.label.justifyH")
     self.HeaderTabControls.textJustifyH = textJustifyH
@@ -149,19 +150,19 @@ class "SettingDefinitions.Collections" (function(_ENV)
     local backgroundSection = Widgets.ExpandableSection.Acquire(false, self)
     backgroundSection:SetExpanded(false)
     backgroundSection:SetID(30)
-    backgroundSection:SetTitle("Background")
+    backgroundSection:SetTitle(L.BACKGROUND)
     Style[backgroundSection].marginTop = 10
     self.CollectableTabControls.backgroundSection = backgroundSection
 
     local showBackgroundCheckBox = Widgets.SettingsCheckBox.Acquire(false, backgroundSection)
     showBackgroundCheckBox:SetID(10)
-    showBackgroundCheckBox:SetLabel("Show")
+    showBackgroundCheckBox:SetLabel(L.SHOW)
     showBackgroundCheckBox:BindUISetting("collectable.showBackground")
     self.CollectableTabControls.showBackgroundCheckBox = showBackgroundCheckBox
 
     local backgroundColorPicker = Widgets.SettingsColorPicker.Acquire(false, backgroundSection)
     backgroundColorPicker:SetID(20)
-    backgroundColorPicker:SetLabel("Color")
+    backgroundColorPicker:SetLabel(L.COLOR)
     backgroundColorPicker:BindUISetting("collectable.backgroundColor")
     self.CollectableTabControls.backgroundColorPicker = backgroundColorPicker
     ---------------------------------------------------------------------------
@@ -170,24 +171,24 @@ class "SettingDefinitions.Collections" (function(_ENV)
     local borderSection = Widgets.ExpandableSection.Acquire(false, self)
     borderSection:SetExpanded(false)
     borderSection:SetID(40)
-    borderSection:SetTitle("Border")
+    borderSection:SetTitle(L.BORDER)
     self.CollectableTabControls.borderSection = borderSection
 
     local showBorderCheckBox = Widgets.SettingsCheckBox.Acquire(false, borderSection)
     showBorderCheckBox:SetID(10)
-    showBorderCheckBox:SetLabel("Show")
+    showBorderCheckBox:SetLabel(L.SHOW)
     showBorderCheckBox:BindUISetting("collectable.showBorder")
     self.CollectableTabControls.showBorderCheckBox = showBorderCheckBox
 
     local borderColorPicker = Widgets.SettingsColorPicker.Acquire(false, borderSection)
     borderColorPicker:SetID(20)
-    borderColorPicker:SetLabel("Color")
+    borderColorPicker:SetLabel(L.COLOR)
     borderColorPicker:BindUISetting("collectable.borderColor")
     self.CollectableTabControls.borderColorPicker = borderColorPicker
 
     local borderSizeSlider = Widgets.SettingsSlider.Acquire(false, borderSection)
     borderSizeSlider:SetID(30)
-    borderSizeSlider:SetLabel("Size")
+    borderSizeSlider:SetLabel(L.SIZE)
     borderSizeSlider:SetMinMaxValues(1, 10)
     borderSizeSlider:BindUISetting("collectable.borderSize")
     self.CollectableTabControls.borderSizeSlider = borderSizeSlider
@@ -197,7 +198,7 @@ class "SettingDefinitions.Collections" (function(_ENV)
     local headerSection = Widgets.ExpandableSection.Acquire(false, self)
     headerSection:SetExpanded(false)
     headerSection:SetID(50)
-    headerSection:SetTitle("Header")
+    headerSection:SetTitle(L.HEADER)
     self.CollectableTabControls.headerSection = headerSection
     ---------------------------------------------------------------------------
     --- Header Sub Sections
@@ -206,7 +207,7 @@ class "SettingDefinitions.Collections" (function(_ENV)
     headertabControl:SetID(50)
     headertabControl:SetID(1)
     headertabControl:AddTabPage({
-      name = "Title",
+      name = L.TITLE,
       onAcquire = function()  
         local font = Widgets.SettingsMediaFont.Acquire(false, headertabControl)
         font:SetID(10)
@@ -215,7 +216,7 @@ class "SettingDefinitions.Collections" (function(_ENV)
 
         local textTransform = Widgets.SettingsDropDown.Acquire(false, headertabControl)
         textTransform:SetID(20)
-        textTransform:SetLabel("Text Transform")
+        textTransform:SetLabel(L.TEXT_TRANSFORM)
         textTransform:SetEntries(TEXT_TRANSFORM_ENTRIES)
         textTransform:BindUISetting("collectable.name.textTransform")
         self.CollectableHeaderTitleTabControls.textTransform = textTransform

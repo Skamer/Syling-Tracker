@@ -9,6 +9,7 @@
 Syling          "SylingTracker_Options.SettingDefinitions.General"           ""
 -- ========================================================================= --
 export {
+  L         = _Locale,
   newtable  = Toolset.newtable
 }
 
@@ -21,20 +22,20 @@ class "SettingDefinitions.General" (function(_ENV)
   function BuildSettingControls(self)
     local showMinimapIconCheckBox = Widgets.SettingsCheckBox.Acquire(false, self)
     showMinimapIconCheckBox:SetID(10)
-    showMinimapIconCheckBox:SetLabel("Show Minimap Icon")
+    showMinimapIconCheckBox:SetLabel(L.SHOW_MINIMAP_ICON)
     showMinimapIconCheckBox:BindSetting("showMinimapIcon")
     self.SettingControls.showMinimapIconCheckBox = showMinimapIconCheckBox
 
     local showBlizzardObjectiveTrackerCheckBox = Widgets.SettingsCheckBox.Acquire(false, self)
     showBlizzardObjectiveTrackerCheckBox:SetID(20)
-    showBlizzardObjectiveTrackerCheckBox:SetLabel("Show Blizzard Objective Tracker")
+    showBlizzardObjectiveTrackerCheckBox:SetLabel(L.SHOW_BLIZZARD_OBJECTIVE_TRACKER)
     showBlizzardObjectiveTrackerCheckBox:BindSetting("showBlizzardObjectiveTracker")
     self.SettingControls.showBlizzardObjectiveTrackerCheckBox = showBlizzardObjectiveTrackerCheckBox
 
 
     local enableTomTomCheckBox = Widgets.SettingsCheckBox.Acquire(false, self)
     enableTomTomCheckBox:SetID(20)
-    enableTomTomCheckBox:SetLabel("|cffff7f00(Experimental)|r Enable TomTom Integration")
+    enableTomTomCheckBox:SetLabel(("|cffff7f00(%s)|r %s"):format(L.EXPERIMENTAL, L.TOMTOM_ENABLE_INTEGRATION))
     enableTomTomCheckBox:BindSetting("enableTomTom")
     self.SettingControls.enableTomTomCheckBox = enableTomTomCheckBox
   end

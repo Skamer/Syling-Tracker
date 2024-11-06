@@ -8,6 +8,8 @@
 Environment.lua
 WidgetAttribute.lua
 
+# Locale files
+Locales\__load.xml
 
 ### Load the widgets
 Widgets\__load.xml

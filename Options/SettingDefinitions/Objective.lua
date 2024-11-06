@@ -8,6 +8,10 @@
 -- ========================================================================= --
 Syling          "SylingTracker_Options.SettingDefinitions.Objective"         ""
 -- ========================================================================= --
+export {
+  L                                   = _Locale
+}
+
 __Widget__()
 class "SettingDefinitions.Objective" (function(_ENV)
   inherit "Frame"
@@ -20,7 +24,7 @@ class "SettingDefinitions.Objective" (function(_ENV)
 
     local textColorPicker = Widgets.SettingsColorPicker.Acquire(true, self)
     textColorPicker:SetID(30)
-    textColorPicker:SetLabel("Text Color")
+    textColorPicker:SetLabel(L.TEXT_COLOR)
     textColorPicker:BindUISetting(("objective.%s.text.textColor"):format(state))
     self.StateControls[textColorPicker] = true
   end
@@ -40,26 +44,26 @@ class "SettingDefinitions.Objective" (function(_ENV)
 
     local textColorSection = Widgets.SettingsExpandableSection.Acquire(false, self)
     textColorSection:SetID(20)
-    textColorSection:SetTitle("Text Color")
+    textColorSection:SetTitle(L.TEXT_COLOR)
     self.TabSettingControls.textColorSection = textColorSection
 
     local textColorProgressColorPicker = Widgets.SettingsColorPicker.Acquire(false, textColorSection)
     textColorProgressColorPicker:SetID(10)
-    textColorProgressColorPicker:SetLabel(Color.LIGHTGRAY .. "Progress")
+    textColorProgressColorPicker:SetLabel(Color.LIGHTGRAY .. L.STATE_PROGRESS)
     textColorProgressColorPicker:SetLabelStyle("small")
     textColorProgressColorPicker:BindUISetting("objective.progress.text.textColor")
     self.TabSettingControls.textColorProgressColorPicker = textColorProgressColorPicker
 
     local textColorCompletedColorPicker = Widgets.SettingsColorPicker.Acquire(false, textColorSection)
     textColorCompletedColorPicker:SetID(20)
-    textColorCompletedColorPicker:SetLabel(Color.GREEN .. "Completed")
+    textColorCompletedColorPicker:SetLabel(Color.GREEN .. L.STATE_COMPLETED)
     textColorCompletedColorPicker:SetLabelStyle("small")
     textColorCompletedColorPicker:BindUISetting("objective.completed.text.textColor")
     self.TabSettingControls.textColorCompletedColorPicker = textColorCompletedColorPicker
 
     local textColorFailedColorPicker = Widgets.SettingsColorPicker.Acquire(false, textColorSection)
     textColorFailedColorPicker:SetID(30)
-    textColorFailedColorPicker:SetLabel(Color.RED .. "Failed")
+    textColorFailedColorPicker:SetLabel(Color.RED .. L.STATE_FAILED)
     textColorFailedColorPicker:SetLabelStyle("small")
     textColorFailedColorPicker:BindUISetting("objective.failed.text.textColor")
     self.TabSettingControls.textColorFailedColorPicker = textColorFailedColorPicker
@@ -94,7 +98,7 @@ class "SettingDefinitions.Objective" (function(_ENV)
     -- })
 
     tabControl:AddTabPage({
-      name = "Text",
+      name = L.TEXT,
       onAcquire = function() self:BuildTextTab() end,
       onRelease = function() self:ReleaseTabSettingControls() end, 
     })

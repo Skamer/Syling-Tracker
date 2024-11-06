@@ -12,6 +12,7 @@ namespace               "SylingTracker.Options.Widgets"
 -- ========================================================================= --
 
 export {
+  L                 = _Locale,
   ResetStyles       = SylingTracker.Utils.ResetStyles,
   TruncateDecimal   = SylingTracker.Utils.TruncateDecimal,
 
@@ -1107,9 +1108,9 @@ class "SettingsMediaFont" (function(_ENV)
     fontHeightSetting:SetValueStep(1)
 
     local fontOutlineSetting = self:GetChild("FontOutlineSetting")
-    fontOutlineSetting:AddEntry({ text = "NONE", value = "NONE"})
-    fontOutlineSetting:AddEntry({ text = "NORMAL", value = "NORMAL"})
-    fontOutlineSetting:AddEntry({ text = "THICK", value = "THICK"})
+    fontOutlineSetting:AddEntry({ text = L.NONE, value = "NONE"})
+    fontOutlineSetting:AddEntry({ text = L.FONT_OUTLINE_NORMAL, value = "NORMAL"})
+    fontOutlineSetting:AddEntry({ text = L.FONT_OUTLINE_THICK, value = "THICK"})
 
     local fontMonochromeSetting = self:GetChild("FontMonochromeSetting")
 
@@ -1363,7 +1364,7 @@ Style.UpdateSkin("Default", {
     marginRight = 0,
 
     WidthSlider = {
-      Label = { text = "Width"},
+      Label = { text = L.WIDTH},
       location = {
         Anchor("TOP"),
         Anchor("LEFT"),
@@ -1372,7 +1373,7 @@ Style.UpdateSkin("Default", {
     },
 
     HeightSlider = {
-      Label = { text = "Height"},
+      Label = { text = L.HEIGHT},
       location = {
         Anchor("TOPLEFT", 0, 0, "WidthSlider", "BOTTOMLEFT"),
         Anchor("TOPRIGHT", 0, 0, "WidthSlider", "BOTTOMRIGHT")
@@ -1418,7 +1419,7 @@ Style.UpdateSkin("Default", {
     marginRight = 0,
 
     FontSetting = {
-      Label = { text = "Font"},
+      Label = { text = L.FONT},
       location = {
         Anchor("TOP"),
         Anchor("LEFT"),
@@ -1427,7 +1428,7 @@ Style.UpdateSkin("Default", {
     },
 
     FontHeightSetting = {
-      Label = { text = "Font Size"},
+      Label = { text = L.FONT_SIZE},
       location = {
         Anchor("TOPLEFT", 0, 0, "FontSetting", "BOTTOMLEFT"),
         Anchor("TOPRIGHT", 0, 0, "FontSetting", "BOTTOMRIGHT")
@@ -1435,7 +1436,7 @@ Style.UpdateSkin("Default", {
     },
 
     FontOutlineSetting = {
-      Label = { text = "Font Outline"},
+      Label = { text = L.FONT_OUTLINE},
       location = {
         Anchor("TOPLEFT", 0, 0, "FontHeightSetting", "BOTTOMLEFT"),
         Anchor("TOPRIGHT", 0, 0, "FontHeightSetting", "BOTTOMRIGHT")
@@ -1443,7 +1444,7 @@ Style.UpdateSkin("Default", {
     },
 
     FontMonochromeSetting = {
-      Label = { text = "Font Monochrome"},
+      Label = { text = L.FONT_MONOCHROME},
       location = {
         Anchor("TOPLEFT", 0, 0, "FontOutlineSetting", "BOTTOMLEFT"),
         Anchor("TOPRIGHT", 0, 0, "FontOutlineSetting", "BOTTOMRIGHT")

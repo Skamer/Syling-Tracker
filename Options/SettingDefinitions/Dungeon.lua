@@ -9,6 +9,7 @@
 Syling         "SylingTracker_Options.SettingDefinitions.Dungeon"            ""
 -- ========================================================================= --
 export {
+  L                                   = _Locale,
   newtable                            = Toolset.newtable
 }
 
@@ -35,7 +36,7 @@ class "SettingDefinitions.Dungeon" (function(_ENV)
   function BuildHeaderTab(self)
     local showHeaderCheckBox = Widgets.SettingsCheckBox.Acquire(false, self)
     showHeaderCheckBox:SetID(10)
-    showHeaderCheckBox:SetLabel("Show")
+    showHeaderCheckBox:SetLabel(L.SHOW)
     showHeaderCheckBox:BindUISetting("dungeon.showHeader")
     self.HeaderTabControls.showHeaderCheckBox = showHeaderCheckBox
 
@@ -45,19 +46,19 @@ class "SettingDefinitions.Dungeon" (function(_ENV)
     local backgroundSection = Widgets.ExpandableSection.Acquire(false, self)
     backgroundSection:SetExpanded(false)
     backgroundSection:SetID(30)
-    backgroundSection:SetTitle("Background")
+    backgroundSection:SetTitle(L.BACKGROUND)
     Style[backgroundSection].marginTop = 10
     self.HeaderTabControls.backgroundSection = backgroundSection
 
     local showBackgroundCheckBox = Widgets.SettingsCheckBox.Acquire(false, backgroundSection)
     showBackgroundCheckBox:SetID(10)
-    showBackgroundCheckBox:SetLabel("Show")
+    showBackgroundCheckBox:SetLabel(L.SHOW)
     showBackgroundCheckBox:BindUISetting("dungeon.header.showBackground")
     self.HeaderTabControls.showBackgroundCheckBox = showBackgroundCheckBox
 
     local backgroundColorPicker = Widgets.SettingsColorPicker.Acquire(false, backgroundSection)
     backgroundColorPicker:SetID(20)
-    backgroundColorPicker:SetLabel("Color")
+    backgroundColorPicker:SetLabel(L.COLOR)
     backgroundColorPicker:BindUISetting("dungeon.header.backgroundColor")
     self.HeaderTabControls.backgroundColorPicker = backgroundColorPicker
     ---------------------------------------------------------------------------
@@ -66,24 +67,24 @@ class "SettingDefinitions.Dungeon" (function(_ENV)
     local borderSection = Widgets.ExpandableSection.Acquire(false, self)
     borderSection:SetExpanded(false)
     borderSection:SetID(40)
-    borderSection:SetTitle("Border")
+    borderSection:SetTitle(L.BORDER)
     self.HeaderTabControls.borderSection = borderSection
 
     local showBorderCheckBox = Widgets.SettingsCheckBox.Acquire(false, borderSection)
     showBorderCheckBox:SetID(10)
-    showBorderCheckBox:SetLabel("Show")
+    showBorderCheckBox:SetLabel(L.SHOW)
     showBorderCheckBox:BindUISetting("dungeon.header.showBorder")
     self.HeaderTabControls.showBorderCheckBox = showBorderCheckBox
 
     local borderColorPicker = Widgets.SettingsColorPicker.Acquire(false, borderSection)
     borderColorPicker:SetID(20)
-    borderColorPicker:SetLabel("Color")
+    borderColorPicker:SetLabel(L.COLOR)
     borderColorPicker:BindUISetting("dungeon.header.borderColor")
     self.HeaderTabControls.borderColorPicker = borderColorPicker
 
     local borderSizeSlider = Widgets.SettingsSlider.Acquire(false, borderSection)
     borderSizeSlider:SetID(30)
-    borderSizeSlider:SetLabel("Size")
+    borderSizeSlider:SetLabel(L.SIZE)
     borderSizeSlider:SetMinMaxValues(1, 10)
     borderSizeSlider:BindUISetting("dungeon.header.borderSize")
     self.HeaderTabControls.borderSizeSlider = borderSizeSlider
@@ -93,7 +94,7 @@ class "SettingDefinitions.Dungeon" (function(_ENV)
     local titleSection = Widgets.ExpandableSection.Acquire(false, self)
     titleSection:SetExpanded(false)
     titleSection:SetID(60)
-    titleSection:SetTitle("Title")
+    titleSection:SetTitle(L.TITLE)
     self.HeaderTabControls.titleSection = titleSection
 
     local titleFont = Widgets.SettingsMediaFont.Acquire(false, titleSection)
@@ -103,27 +104,27 @@ class "SettingDefinitions.Dungeon" (function(_ENV)
 
     local textColorPicker = Widgets.SettingsColorPicker.Acquire(false, titleSection)
     textColorPicker:SetID(20)
-    textColorPicker:SetLabel("Text Color")
+    textColorPicker:SetLabel(L.TEXT_COLOR)
     textColorPicker:BindUISetting("dungeon.header.label.textColor")
     self.HeaderTabControls.textColorPicker = textColorPicker
 
     local textTransform = Widgets.SettingsDropDown.Acquire(false, titleSection)
     textTransform:SetID(30)
-    textTransform:SetLabel("Text Transform")
+    textTransform:SetLabel(L.TEXT_TRANSFORM)
     textTransform:SetEntries(TEXT_TRANSFORM_ENTRIES)
     textTransform:BindUISetting("dungeon.header.label.textTransform")
     self.HeaderTabControls.textTransform = textTransform
 
     local textJustifyV = Widgets.SettingsDropDown.Acquire(false, titleSection)
     textJustifyV:SetID(40)
-    textJustifyV:SetLabel("Text Justify V")
+    textJustifyV:SetLabel(L.TEXT_JUSITFY_V)
     textJustifyV:SetEntries(TEXT_JUSTIFY_V_ENTRIES)
     textJustifyV:BindUISetting("dungeon.header.label.justifyV")
     self.HeaderTabControls.textJustifyV = textJustifyV
 
     local textJustifyH = Widgets.SettingsDropDown.Acquire(false, titleSection)
     textJustifyH:SetID(50)
-    textJustifyH:SetLabel("Text Justify H")
+    textJustifyH:SetLabel(L.TEXT_JUSITFY_H)
     textJustifyH:SetEntries(TEXT_JUSTIFY_H_ENTRIES)
     textJustifyH:BindUISetting("dungeon.header.label.justifyH")
     self.HeaderTabControls.textJustifyH = textJustifyH
@@ -195,7 +196,7 @@ class "SettingDefinitions.Dungeon" (function(_ENV)
     local dungeonNameSection = Widgets.ExpandableSection.Acquire(false, self)
     dungeonNameSection:SetExpanded(false)
     dungeonNameSection:SetID(50)
-    dungeonNameSection:SetTitle("Dungeon Name")
+    dungeonNameSection:SetTitle(L.DUNGEON_NAME)
     self.TopInfoTabControls.dungeonNameSection = dungeonNameSection
 
     local dungeonNameFont = Widgets.SettingsMediaFont.Acquire(false, dungeonNameSection)
@@ -205,26 +206,26 @@ class "SettingDefinitions.Dungeon" (function(_ENV)
 
     local dungeonNameTextColorPicker = Widgets.SettingsColorPicker.Acquire(false, dungeonNameSection)
     dungeonNameTextColorPicker:SetID(20)
-    dungeonNameTextColorPicker:SetLabel("Text Color")
+    dungeonNameTextColorPicker:SetLabel(L.TEXT_COLOR)
     dungeonNameTextColorPicker:BindUISetting("dungeon.name.textColor")
     self.TopInfoTabControls.dungeonNameTextColorPicker = dungeonNameTextColorPicker
 
     local dungeonNameTextTransform = Widgets.SettingsDropDown.Acquire(false, dungeonNameSection)
     dungeonNameTextTransform:SetID(30)
-    dungeonNameTextTransform:SetLabel("Text Transform")
+    dungeonNameTextTransform:SetLabel(L.TEXT_TRANSFORM)
     dungeonNameTextTransform:SetEntries(TEXT_TRANSFORM_ENTRIES)
     dungeonNameTextTransform:BindUISetting("dungeon.name.textTransform")
     self.TopInfoTabControls.dungeonNameTextTransform = dungeonNameTextTransform
 
     local dungeonNameTextJustifyV = Widgets.SettingsDropDown.Acquire(false, dungeonNameSection)
-    dungeonNameTextJustifyV:SetLabel("Text Justify V")
+    dungeonNameTextJustifyV:SetLabel(L.TEXT_JUSITFY_V)
     dungeonNameTextJustifyV:SetEntries(TEXT_JUSTIFY_V_ENTRIES)
     dungeonNameTextJustifyV:BindUISetting("dungeon.name.justifyV")
     self.TopInfoTabControls.dungeonNameTextJustifyV = dungeonNameTextJustifyV
 
     local dungeonNameTextJustifyH = Widgets.SettingsDropDown.Acquire(false, dungeonNameSection)
     dungeonNameTextJustifyH:SetID(50)
-    dungeonNameTextJustifyH:SetLabel("Text Justify H")
+    dungeonNameTextJustifyH:SetLabel(L.TEXT_JUSITFY_H)
     dungeonNameTextJustifyH:SetEntries(TEXT_JUSTIFY_H_ENTRIES)
     dungeonNameTextJustifyH:BindUISetting("dungeon.name.justifyH")
     self.TopInfoTabControls.dungeonNameTextJustifyH = dungeonNameTextJustifyH
@@ -251,13 +252,13 @@ class "SettingDefinitions.Dungeon" (function(_ENV)
     -- })
     
     tabControl:AddTabPage({
-      name = "Header",
+      name = L.HEADER,
       onAcquire = function() self:BuildHeaderTab() end,
       onRelease = function() self:ReleaseHeaderTab() end,
     })
 
     tabControl:AddTabPage({
-      name = "Top Info",
+      name = L.TOP_INFO,
       onAcquire = function() self:BuildTopInfoTab() end,
       onRelease = function() self:ReleaseTopInfoTab() end,
     })
