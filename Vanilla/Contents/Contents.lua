@@ -19,8 +19,8 @@ export {
 -------------------------------------------------------------------------------
 RegisterContent({
   id = "quests",
-  name = "Quests",
-  formattedName = CreateAtlasMarkup("QuestNormal", 16, 16) .. " Quests",
+  name = _Locale.QUESTS,
+  formattedName = CreateAtlasMarkup("QuestNormal", 16, 16) .. " " .. _Locale.QUESTS,
   description = "QUESTS_PH_DESC",
   icon = { atlas =  AtlasType("QuestNormal") },
   order = 140,

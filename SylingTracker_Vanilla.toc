@@ -15,6 +15,9 @@ embeds.xml
 SylingModule.lua
 Environment.lua
 
+# Locale files
+Locales\__load.xml
+
 # Utilities files 
 Utils\__load.xml
 

@@ -47,7 +47,7 @@ export {
 RegisterContextMenuPattern("quest", {
   {
     id = "supertrackQuest",
-    text = "Supertrack",
+    text = _Locale.CONTEXT_MENU_SUPERTRACK,
     type = "action",
     order = 10,
     icon = { atlas = AtlasType("Target-Tracker")},
@@ -67,14 +67,14 @@ RegisterContextMenuPattern("quest", {
   },
   {
     id = "linkQuestToChat",
-    text = "Link to chat",
+    text = _Locale.CONTEXT_MENU_LINK_TO_CHAT,
     order = 20,
     icon = { atlas = AtlasType("communities-icon-chat") },
     handler = function(questID) ChatFrame_OpenChat(GetQuestLink(questID)) end
   },
   {
     id = "showQuestDetails",
-    text = "Show details",
+    text = _Locale.CONTEXT_MENU_SHOW_DETAILS,
     order = 30,
     icon = { atlas = AtlasType("adventureguide-icon-whatsnew") },
     handler = function(questID)OpenQuestDetails(questID) end
@@ -85,7 +85,7 @@ RegisterContextMenuPattern("quest", {
   },
   {
     id = "findAGroup",
-    text = "Find a group",
+    text = _Locale.CONTEXT_MENU_FIND_A_GROUP,
     order = 40,
     icon = { atlas = AtlasType("socialqueuing-icon-group")},
     handler = function(questID) LFGListUtil_FindQuestGroup(questID) end
@@ -96,14 +96,14 @@ RegisterContextMenuPattern("quest", {
   },
   {
     id = "stopWatchingQuest",
-    text = "Stop Watching",
+    text = _Locale.CONTEXT_MENU_STOP_WATCHING,
     order = 50,
     icon = { atlas = AtlasType("transmog-icon-hidden") },
     handler = function(questID) RemoveQuestWatch(questID) end
   },
   {
     id = "abandonQuest",
-    text = "Abandon",
+    text = _Locale.CONTEXT_MENU_ABANDON,
     order = 60,
     icon = { atlas = AtlasType("transmog-icon-remove") },
     handler = function(questID)  QuestMapQuestOptions_AbandonQuest(questID) end
@@ -114,7 +114,7 @@ RegisterContextMenuPattern("quest", {
   },
   {
     id = "helpQuest",
-    text = "Help",
+    text = _Locale.CONTEXT_MENU_HELP,
     order = 70,
     icon  =  { atlas = AtlasType("QuestTurnin") },
     handler = function(questID) ShowHelperWindow("quest", questID) end,
@@ -126,7 +126,7 @@ RegisterContextMenuPattern("quest", {
 RegisterContextMenuPattern("achievement", {
   {
     id = "linkAchievementToChat",
-    text = "Link to chat",
+    text = _Locale.CONTEXT_MENU_LINK_TO_CHAT,
     order = 10,
     icon = { atlas = AtlasType("communities-icon-chat")},
     handler = function(achievementID)
@@ -138,7 +138,7 @@ RegisterContextMenuPattern("achievement", {
   },
   {
     id = "showAchievementDetails",
-    text = "Show details",
+    text = _Locale.CONTEXT_MENU_SHOW_DETAILS,
     order = 20,
     icon = { atlas = AtlasType("adventureguide-icon-whatsnew")},
     handler = function(achievementID)
@@ -157,7 +157,7 @@ RegisterContextMenuPattern("achievement", {
   },
   {
     id = "stopWatchingAchievement",
-    text = "Stop watching",
+    text = _Locale.CONTEXT_MENU_STOP_WATCHING,
     order = 30,
     icon = { atlas = AtlasType("transmog-icon-hidden")},
     handler = function(achievementID)
@@ -170,7 +170,7 @@ RegisterContextMenuPattern("achievement", {
   },
   {
     id = "helpAchievement",
-    text = "Help",
+    text = _Locale.CONTEXT_MENU_HELP,
     order = 40,
     icon = { atlas = AtlasType("QuestTurnin")},
     handler = function(achievementID)
@@ -184,7 +184,7 @@ RegisterContextMenuPattern("achievement", {
 RegisterContextMenuPattern("recipe", {
   {
     id = "stopTrackingRecipe",
-    text = "Stop tracking",
+    text = _Locale.CONTEXT_MENU_STOP_TRACKING,
     order = 10,
     icon = { atlas = AtlasType("transmog-icon-hidden") },
     handler = function(recipeID, isRecraft)
@@ -198,7 +198,7 @@ RegisterContextMenuPattern("recipe", {
 RegisterContextMenuPattern("activity", {
   {
     id = "showDetails",
-    text = "Show details",
+    text = _Locale.CONTEXT_MENU_SHOW_DETAILS,
     order = 10,
     icon = { atlas = AtlasType("adventureguide-icon-whatsnew") },
     handler = function(activityID)
@@ -207,7 +207,7 @@ RegisterContextMenuPattern("activity", {
   },
   {
     id = "stopTrackingActivity",
-    text = "Stop tracking",
+    text = _Locale.CONTEXT_MENU_STOP_TRACKING,
     order = 20,
     icon = { atlas = AtlasType("transmog-icon-hidden") },
     handler = function(activityID)
@@ -221,7 +221,7 @@ RegisterContextMenuPattern("activity", {
 RegisterContextMenuPattern("collection", {
   {
     id = "openCollection",
-    text = "Open Collections",
+    text = _Locale.CONTEXT_MENU_OPEN_COLLECTIONS,
     order = 10,
     icon = { atlas = AtlasType("adventureguide-icon-whatsnew") },
     isShown = function(collectableID, collectableType) return collectableType == EContentTrackingType.Appearance end,
@@ -231,7 +231,7 @@ RegisterContextMenuPattern("collection", {
   },
   {
     id = "stopTrackingCollectable",
-    text = "Stop tracking",
+    text = _Locale.CONTEXT_MENU_STOP_TRACKING,
     order = 20,
     icon = { atlas = AtlasType("transmog-icon-hidden") },
     handler = function(collectableID, collectableType)

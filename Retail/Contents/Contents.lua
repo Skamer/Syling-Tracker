@@ -21,7 +21,7 @@ export {
 -------------------------------------------------------------------------------
 RegisterContent({
   id = "autoQuests",
-  name = "Auto Quests PopUp",
+  name = _Locale.AUTO_QUESTS_POPUP,
   description = "AUTO_QUESTS_PH_DESC",
   order = 10,
   viewClass = AutoQuestsContentView,
@@ -33,7 +33,7 @@ RegisterContent({
 -------------------------------------------------------------------------------
 RegisterContent({
   id = "widgets",
-  name = "Widgets",
+  name = _Locale.WIDGETS,
   description = "WIDGETS_PH_DESC",
   order = 15,
   viewClass = WidgetsContentView,
@@ -45,8 +45,8 @@ RegisterContent({
 -------------------------------------------------------------------------------
 RegisterContent({
   id = "scenario",
-  name = "Scenario",
-  formattedName = CreateAtlasMarkup("ScenariosIcon", 16, 16) .. " Scenario",
+  name = _Locale.SCENARIO,
+  formattedName = CreateAtlasMarkup("ScenariosIcon", 16, 16) .. " " .. _Locale.SCENARIO,
   description = "SCENARIO_PH_DESC",
   icon = { atlas = AtlasType("ScenariosIcon") },
   order = 20,
@@ -59,8 +59,8 @@ RegisterContent({
 -------------------------------------------------------------------------------
 RegisterContent({
   id = "delve",
-  name = "Delve",
-  formattedName = CreateAtlasMarkup("delves-regular", 16, 16) .. " Delve",
+  name = _Locale.DELVE,
+  formattedName = CreateAtlasMarkup("delves-regular", 16, 16) .. " " .. _Locale.DELVE,
   description = "DELVE_PH_DESC",
   icon = { atlas = AtlasType("delves-regular") },
   order = 25,
@@ -73,8 +73,8 @@ RegisterContent({
 -------------------------------------------------------------------------------
 RegisterContent({
   id = "dungeon",
-  name = "Dungeon",
-  formattedName = CreateAtlasMarkup("Dungeon", 16, 16) .. " Dungeon",
+  name = _Locale.DUNGEON,
+  formattedName = CreateAtlasMarkup("Dungeon", 16, 16) .. " " .. _Locale.DUNGEON,
   description = "DUNGEON_PH_DESC",
   icon = { atlas = AtlasType("Dungeon") },
   order = 30,
@@ -87,8 +87,8 @@ RegisterContent({
 -------------------------------------------------------------------------------
 RegisterContent({
   id = "keystone",
-  name = "Mythic +",
-  formattedName = CreateAtlasMarkup("Dungeon", 16, 16) .. " Mythic +",
+  name = _Locale.KEYSTONE,
+  formattedName = CreateAtlasMarkup("Dungeon", 16, 16) .. " " .. _Locale.KEYSTONE,
   description = "KEYSTONE_PH_DESC",
   icon = { atlas = AtlasType("Dungeon") },
   order = 40,
@@ -114,8 +114,8 @@ RegisterContent({
 -------------------------------------------------------------------------------
 RegisterContent({
   id = "worldQuests",
-  name = "World Quests",
-  formattedName = CreateAtlasMarkup("QuestDaily", 16, 16) .. " World Quests",
+  name = _Locale.WORLD_QUESTS,
+  formattedName = CreateAtlasMarkup("QuestDaily", 16, 16) .. " " .. _Locale.WORLD_QUESTS,
   description = "WORLD_QUESTS_PH_DESC",
   icon = { atlas = AtlasType("QuestDaily") },
   order = 60,
@@ -128,8 +128,8 @@ RegisterContent({
 -------------------------------------------------------------------------------
 RegisterContent({
   id = "tasks",
-  name = "Tasks",
-  formattedName = CreateAtlasMarkup("QuestBonusObjective", 16, 16) .. " Tasks",
+  name = _Locale.TASKS,
+  formattedName = CreateAtlasMarkup("QuestBonusObjective", 16, 16) .. " " .. _Locale.TASKS,
   description = "TASKS_PH_DESC",
   icon = { atlas = AtlasType("QuestBonusObjective") },
   order = 70,
@@ -156,8 +156,8 @@ RegisterContent({
 -------------------------------------------------------------------------------
 RegisterContent({
   id = "bonusTasks",
-  name = "Bonus Tasks",
-  formattedName = CreateAtlasMarkup("QuestBonusObjective", 16, 16) .. " Bonus Tasks",
+  name = _Locale.BONUS_TASKS,
+  formattedName = CreateAtlasMarkup("QuestBonusObjective", 16, 16) .. " " .. _Locale.BONUS_TASKS,
   description = "BONUS_TASKS_PH_DESC",
   icon = { atlas = AtlasType("QuestBonusObjective") },
   order = 80,
@@ -185,8 +185,8 @@ RegisterContent({
 -------------------------------------------------------------------------------
 RegisterContent({
   id = "achievements",
-  name = "Achievements",
-  formattedName = CreateAtlasMarkup("UI-HUD-MicroMenu-Achievements-Mouseover", 16, 16) .. " Achievements",
+  name = _Locale.ACHIEVEMENTS,
+  formattedName = CreateAtlasMarkup("UI-HUD-MicroMenu-Achievements-Mouseover", 16, 16) .. " " ..  _Locale.ACHIEVEMENTS,
   description = "ACHIEVEMENTS_PH_DESC",
   icon = { atlas = AtlasType("UI-HUD-MicroMenu-Achievements-Mouseover")},
   order = 90,
@@ -199,8 +199,8 @@ RegisterContent({
 -------------------------------------------------------------------------------
 RegisterContent({
   id = "activities",
-  name = "Activities",
-  formattedName = CreateAtlasMarkup("UI-HUD-MicroMenu-AdventureGuide-Mouseover", 16, 16) .. " Activities",
+  name = _Locale.ACTIVITIES,
+  formattedName = CreateAtlasMarkup("UI-HUD-MicroMenu-AdventureGuide-Mouseover", 16, 16) .. " " .. _Locale.ACTIVITIES,
   description = "ACTIVITIES_PH_DESC",
   icon = { atlas = AtlasType("UI-HUD-MicroMenu-AdventureGuide-Mouseover") },
   order = 100,
@@ -213,8 +213,8 @@ RegisterContent({
 -------------------------------------------------------------------------------
 RegisterContent({
   id = "professionRecipes",
-  name = "Profession",
-  formattedName = CreateAtlasMarkup("Professions-Crafting-Orders-Icon", 16, 16) .. " Profession",
+  name = _Locale.PROFESSION,
+  formattedName = CreateAtlasMarkup("Professions-Crafting-Orders-Icon", 16, 16) .. " " .. _Locale.PROFESSION,
   description = "PROFESSION_RECIPES_PH_DESC",
   icon = { atlas = AtlasType("Professions-Crafting-Orders-Icon") },
   order = 110,
@@ -227,8 +227,8 @@ RegisterContent({
 -------------------------------------------------------------------------------
 RegisterContent({
   id = "collections",
-  name = "Collections",
-  formattedName = CreateAtlasMarkup("UI-HUD-MicroMenu-Collections-Mouseover", 16, 16) .. " Collections",
+  name = _Locale.COLLECTIONS,
+  formattedName = CreateAtlasMarkup("UI-HUD-MicroMenu-Collections-Mouseover", 16, 16) .. " " .. _Locale.COLLECTIONS,
   description = "COLLECTIONS_PH_DESC",
   icon = { atlas = AtlasType("UI-HUD-MicroMenu-Collections-Mouseover") },
   order = 120,
@@ -258,8 +258,8 @@ RegisterObservableContent("campaignQuests", campaignQuestsData)
 
 RegisterContent({
   id = "campaignQuests",
-  name = "Campaign Quests",
-  formattedName = CreateAtlasMarkup("quest-campaign-available", 16, 16) .. " Campaign Quests",
+  name = _Locale.CAMPAIGN_QUESTS,
+  formattedName = CreateAtlasMarkup("quest-campaign-available", 16, 16) .. " " .. _Locale.CAMPAIGN_QUESTS,
   description = "CAMPAIGN_QUESTS_PH_DESC",
   icon =  { atlas = AtlasType("quest-campaign-available") },
   order = 130,
@@ -280,8 +280,8 @@ RegisterContent({
 -------------------------------------------------------------------------------
 RegisterContent({
   id = "quests",
-  name = "Quests",
-  formattedName = CreateAtlasMarkup("QuestNormal", 16, 16) .. " Quests",
+  name = _Locale.QUESTS,
+  formattedName = CreateAtlasMarkup("QuestNormal", 16, 16) .. " " .. _Locale.QUESTS,
   description = "QUESTS_PH_DESC",
   icon = { atlas =  AtlasType("QuestNormal") },
   order = 140,

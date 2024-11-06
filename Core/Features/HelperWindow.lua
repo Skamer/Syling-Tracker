@@ -8,10 +8,10 @@
 -- ========================================================================= --
 Syling                 "SylingTracker.Features.HelperWindow"                 ""
 -- ========================================================================= --
-DESCRIPTION_TEXT_FORMAT = "Wowhead may help you to find your way for completing this %s"
-ACHIEVEMENT_TEXT        = "achievement"
-QUEST_TEXT              = "quest"
-WOWHEAD_LINK_FORMAT     = "https://www.wowhead.com/%s=%i"
+local DESCRIPTION_TEXT_FORMAT = _Locale.HELPER_WINDOW_HELP_TEXT
+local ACHIEVEMENT_TEXT        = _Locale.HELPER_WINDOW_ACHIEVEMENT
+local QUEST_TEXT              = _Locale.HELPER_WINDOW_QUEST
+local WOWHEAD_LINK_FORMAT     = _Locale.HELPER_WINDOW_WOWHEAD_LINK_FORMAT
 -- ========================================================================= --
 __UIElement__()
 class "HelperWindow" (function(_ENV)
@@ -111,7 +111,7 @@ Style.UpdateSkin("Default", {
 
     HeaderText = {
       height = 24,
-      text = "Need Help ?",
+      text = _Locale.HELPER_WINDOW_TITLE,
       textColor = Color(0, 0.9, 0.9, 0.9),
       justifyH = "CENTER",
       location = {
@@ -130,7 +130,7 @@ Style.UpdateSkin("Default", {
 
     CopyHelpText = {
       height = 24,
-      text = "Ctrl + C to copy",
+      text = _Locale.HELPER_WINDOW_COPY_SHORTCUT,
       textColor = Color(0.9, 0.37, 0, 0.9),
       justifyH = "CENTER",
       location = {

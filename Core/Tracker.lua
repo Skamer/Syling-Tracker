@@ -1372,7 +1372,7 @@ Style.UpdateSkin("Default", {
     backdropColor                     = { r = 0, g = 1, b = 0, a = 0.3},
     location                          = NIL,
     Text = {
-      text                            = "Click here to move the tracker",
+      text                            = _Locale.TRACKER_MOVER,
       setAllPoints                    = true,
       mediaFont                       = FontType("PT Sans Narrow Bold", 13)
     },

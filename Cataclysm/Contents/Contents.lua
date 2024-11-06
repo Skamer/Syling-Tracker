@@ -19,7 +19,7 @@ export {
 -------------------------------------------------------------------------------
 RegisterContent({
   id = "autoQuests",
-  name = "Auto Quests PopUp",
+  name = _Locale.AUTO_QUESTS_POPUP,
   description = "AUTO_QUESTS_PH_DESC",
   order = 10,
   viewClass = AutoQuestsContentView,
@@ -31,11 +31,11 @@ RegisterContent({
 -------------------------------------------------------------------------------
 RegisterContent({
   id = "achievements",
-  name = "Achievements",
-  formattedName = CreateAtlasMarkup("UI-HUD-MicroMenu-Achievements-Mouseover", 16, 16) .. " Achievements",
+  name = _Locale.ACHIEVEMENTS,
+  formattedName = CreateAtlasMarkup("UI-HUD-MicroMenu-Achievements-Mouseover", 16, 16) .. " " ..  _Locale.ACHIEVEMENTS,
   description = "ACHIEVEMENTS_PH_DESC",
   icon = { atlas = AtlasType("UI-HUD-MicroMenu-Achievements-Mouseover")},
-  order = 10,
+  order = 20,
   viewClass = AchievementsContentView,
   data = GetObservableContent("achievements"),
   statusFunc = function(data) return (data and data.achievements) and true or false end
@@ -45,11 +45,11 @@ RegisterContent({
 -------------------------------------------------------------------------------
 RegisterContent({
   id = "quests",
-  name = "Quests",
-  formattedName = CreateAtlasMarkup("QuestNormal", 16, 16) .. " Quests",
+  name = _Locale.QUESTS,
+  formattedName = CreateAtlasMarkup("QuestNormal", 16, 16) .. " " .. _Locale.QUESTS,
   description = "QUESTS_PH_DESC",
   icon = { atlas =  AtlasType("QuestNormal") },
-  order = 20,
+  order = 30,
   viewClass = QuestsContentView,
   data = GetObservableContent("quests"):Map(function(data)
     local quests = {}

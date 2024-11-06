@@ -33,7 +33,7 @@ export {
 RegisterContextMenuPattern("quest", {
   {
     id = "linkQuestToChat",
-    text = "Link to chat",
+    text = _Locale.CONTEXT_MENU_LINK_TO_CHAT,
     order = 20,
     icon = { atlas = AtlasType("communities-icon-chat") },
     handler = function(questID) ChatFrame_OpenChat(GetQuestLink(questID)) end
@@ -45,7 +45,7 @@ RegisterContextMenuPattern("quest", {
   },
   {
     id = "stopWatchingQuest",
-    text = "Stop Watching",
+    text = _Locale.CONTEXT_MENU_STOP_WATCHING,
     order = 50,
     icon = { atlas = AtlasType("transmog-icon-hidden") },
     handler = function(questID) 
@@ -54,7 +54,7 @@ RegisterContextMenuPattern("quest", {
   },
   {
     id = "abandonQuest",
-    text = "Abandon",
+    text = _Locale.CONTEXT_MENU_ABANDON,
     order = 60,
     icon = { atlas = AtlasType("transmog-icon-remove") },
     handler = function(questID)
@@ -78,7 +78,7 @@ RegisterContextMenuPattern("quest", {
   },
   {
     id = "helpQuest",
-    text = "Help",
+    text = _Locale.CONTEXT_MENU_HELP,
     order = 70,
     icon  =  { atlas = AtlasType("QuestTurnin") },
     handler = function(questID) ShowHelperWindow("quest", questID) end,

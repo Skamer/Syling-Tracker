@@ -814,7 +814,7 @@ Style.UpdateSkin("Default", {
         setAllPoints                  = true,
         fontObject                    = GameFontHighlightSmall,
         textColor                     = Color.YELLOW,
-        text                          = "Syling Tracker - Item Bar",
+        text                          = "Syling Tracker - " .. _Locale.ITEM_BAR_MOVER,
         justifyH                      = "CENTER",
      },
 
