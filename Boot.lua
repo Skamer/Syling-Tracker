@@ -127,7 +127,7 @@ function SetupMinimapButton(self)
     OnTooltipShow = function(tooltip)
       tooltip:AddDoubleLine("Syling Tracker", GetAddonVersion(), 1, 106/255, 0, 1, 1, 1)
       tooltip:AddLine(" ")
-      tooltip:AddLine("|cff00ffffClick|r to open the options")
+      tooltip:AddLine(_Locale.MINIMAP_BUTTON_TOOLTIP)
     end
   })
 

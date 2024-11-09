@@ -1,4 +1,10 @@
-# 2.6.0
+# 2.6.1
+
+- Added zhCN locales
+
+---
+
+## 2.6.0
 
 - Added the localization support
 
