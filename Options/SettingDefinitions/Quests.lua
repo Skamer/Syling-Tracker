@@ -389,8 +389,22 @@ class "SettingDefinitions.Quests" (function(_ENV)
         textTransform:BindUISetting("quest.name.textTransform")
         self.QuestHeaderTitleTabControls.textTransform = textTransform
 
+        -- local textJustifyV = Widgets.SettingsDropDown.Acquire(false, headertabControl)
+        -- textJustifyV:SetID(30)
+        -- textJustifyV:SetLabel(L.TEXT_JUSITFY_V)
+        -- textJustifyV:SetEntries(TEXT_JUSTIFY_V_ENTRIES)
+        -- textJustifyV:BindUISetting("quest.name.justifyV")
+        -- self.QuestHeaderTitleTabControls.textJustifyV = textJustifyV
+    
+        local textJustifyH = Widgets.SettingsDropDown.Acquire(false, headertabControl)
+        textJustifyH:SetID(40)
+        textJustifyH:SetLabel(L.TEXT_JUSITFY_H)
+        textJustifyH:SetEntries(TEXT_JUSTIFY_H_ENTRIES)
+        textJustifyH:BindUISetting("quest.name.justifyH")
+        self.QuestHeaderTitleTabControls.textJustifyH = textJustifyH
+
         local textColorsSection = Widgets.SettingsExpandableSection.Acquire(false, headertabControl)
-        textColorsSection:SetID(30)
+        textColorsSection:SetID(50)
         textColorsSection:SetTitle(L.TEXT_COLORS)
         self.QuestHeaderTitleTabControls.textColorsSection = textColorsSection
     

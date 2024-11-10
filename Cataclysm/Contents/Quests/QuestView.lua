@@ -340,6 +340,7 @@ RegisterUISetting("quest.borderSize", 1)
 RegisterUISetting("quest.name.textColor", Color.NORMAL)
 RegisterUISetting("quest.name.mediaFont", FontType("DejaVuSansCondensed Bold", 10))
 RegisterUISetting("quest.name.textTransform", "NONE")
+RegisterUISetting("quest.name.justifyH", "CENTER")
 RegisterUISetting("quest.level.mediaFont", FontType("PT Sans Caption Bold", 10))
 RegisterUISetting("quest.enablePOI", true)
 
@@ -471,6 +472,7 @@ Style.UpdateSkin("Default", {
           text                        = FromUIProperty("QuestName"),
           textColor                   = FromUISetting("quest.name.textColor"),
           justifyV                    = "MIDDLE",
+          justifyH                    = FromUISetting("quest.name.justifyH"),
           mediaFont                   = FromUISetting("quest.name.mediaFont"),
           textTransform               = FromUISetting("quest.name.textTransform"),
           location = {

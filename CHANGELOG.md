@@ -1,12 +1,20 @@
-# 2.6.1
+# 2.6.2
 
-- Added zhCN locales
+###### NEW
+
+- Added [ticket #117](https://github.com/Skamer/Syling-Tracker/issues/117) : a way for changing the horizontal alignment for quest names in the options.
+
+---
+
+## 2.6.1
+
+- Added zhCN locales.
 
 ---
 
 ## 2.6.0
 
-- Added the localization support
+- Added the localization support.
 
 ---
 
@@ -18,7 +26,7 @@
 
 ###### FIXES
 
-- Fixed the quests loading
+- Fixed the quests loading.
 
 ---
 
