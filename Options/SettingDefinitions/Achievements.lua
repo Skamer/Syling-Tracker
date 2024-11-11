@@ -205,11 +205,10 @@ class "SettingDefinitions.Achievements" (function(_ENV)
     --- Header Sub Sections
     ---------------------------------------------------------------------------
     local headertabControl = Widgets.TabControl.Acquire(false, headerSection)
-    headertabControl:SetID(50)
-    headertabControl:SetID(1)
+    headertabControl:SetID(60)
     headertabControl:AddTabPage({
       name = L.TITLE,
-      onAcquire = function()  
+      onAcquire = function()
         local font = Widgets.SettingsMediaFont.Acquire(false, headertabControl)
         font:SetID(10)
         font:BindUISetting("achievement.name.mediaFont")
@@ -221,9 +220,16 @@ class "SettingDefinitions.Achievements" (function(_ENV)
         textTransform:SetEntries(TEXT_TRANSFORM_ENTRIES)
         textTransform:BindUISetting("achievement.name.textTransform")
         self.AchievementHeaderTitleTabControls.textTransform = textTransform
+
+        local textJustifyH = Widgets.SettingsDropDown.Acquire(false, headertabControl)
+        textJustifyH:SetID(30)
+        textJustifyH:SetLabel(L.TEXT_JUSITFY_H)
+        textJustifyH:SetEntries(TEXT_JUSTIFY_H_ENTRIES)
+        textJustifyH:BindUISetting("achievement.name.justifyH")
+        self.AchievementHeaderTitleTabControls.textJustifyH = textJustifyH
       
       end,
-      onRelease = function()  
+      onRelease = function() 
         for index, control in pairs(self.AchievementHeaderTitleTabControls) do 
             control:Release()
             self.AchievementHeaderTitleTabControls[index] = nil

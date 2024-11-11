@@ -117,6 +117,7 @@ RegisterUISetting("task.borderColor", Color(0, 0, 0, 0.4))
 RegisterUISetting("task.borderSize", 1)
 RegisterUISetting("task.name.mediaFont", FontType("DejaVuSansCondensed Bold", 10))
 RegisterUISetting("task.name.textTransform", "NONE")
+RegisterUISetting("task.name.justifyH", "CENTER")
 RegisterUISetting("task.name.textColor", Color(1, 106/255, 0))
 -------------------------------------------------------------------------------
 --                              Observables                                  --
@@ -152,13 +153,14 @@ Style.UpdateSkin("Default", {
       Name = {
         text                          = FromUIProperty("TaskName"),
         justifyV                      = "MIDDLE",
+        justifyH                      = FromUISetting("task.name.justifyH"),
         mediaFont                     = FromUISetting("task.name.mediaFont"),
         textTransform                 = FromUISetting("task.name.textTransform"),
         textColor                     = FromUISetting("task.name.textColor"),
         location                      = {
                                         Anchor("TOP"),
-                                        Anchor("LEFT"),
-                                        Anchor("RIGHT"),
+                                        Anchor("LEFT", 4, 0),
+                                        Anchor("RIGHT", -4, 0),
                                         Anchor("BOTTOM")
                                       }
       },

@@ -270,6 +270,13 @@ class "SettingDefinitions.Tasks" (function(_ENV)
         textTransform:SetEntries(TEXT_TRANSFORM_ENTRIES)
         textTransform:BindUISetting("task.name.textTransform")
         self.TaskHeaderTitleTabControls.textTransform = textTransform
+
+        local textJustifyH = Widgets.SettingsDropDown.Acquire(false, headertabControl)
+        textJustifyH:SetID(30)
+        textJustifyH:SetLabel(L.TEXT_JUSITFY_H)
+        textJustifyH:SetEntries(TEXT_JUSTIFY_H_ENTRIES)
+        textJustifyH:BindUISetting("task.name.justifyH")
+        self.TaskHeaderTitleTabControls.textJustifyH = textJustifyH
       
       end,
       onRelease = function()  

@@ -110,6 +110,7 @@ RegisterUISetting("achievement.backgroundColor", Color(35/255, 40/255, 46/255, 0
 RegisterUISetting("achievement.borderColor", Color(0, 0, 0, 0.4))
 RegisterUISetting("achievement.borderSize", 1)
 RegisterUISetting("achievement.name.mediaFont", FontType("DejaVuSansCondensed Bold", 10))
+RegisterUISetting("achievement.name.justifyH", "CENTER")
 RegisterUISetting("achievement.name.textTransform", "NONE")
 -------------------------------------------------------------------------------
 --                                Styles                                     --
@@ -135,12 +136,13 @@ Style.UpdateSkin("Default", {
         height                        = 24,
         text                          = FromUIProperty("AchievementName"),
         justifyV                      = "MIDDLE",
+        justifyH                      = FromUISetting("achievement.name.justifyH"),
         mediaFont                     = FromUISetting("achievement.name.mediaFont"),
         textTransform                 = FromUISetting("achievement.name.textTransform"),
         location                      = {
                                         Anchor("TOP", 0, -5),
-                                        Anchor("LEFT"),
-                                        Anchor("RIGHT"),
+                                        Anchor("LEFT", 4, 0),
+                                        Anchor("RIGHT", -4, 0),
                                       }
       },
 
