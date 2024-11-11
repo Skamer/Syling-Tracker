@@ -191,7 +191,7 @@ class "TabControl" (function(_ENV)
       previousPageInfo.onRelease(self)
     end
 
-    if pageInfo and pageInfo.onAcquire then 
+    if pageInfo and pageInfo.onAcquire then
       pageInfo.onAcquire(self)
     end
 
@@ -206,6 +206,8 @@ class "TabControl" (function(_ENV)
     end
 
     for index, tabButton in pairs(self.TabButtons) do 
+      tabButton.OnClick = tabButton.OnClick - self.OnTabButtonClick
+
       tabButton:Release()
       self.TabButtons[index] = nil 
     end

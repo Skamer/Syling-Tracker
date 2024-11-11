@@ -4,6 +4,11 @@
 
 - Added [ticket #117](https://github.com/Skamer/Syling-Tracker/issues/117) : a way for changing the horizontal alignment for quest names in the options.
 
+###### FIXES
+
+- Fixed an issue where sometimes the tab content could become blank in the options.
+- Fixed an issue where the font of an element would be unexpectedly be changed when navigating in its options.
+
 ---
 
 ## 2.6.1

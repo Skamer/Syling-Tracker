@@ -1004,14 +1004,16 @@ class "SettingsMediaFont" (function(_ENV)
     end
   end
 
-  local function OnFontHeightSettingChanged(self, slider, value)
-    if self.Font then 
-      OnFontChanged(self, FontType(
-        self.Font.font, 
-        value,
-        self.Font.outline, 
-        self.Font.monochrome
-      ))
+  local function OnFontHeightSettingChanged(self, slider, value, userControl)
+    if userControl then 
+      if self.Font then 
+        OnFontChanged(self, FontType(
+          self.Font.font, 
+          value,
+          self.Font.outline, 
+          self.Font.monochrome
+        ))
+      end
     end
   end
 
