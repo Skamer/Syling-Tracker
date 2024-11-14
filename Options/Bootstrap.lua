@@ -48,6 +48,7 @@ __Async__() function SylingTracker_OPEN_OPTIONS()
     _M:CreateTrackerEntries(panel)
 
     -- Contents entries
+    panel:AddCategoryEntry({ text = L.AUTO_QUESTS, value = SettingDefinitions.AutoQuests}, "contents")
     panel:AddCategoryEntry({ text = L.QUESTS, value = SettingDefinitions.Quests}, "contents")
     panel:AddCategoryEntry({ text = L.TASKS, value = SettingDefinitions.Tasks}, "contents")
     -- panel:AddCategoryEntry({ text = "World Quests"}, "contents")

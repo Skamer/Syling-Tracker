@@ -12,6 +12,11 @@ local L = _Locale("zhCN")
 
 if not L then return end
 
+-- L.AUTO_QUEST = "Auto Quest"
+-- L.AUTO_QUESTS = "Auto Quests" -- plural of AUTO_QUEST
+-- L.QUEST_NAME = "Quest Name"
+-- L.SUB_TEXT = "Sub Text"
+
 L.ACHIEVEMENT = "成就"
 L.ACHIEVEMENTS = "成就"
 L.ACTIVITIES = "活动"

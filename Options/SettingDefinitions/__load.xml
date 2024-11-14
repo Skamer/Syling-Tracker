@@ -5,6 +5,7 @@
   <Script file="Objective.lua" />
   <Script file="Trackers.lua" />
   <Script file="ItemBar.lua" />
+  <Script file="AutoQuests.lua" />
   <Script file="Quests.lua" />
   <Script file="Tasks.lua" />
   <Script file="Achievements.lua" />
