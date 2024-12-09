@@ -1,4 +1,12 @@
-# 2.6.2
+# 2.6.3
+
+###### NEW
+
+- Added [ticket #88](https://github.com/Skamer/Syling-Tracker/issues/88) : options for the auto quests popup.
+
+---
+
+## 2.6.2
 
 ###### NEW
 
