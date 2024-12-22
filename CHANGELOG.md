@@ -1,4 +1,14 @@
-# 2.6.3
+# 2.6.4
+
+##### Cataclysm
+
+###### FIXES
+
+- Fixed [ticket #126](https://github.com/Skamer/Syling-Tracker/issues/126) : an AutoQuest error.
+
+---
+
+## 2.6.3
 
 ###### NEW
 

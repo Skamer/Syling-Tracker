@@ -41,7 +41,7 @@ __SystemEvent__()
 function PLAYER_ENTERING_WORLD()
   for i = 1, GetNumAutoQuestPopUps() do 
     local questID, popupType = GetAutoQuestPopUp(i)
-    M:AddAutoQuest(questID, popupType)
+    _M:AddAutoQuest(questID, popupType)
   end 
 end
 
