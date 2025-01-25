@@ -1,4 +1,10 @@
-# 2.6.4
+# 2.6.5
+
+- Added a temporary command for [ticket #121](https://github.com/Skamer/Syling-Tracker/issues/121): `/slt showMapForQuestDetails value` (value can be true, false or nil).
+
+---
+
+## 2.6.4
 
 ##### Cataclysm
 
