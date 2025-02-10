@@ -202,7 +202,12 @@ RegisterContextMenuPattern("activity", {
     order = 10,
     icon = { atlas = AtlasType("adventureguide-icon-whatsnew") },
     handler = function(activityID)
-      MonthlyActivitiesObjectiveTracker_OpenFrameToActivity(activityID)
+      -- MonthlyActivitiesFrame_OpenFrameToActivity is undefined if the EncounterJournal isn't loaded.
+      if not EncounterJournal then
+        EncounterJournal_LoadUI();
+      end
+
+      MonthlyActivitiesFrame_OpenFrameToActivity(activityID)
     end
   },
   {

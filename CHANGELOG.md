@@ -1,4 +1,12 @@
-# 2.6.5
+# 2.6.6
+
+###### FIXES
+
+- Fixed [ticket #128](https://github.com/Skamer/Syling-Tracker/issues/128): the activities were not added after being tracked.
+
+---
+
+## 2.6.5
 
 - Added a temporary command for [ticket #121](https://github.com/Skamer/Syling-Tracker/issues/121): `/slt showMapForQuestDetails value` (value can be true, false or nil).
 

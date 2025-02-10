@@ -24,7 +24,7 @@ ACTIVITIES_CONTENT_SUBJECT = RegisterObservableContent("activities", ActivitiesC
 -- Used for checking quicky if an activity is tracked
 ACTIVITIES_CACHE = {}
 
-__ActiveOnEvents__ "PLAYER_ENTERING_WORLD" "PERKS_ACTIVITIES_TRACKED_UPDATED" "PERKS_ACTIVITY_COMPLETED"
+__ActiveOnEvents__ "PLAYER_ENTERING_WORLD" "PERKS_ACTIVITIES_TRACKED_LIST_CHANGED" "PERKS_ACTIVITY_COMPLETED"
 function BecomeActiveOn(self, event, ...)
   return #GetTrackedPerksActivities().trackedIDs > 0
 end
@@ -80,6 +80,16 @@ end
 
 __SystemEvent__()
 function PERKS_ACTIVITIES_TRACKED_UPDATED()
+  _M:LoadAndUpdateActivities()
+end
+
+__SystemEvent__()
+function PERKS_ACTIVITY_COMPLETED()
+  _M:LoadAndUpdateActivities()
+end
+
+__SystemEvent__()
+function PERKS_ACTIVITIES_TRACKED_LIST_CHANGED()
   _M:LoadAndUpdateActivities()
 end
 -- ========================================================================= --
