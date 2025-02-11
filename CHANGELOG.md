@@ -1,4 +1,12 @@
-# 2.6.6
+# 2.6.7
+
+###### NEW
+
+- Added [ticket #120](https://github.com/Skamer/Syling-Tracker/issues/120): a way for showing the tooltip when mouseover a quest.
+
+---
+
+## 2.6.6
 
 ###### FIXES
 

@@ -466,6 +466,14 @@ class "SettingDefinitions.Quests" (function(_ENV)
     --   onRelease = function()
     --   end,
     -- })
+
+    local showTooltip =  Widgets.SettingsCheckBox.Acquire(false, self)
+    showTooltip:SetID(60)
+    showTooltip:SetLabel("Show Tooltip")
+    showTooltip:BindUISetting("quest.showTooltip")
+    self.QuestTabControls.showTooltip = showTooltip
+
+
     headertabControl:Refresh()
     headertabControl:SelectTab(1)
 

@@ -17,6 +17,7 @@ export {
   FromUISetting                         = API.FromUISetting,
   FromUISettings                        = API.FromUISettings,
   GenerateUISettings                    = API.GenerateUISettings,
+  GetTooltip                            = API.GetTooltip,
   GetFrame                              = Wow.GetFrame,
 
   -- Wow API & Utils
@@ -34,15 +35,16 @@ class "QuestItemIcon" (function(_ENV)
   --                               Handlers                                  --
   -----------------------------------------------------------------------------
   local function OnLeaveHandler(self)
-    GameTooltip:Hide()
+    GetTooltip():Hide()
   end
 
   local function OnEnterHandler(self)
     local itemLink = self.ItemLink
-    if itemLink then 
-      GameTooltip:SetOwner(self)
-      GameTooltip:SetHyperlink(itemLink)
-      GameTooltip:Show()
+    if itemLink then
+      local tooltip = GetTooltip()
+      tooltip:SetOwner(self)
+      tooltip:SetHyperlink(itemLink)
+      tooltip:Show()
     end
   end
   -----------------------------------------------------------------------------
@@ -142,6 +144,37 @@ class "QuestViewContent"(function(_ENV)
     end
   end
 
+  local function OnLeaveHandler(self)
+    GetTooltip():Hide()
+  end
+  
+  local function OnEnterHandler(self)
+    local parent = self:GetParent()
+    local questID = parent.QuestID
+    
+    if questID then 
+      local questLink = GetQuestLink(questID)
+      
+      if questLink then
+        local tooltip = GetTooltip()
+        
+        tooltip:SetOwner(self)
+        Utils.AddQuestToTooltip(tooltip, questID)
+        tooltip:Show()
+      end
+    end
+  end
+
+  local function ShowTooltipHandler(self, new)
+    if new then 
+      self.OnEnter = self.OnEnter + OnEnterHandler
+      self.OnLeave = self.OnLeave + OnLeaveHandler
+    else 
+      self.OnEnter = self.OnEnter - OnEnterHandler
+      self.OnLeave = self.OnLeave - OnLeaveHandler
+    end
+  end
+  
   local function OnEnablePOIHandler(self, enable)
     if enable then 
       self:UpdatePOI()
@@ -149,6 +182,14 @@ class "QuestViewContent"(function(_ENV)
       Style[self].POI = NIL 
     end
   end
+  -----------------------------------------------------------------------------
+  --                               Properties                                --
+  -----------------------------------------------------------------------------
+  property "ShowTooltip" {
+    type = Boolean,
+    default = false,
+    handler = ShowTooltipHandler
+  }
   -----------------------------------------------------------------------------
   --                              Constructors                               --
   -----------------------------------------------------------------------------
@@ -452,6 +493,7 @@ RegisterUISetting("quest.name.textTransform", "NONE")
 RegisterUISetting("quest.name.justifyH", "CENTER")
 RegisterUISetting("quest.level.mediaFont", FontType("PT Sans Caption Bold", 10))
 RegisterUISetting("quest.enablePOI", true)
+RegisterUISetting("quest.showTooltip", false)
 
 GenerateUISettings("dungeonQuest", "quest", function(generatedSettings)
   if generatedSettings["dungeonQuest.backgroundColor"] then 
@@ -528,7 +570,7 @@ Style.UpdateSkin("Default", {
     showBorder                        = true, 
     backdropBorderColor               = Color(0, 0, 0, 0.4),
     borderSize                        = 1,
-    autoAdjustHeight = true,
+    autoAdjustHeight                  = true,
     
     Icon = {
       file = FromUIProperty("ItemTexture"),
@@ -561,6 +603,7 @@ Style.UpdateSkin("Default", {
       backdropColor                   = FromUISetting("quest.backgroundColor"),
       backdropBorderColor             = FromUISetting("quest.borderColor"),
       borderSize                      = FromUISetting("quest.borderSize"),
+      showTooltip                     = FromUISetting("quest.showTooltip"),
 
       Header = {
         height                        = 24,
