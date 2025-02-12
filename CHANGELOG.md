@@ -3,6 +3,7 @@
 ###### NEW
 
 - Added [ticket #120](https://github.com/Skamer/Syling-Tracker/issues/120): a way for showing the tooltip when mouseover a quest.
+- Added ruRU locales.
 
 ---
 
