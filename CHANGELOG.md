@@ -1,4 +1,12 @@
-# 2.6.7
+# 2.6.8
+
+###### FIXES
+
+- Fixed [ticket #131](https://github.com/Skamer/Syling-Tracker/issues/131): the data related to activities were missing on the first loading.
+
+---
+
+## 2.6.7
 
 ###### NEW
 

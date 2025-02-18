@@ -24,8 +24,10 @@ ACTIVITIES_CONTENT_SUBJECT = RegisterObservableContent("activities", ActivitiesC
 -- Used for checking quicky if an activity is tracked
 ACTIVITIES_CACHE = {}
 
-__ActiveOnEvents__ "PLAYER_ENTERING_WORLD" "PERKS_ACTIVITIES_TRACKED_LIST_CHANGED" "PERKS_ACTIVITY_COMPLETED"
+__ActiveOnEvents__ "PLAYER_ENTERING_WORLD" "PERKS_ACTIVITIES_TRACKED_LIST_CHANGED" "PERKS_ACTIVITY_COMPLETED" "PERKS_ACTIVITIES_UPDATED"
 function BecomeActiveOn(self, event, ...)
+  -- IMPORTANT: the event 'PLAYER_ENTERING_WORLD' won't enable the module even if the player has activities tracked because the activities count is
+  -- still 0 on the first login. The event "PERKS_ACTIVITIES_UPDATED" is used as fallback for this case. 
   return #GetTrackedPerksActivities().trackedIDs > 0
 end
 
