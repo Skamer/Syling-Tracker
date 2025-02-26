@@ -1,4 +1,10 @@
-# 2.6.8
+# 2.6.9
+
+- Bumped the toc version for 11.1.0
+
+---
+
+## 2.6.8
 
 ###### FIXES
 
