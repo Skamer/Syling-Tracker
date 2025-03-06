@@ -18,6 +18,8 @@ export {
   FromUISettings                        = API.FromUISettings,
   GenerateUISettings                    = API.GenerateUISettings,
   GetTooltip                            = API.GetTooltip,
+  UseTooltip                            = API.UseTooltip,
+  SetTooltipPendingData                 = API.SetTooltipPendingData,
   GetFrame                              = Wow.GetFrame,
 
   -- Wow API & Utils
@@ -25,7 +27,9 @@ export {
   GetNextWaypoint                       = C_QuestLog.GetNextWaypoint,
   GetQuestPOINumber                     = Utils.GetQuestPOINumber,
   Secure_OpenToQuestDetails             = Utils.Secure_OpenToQuestDetails,
-  ShouldQuestIconsUseCampaignAppearance = QuestUtil.ShouldQuestIconsUseCampaignAppearance
+  ShouldQuestIconsUseCampaignAppearance = QuestUtil.ShouldQuestIconsUseCampaignAppearance,
+  IsQuestHasRewardsData                 = Utils.IsQuestHasRewardsData,
+  AddQuestRewardsToTooltip              = Utils.AddQuestRewardsToTooltip
 }
 
 __UIElement__()
@@ -134,7 +138,7 @@ class "QuestViewContent"(function(_ENV)
         ContextMenu_Show(contextMenuPattern, parent, questID)
       end
     else 
-      if data.isAutoComplete and data.isComplete then 
+      if data.isAutoComplete and data.isComplete then
         AutoQuestPopupTracker_RemovePopUp(questID)
         ShowQuestComplete(questID)
       else
@@ -147,22 +151,47 @@ class "QuestViewContent"(function(_ENV)
   local function OnLeaveHandler(self)
     GetTooltip():Hide()
   end
-  
+
   local function OnEnterHandler(self)
     local parent = self:GetParent()
     local questID = parent.QuestID
-    
-    if questID then 
-      local questLink = GetQuestLink(questID)
-      
-      if questLink then
-        local tooltip = GetTooltip()
-        
-        tooltip:SetOwner(self)
-        Utils.AddQuestToTooltip(tooltip, questID)
-        tooltip:Show()
+    local showRewards = self.ShowRewardsInTooltip 
+
+    if not questID then 
+      return 
+    end 
+
+    local questLink = GetQuestLink(questID)
+    if not questLink then 
+      return 
+    end
+
+    local tooltip, tooltipToken = UseTooltip()
+    tooltip:SetOwner(self)
+    tooltip:SetHyperlink(questLink)
+
+    if showRewards then 
+      if IsQuestHasRewardsData(questID) then
+        AddQuestRewardsToTooltip(tooltip, questID)
+      else
+        tooltip:AddLine("Rewards :")
+        tooltip:AddLine(RETRIEVING_DATA, RED_FONT_COLOR.r, RED_FONT_COLOR.g, RED_FONT_COLOR.b)
+
+        SetTooltipPendingData(
+          function() return not IsQuestHasRewardsData(questID) end, 
+          function()
+            tooltip:SetHyperlink(questLink)
+
+            AddQuestRewardsToTooltip(tooltip, questID)
+            tooltip:Show()
+          end,
+          tooltipToken,
+          0.1
+        )
       end
     end
+    
+    tooltip:Show()
   end
 
   local function ShowTooltipHandler(self, new)
@@ -179,7 +208,7 @@ class "QuestViewContent"(function(_ENV)
     if enable then 
       self:UpdatePOI()
     else
-      Style[self].POI = NIL 
+      Style[self].POI = NIL
     end
   end
   -----------------------------------------------------------------------------
@@ -189,6 +218,11 @@ class "QuestViewContent"(function(_ENV)
     type = Boolean,
     default = false,
     handler = ShowTooltipHandler
+  }
+
+  property "ShowRewardsInTooltip" {
+    type = Boolean,
+    default = false
   }
   -----------------------------------------------------------------------------
   --                              Constructors                               --
@@ -494,6 +528,7 @@ RegisterUISetting("quest.name.justifyH", "CENTER")
 RegisterUISetting("quest.level.mediaFont", FontType("PT Sans Caption Bold", 10))
 RegisterUISetting("quest.enablePOI", true)
 RegisterUISetting("quest.showTooltip", false)
+RegisterUISetting("quest.tooltip.showRewards", false)
 
 GenerateUISettings("dungeonQuest", "quest", function(generatedSettings)
   if generatedSettings["dungeonQuest.backgroundColor"] then 
@@ -604,6 +639,7 @@ Style.UpdateSkin("Default", {
       backdropBorderColor             = FromUISetting("quest.borderColor"),
       borderSize                      = FromUISetting("quest.borderSize"),
       showTooltip                     = FromUISetting("quest.showTooltip"),
+      showRewardsInTooltip            = FromUISetting("quest.tooltip.showRewards"),
 
       Header = {
         height                        = 24,

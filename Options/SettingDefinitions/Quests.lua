@@ -473,6 +473,11 @@ class "SettingDefinitions.Quests" (function(_ENV)
     showTooltip:BindUISetting("quest.showTooltip")
     self.QuestTabControls.showTooltip = showTooltip
 
+    local showRewardsInTooltip =  Widgets.SettingsCheckBox.Acquire(false, self)
+    showRewardsInTooltip:SetID(70)
+    showRewardsInTooltip:SetLabel(("|cffff7f00(%s)|r %s"):format(L.EXPERIMENTAL, "Show Rewards in Tooltip"))
+    showRewardsInTooltip:BindUISetting("quest.tooltip.showRewards")
+    self.QuestTabControls.showRewardsInTooltip = showRewardsInTooltip
 
     headertabControl:Refresh()
     headertabControl:SelectTab(1)
