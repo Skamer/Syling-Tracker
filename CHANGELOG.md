@@ -2,7 +2,7 @@
 
 ###### NEW
 
-- Added a feature for displaying the rewards in the quest tooltip. This one is disabled by default, and need to be enabled from the options if you want it.
+- Added a feature for displaying the rewards in the quest tooltip. If you want this one, you need to enable from the options as it's disabled by default.
 
 ---
 
