@@ -194,7 +194,7 @@ function AddQuestRewardsToTooltip(tooltip, questID)
   
   if numQuestRewards > 0 or numQuestChoices > 0 or money > 0 or xp > 0 or honor > 0 or majorFactionRepRewards then
     tooltip:AddLine("\n")
-    tooltip:AddLine("Rewards :")
+    tooltip:AddLine("Rewards:")
 
     -- XP and money
     if xp > 0 and money > 0 then 

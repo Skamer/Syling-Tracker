@@ -174,7 +174,7 @@ class "QuestViewContent"(function(_ENV)
       if IsQuestHasRewardsData(questID) then
         AddQuestRewardsToTooltip(tooltip, questID)
       else
-        tooltip:AddLine("Rewards :")
+        tooltip:AddLine("Rewards:")
         tooltip:AddLine(RETRIEVING_DATA, RED_FONT_COLOR.r, RED_FONT_COLOR.g, RED_FONT_COLOR.b)
 
         SetTooltipPendingData(

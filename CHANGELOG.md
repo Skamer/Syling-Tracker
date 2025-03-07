@@ -1,4 +1,12 @@
-# 2.6.9
+# 2.6.10
+
+###### NEW
+
+- Added a feature for displaying the rewards in the quest tooltip. This one is disabled by default, and need to be enabled from the options if you want it.
+
+---
+
+## 2.6.9
 
 - Bumped the toc version for 11.1.0
 
