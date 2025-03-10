@@ -241,16 +241,21 @@ class "__DataProperties__" (function(_ENV)
             local isMap = attributeInfo.isMap 
             local isArray = attributeInfo.isArray
             local collectionIndex = "__" .. propertyName
+            local collection = obj[collectionIndex]
 
-            if isMap and obj[collectionIndex] then 
-              for k in pairs(obj[collectionIndex]) do 
-                obj[propertyName][k] = nil 
+            if isMap then
+              if collection then 
+                for k in pairs(collection) do 
+                  obj[propertyName][k] = nil
+                end
               end
-            elseif isArray and obj[collectionIndex] then
-              for k in obj[collectionIndex]:GetIterator() do 
-                  obj[propertyName][k] = nil 
+            elseif isArray then
+              if collection then 
+                for k in collection:GetIterator() do
+                    obj[propertyName][k] = nil 
+                end
               end
-            else 
+            else
               obj[propertyName] = nil 
             end
           end

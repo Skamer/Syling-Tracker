@@ -224,9 +224,14 @@ function CHALLENGE_MODE_DEATH_COUNT_UPDATED()
   local keystoneLevel = KEYSTONE_CONTENT_SUBJECT.level
   local timeLostByDeath = 5 -- in seconds
 
-  -- From TWW, the 3rd afix (level 7+) removes 15 seconds by death on the timer. 
-  if keystoneLevel and keystoneLevel >= 7 then 
-    timeLostByDeath = 15
+  if keystoneLevel then 
+    -- In the key levels 2 and 3, the deaths no longer remove time from the timer.
+    if keystoneLevel <= 3 then 
+      timeLostByDeath = 0
+    -- From TWW, the 3rd afix (level 7+) removes 15 seconds by death on the timer. 
+    elseif keystoneLevel >= 7 then 
+      timeLostByDeath = 15
+    end
   end
 
   -- We reduce the start time for advancing the timer of '5 or 15' seconds.

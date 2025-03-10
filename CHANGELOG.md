@@ -1,4 +1,14 @@
-# 2.6.10
+# 2.6.11
+
+###### FIXES
+
+- Fixed an error occurred sometimes when resetting the data.
+- Fixed a case where the affix frame is still displayed even when there is no affix to display.
+- Following to recent hotfix by blizzard, the time will no longer be lost for the key levels 2 and 3 when a player dies.
+
+---
+
+## 2.6.10
 
 ###### NEW
 

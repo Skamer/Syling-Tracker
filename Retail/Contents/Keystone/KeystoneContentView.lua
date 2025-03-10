@@ -87,6 +87,11 @@ class "KeystoneAffixes" (function(_ENV)
         end
       end
     else
+      for i = 1, 4 do 
+        local affix = self:GetChild("Affix"..i)
+        affix:Hide()
+      end
+
       self.AffixesCount = nil 
     end
   end
