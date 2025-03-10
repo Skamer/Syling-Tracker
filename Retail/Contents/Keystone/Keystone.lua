@@ -228,8 +228,8 @@ function CHALLENGE_MODE_DEATH_COUNT_UPDATED()
     -- In the key levels 2 and 3, the deaths no longer remove time from the timer.
     if keystoneLevel <= 3 then 
       timeLostByDeath = 0
-    -- From TWW, the 3rd afix (level 7+) removes 15 seconds by death on the timer. 
-    elseif keystoneLevel >= 7 then 
+    -- From TWW season 2, the 4th afix (level 12+) removes 15 seconds by death on the timer. 
+    elseif keystoneLevel >= 12 then 
       timeLostByDeath = 15
     end
   end

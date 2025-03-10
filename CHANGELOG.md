@@ -4,7 +4,7 @@
 
 - Fixed an error occurred sometimes when resetting the data.
 - Fixed a case where the affix frame is still displayed even when there is no affix to display.
-- Following to recent hotfix by blizzard, the time will no longer be lost for the key levels 2 and 3 when a player dies.
+- Updated the time lost on deaths in mythic + (this is for taking as account the changes done for the season 2 and the recent hotfix).
 
 ---
 
