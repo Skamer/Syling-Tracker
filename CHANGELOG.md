@@ -1,4 +1,13 @@
-# 2.6.11
+# 2.6.12
+
+###### FIXES
+
+- Fixed an issue where the tracker cannot be resized from the resizer after a loading.
+- Fixed an issue where the visibility rules having 'false' as value rollback to default value.
+
+---
+
+## 2.6.11
 
 ###### FIXES
 

@@ -1026,7 +1026,12 @@ function LoadVisibilityRulesForTracker(tracker)
 
   for _, prop in Struct.GetMembers(VisibilityRulesType) do
     local propName = prop:GetName()
-    trackerVisibilityRules[propName] = rules and rules[propName] or prop:GetDefault()
+
+    if rules and rules[propName] ~= nil then 
+      trackerVisibilityRules[propName] = rules[propName]
+    else 
+      trackerVisibilityRules[propName] = prop:GetDefault()
+    end
   end
 
   tracker.HideWhenEmpty = trackerVisibilityRules.hideWhenEmpty
@@ -1050,20 +1055,20 @@ function GetRulesVisibilityShownForTracker(tracker)
   local rules = tracker.VisibilityRules
 
   if tracker.Empty and rules.hideWhenEmpty then
-    return false 
+    return false
   end
 
-  if rules.enableAdvancedRules then 
+  if rules.enableAdvancedRules then
     local result = EvaluateVisibilityAdvancedRules(rules)
-    if result == "show" then 
-      return true 
-    elseif result == "hide" then 
-      return false 
+    if result == "show" then
+      return true
+    elseif result == "hide" then
+      return false
     end
   end
 
-  if rules.defaultVisibility == "hide" then 
-    return false 
+  if rules.defaultVisibility == "hide" then
+    return false
   end
 
   return true
@@ -1407,8 +1412,6 @@ Style.UpdateSkin("Default", {
     minResize                         = { width = 100, height = 100},
     size                              = FromTrackerSetting("size"),
     location                          = FromLocation(),
-    resizable                         = false,
-    movable                           = false,
     backdrop                          = FromBackdrop(),
     showBackground                    = FromTrackerSetting("showBackground"),
     showBorder                        = FromTrackerSetting("showBorder"),
