@@ -129,13 +129,17 @@ class "QuestViewContent"(function(_ENV)
       if questID and contextMenuPattern then 
         ContextMenu_Show(contextMenuPattern, parent, questID)
       end
-    else 
-      if data.isAutoComplete and data.isComplete then 
-        WatchFrameAutoQuest_ClearPopUp(questID)
-        ShowQuestComplete(GetQuestLogIndexByID(questID))
-      else
-        -- The quest details won't be shown if the player is in combat.
-        -- Secure_OpenToQuestDetails(questID)
+    else
+      if not IsShiftKeyDown() then 
+        if data.isAutoComplete and data.isComplete then 
+          WatchFrameAutoQuest_ClearPopUp(questID)
+          ShowQuestComplete(GetQuestLogIndexByID(questID))
+        else
+          -- The quest details won't be shown if the player is in combat.
+          -- Secure_OpenToQuestDetails(questID)
+        end
+      else 
+        RemoveQuestWatch(GetQuestLogIndexByID(questID))
       end
     end
   end

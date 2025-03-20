@@ -27,6 +27,7 @@ export {
   GetNextWaypoint                       = C_QuestLog.GetNextWaypoint,
   GetQuestPOINumber                     = Utils.GetQuestPOINumber,
   Secure_OpenToQuestDetails             = Utils.Secure_OpenToQuestDetails,
+  RemoveQuestWatch                      = C_QuestLog.RemoveQuestWatch,
   ShouldQuestIconsUseCampaignAppearance = QuestUtil.ShouldQuestIconsUseCampaignAppearance,
   IsQuestHasRewardsData                 = Utils.IsQuestHasRewardsData,
   AddQuestRewardsToTooltip              = Utils.AddQuestRewardsToTooltip
@@ -137,13 +138,17 @@ class "QuestViewContent"(function(_ENV)
       if questID and contextMenuPattern then 
         ContextMenu_Show(contextMenuPattern, parent, questID)
       end
-    else 
-      if data.isAutoComplete and data.isComplete then
-        AutoQuestPopupTracker_RemovePopUp(questID)
-        ShowQuestComplete(questID)
-      else
-        -- The quest details won't be shown if the player is in combat.
-        Secure_OpenToQuestDetails(questID)
+    else
+      if not IsShiftKeyDown() then 
+        if data.isAutoComplete and data.isComplete then
+          AutoQuestPopupTracker_RemovePopUp(questID)
+          ShowQuestComplete(questID)
+        else
+          -- The quest details won't be shown if the player is in combat.
+          Secure_OpenToQuestDetails(questID)
+        end
+      else 
+        RemoveQuestWatch(questID)
       end
     end
   end

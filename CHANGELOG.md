@@ -1,4 +1,12 @@
-# 2.6.12
+# 2.6.13
+
+###### NEW
+
+- Shift + Left Clicking on a quest will now unwatch it.
+
+---
+
+## 2.6.12
 
 ###### FIXES
 
