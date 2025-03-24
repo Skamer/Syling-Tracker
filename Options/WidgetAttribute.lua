@@ -36,8 +36,8 @@ local function RegisterWidgetForSystemEvent(widget, event)
   end
 end
 
-local function UnregisterSystemEvent(widget, event)
-  local t = _Events[event]
+local function UnregisterWidgetForSystemEvent(widget, event)
+  local t = EVENTS[event]
   if t then 
     t[widget] = nil 
   end

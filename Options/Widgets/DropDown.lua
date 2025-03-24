@@ -50,12 +50,18 @@ class "DropDown" (function(_ENV)
   --                               Events                                    --
   -----------------------------------------------------------------------------
   event "OnEntrySelected"
-
+  -----------------------------------------------------------------------------
+  --                               Handlers                                  --
+  -----------------------------------------------------------------------------
   local function OnPopoutEntrySelected(self, popout, entry)
     self:SelectEntry(entry:GetEntryData())
 
     self:OnEntrySelected(entry)
     self:ClosePopout()
+  end
+
+  local function OnToggleButtonMouseDownHandler(button)
+    button:GetParent():TogglePopout()
   end
   -----------------------------------------------------------------------------
   --                               Methods                                   --
@@ -68,10 +74,11 @@ class "DropDown" (function(_ENV)
 
       local toggleButton = self:GetChild("TogglePopoutButton")
       popout:InstantApplyStyle()
-      popout:SetPoint("TOP", toggleButton, "BOTTOM", 0, 11)
+      popout:SetPoint("TOP", toggleButton, "BOTTOM", 0, -2)
       popout:SetParent(UIParent)
       popout:SetFrameStrata("FULLSCREEN_DIALOG")
       popout:SetToplevel(true)
+      popout:EnableMouse(true)
 
       popout.OnEntrySelected = popout.OnEntrySelected + self.OnPopoutEntrySelected
 
@@ -87,12 +94,14 @@ class "DropDown" (function(_ENV)
     popout:SelectEntry(self.SelectedEntry)
     popout:Refresh()
     popout:Show()
+    self:RegisterSystemEvent("GLOBAL_MOUSE_DOWN")
   end
 
   function ClosePopout(self)
     local popout = self.popout
     if (popout) then
       popout:Hide()
+      self:UnregisterSystemEvent("GLOBAL_MOUSE_DOWN")
     end
   end
 
@@ -102,6 +111,7 @@ class "DropDown" (function(_ENV)
 
   function TogglePopout(self)
     local popout = self.popout
+
     if popout and popout:IsShown() then
       self:ClosePopout()
     else
@@ -176,6 +186,19 @@ class "DropDown" (function(_ENV)
 
     self:SetEntries(entries)
   end
+
+  function OnSystemEvent(self, event, ...)
+    local buttonType = ...
+
+    if buttonType == "LeftButton" then
+      local toggleButton = self:GetChild("TogglePopoutButton")
+      local popout = self.popout 
+
+      if popout and popout:IsShown() and not popout:IsMouseOver(0, 0, 0, 10) and not toggleButton:IsMouseOver() then 
+        self:TogglePopout()
+      end
+    end
+  end
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
@@ -194,9 +217,7 @@ class "DropDown" (function(_ENV)
   }
   function __ctor(self)
     local toggleButton = self:GetChild("TogglePopoutButton")
-    toggleButton.OnMouseDown = toggleButton.OnClick + function()
-      self:TogglePopout()
-    end
+    toggleButton.OnMouseDown = toggleButton.OnMouseDown + OnToggleButtonMouseDownHandler
 
     self.OnPopoutEntrySelected = function(popout, entry) OnPopoutEntrySelected(self, popout, entry) end
   end
@@ -222,68 +243,16 @@ Style.UpdateSkin("Default", {
         Anchor("BOTTOM")
       }
     },
+
     AutoHeightOffsetExtent = 40,
     
-    TopLeftBGTexture = {
-      atlas = AtlasType("CharacterCreateDropdown-NineSlice-CornerTopLeft", true),
-      location = {
-        Anchor("TOPLEFT", -30, 20)
-      }
+    backdrop = {
+      bgFile              = [[Interface\Buttons\WHITE8X8]],
+      edgeFile            = [[Interface\Buttons\WHITE8X8]],
+      edgeSize            = 1
     },
-
-    TopRightBGTexture = {
-      atlas = AtlasType("CharacterCreateDropdown-NineSlice-CornerTopRight", true),
-      location = {
-        Anchor("TOPRIGHT", 30, 20)
-      }
-    },
-    BottomLeftBGTexture = {
-      atlas = AtlasType("CharacterCreateDropdown-NineSlice-CornerBottomLeft", true),
-      location = {
-        Anchor("BOTTOMLEFT", -30, -20)
-      }
-    },
-    BottomRightBGTexture = {
-      atlas = AtlasType("CharacterCreateDropdown-NineSlice-CornerBottomRight", true),
-      location = {
-        Anchor("BOTTOMRIGHT", 30, -20)
-      }
-    },
-    TopBGTexture = {
-      atlas = AtlasType("_CharacterCreateDropdown-NineSlice-EdgeTop", true),
-      location = {
-        Anchor("TOPLEFT", 0, 0, "TopLeftBGTexture", "TOPRIGHT"),
-        Anchor("TOPRIGHT", 0, 0, "TopRightBGTexture", "TOPLEFT")
-      }
-    },
-    BottomBGTexture = {
-      atlas = AtlasType("_CharacterCreateDropdown-NineSlice-EdgeBottom", true),
-      location = {
-        Anchor("BOTTOMLEFT", 0, 0, "BottomLeftBGTexture", "BOTTOMRIGHT"),
-        Anchor("BOTTOMRIGHT", 0, 0, "BottomRightBGTexture", "BOTTOMLEFT")
-      }
-    },
-    LeftBGTexture = {
-      atlas = AtlasType("!CharacterCreateDropdown-NineSlice-EdgeLeft", true),
-      location = {
-        Anchor("TOPLEFT", 0, 0, "TopLeftBGTexture", "BOTTOMLEFT"),
-        Anchor("BOTTOMLEFT", 0, 0, "BottomLeftBGTexture", "TOPLEFT")
-      }
-    },
-    RightBGTexture = {
-      atlas = AtlasType("!CharacterCreateDropdown-NineSlice-EdgeRight", true),
-      location = {
-        Anchor("TOPRIGHT", 0, 0, "TopRightBGTexture", "BOTTOMRIGHT"),
-        Anchor("BOTTOMRIGHT", 0, 0, "BottomRightBGTexture", "TOPRIGHT")
-      }
-    },
-    BackgroundTexture = {
-      atlas = AtlasType("CharacterCreateDropdown-NineSlice-Center", true),
-      location = {
-        Anchor("TOPLEFT", 0, 0, "TopLeftBGTexture", "BOTTOMRIGHT"),
-        Anchor("BOTTOMRIGHT", 0, 0, "BottomRightBGTexture", "TOPLEFT")
-      }
-    },    
+    backdropColor       = { r = 0, g = 0, b = 0, a = 1.0},
+    backdropBorderColor =  { r = 0.35, g = 0.35, b = 0.35, a = 0.5},   
   },
 
   [DropDownPopoutButton] = {

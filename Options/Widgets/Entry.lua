@@ -343,20 +343,6 @@ class "GridEntriesFauxScrollBox" (function(_ENV)
       self:SetHeight(rowTotalHeight + self.AutoHeightOffsetExtent)
     end
   end
-
-  function OnSystemEvent(self, event, ...)
-    if not self:IsMouseOver() then
-      self:Hide()
-    end
-  end
-
-  function OnAcquire(self)
-    self:RegisterSystemEvent("GLOBAL_MOUSE_DOWN")
-  end
-
-  function OnRelease(self)
-    self:UnegisterSystemEvent("GLOBAL_MOUSE_DOWN")
-  end
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------

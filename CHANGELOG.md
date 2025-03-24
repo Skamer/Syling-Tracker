@@ -1,4 +1,12 @@
-# 2.6.13
+# 2.6.14
+
+###### FIXES
+
+- Did some improvements for the dropdown in the options.
+
+---
+
+## 2.6.13
 
 ###### NEW
 
