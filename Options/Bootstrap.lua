@@ -11,7 +11,7 @@ Syling                "SylingTracker_Options.Bootstrap"                      ""
 export {
   L                             = _Locale,
   IterateTrackers               = SylingTracker.API.IterateTrackers,
-  GetAddonVersion               = SylingTracker.Utils.GetAddonVersion
+  GetAddonVersion               = SylingTracker.Utils.GetAddonVersion,
 }
 
 LOGO_WHITE = [[Interface\AddOns\SylingTracker_Options\Media\logo_white]]
@@ -48,18 +48,29 @@ __Async__() function SylingTracker_OPEN_OPTIONS()
     _M:CreateTrackerEntries(panel)
 
     -- Contents entries
-    panel:AddCategoryEntry({ text = L.AUTO_QUESTS, value = SettingDefinitions.AutoQuests}, "contents")
+    if not IsVanilla() then 
+      panel:AddCategoryEntry({ text = L.AUTO_QUESTS, value = SettingDefinitions.AutoQuests}, "contents")
+    end
     panel:AddCategoryEntry({ text = L.QUESTS, value = SettingDefinitions.Quests}, "contents")
-    panel:AddCategoryEntry({ text = L.TASKS, value = SettingDefinitions.Tasks}, "contents")
-    -- panel:AddCategoryEntry({ text = "World Quests"}, "contents")
-    -- panel:AddCategoryEntry({ text = "Bonus objectives"}, "contents")
-    panel:AddCategoryEntry({ text = L.SCENARIO, value = SettingDefinitions.Scenario}, "contents")
-    panel:AddCategoryEntry({ text = Color.GRAY .. L.KEYSTONE .. " (NYI)"}, "contents")
-    panel:AddCategoryEntry({ text = L.DUNGEON, value = SettingDefinitions.Dungeon}, "contents")
-    panel:AddCategoryEntry({ text = L.ACHIEVEMENTS, value = SettingDefinitions.Achievements}, "contents")
-    panel:AddCategoryEntry({ text = L.PROFESSION, value = SettingDefinitions.Profession}, "contents")
-    panel:AddCategoryEntry({ text = L.ACTIVITIES, value = SettingDefinitions.Activities}, "contents")
-    panel:AddCategoryEntry({ text = L.COLLECTIONS, value = SettingDefinitions.Collections}, "contents")
+    
+    if IsRetail() then
+      panel:AddCategoryEntry({ text = L.TASKS, value = SettingDefinitions.Tasks}, "contents")
+      -- panel:AddCategoryEntry({ text = "World Quests"}, "contents")
+      -- panel:AddCategoryEntry({ text = "Bonus objectives"}, "contents")
+      panel:AddCategoryEntry({ text = L.SCENARIO, value = SettingDefinitions.Scenario}, "contents")
+    end
+    -- panel:AddCategoryEntry({ text = Color.GRAY .. L.KEYSTONE .. " (NYI)"}, "contents")
+
+    if not IsVanilla() then 
+      panel:AddCategoryEntry({ text = L.DUNGEON, value = SettingDefinitions.Dungeon}, "contents")
+      panel:AddCategoryEntry({ text = L.ACHIEVEMENTS, value = SettingDefinitions.Achievements}, "contents")
+    end
+
+    if IsRetail() then 
+      panel:AddCategoryEntry({ text = L.PROFESSION, value = SettingDefinitions.Profession}, "contents")
+      panel:AddCategoryEntry({ text = L.ACTIVITIES, value = SettingDefinitions.Activities}, "contents")
+      panel:AddCategoryEntry({ text = L.COLLECTIONS, value = SettingDefinitions.Collections}, "contents")
+    end
     -- panel:AddCategoryEntry({ text = "Torghast"}, "contents")
     -- panel:AddCategoryEntry({ text = "Quests"}, "contents")
 

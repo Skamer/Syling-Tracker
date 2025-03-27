@@ -1,4 +1,12 @@
-# 2.6.14
+# 2.6.15
+
+##### Classic
+
+- Removed the option categories which are not relevant to Vanilla and Cataclysm.
+
+---
+
+## 2.6.14
 
 ###### FIXES
 
