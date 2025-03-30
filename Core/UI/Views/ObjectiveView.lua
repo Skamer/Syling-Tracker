@@ -148,10 +148,33 @@ __UIElement__()
 class(tostring(ObjectiveView) .. ".Timer") { SylingTracker.Timer }
 
 __UIElement__()
-class "ObjectiveListView" { ListView }
+class "ObjectiveListView"(function(_ENV)
+  inherit "ListView"
+  -----------------------------------------------------------------------------
+  --                                Methods                                  --
+  -----------------------------------------------------------------------------
+  function IsFilteredItem(self, key, objectiveData, metadata)
+    if self.HideCompleted and objectiveData.isCompleted then 
+      return true
+    end 
+
+    return super.IsFilteredItem(self, key, objectiveData, metadata)
+  end
+  -----------------------------------------------------------------------------
+  --                               Properties                                --
+  -----------------------------------------------------------------------------
+  property "HideCompleted" {
+    type = Boolean,
+    default = false,
+    handler = function(self) self:RefreshView() end
+  }
+end)
+
 -------------------------------------------------------------------------------
 --                              UI Settings                                  --
 -------------------------------------------------------------------------------
+RegisterUISetting("objectives.hideCompleted", false)
+
 RegisterUISetting("objective.text.justifyH", "LEFT")
 RegisterUISetting("objective.text.JustifyV", "TOP")
 RegisterUISetting("objective.text.mediaFont", FontType("PT Sans Narrow Bold", 13))
@@ -295,6 +318,7 @@ Style.UpdateSkin("Default", {
 
   [ObjectiveListView] = {
     viewClass = ObjectiveView,
-    indexed = false
+    indexed = false,
+    hideCompleted = FromUISetting("objectives.hideCompleted")
   }
 })

@@ -14,6 +14,8 @@ local L = _Locale("ruRU")
 
 if not L then return end
 
+-- L.HIDE_COMPLETED_OBJECTIVES = "Hide completed objectives"
+
 L.ACHIEVEMENT = "Достижение"
 L.ACHIEVEMENTS = "Достижения"
 L.ACTIVITIES = "Активности"

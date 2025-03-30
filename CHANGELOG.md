@@ -1,4 +1,12 @@
-# 2.6.15
+# 2.7.0
+
+###### NEW
+
+- Added a way to hide the completed objectives for an achievement in the options. (ref [ticket #134](https://github.com/Skamer/Syling-Tracker/issues/134))
+
+---
+
+## 2.6.15
 
 ##### Classic
 

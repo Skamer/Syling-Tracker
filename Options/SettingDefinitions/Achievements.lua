@@ -145,6 +145,12 @@ class "SettingDefinitions.Achievements" (function(_ENV)
   --                    [Achievement] Tab Builder                            --
   -----------------------------------------------------------------------------
   function BuildAchievementTab(self)
+    local hideCompletedObjectivesCheckBox = Widgets.SettingsCheckBox.Acquire(false, self)
+    hideCompletedObjectivesCheckBox:SetID(10)
+    hideCompletedObjectivesCheckBox:SetLabel(L.HIDE_COMPLETED_OBJECTIVES)
+    hideCompletedObjectivesCheckBox:BindUISetting("achievement.objectives.hideCompleted")
+    self.AchievementTabControls.hideCompletedObjectivesCheckBox = hideCompletedObjectivesCheckBox
+
     ---------------------------------------------------------------------------
     --- Background Section
     ---------------------------------------------------------------------------

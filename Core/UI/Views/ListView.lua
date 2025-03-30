@@ -71,9 +71,15 @@ class "ListView" (function(_ENV)
     local yield = coroutine.yield
     local iterator = self.Indexed and ipairs or pairs 
 
-    for k, v in iterator(data) do 
-      yield(k, v, metadata)
+    for k, v in iterator(data) do
+      if not self:IsFilteredItem(k, v, metadata) then
+        yield(k, v, metadata)
+      end
     end
+  end
+
+  function IsFilteredItem(self, key, itemData, metadata)
+    return false
   end
 
   function AcquireView(self, key, classType)

@@ -11,7 +11,6 @@ Syling               "SylingTracker_Options.Localization.enUS"               ""
 local L = _Locale("enUS", true)
 
 if not L then return end
-
 L.ACHIEVEMENT = "Achievement"
 L.ACHIEVEMENTS = "Achievements"
 L.ACTIVITIES = "Activities"
@@ -55,6 +54,7 @@ L.HEADER = "Header"
 L.HEIGHT = "Height"
 L.HIDDEN = "Hidden"
 L.HIDE = "Hide"
+L.HIDE_COMPLETED_OBJECTIVES = "Hide completed objectives"
 L.HIDE_WHEN_EMPTY = "Hide when empty"
 L.HORIZONTAL = "Horizontal"
 L.HORIZONTAL_SPACING = "Horizontal Spacing"

@@ -14,6 +14,7 @@ export {
   FromBackdrop                        = Frame.FromBackdrop,
   RegisterUISetting                   = API.RegisterUISetting,
   FromUISetting                       = API.FromUISetting,
+  GenerateUISettings                  = API.GenerateUISettings,
 }
 
 __UIElement__()
@@ -104,6 +105,8 @@ class "AchievementListView" { ListView }
 -------------------------------------------------------------------------------
 --                              UI Settings                                  --
 -------------------------------------------------------------------------------
+GenerateUISettings("achievement.objectives", "objectives")
+
 RegisterUISetting("achievement.showBackground", true)
 RegisterUISetting("achievement.showBorder", true)
 RegisterUISetting("achievement.backgroundColor", Color(35/255, 40/255, 46/255, 0.73))
@@ -172,7 +175,7 @@ Style.UpdateSkin("Default", {
 
     [AchievementView.Objectives] = {
       spacing                         = 5,
-
+      hideCompleted                   = FromUISetting("achievement.objectives.hideCompleted"),
       location                        = {
                                         Anchor("TOPLEFT", 0, -5, "Header", "BOTTOMLEFT"),
                                         Anchor("TOPRIGHT", 0, -5, "Header", "BOTTOMRIGHT")
