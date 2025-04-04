@@ -1,4 +1,19 @@
-# 2.7.0
+# 2.7.1
+
+###### NEW
+
+- Added a way for changing the text color for the achievement name in the options. ([ticket #135](https://github.com/Skamer/Syling-Tracker/issues/135))
+- Added options for changing the achievement description. ([ticket #135](https://github.com/Skamer/Syling-Tracker/issues/135))
+
+##### Classic
+
+###### FIXES
+
+- Fixed the ColorPicker.
+
+---
+
+## 2.7.0
 
 ###### NEW
 

@@ -220,15 +220,21 @@ class "SettingDefinitions.Achievements" (function(_ENV)
         font:BindUISetting("achievement.name.mediaFont")
         self.AchievementHeaderTitleTabControls.font = font
 
+        local textColorPicker = Widgets.SettingsColorPicker.Acquire(false, headertabControl)
+        textColorPicker:SetID(20)
+        textColorPicker:SetLabel(L.TEXT_COLOR)
+        textColorPicker:BindUISetting("achievement.name.textColor")
+        self.AchievementHeaderTitleTabControls.textColorPicker = textColorPicker
+
         local textTransform = Widgets.SettingsDropDown.Acquire(false, headertabControl)
-        textTransform:SetID(20)
+        textTransform:SetID(30)
         textTransform:SetLabel(L.TEXT_TRANSFORM)
         textTransform:SetEntries(TEXT_TRANSFORM_ENTRIES)
         textTransform:BindUISetting("achievement.name.textTransform")
         self.AchievementHeaderTitleTabControls.textTransform = textTransform
 
         local textJustifyH = Widgets.SettingsDropDown.Acquire(false, headertabControl)
-        textJustifyH:SetID(30)
+        textJustifyH:SetID(40)
         textJustifyH:SetLabel(L.TEXT_JUSITFY_H)
         textJustifyH:SetEntries(TEXT_JUSTIFY_H_ENTRIES)
         textJustifyH:BindUISetting("achievement.name.justifyH")
@@ -242,6 +248,50 @@ class "SettingDefinitions.Achievements" (function(_ENV)
         end
       end,
     })
+
+    headertabControl:AddTabPage({
+      name = L.DESCRIPTION,
+      onAcquire = function()
+        local font = Widgets.SettingsMediaFont.Acquire(false, headertabControl)
+        font:SetID(10)
+        font:BindUISetting("achievement.desc.mediaFont")
+        self.AchievementHeaderDescTabControls.font = font
+
+        local textColorPicker = Widgets.SettingsColorPicker.Acquire(false, headertabControl)
+        textColorPicker:SetID(20)
+        textColorPicker:SetLabel(L.TEXT_COLOR)
+        textColorPicker:BindUISetting("achievement.desc.textColor")
+        self.AchievementHeaderDescTabControls.textColorPicker = textColorPicker
+
+        local textTransform = Widgets.SettingsDropDown.Acquire(false, headertabControl)
+        textTransform:SetID(30)
+        textTransform:SetLabel(L.TEXT_TRANSFORM)
+        textTransform:SetEntries(TEXT_TRANSFORM_ENTRIES)
+        textTransform:BindUISetting("achievement.desc.textTransform")
+        self.AchievementHeaderDescTabControls.textTransform = textTransform
+
+        local textJustifyV = Widgets.SettingsDropDown.Acquire(false, headertabControl)
+        textJustifyV:SetID(40)
+        textJustifyV:SetLabel(L.TEXT_JUSITFY_V)
+        textJustifyV:SetEntries(TEXT_JUSTIFY_V_ENTRIES)
+        textJustifyV:BindUISetting("achievement.desc.justifyV")
+        self.AchievementHeaderDescTabControls.textJustifyV = textJustifyV
+
+        local textJustifyH = Widgets.SettingsDropDown.Acquire(false, headertabControl)
+        textJustifyH:SetID(50)
+        textJustifyH:SetLabel(L.TEXT_JUSITFY_H)
+        textJustifyH:SetEntries(TEXT_JUSTIFY_H_ENTRIES)
+        textJustifyH:BindUISetting("achievement.desc.justifyH")
+        self.AchievementHeaderDescTabControls.textJustifyH = textJustifyH
+      end,
+      onRelease = function()
+        for index, control in pairs(self.AchievementHeaderDescTabControls) do 
+          control:Release()
+          self.AchievementHeaderDescTabControls[index] = nil
+        end
+      end
+    })
+
     headertabControl:Refresh()
     headertabControl:SelectTab(1)
     self.AchievementTabControls.headertabControl = headertabControl
@@ -326,6 +376,11 @@ class "SettingDefinitions.Achievements" (function(_ENV)
   }
 
   property "AchievementHeaderTitleTabControls" {
+    set = false, 
+    default = function() return newtable(false, true) end
+  }
+
+  property "AchievementHeaderDescTabControls" {
     set = false, 
     default = function() return newtable(false, true) end
   }

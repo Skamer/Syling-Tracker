@@ -14,6 +14,7 @@ if not L then return end
 
 -- L.AUTO_QUEST = "Auto Quest"
 -- L.AUTO_QUESTS = "Auto Quests" -- plural of AUTO_QUEST
+-- L.DESCRIPTION = "Description"
 -- L.HIDE_COMPLETED_OBJECTIVES = "Hide completed objectives"
 -- L.QUEST_NAME = "Quest Name"
 -- L.SUB_TEXT = "Sub Text"

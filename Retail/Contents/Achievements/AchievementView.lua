@@ -113,8 +113,14 @@ RegisterUISetting("achievement.backgroundColor", Color(35/255, 40/255, 46/255, 0
 RegisterUISetting("achievement.borderColor", Color(0, 0, 0, 0.4))
 RegisterUISetting("achievement.borderSize", 1)
 RegisterUISetting("achievement.name.mediaFont", FontType("DejaVuSansCondensed Bold", 10))
+RegisterUISetting("achievement.name.textColor", Color.NORMAL)
 RegisterUISetting("achievement.name.justifyH", "CENTER")
 RegisterUISetting("achievement.name.textTransform", "NONE")
+RegisterUISetting("achievement.desc.mediaFont", FontType("PT Sans Bold", 11))
+RegisterUISetting("achievement.desc.textColor", Color.WHITE)
+RegisterUISetting("achievement.desc.justifyH", "LEFT")
+RegisterUISetting("achievement.desc.justifyV", "TOP")
+RegisterUISetting("achievement.desc.textTransform", "NONE")
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
@@ -124,12 +130,12 @@ Style.UpdateSkin("Default", {
     minResize                         = { width = 0, height = 24},
     autoAdjustHeight                  = true,
     registerForClicks                 = { "LeftButtonDown", "RightButtonDown" },
-    backdrop                        = FromBackdrop(),
-    showBackground                  = FromUISetting("achievement.showBackground"),
-    showBorder                      = FromUISetting("achievement.showBorder"),
-    backdropColor                   = FromUISetting("achievement.backgroundColor"),
-    backdropBorderColor             = FromUISetting("achievement.borderColor"),
-    borderSize                      = FromUISetting("achievement.borderSize"),
+    backdrop                          = FromBackdrop(),
+    showBackground                    = FromUISetting("achievement.showBackground"),
+    showBorder                        = FromUISetting("achievement.showBorder"),
+    backdropColor                     = FromUISetting("achievement.backgroundColor"),
+    backdropBorderColor               = FromUISetting("achievement.borderColor"),
+    borderSize                        = FromUISetting("achievement.borderSize"),
     
     Header = {
       height                          = 24,
@@ -138,9 +144,10 @@ Style.UpdateSkin("Default", {
       Name = {
         height                        = 24,
         text                          = FromUIProperty("AchievementName"),
+        mediaFont                     = FromUISetting("achievement.name.mediaFont"),
+        textColor                     = FromUISetting("achievement.name.textColor"),
         justifyV                      = "MIDDLE",
         justifyH                      = FromUISetting("achievement.name.justifyH"),
-        mediaFont                     = FromUISetting("achievement.name.mediaFont"),
         textTransform                 = FromUISetting("achievement.name.textTransform"),
         location                      = {
                                         Anchor("TOP", 0, -5),
@@ -151,10 +158,11 @@ Style.UpdateSkin("Default", {
 
       Description = {
         text                          = FromUIProperty("AchievementDesc"),
-        mediaFont                     = FontType("PT Sans Bold", 11),
-        textColor                     = Color.WHITE,
-        justifyH                      = "LEFT",
-        justifyV                      = "TOP",
+        mediaFont                     = FromUISetting("achievement.desc.mediaFont"),
+        textColor                     = FromUISetting("achievement.desc.textColor"),
+        justifyH                      = FromUISetting("achievement.desc.justifyH"),
+        justifyV                      = FromUISetting("achievement.desc.justifyV"),
+        textTransform                 = FromUISetting("achievement.desc.textTransform"),
         location                      = {
                                         Anchor("TOP", 0, -5, "Name", "BOTTOM"),
                                         Anchor("LEFT", 5, 0, "Icon", "RIGHT"),
