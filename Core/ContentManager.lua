@@ -250,18 +250,18 @@ class "Content" (function(_ENV)
 
   __Arguments__ { Tracker }
   function UnregisterTracker(self, tracker)
-    local view = self.Views[tracker]
+    self.Trackers[tracker] = nil
 
-    if not view then 
+    -- Remove the view if exists
+    local view = self.Views[tracker]
+    if not view then
       return 
     end
-
+    
     tracker:RemoveView(view)
-
+    
     view:Release()
-
-    self.Views[tracker] = nil 
-    self.Trackers[tracker] = nil 
+    self.Views[tracker] = nil
   end  
   -----------------------------------------------------------------------------
   --                               Properties                                --
@@ -309,7 +309,7 @@ class "Content" (function(_ENV)
   --- Contains the trackers are registered 
   property "Trackers" {
     set = false, 
-    default = function() return System.Toolset.newtable(true, false) end 
+    default = function() return System.Toolset.newtable(true, false) end
   }
 
   --- The source of data will be pushed to all views.

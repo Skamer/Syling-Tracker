@@ -1,4 +1,10 @@
-# 2.7.1
+# 2.7.2
+
+- Fixed an issue where the ContentManager could incorrectly adds a content to a tracker when this one is re-enabled.
+
+---
+
+## 2.7.1
 
 ###### NEW
 
