@@ -351,6 +351,13 @@ end)
 -------------------------------------------------------------------------------
 --                              UI Settings                                  --
 -------------------------------------------------------------------------------
+enum "QuestLevetVisibilityPolicyType" {
+  "AlwaysShow",
+  "AlwaysHide",
+  "HideWhenCharIsMaxLevel",
+  "ShowOnlyWhenBelowMaxLevel",
+}
+
 RegisterUISetting("quest.showBackground", true)
 RegisterUISetting("quest.showBorder", true)
 RegisterUISetting("quest.backgroundColor", Color(35/255, 40/255, 46/255, 0.73))
@@ -361,6 +368,7 @@ RegisterUISetting("quest.name.mediaFont", FontType("DejaVuSansCondensed Bold", 1
 RegisterUISetting("quest.name.textTransform", "NONE")
 RegisterUISetting("quest.name.justifyH", "CENTER")
 RegisterUISetting("quest.level.mediaFont", FontType("PT Sans Caption Bold", 10))
+RegisterUISetting("quest.level.visibilityPolicy", QuestLevetVisibilityPolicyType.AlwaysShow)
 RegisterUISetting("quest.enablePOI", true)
 
 GenerateUISettings("dungeonQuest", "quest", function(generatedSettings)
@@ -428,6 +436,36 @@ function FromQuestTagIconTexCoords()
       if left and right and top and bottom then 
         return { left = left, right = right, top = top, bottom = bottom }
       end
+    end)
+end
+
+function FromPlayerLevel()
+  return Observable.Switch(
+    Observable(function(observer) return observer:OnNext(UnitLevel("player")) end),
+    Wow.FromEvent("PLAYER_LEVEL_UP"):Map(function(newLevel) return newLevel end)
+   )
+end
+
+function FromQuestLevelVisible()
+  local maxLevel = 60
+
+  return FromUISetting("quest.level.visibilityPolicy")
+    :CombineLatest(Wow.FromUIProperty("QuestLevel"))
+    :CombineLatest(FromPlayerLevel())
+    :Map(function(visibilityPolicy, questLevel, playerLevel)
+      if visibilityPolicy == "AlwaysHide" then 
+        return false 
+      elseif visibilityPolicy == "HideWhenCharIsMaxLevel" then
+        if playerLevel >= maxLevel then 
+          return false 
+        end 
+      elseif visibilityPolicy == "ShowOnlyWhenBelowMaxLevel" then 
+        if questLevel >= maxLevel then 
+          return false 
+        end
+      end
+
+      return true
     end)
 end
 -------------------------------------------------------------------------------
@@ -503,6 +541,7 @@ Style.UpdateSkin("Default", {
         },
   
         Level = {
+          visible = FromQuestLevelVisible(),
           text = Wow.FromUIProperty("QuestLevel"):Map(function(level)
              local difficultyColor = GetQuestDifficultyColor(level)
              if difficultyColor then 

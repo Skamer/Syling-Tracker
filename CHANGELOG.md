@@ -1,4 +1,14 @@
-# 2.7.2
+# 2.7.3
+
+###### NEW
+
+- Added visibility policy setting for quest level in the options.
+
+---
+
+## 2.7.2
+
+###### FIXES
 
 - Fixed an issue where the ContentManager could incorrectly adds a content to a tracker when this one is re-enabled.
 

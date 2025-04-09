@@ -256,6 +256,12 @@ class "SettingDefinitions.Quests" (function(_ENV)
   -----------------------------------------------------------------------------
   --                        [Quest] Tab Builder                              --
   -----------------------------------------------------------------------------
+  _QUEST_LEVEL_VISIBILITY_POLICY_ENTRIES = Array[Widgets.EntryData]()
+  _QUEST_LEVEL_VISIBILITY_POLICY_ENTRIES:Insert({ text = L.ALWAYS_SHOW, value = "AlwaysShow"})
+  _QUEST_LEVEL_VISIBILITY_POLICY_ENTRIES:Insert({ text = L.ALWAYS_HIDE, value = "AlwaysHide"})
+  _QUEST_LEVEL_VISIBILITY_POLICY_ENTRIES:Insert({ text = L.HIDE_WHEN_CHARACTER_IS_MAX_LEVEL, value = "HideWhenCharIsMaxLevel"})
+  _QUEST_LEVEL_VISIBILITY_POLICY_ENTRIES:Insert({ text = L.SHOW_ONLY_WHEN_QUEST_BELOW_MAX_LEVEL, value = "ShowOnlyWhenBelowMaxLevel"})
+
   function BuildQuestTab(self)
     ---------------------------------------------------------------------------
     --- Background Section
@@ -446,9 +452,16 @@ class "SettingDefinitions.Quests" (function(_ENV)
 
     headertabControl:AddTabPage({
       name = L.LEVEL,
-      onAcquire = function() 
+      onAcquire = function()
+        local visibilityPolicy = Widgets.SettingsDropDown.Acquire(false, headertabControl)
+        visibilityPolicy:SetID(10)
+        visibilityPolicy:SetLabel(L.VISIBILITY_POLICY)
+        visibilityPolicy:SetEntries(_QUEST_LEVEL_VISIBILITY_POLICY_ENTRIES)
+        visibilityPolicy:BindUISetting("quest.level.visibilityPolicy")
+        self.QuestHeaderLevelTabControls.visibilityPolicy = visibilityPolicy
+
         local font = Widgets.SettingsMediaFont.Acquire(false, headertabControl)
-        font:SetID(10)
+        font:SetID(20)
         font:BindUISetting("quest.level.mediaFont")
         self.QuestHeaderLevelTabControls.font = font
       end,

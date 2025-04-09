@@ -12,12 +12,17 @@ local L = _Locale("zhCN")
 
 if not L then return end
 
+-- L.ALWAYS_HIDE = "Always Hide"
+-- L.ALWAYS_SHOW = "Always Show"
 -- L.AUTO_QUEST = "Auto Quest"
 -- L.AUTO_QUESTS = "Auto Quests" -- plural of AUTO_QUEST
 -- L.DESCRIPTION = "Description"
 -- L.HIDE_COMPLETED_OBJECTIVES = "Hide completed objectives"
+-- L.HIDE_WHEN_CHARACTER_IS_MAX_LEVEL = "Hide when the character is max level"
 -- L.QUEST_NAME = "Quest Name"
+-- L.SHOW_ONLY_WHEN_QUEST_BELOW_MAX_LEVEL = "Show only when the quest is below max level"
 -- L.SUB_TEXT = "Sub Text"
+-- L.VISIBILITY_POLICY = "Visibility Policy"
 
 L.ACHIEVEMENT = "成就"
 L.ACHIEVEMENTS = "成就"

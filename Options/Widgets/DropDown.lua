@@ -228,7 +228,7 @@ end)
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
   [DropDownPopout] = {
-    width = 230,
+    width = 350,
     ScrollBar = {
       location = {
         Anchor("TOP", 0, -5),
