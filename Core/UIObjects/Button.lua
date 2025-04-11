@@ -95,8 +95,11 @@ class "Button" (function(_ENV)
     end
   end
 
-  POINTS = { "TOP", "TOPLEFT", "TOPRIGHT"}
   function IsIgnoredForAdjustment(self, child)
+    if Style[child].excludeFromAutoHeight then
+      return true 
+    end
+    
     if not child:IsShown() then
       return true 
     end
@@ -105,12 +108,8 @@ class "Button" (function(_ENV)
     if prop and prop:match("^backdrop") then
       return true 
     end
-  
-    for _, point in ipairs(POINTS) do
-      return false 
-    end
-
-    return true
+    
+    return false
   end
 
   function ShouldSubscribeForAdjustment(self, child)

@@ -17,6 +17,7 @@
   <Script file="UISettings.lua" />
   <Script file="ObjectData.lua" />
 
+  <Script file="UIObjects\Property.lua" />
   <Script file="UIObjects\FontString.lua" />
   <Script file="UIObjects\Texture.lua" />
   <Script file="UIObjects\StatusBar.lua" />
