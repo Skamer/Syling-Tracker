@@ -69,7 +69,7 @@ class "ListView" (function(_ENV)
   __Iterator__()
   function IterateData(self, data, metadata)
     local yield = coroutine.yield
-    local iterator = self.Indexed and ipairs or pairs 
+    local iterator = self.Indexed and ipairs or pairs
 
     for k, v in iterator(data) do
       if not self:IsFilteredItem(k, v, metadata) then

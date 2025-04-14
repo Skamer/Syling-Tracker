@@ -340,3 +340,19 @@ RegisterContent({
 --     return false
 --   end
 -- })
+-------------------------------------------------------------------------------
+--                             Pets                                          --
+-------------------------------------------------------------------------------
+if C_AddOns.IsAddOnLoaded("PetTracker") then
+  RegisterContent({
+    id = "pets",
+    name = "Pets",
+    formattedName = CreateAtlasMarkup("WildBattlePetCapturable", 16, 16) .. " " .. "Pets",
+    description = "PETS_PH_DESC",
+    icon = { atlas = AtlasType("WildBattlePetCapturable") },
+    order = 150,
+    viewClass = PetsContentView,
+    data = GetObservableContent("pets"),
+    statusFunc = function(data) return (data and data.totalInZone) and true or false end
+  })
+end

@@ -4,7 +4,7 @@
 ## Author: Skamer
 ## SavedVariables: SylingTrackerDB
 ## Dependencies: Scorpio
-## OptionalDeps: LibSharedMedia-3.0, ViragDevTool
+## OptionalDeps: LibSharedMedia-3.0, ViragDevTool, PetTracker
 ## IconTexture: Interface\AddOns\SylingTracker\Media\logo
 
 ## X-Curse-Project-ID: 398177

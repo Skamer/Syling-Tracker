@@ -59,6 +59,11 @@
   <Script file="Keystone\Keystone.lua" />
   <!-- UI Widgets -->
   <Script file="Widgets\WidgetsContentView.lua"/>
+  <!-- Pets (PetTracker) -->
+  <Script file="Pets\PetsData.lua"/>
+  <Script file="Pets\PetView.lua" />
+  <Script file="Pets\PetsContentView.lua"/>
+  <Script file="Pets\Pets.lua"/>
   <!-- Contents Loading -->
   <Script file="Contents.lua" />
 </Ui>

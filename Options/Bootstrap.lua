@@ -70,6 +70,10 @@ __Async__() function SylingTracker_OPEN_OPTIONS()
       panel:AddCategoryEntry({ text = L.PROFESSION, value = SettingDefinitions.Profession}, "contents")
       panel:AddCategoryEntry({ text = L.ACTIVITIES, value = SettingDefinitions.Activities}, "contents")
       panel:AddCategoryEntry({ text = L.COLLECTIONS, value = SettingDefinitions.Collections}, "contents")
+
+      if C_AddOns.IsAddOnLoaded("PetTracker") then
+        panel:AddCategoryEntry({ text = "Pets", value = SettingDefinitions.Pets}, "contents")
+      end
     end
     -- panel:AddCategoryEntry({ text = "Torghast"}, "contents")
     -- panel:AddCategoryEntry({ text = "Quests"}, "contents")
