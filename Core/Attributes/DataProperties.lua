@@ -155,14 +155,16 @@ class "__DataProperties__" (function(_ENV)
           end
 
           target["Clear"..methodPluralPart] = function(self)
-            if not self[collectionIndex] then 
+            local collection = self[collectionIndex]
+            
+            if not collection then 
               return 
             end
 
-            local iterator = self.isMap and pairs(self[collectionIndex]) or self[collectionIndex]:GetIterator()
-
-            for k in iterator() do 
-              self[propertyName][k] = nil
+            if isMap then 
+              wipe(collection)
+            elseif isArray then
+              collection:Clear()
             end
           end
 
