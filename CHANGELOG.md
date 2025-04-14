@@ -1,4 +1,12 @@
-# 2.7.3
+# 2.8.0
+
+###### NEW
+
+- Added the support for PetTracker. ([ticket #136](https://github.com/Skamer/Syling-Tracker/issues/136))
+
+---
+
+## 2.7.3
 
 ###### NEW
 
