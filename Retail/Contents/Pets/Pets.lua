@@ -33,9 +33,8 @@ function OnActive(self)
   self:LoadAndUpdatePets()
 end
 
-__SystemEvent__ "LPJ_PostPetListUpdated"
-function LPJ_PostPetListUpdated()
-  print(Color.CYAN .. "LPJ_PostPetListUpdated")
+function OnInactive(self)
+  PETS_CONTENT_SUBJECT:ResetDataProperties()
 end
 
 __AsyncSingle__()

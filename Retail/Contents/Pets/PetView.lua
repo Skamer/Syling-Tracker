@@ -71,7 +71,7 @@ end)
 
 __UIElement__()
 class "PetListView"(function(_ENV)
-  inherit "ListView"
+  inherit "NewListView"
   -----------------------------------------------------------------------------
   --                                Methods                                  --
   -----------------------------------------------------------------------------
@@ -94,18 +94,18 @@ class "PetListView"(function(_ENV)
     end)
 
     for _, petData in ipairs(self.PetsOrder) do
-      if not self:IsFilteredItem(petData.specieID, petData, metadata) then 
+      if not self:IsFilteredEntry(petData.specieID, petData, metadata) then 
         yield(petData.specieID, petData, metadata)
       end
     end
   end
 
-  function IsFilteredItem(self, key, petData, metadata)
+  function IsFilteredEntry(self, key, petData, metadata)
     if self.HideOwned and petData.quality and petData.quality > 0 then 
       return true 
     end
 
-    return super.IsFilteredItem(self, key, petData, metadata)
+    return super.IsFilteredEntry(self, key, petData, metadata)
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
@@ -125,6 +125,7 @@ end)
 --                              UI Settings                                  --
 -------------------------------------------------------------------------------
 RegisterUISetting("pets.hideOwned", false)
+RegisterUISetting("pets.columns", 2)
 
 RegisterUISetting("pet.showBackground", true)
 RegisterUISetting("pet.showBorder", true)
@@ -204,6 +205,7 @@ Style.UpdateSkin("Default", {
   [PetListView] = {
     viewClass = PetView,
     indexed = false,
-    hideOwned = FromUISetting("pets.hideOwned")
+    hideOwned = FromUISetting("pets.hideOwned"),
+    columns = FromUISetting("pets.columns")
   }
 })

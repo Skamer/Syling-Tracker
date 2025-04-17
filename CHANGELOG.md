@@ -1,4 +1,12 @@
-# 2.8.0
+# 2.8.1
+
+###### NEW
+
+- The pets can now be displayed by column. The number of column can be changed from the options.
+
+---
+
+## 2.8.0
 
 ###### NEW
 

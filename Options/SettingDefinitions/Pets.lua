@@ -27,6 +27,13 @@ class "SettingDefinitions.Pets" (function(_ENV)
     hideOwnedPetsCheckBox:SetLabel("Hide owned pets")
     hideOwnedPetsCheckBox:BindUISetting("pets.hideOwned")
     self.GeneralTabControls.hideOwnedPetsCheckBox = hideOwnedPetsCheckBox
+
+    local petsColumnsSlider = Widgets.SettingsSlider.Acquire(false, self)
+    petsColumnsSlider:SetID(20)
+    petsColumnsSlider:SetLabel("Columns")
+    petsColumnsSlider:SetMinMaxValues(1, 10)
+    petsColumnsSlider:BindUISetting("pets.columns")
+    self.GeneralTabControls.borderSizeSlider = petsColumnsSlider
   end
   -----------------------------------------------------------------------------
   --                    [General] Tab Release                                --
@@ -46,7 +53,6 @@ class "SettingDefinitions.Pets" (function(_ENV)
     showHeaderCheckBox:SetLabel(L.SHOW)
     showHeaderCheckBox:BindUISetting("pets.showHeader")
     self.HeaderTabControls.showHeaderCheckBox = showHeaderCheckBox
-
     ---------------------------------------------------------------------------
     --- Background Section
     ---------------------------------------------------------------------------

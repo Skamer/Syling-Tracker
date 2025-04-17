@@ -36,6 +36,7 @@
   <Script file="UI\Components\Timer.lua" />
 
   <Script file="UI\Views\ListView.lua" />
+  <Script file="UI\Views\NewListView.lua" />
   <Script file="UI\Views\ObjectiveView.lua" />
   <Script file="UI\Views\ContentView.lua" />
 
