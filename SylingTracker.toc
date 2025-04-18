@@ -1,5 +1,6 @@
-## Interface: 110100
+## Interface: 110105
 ## Title: |cffff6a00Syling Tracker|r
+## Notes-ruRU: Syling Tracker - дополнение, которое отслеживает различный игровой контент: квесты, сценарии, M+ ключи и многое другое
 ## Version:  @project-version@
 ## Author: Skamer
 ## SavedVariables: SylingTrackerDB
