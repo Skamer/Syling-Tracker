@@ -4,17 +4,14 @@
 --                                                                           --
 --                               Repository:                                 --
 --                   https://github.com/Skamer/SylingTracker                 --
---                                                                           -- 
---                   Translator ZamestoTV                                    --  
 --                                                                           --
+--                     Translator: ZamestoTV and Hollicsh                    --
 -- ========================================================================= --
 Syling               "SylingTracker_Options.Localization.ruRU"               ""
 -- ========================================================================= --
 local L = _Locale("ruRU")
 
 if not L then return end
-
-L.VISIBILITY_POLICY = "Visibility Policy"
 
 L.ACHIEVEMENT = "Достижение"
 L.ACHIEVEMENTS = "Достижения"
