@@ -5,7 +5,7 @@
 --                               Repository:                                 --
 --                   https://github.com/Skamer/SylingTracker                 --
 --                                                                           --
---                         Translator: ZamestoTV                             --
+--                     Translators: ZamestoTV and Hollicsh                   --
 -- ========================================================================= --
 Syling                  "SylingTracker.Localization.ruRU"                    ""
 -- ========================================================================= --
