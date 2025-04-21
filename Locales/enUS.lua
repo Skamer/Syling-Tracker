@@ -33,7 +33,7 @@ L.HELPER_WINDOW_ACHIEVEMENT = "achievement"
 L.HELPER_WINDOW_COPY_SHORTCUT = "Ctrl + C to copy"
 L.HELPER_WINDOW_HELP_TEXT = "Wowhead may help you to find your way for completing this %s" -- %s will be L.HELPER_WINDOW_ACHIEVEMENT or L.HELPER_WINDOW_QUEST
 L.HELPER_WINDOW_QUEST = "quest"
-L.HELPER_WINDOW_TITLE = "Need Hekp ?"
+L.HELPER_WINDOW_TITLE = "Need Help ?"
 L.HELPER_WINDOW_WOWHEAD_LINK_FORMAT = "https://www.wowhead.com/%s=%i"
 L.ITEM_BAR_MOVER = "Item Bar"
 L.KEYSTONE = "Mythic +"
