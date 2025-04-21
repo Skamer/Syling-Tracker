@@ -1,4 +1,13 @@
-# 2.8.1
+# [2.8.2](https://github.com/Skamer/Syling-Tracker/discussions/148#discussioncomment-12900927)
+
+###### NEW
+
+- Added the support for Horrific Visions.
+- New options relative to Horrific Visions have been added in Scenario options.
+
+---
+
+## 2.8.1
 
 ###### NEW
 
