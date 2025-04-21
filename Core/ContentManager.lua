@@ -453,13 +453,47 @@ __Static__() function API.RegisterObservableContent(id, clsOrObservable)
 
   return observable
 end
-
 --- Retrieve an observable has been registered.
 ---
 --- @param id the observable id to retrieve.
 __Arguments__ { String }
 __Static__() function API.GetObservableContent(id)
   return OBSERVABLE_CONTENTS[id]
+end
+
+--- Combine multiple observable contents into one. 
+--- @param ... the observables id to combine
+---
+--- @return return the combined observable
+__Arguments__ { String * 2 }
+__Static__() function API.CombineObservableContent(...)
+  local observable
+
+  for i = 1, select("#", ...) do
+    local id = select(i, ...)
+    if not observable then 
+      observable = OBSERVABLE_CONTENTS[id]
+    else
+      observable = observable:CombineLatest(OBSERVABLE_CONTENTS[id]):Map(function(a, b)
+        if a == nil and b == nil then 
+          return
+        end 
+
+        if a == nil and b ~= nil then 
+          return b 
+        end 
+
+        if b == nil and a ~= nil then 
+          return a 
+        end 
+
+        for k,v in pairs(b) do a[k] = v end 
+        return a 
+      end)
+    end
+  end
+
+  return observable
 end
 
 __SystemEvent__()

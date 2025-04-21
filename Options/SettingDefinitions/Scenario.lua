@@ -338,6 +338,78 @@ class "SettingDefinitions.Scenario" (function(_ENV)
     end
   end
   -----------------------------------------------------------------------------
+  --                    [Horrific Visions Tab Builder                        --
+  -----------------------------------------------------------------------------
+  function BuildHorrificVisions(self)
+    ---------------------------------------------------------------------------
+    --- Mementos Section
+    ---------------------------------------------------------------------------
+    local mementosSection = Widgets.ExpandableSection.Acquire(false, self)
+    mementosSection:SetExpanded(false)
+    mementosSection:SetID(30)
+    mementosSection:SetTitle("Mementos")
+    Style[mementosSection].marginTop = 10
+    self.HorrificVisionsControls.mementosSection = mementosSection
+
+    local showBackgroundCheckBox = Widgets.SettingsCheckBox.Acquire(false, mementosSection)
+    showBackgroundCheckBox:SetID(10)
+    showBackgroundCheckBox:SetLabel(L.SHOW_BACKGROUND)
+    showBackgroundCheckBox:BindUISetting("horrificVisions.mementos.showBackground")
+    self.HorrificVisionsControls.showBackgroundCheckBox = showBackgroundCheckBox
+
+    local backgroundColorPicker = Widgets.SettingsColorPicker.Acquire(false, mementosSection)
+    backgroundColorPicker:SetID(20)
+    backgroundColorPicker:SetLabel(L.BACKGROUND_COLOR)
+    backgroundColorPicker:BindUISetting("horrificVisions.mementos.backgroundColor")
+    self.HorrificVisionsControls.backgroundColorPicker = backgroundColorPicker
+
+    local showBorderCheckBox = Widgets.SettingsCheckBox.Acquire(false, mementosSection)
+    showBorderCheckBox:SetID(30)
+    showBorderCheckBox:SetLabel(L.SHOW_BORDER)
+    showBorderCheckBox:BindUISetting("horrificVisions.mementos.showBorder")
+    self.HorrificVisionsControls.showBorderCheckBox = showBorderCheckBox
+
+    local borderColorPicker = Widgets.SettingsColorPicker.Acquire(false, mementosSection)
+    borderColorPicker:SetID(40)
+    borderColorPicker:SetLabel(L.BORDER_COLOR)
+    borderColorPicker:BindUISetting("horrificVisions.mementos.borderColor")
+    self.HorrificVisionsControls.borderColorPicker = borderColorPicker
+
+    local borderSizeSlider = Widgets.SettingsSlider.Acquire(false, mementosSection)
+    borderSizeSlider:SetID(50)
+    borderSizeSlider:SetLabel(L.BORDER_SIZE)
+    borderSizeSlider:SetMinMaxValues(1, 10)
+    borderSizeSlider:BindUISetting("horrificVisions.mementos.borderSize")
+    self.HorrificVisionsControls.borderSizeSlider = borderSizeSlider
+
+    local mementoFont = Widgets.SettingsMediaFont.Acquire(false, mementosSection)
+    mementoFont:SetID(60)
+    mementoFont:BindUISetting("horrificVisions.mementos.mediaFont")
+    self.HorrificVisionsControls.mementoFont = mementoFont
+
+    local mementosTextColorPicker = Widgets.SettingsColorPicker.Acquire(false, mementosSection)
+    mementosTextColorPicker:SetID(70)
+    mementosTextColorPicker:SetLabel(L.TEXT_COLOR)
+    mementosTextColorPicker:BindUISetting("horrificVisions.mementos.textColor")
+    self.HorrificVisionsControls.mementosTextColorPicker = mementosTextColorPicker
+
+    local mementosTextJustifyH = Widgets.SettingsDropDown.Acquire(false, mementosSection)
+    mementosTextJustifyH:SetID(80)
+    mementosTextJustifyH:SetLabel(L.TEXT_JUSITFY_H)
+    mementosTextJustifyH:SetEntries(TEXT_JUSTIFY_H_ENTRIES)
+    mementosTextJustifyH:BindUISetting("horrificVisions.mementos.justifyH")
+    self.HorrificVisionsControls.mementosTextJustifyH = mementosTextJustifyH
+  end
+  -----------------------------------------------------------------------------
+  --                  [Horrific Visions] Release Builder                     --
+  -----------------------------------------------------------------------------
+  function ReleaseHorrificVisions(self)
+    for index, control in pairs(self.HorrificVisionsControls) do
+      control:Release()
+      self.HorrificVisionsControls[index] = nil
+    end
+  end
+  -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
   function BuildSettingControls(self)
@@ -359,6 +431,12 @@ class "SettingDefinitions.Scenario" (function(_ENV)
       name = L.TOP_INFO,
       onAcquire = function() self:BuildTopInfoTab() end,
       onRelease = function() self:ReleaseTopInfoTab() end,
+    })
+
+    tabControl:AddTabPage({
+      name = CreateAtlasMarkup("worldquest-icon-nzoth", 24, 24) .. L.HORRIFIC_VISIONS,
+      onAcquire = function() self:BuildHorrificVisions() end,
+      onRelease = function() self:ReleaseHorrificVisions() end,
     })
     
 
@@ -427,6 +505,10 @@ class "SettingDefinitions.Scenario" (function(_ENV)
     default = function() return newtable(false, true) end 
   }
 
+  property "HorrificVisionsControls" {
+    set = false,
+    default = function() return newtable(false, true) end     
+  }
 end)
 -------------------------------------------------------------------------------
 --                                Styles                                     --

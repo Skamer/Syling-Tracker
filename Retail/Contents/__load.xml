@@ -44,6 +44,8 @@
   <Script file="Scenario\ScenarioData.lua" />
   <Script file="Scenario\ScenarioContentView.lua" />
   <Script file="Scenario\Scenario.lua" />
+  <Script file="Scenario\HorrificVisionsContentView.lua" />
+  <Script file="Scenario\HorrificVisions.lua" />
   <!-- Delve -->
   <Script file="Delve\DelveData.lua" />
   <Script file="Delve\DelveContentView.lua" />

@@ -190,6 +190,23 @@ function IsInDelve()
   return false
 end
 
+function IsInHorrificVisions()
+  local stepInfo = C_ScenarioInfo.GetScenarioStepInfo()
+
+  if not stepInfo then
+    return false 
+  end
+
+  local widgetSetID = stepInfo.widgetSetID
+
+  if widgetSetID == 1540 then
+    return true 
+  end
+
+  return false 
+end
+
 -- Export the functions in Utils
 Utils.GetInstanceTextureFileID = GetInstanceTextureFileID
 Utils.IsInDelve = IsInDelve
+Utils.IsInHorrificVisions = IsInHorrificVisions

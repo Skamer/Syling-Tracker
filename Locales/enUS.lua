@@ -35,6 +35,7 @@ L.HELPER_WINDOW_HELP_TEXT = "Wowhead may help you to find your way for completin
 L.HELPER_WINDOW_QUEST = "quest"
 L.HELPER_WINDOW_TITLE = "Need Help ?"
 L.HELPER_WINDOW_WOWHEAD_LINK_FORMAT = "https://www.wowhead.com/%s=%i"
+L.HORRIFIC_VISIONS = "Horrific Visions"
 L.ITEM_BAR_MOVER = "Item Bar"
 L.KEYSTONE = "Mythic +"
 L.MINIMAP_BUTTON_TOOLTIP = "|cff00ffffClick|r to open the options"

@@ -12,9 +12,11 @@ export {
   RegisterContent             = API.RegisterContent,
   RegisterObservableContent   = API.RegisterObservableContent,
   GetObservableContent        = API.GetObservableContent,
+  CombineObservableContent    = API.CombineObservableContent,
   CreateAtlasMarkup           = CreateAtlasMarkup,
 
-  HasObjectiveWidgets         = Utils.HasObjectiveWidgets
+  HasObjectiveWidgets         = Utils.HasObjectiveWidgets,
+  IsInHorrificVisions         = Utils.IsInHorrificVisions
 }
 -------------------------------------------------------------------------------
 --                             AutoQuests                                 --
@@ -52,7 +54,13 @@ RegisterContent({
   order = 20,
   viewClass = ScenarioContentView,
   data = GetObservableContent("scenario"),
-  statusFunc = function(data) return (data and data.scenario) and true or false end
+  statusFunc = function(data)
+    if IsInHorrificVisions() then 
+      return false 
+    end
+
+    return (data and data.scenario) and true or false 
+  end
 })
 -------------------------------------------------------------------------------
 --                              Delve                                        --
@@ -67,6 +75,20 @@ RegisterContent({
   viewClass = DelveContentView,
   data = GetObservableContent("delve"),
   statusFunc = function(data) return (data and data.name) and true or false end
+})
+-------------------------------------------------------------------------------
+--                              Horrific Visions                             --
+-------------------------------------------------------------------------------
+RegisterContent({
+  id = "horrificVisions",
+  name = _Locale.HORRIFIC_VISIONS,
+  formattedName = CreateAtlasMarkup("worldquest-icon-nzoth", 16, 16) .. " " .. _Locale.HORRIFIC_VISIONS,
+  description = "HORRIFIC_VISIONS_PH_DESC",
+  icon = { atlas = AtlasType("worldquest-icon-nzoth") },
+  order = 25,
+  viewClass = HorrificVisionsContentView,
+  data = CombineObservableContent("scenario", "horrificVisions"),
+  statusFunc = function(data) return IsInHorrificVisions() end
 })
 -------------------------------------------------------------------------------
 --                             Dungeon                                       --
