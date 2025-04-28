@@ -381,7 +381,7 @@ end)
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
   [PanelCategoryEntryButton] = {
-    width = 175,
+    width = 256,
     height = 20,
 
     Texture = {
@@ -406,7 +406,7 @@ Style.UpdateSkin("Default", {
   },
 
   [PanelCategory] = {
-    width = 225,
+    width = 256,
     minResize = { width = 0, height = 30},
     layoutManager = Layout.VerticalLayoutManager(true, true),
     paddingTop = 32,
@@ -414,7 +414,7 @@ Style.UpdateSkin("Default", {
     clipChildren = true,
 
     Header = {
-      width = 225,
+      width = 256,
       height = 30,
       backdrop = {
         bgFile = [[Interface\AddOns\SylingTracker\Media\Textures\LinearGradient]],

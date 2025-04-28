@@ -93,20 +93,27 @@ class "Panel" (function(_ENV)
   --                            Constructors                                 --
   -----------------------------------------------------------------------------
   __Template__ {
+    LeftSide = Frame,
+
     Categories = PanelCategories,
     Footer = Frame,
     InnerTexture = Texture,
-    Header =  Frame,
+    -- Header =  Frame,
+    CurrentCategory = Frame,
+
     Container = ScrollBox,
     {
+      CurrentCategory = {
+        Text = FontString
+      },
       Footer = {
         AddonLogo = Texture,
         AddonVersion = FontString
       },
-      Header = {
-        Title = FontString,
-        Separator = Texture
-      }
+      -- Header = {
+      --   Title = FontString,
+      --   Separator = Texture
+      -- }
     }
   }
   function __ctor(self) end 
@@ -153,7 +160,7 @@ class "SettingsPanel" (function(_ENV)
       self.CurrentSettings = nil 
     end
 
-    Style[self].Header.Title.text = data.text
+    Style[self].CurrentCategory.Text.text = data.text
   end
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
@@ -165,8 +172,6 @@ class "SettingsPanel" (function(_ENV)
     self.OnCategorySelected = self.OnCategorySelected + self.OnPanelCategorySelected
   end
 end)
-
-
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
@@ -183,49 +188,44 @@ Style.UpdateSkin("Default", {
       }
     },
 
-    Categories = {
-      height = 680,
+    LeftSide = {
+      width = 256,
       location = {
-        Anchor("TOPLEFT", 23, -40)
+        Anchor("TOP", 0, 0, "Header", "BOTTOM"),
+        Anchor("LEFT", 1, 0),
+        Anchor("BOTTOM", 0, 1)
       },
 
-      -- [Category] = {
-      --   paddingTop = 40
-      -- }
-    },
-
-    InnerTexture = {
-      atlas = AtlasType("Options_InnerFrame", false),
-      visible = true,
-      drawLayer = "OVERLAY",
-      subLevel = 0,
-      location = {
-        Anchor("TOPLEFT", 20, -35),
-        Anchor("BOTTOMRIGHT", -20, 45)
+      BackgroundTexture = {
+        setAllPoints = true,
+        color = { r = 0, g = 0, b = 0, a = 0.2}
       }
     },
 
+    Categories = {
+      height = 680,
+      location = {
+        Anchor("TOPLEFT", 0, -5, "LeftSide", "TOPLEFT"),
+        Anchor("TOPRIGHT", 0, -5, "LeftSide", "TOPRIGHT")
+      },
+    },
 
-    Header = {
-
+    CurrentCategory = {
       height = 50,
       location = {
-        Anchor("TOP", 0, -30),
-        Anchor("LEFT", 40, 0, "Categories", "RIGHT"),
-        Anchor("RIGHT", -30, 0),
+        Anchor("TOP", 0, 0, "Header", "BOTTOM"),
+        Anchor("LEFT", 40, 0, "LeftSide", "RIGHT"),
+        Anchor("RIGHT")
       },
 
-      Title = {
+      Text = {
         fontObject = GameFontHighlightHuge,
+        setAllPoints = true,
         justifyH = "LEFT",
-        text = "Header Text",
-
-        location = {
-          Anchor("TOPLEFT", 7, -22)
-        }
+        justifyV = "MIDDLE",
       },
 
-      Separator = {
+      BottomBGTexture = {
         atlas = AtlasType("Options_HorizontalDivider", true),
         snapToPixelGrid = false,
         texelSnappingBias = 0,  
@@ -237,7 +237,7 @@ Style.UpdateSkin("Default", {
 
     Container = {
       location = {
-        Anchor("TOP", 0, -10, "Header", "BOTTOM"),
+        Anchor("TOP", 0, -10, "CurrentCategory", "BOTTOM"),
         Anchor("LEFT", 50, 0, "Categories", "RIGHT"),
         Anchor("RIGHT", -45, 0),
         Anchor("BOTTOM", 0, 5, "Footer", "TOP")
@@ -264,7 +264,7 @@ Style.UpdateSkin("Default", {
 
       AddonVersion = {  
         fontObject = GameFontNormal,
-        textColor = { r = 0.9, g = 0.9, b = 0.9, a = 0.35},
+        textColor = { r = 1, g = 1, b = 1, a = 0.35},
         location = {
           Anchor("LEFT", 5, 0, "AddonLogo", "RIGHT")
         }
