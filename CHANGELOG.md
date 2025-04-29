@@ -1,4 +1,4 @@
-# [2.8.3]
+# 2.8.3
 
 - Updated the visual of panel for options.
 
