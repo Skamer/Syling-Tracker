@@ -1,4 +1,10 @@
-# [2.8.2](https://github.com/Skamer/Syling-Tracker/discussions/148#discussioncomment-12900927)
+# [2.8.3]
+
+- Updated the visual of panel for options.
+
+---
+
+## [2.8.2](https://github.com/Skamer/Syling-Tracker/discussions/148#discussioncomment-12900927)
 
 ###### NEW
 
