@@ -194,6 +194,7 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     local relativePositionAnchorDropDown = Widgets.SettingsFramePointPicker.Acquire(true, positionSection)
     relativePositionAnchorDropDown:SetID(10)
     relativePositionAnchorDropDown:SetText(L.TO_SCREEN)
+    relativePositionAnchorDropDown:DisablePoint("CENTER")
     relativePositionAnchorDropDown:BindTrackerSetting(trackerID, "relativePositionAnchor")
     self.GeneralTabControls.relativePositionAnchorDropDown = relativePositionAnchorDropDown
 

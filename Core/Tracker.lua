@@ -444,29 +444,27 @@ TRACKER_SETTINGS  = {}
 local function OnTrackerStopMoving(tracker)
   local left = tracker:GetLeft()
   local top = tracker:GetTop()
+  local scale = tracker:GetScale()
   local relAnchor = GetTrackerSetting(tracker.id, "relativePositionAnchor") or "BOTTOMLEFT"
 
   if relAnchor == "TOPRIGHT" then 
-    left = left - GetScreenWidth()
-    top = top - GetScreenHeight()
+    left = left - GetScreenWidth() / scale
+    top = top - GetScreenHeight() / scale
   elseif relAnchor == "TOPLEFT" then 
-    top = top - GetScreenHeight()
+    top = top - GetScreenHeight() / scale
   elseif relAnchor == "BOTTOMRIGHT" then 
-    left = left - GetScreenWidth()
+    left = left - GetScreenWidth() / scale
   elseif relAnchor == "RIGHT" then 
-    left = left - GetScreenWidth()
-    top = top - GetScreenHeight() / 2
+    left = left - GetScreenWidth() / scale
+    top = top - (GetScreenHeight() / 2) / scale
   elseif relAnchor == "TOP" then 
-    left = left - GetScreenWidth() / 2
-    top = top - GetScreenHeight()
+    left = left - (GetScreenWidth() / 2) / scale
+    top = top - (GetScreenHeight()) / scale
   elseif relAnchor == "LEFT" then 
-    top = top - GetScreenHeight() / 2
+    top = top - (GetScreenHeight() / 2) / scale
   elseif relAnchor == "BOTTOM" then 
-    left = left - GetScreenWidth() / 2
-  elseif relAnchor == "CENTER" then 
-    left = left - GetScreenWidth() / 2
-    top = top - GetScreenHeight() / 2
-  end 
+    left = left - (GetScreenWidth() / 2) / scale
+  end
   
   SetTrackerSetting(tracker.id, "position", Position(left, top), false)
 end

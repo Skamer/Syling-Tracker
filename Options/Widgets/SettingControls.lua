@@ -668,6 +668,8 @@ class "SettingsPosition"(function(_ENV)
   function SyncFromOutside(self, value)
     self:GetChild("XSlider"):SetValue(value.x)
     self:GetChild("YSlider"):SetValue(value.y)
+
+    self.Position = value
   end
 
   function OnRelease(self)

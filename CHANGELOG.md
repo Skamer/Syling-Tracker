@@ -1,4 +1,15 @@
-# 2.8.3
+# 2.8.4
+
+- Removed "CENTER" point for relative point in the tracker position. NOTE: If you choiced this value before this update, you may need to reset the position of your tracker.
+
+###### FIXES
+
+- Fixed an issue where the tracker position was incorrect after a reload if your tracker "Scale" setting is different of "1". ([ticket #122](https://github.com/Skamer/Syling-Tracker/issues/122))
+- Fixed a case where changing the tracker position with sliders in the options will rollback the tracker to previous position.
+
+---
+
+## 2.8.3
 
 - Updated the visual of panel for options.
 
