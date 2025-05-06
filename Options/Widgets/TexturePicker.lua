@@ -10,126 +10,64 @@ Syling            "SylingTracker_Options.Widgets.TexturePicker"              ""
 -- ========================================================================= --
 namespace               "SylingTracker.Options.Widgets"
 -- ========================================================================= --
-
-
---[[
-Source 
- - Wow Atlas 
- - SylingTracker Media Atlas 
- - File 
- - Color 
-
-Color 
-File: 
-
-Atlas:
-
-Atlas Name
-use Atlas Size
-
-OnTextureConfirmed
---]]
-
-_TEXTURE_SOURCE_ENTRIES = Array[Widgets.EntryData]()
+local TEXTURE_POPUP = nil
 
 __Widget__()
-class "MediaTexturePopup" (function(_ENV)
+class "TexturePopup" (function(_ENV)
   inherit "Window"
+  -----------------------------------------------------------------------------
+  --                               Events                                    --
+  -----------------------------------------------------------------------------
+  event "OnTextureConfirmed"
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
-  function BuildWowAtlasControls(self)
-    self:GetChild("FileControl"):SetID(0)
-    self:GetChild("FileControl"):Hide()
-
-    self:GetChild("MediaAtlasControl"):SetID(0)
-    self:GetChild("MediaAtlasControl"):Hide()
-    
-    self:GetChild("AtlasControl"):SetID(2)
-    self:GetChild("AtlasControl"):Show()
-
-    self:GetChild("ColorControl"):SetID(0)
-    self:GetChild("ColorControl"):Hide()
+  function CloneMediaTexture(self)
+    return self.MediaTexture and Toolset.clone(self.MediaTexture) or {}
   end
 
-  function BuildMediaAtlasControls(self)
-    self:GetChild("AtlasControl"):SetID(0)
-    self:GetChild("AtlasControl"):Hide()
+  function Reset(self)
+    self.SourceType = nil
+    self.MediaTexture = nil
 
-    self:GetChild("FileControl"):SetID(0)
-    self:GetChild("FileControl"):Hide()
-
-    self:GetChild("MediaAtlasControl"):SetID(2)
-    self:GetChild("MediaAtlasControl"):Show()
-
-    self:GetChild("ColorControl"):SetID(0)
-    self:GetChild("ColorControl"):Hide()
+    self:GetChild("SourceControl"):GetChild("DropDown"):SelectByValue("atlas")
+    self:GetChild("AtlasControl"):GetChild("EditBox"):SetText("")
+    self:GetChild("FileControl"):GetChild("EditBox"):SetText("")
+    self:GetChild("ColorControl"):GetChild("ColorPicker"):SetColor()
   end
 
-  function BuildColorTextureControls(self)
-    self:GetChild("MediaAtlasControl"):SetID(0)
-    self:GetChild("MediaAtlasControl"):Hide()
+  function UpdateFromMediaTexture(self, mediaTexture)
+    if not mediaTexture then 
+      return 
+    end
 
-    self:GetChild("AtlasControl"):SetID(0)
-    self:GetChild("AtlasControl"):Hide()
+    local from = self.MediaTexture.from
+    local value = self.MediaTexture.value
 
-    self:GetChild("FileControl"):SetID(0)
-    self:GetChild("FileControl"):Hide()
+    self.SourceType = from
 
-    self:GetChild("ColorControl"):SetID(2)
-    self:GetChild("ColorControl"):Show()
-  end
+    self:GetChild("SourceControl"):GetChild("DropDown"):SelectByValue(self.SourceType)
 
-  function BuildFileControls(self)
-    self:GetChild("MediaAtlasControl"):SetID(0)
-    self:GetChild("MediaAtlasControl"):Hide()
-
-    self:GetChild("AtlasControl"):SetID(0)
-    self:GetChild("AtlasControl"):Hide()
-
-    self:GetChild("ColorControl"):SetID(0)
-    self:GetChild("ColorControl"):Hide()
-
-    self:GetChild("FileControl"):SetID(2)
-    self:GetChild("FileControl"):Show()
+    if self.SourceType == "atlas" then 
+      self:GetChild("AtlasControl"):GetChild("EditBox"):SetText(value and value.name or "")
+    elseif self.SourceType == "color" then 
+      self:GetChild("FileControl"):GetChild("EditBox"):SetText(value)
+    elseif self.SourceType == "file" then 
+      self:GetChild("FileControl"):GetChild("EditBox"):SetText(value or "")
+    end
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
-  property "SourceType" {
-    type = String,
-    default = "",
-    handler = function(self, new, old)
-      if new == "atlas" then 
-        self:BuildWowAtlasControls()
-      elseif new == "mediaAtlas" then 
-        self:BuildMediaAtlasControls()
-      elseif new == "file" then 
-        self:BuildFileControls()
-      elseif new == "color" then 
-        self:BuildColorTextureControls()
-      end
-    end
+  __Observable__()
+  property "MediaTexture" {
+    type = SylingTracker.MediaTextureType
   }
 
-  property "MediaTexture" {
-    type = SylingTracker.MediaTextureType,
-    default = function(self, new, old)
-      if new then 
-        if new.atlas and not new.isMediaAtlas then 
-          self.SourceType = "atlas" 
-        elseif new.atlas then 
-          self.SourceType = "mediaAtlas"
-        elseif new.file then 
-          self.SourceType = "file"
-        elseif new.color then 
-          self.SourceType = "color"
-        end
-        print("MediaTexture", new)
-        Style[self].PreviewControl.Texture.mediaTexture = new
-      end
-
-    end
+  __Observable__()
+  property "SourceType" {
+    type = String,
+    default = "atlas"
   }
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
@@ -137,23 +75,19 @@ class "MediaTexturePopup" (function(_ENV)
   __Template__ {
     SourceControl = Frame,
     AtlasControl = Frame,
-    MediaAtlasControl = Frame,
     FileControl = Frame,
     ColorControl = Frame,
-    PreviewControl = Frame,
+    PreviewTexture = SylingTracker.Texture,
     ConfirmButton = SuccessPushButton,
     {
       SourceControl = {
-        Label     = FontString,
-        DropDown  = DropDown
+        Label = FontString,
+        DropDown = DropDown
       },
+
       AtlasControl = {
         Label = FontString,
         EditBox = EditBox
-      },
-      MediaAtlasControl = {
-        Label = FontString,
-        EditBox = EditBox        
       },
 
       FileControl = {
@@ -164,28 +98,80 @@ class "MediaTexturePopup" (function(_ENV)
       ColorControl = {
         Label = FontString,
         ColorPicker = ColorPicker
-      },
-
-      PreviewControl = {
-        Label = FontString,
-        Texutre = SylingTracker.Texture
       }
     }
   }
   function __ctor(self)
-
-    local function OnSourceEntrySelected(dropdown, entry)
-      local data = entry:GetEntryData()
-      self.SourceType = data.value
-    end
+    self.cacheValues = {}
 
     local sourceDropDown = self:GetChild("SourceControl"):GetChild("DropDown")
-    sourceDropDown:AddEntry({ text = "Wow Atlas", value = "atlas"})
-    sourceDropDown:AddEntry({ text = "SylingTracker Media Atlas", value = "mediaAtlas"})
-    sourceDropDown:AddEntry({ text = "File", value = "file"})
-    sourceDropDown:AddEntry({ text = "Color Texture", value = "color"})
-    sourceDropDown:SetUserHandler("OnEntrySelected", OnSourceEntrySelected)
+    sourceDropDown:AddEntry( { text = "WoW Atlas", value = "atlas"})
+    sourceDropDown:AddEntry( { text = "File", value = "file" })
+    sourceDropDown:AddEntry( { text = "Color Square Texture", value = "color"})
     sourceDropDown:SelectByValue("atlas")
+
+    local function OnSourceTypeEntrySelected(_, entry)
+      local mediaTexture = self:CloneMediaTexture()
+      local from = entry:GetEntryData().value
+
+      self.SourceType = from
+
+      mediaTexture.from = from
+      mediaTexture.value = self.cacheValues[from]
+      self.MediaTexture = mediaTexture
+    end
+    sourceDropDown:SetUserHandler("OnEntrySelected", OnSourceTypeEntrySelected)
+
+    local atlasNameEditBox = self:GetChild("AtlasControl"):GetChild("EditBox")
+
+    local function OnAtlasNameConfirmed()
+      local atlasName = atlasNameEditBox:GetText()
+      local mediaTexture = self:CloneMediaTexture()
+
+      mediaTexture.from = self.SourceType
+      mediaTexture.value = AtlasType(atlasName)
+      self.cacheValues[self.SourceType] = mediaTexture.value
+
+      self.MediaTexture = mediaTexture
+    end
+
+    atlasNameEditBox:SetUserHandler("OnEnterPressed", OnAtlasNameConfirmed)
+
+    local fileEditBox = self:GetChild("FileControl"):GetChild("EditBox")
+
+    local function OnFileConfirmed()
+      local mediaTexture = self:CloneMediaTexture()
+      local file = fileEditBox:GetText()
+
+      mediaTexture.value = file
+      self.cacheValues[self.SourceType] = mediaTexture.value
+
+      self.MediaTexture = mediaTexture
+    end
+    fileEditBox:SetUserHandler("OnEnterPressed", OnFileConfirmed)
+
+
+    local colorPicker = self:GetChild("ColorControl"):GetChild("ColorPicker")
+
+    local function OnColorConfirmed(_, r, g, b, a)
+      local mediaTexture = self:CloneMediaTexture()
+      local color = { r = r, g = g, b = b, a = a }
+
+      mediaTexture.value = color
+      self.cacheValues[self.SourceType] = mediaTexture.value
+
+      self.MediaTexture = mediaTexture
+    end
+    colorPicker:SetUserHandler("OnColorConfirmed", OnColorConfirmed)
+
+
+    local confirmButton = self:GetChild("ConfirmButton")
+
+    local function OnConfirm()
+      self:OnTextureConfirmed(self.MediaTexture)
+    end
+    confirmButton:SetUserHandler("OnClick", OnConfirm)
+
   end
 end)
 
@@ -195,37 +181,47 @@ class "TexturePicker" (function(_ENV)
   -----------------------------------------------------------------------------
   --                               Events                                    --
   -----------------------------------------------------------------------------
-  event "OnTextureChanged"
-
   event "OnTextureConfirmed"
   -----------------------------------------------------------------------------
   --                               Handlers                                  --
   -----------------------------------------------------------------------------
   local function OnClickHandler(self)
-    local texturePickerPopup = MediaTexturePopup.Acquire()
-    texturePickerPopup:SetParent(UIParent)
-    texturePickerPopup:SetPoint("CENTER")
-    texturePickerPopup:SetFrameStrata("FULLSCREEN_DIALOG")
-    texturePickerPopup:SetTitle("Texture Picker")
-    texturePickerPopup:SetFrameLevel(self:GetFrameLevel() + 10)
-    texturePickerPopup:SetClampedToScreen(true)
 
-    texturePickerPopup.mediaTexture = Style[self].Texture.mediaTexture
+    if not TEXTURE_POPUP then 
+      TEXTURE_POPUP = TexturePopup.Acquire()
+      TEXTURE_POPUP:SetParent(UIParent)
+      TEXTURE_POPUP:SetPoint("CENTER")
+      TEXTURE_POPUP:SetFrameStrata("FULLSCREEN_DIALOG")
+      TEXTURE_POPUP:SetTitle("Texture Picker")
+      TEXTURE_POPUP:SetFrameLevel(self:GetFrameLevel() + 10)
+      TEXTURE_POPUP:SetClampedToScreen(true)
+      TEXTURE_POPUP.OnHide = TEXTURE_POPUP.OnHide + function()
+        TEXTURE_POPUP:SetUserData("caller")
+        TEXTURE_POPUP:Reset()
+      end
+    end 
 
+    local caller = TEXTURE_POPUP:GetUserData("caller")
+
+    if caller == self then
+      TEXTURE_POPUP:Hide()
+      return 
+    end
+
+    TEXTURE_POPUP:SetUserData("caller",  self)
+    TEXTURE_POPUP:SetUserHandler("OnTextureConfirmed", function(_, ...) 
+      self:OnTextureConfirmed(...) 
+      TEXTURE_POPUP:Hide()
+    end)
+    TEXTURE_POPUP:Show()
   end
   -----------------------------------------------------------------------------
-  --                               Methods                                   --
+  --                            Constructors                                 --
   -----------------------------------------------------------------------------
-  __Arguments__ { SylingTracker.MediaTextureType/nil }
-  function SetMediaTexture(self, mediaTexture)
-    Style[self].Texture.mediaTexture = mediaTexture
-  end
-
-
   __Template__ {
     Texture = SylingTracker.Texture
   }
-  function __ctor(self) 
+  function __ctor(self)
     self.OnClick = self.OnClick + OnClickHandler
   end
 end)
@@ -233,9 +229,7 @@ end)
 --                                Styles                                     --
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
-  [MediaTexturePopup] = {
-    backdropColor         = { r = 0.1, g = 0.1, b = 0.1, a = 0.95},
-    backdropBorderColor   = { r = 0, g = 0, b = 0, a = 1 },
+  [TexturePopup] = {
     layoutManager = Layout.VerticalLayoutManager(),
     minResize = { width = 601, height = 400 },
     paddingTop = 50,
@@ -243,183 +237,114 @@ Style.UpdateSkin("Default", {
 
     SourceControl = {
       height = 35,
-      marginRight = 0,
-      id = 1,
-  
+      id = 1, 
+
       Label = {
         fontObject = GameFontNormal,
-        textColor = Color.WHITE,
-        justifyH = "LEFT",
-        text = "Texture Source",
-        wordWrap = false,
-        location = {
-          Anchor("LEFT"),
-          Anchor("RIGHT", 0, 0, nil, "CENTER"),  
-        }
+        textColor = Color.WHITE, 
+        justifyH = "LEFT", 
+        text = "From", 
+        location = { Anchor("LEFT"), Anchor("RIGHT", 0, 0, nil, "CENTER") }
       },
-  
+
       DropDown = {
-        location = {
-          Anchor("LEFT", 0, 0, "Label", "RIGHT")
-        }
+        location = { Anchor("LEFT", 0, 0, "Label", "RIGHT") }
       }
     },
-    FileControl = {
-      height = 35,
-      marginRight = 0,
-  
-      Label = {
-        fontObject = GameFontNormal,
-        textColor = Color.WHITE,
-        justifyH = "LEFT",
-        text = "File",
-        wordWrap = false,
-        location = {
-          Anchor("LEFT"),
-          Anchor("RIGHT", 0, 0, nil, "CENTER"),  
-        }
-      },
-  
-      EditBox = {
-        location = {
-          Anchor("LEFT", 0, 0, "Label", "RIGHT")
-        }
-      }
-    },
+
     AtlasControl = {
       height = 35,
-      marginRight = 0,
-  
+      id = 2,
+      visible = Wow.FromUIProperty("SourceType"):Map(function(SourceType) return SourceType == "atlas" end),
+      
       Label = {
         fontObject = GameFontNormal,
         textColor = Color.WHITE,
         justifyH = "LEFT",
         text = "Atlas Name",
-        wordWrap = false,
-        location = {
-          Anchor("LEFT"),
-          Anchor("RIGHT", 0, 0, nil, "CENTER"),  
-        }
+        location = { Anchor("LEFT"), Anchor("RIGHT", 0, 0, nil, "CENTER") }
       },
-  
+
       EditBox = {
-        location = {
-          Anchor("LEFT", 0, 0, "Label", "RIGHT")
-        }
+        location = { Anchor("LEFT", 0, 0, "Label", "RIGHT") }
       }
     },
-    MediaAtlasControl = {
+
+    FileControl = {
       height = 35,
-      marginRight = 0,
-  
+      id = 2,
+      visible = Wow.FromUIProperty("SourceType"):Map(function(SourceType) return SourceType == "file" end),
+
       Label = {
         fontObject = GameFontNormal,
         textColor = Color.WHITE,
         justifyH = "LEFT",
-        text = "Media Atlas Name",
-        wordWrap = false,
-        location = {
-          Anchor("LEFT"),
-          Anchor("RIGHT", 0, 0, nil, "CENTER"),  
-        }
+        text = "File",
+        location = { Anchor("LEFT"), Anchor("RIGHT", 0, 0, nil, "CENTER") }
       },
-  
+
       EditBox = {
-        location = {
-          Anchor("LEFT", 0, 0, "Label", "RIGHT")
-        }
-      }
+        location = { Anchor("LEFT", 0, 0, "Label", "RIGHT") }
+      }      
     },
 
     ColorControl = {
       height = 35,
-      marginRight = 0,
+      id = 2,
+      visible = Wow.FromUIProperty("SourceType"):Map(function(SourceType) return SourceType == "color" end),
 
       Label = {
         fontObject = GameFontNormal,
         textColor = Color.WHITE,
         justifyH = "LEFT",
-        wordWrap = false,
         text = "Color",
-        location = {
-          Anchor("LEFT"),
-          Anchor("RIGHT", 0, 0, nil, "CENTER"),  
-        }
+        location = { Anchor("LEFT"), Anchor("RIGHT", 0, 0, nil, "CENTER") }
       },
 
       ColorPicker = {
-        location = {
-          Anchor("LEFT", -6, 0, nil, "CENTER")
-        }
-      }      
+        location = { Anchor("LEFT", 0, 0, "Label", "RIGHT") }
+      }
     },
 
-    PreviewControl = {
-
-      height = 175,
+    PreviewTexture = {
+      height = 64,
+      width = 64,
+      mediaTexture = Wow.FromUIProperty("MediaTexture"),
 
       location = {
-        Anchor("LEFT"),
-        Anchor("RIGHT"),
-        Anchor("BOTTOM")
-      },
-
-      Label = {
-        fontObject = GameFontHighlightLarge,
-        justifyH = "CENTER",
-        justifyV = "TOP",
-        wordWrap = false,
-        text = "Preview:",
-        
-        location = {
-          Anchor("TOP"),
-          Anchor("LEFT"),
-          Anchor("RIGHT"),
-          Anchor("BOTTOM", 0, 36)
-        }
-      },
+        Anchor("BOTTOM", 0, 50)
+      }
     },
 
     ConfirmButton = {
       Text = {
         text = "Apply"
       },
-      location = {
-        Anchor("BOTTOM", 0, 10)
-      }
+
+      location = { Anchor("BOTTOM", 0, 10) }
     }
   },
 
   [TexturePicker] = {
-    size = { width = 32, height = 26 },
-
+    size = { width = 32, height = 26},
+    
     Text = {
       visible = false
     },
 
     Texture = {
-      -- atlas = AtlasType("services-checkmark"),
-      mediaTexture = { atlas = AtlasType("services-checkmark") },
+      mediaTexture = { from = "atlas", value = AtlasType("services-checkmark") },
       height = 16,
       width = 16,
       drawLayer = "OVERLAY",
       subLevel = 2,
-      location = {
-        Anchor("CENTER")
-      }
+      location = { Anchor("CENTER") }
     }
   }
 })
 
-function OnLoad(self)
-  -- local mediaPopup = MediaTexturePopup.Acquire()
-  -- mediaPopup:SetParent(UIParent)
-  -- mediaPopup:SetPoint("CENTER")
-  -- mediaPopup:SetFrameStrata("HIGH")
-  -- mediaPopup:SetTitle("Texture Picker")
-
-
-  -- local texturePicker = TexturePicker.Acquire()
-  -- texturePicker:SetParent(UIParent)
-  -- texturePicker:SetPoint("CENTER", 0, 200)
-end
+-- function OnLoad(self)
+--   local texturePicker = TexturePicker.Acquire()
+--   texturePicker:SetParent(UIParent)
+--   texturePicker:SetPoint("CENTER", 0, 200)
+-- end

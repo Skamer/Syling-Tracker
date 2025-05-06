@@ -13,14 +13,17 @@ export {
 }
 
 struct "MediaTextureType" {
-  { name = "name", type = String },
-  { name = "type", type = String },
-  { name = "atlas", type = AtlasType },
-  { name = "file", type = String + Number },
-  { name = "isMediaAtlas", type = Boolean },
-  { name = "texCoords", type = RectType},
-  { name = "color", type = ColorType },
-  { name = "size", type = Size} 
+  { name = "name", type = String }, -- deprecated
+  { name = "type", type = String }, -- deprecated 
+  { name = "atlas", type = AtlasType }, -- deprecated
+  { name = "file", type = String + Number }, -- deprecated
+  { name = "isMediaAtlas", type = Boolean }, -- deprecated
+  { name = "texCoords", type = RectType}, -- deprecated
+  { name = "color", type = ColorType }, -- deprecated
+  { name = "size", type = Size}, -- deprecated
+
+  { name = "from", type = String },
+  { name = "value", type = Any}
 }
 
 __UIElement__()
@@ -29,7 +32,7 @@ class "Texture" (function(_ENV)
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
-  function SetMediaTexture(self, mediaTexture)
+  function Legacy_SetMediaTexture(self, mediaTexture)
     if not mediaTexture then 
       Style[self].file      = CLEAR
       Style[self].texCoords = CLEAR 
@@ -77,6 +80,34 @@ class "Texture" (function(_ENV)
     end
 
     Style[self].size = size or CLEAR
+  end
+
+  function SetMediaTexture(self, mediaTexture)
+    -- Backward compatibilty with the old interface
+    if not mediaTexture or not mediaTexture.from then 
+      return self:Legacy_SetMediaTexture(mediaTexture)
+    end
+
+    local from = mediaTexture.from 
+    local value = mediaTexture.value
+
+    if value == nil then 
+      value = CLEAR
+    end
+
+    if from == "atlas" then
+      Style[self].atlas     = value
+      Style[self].color     = CLEAR
+      Style[self].file      = CLEAR
+    elseif from == "file" then
+      Style[self].file      = value
+      Style[self].atlas     = CLEAR
+      Style[self].color     = CLEAR
+    elseif from == "color" then
+      Style[self].color     = value
+      Style[self].atlas     = CLEAR
+      Style[self].file      = CLEAR
+    end
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
