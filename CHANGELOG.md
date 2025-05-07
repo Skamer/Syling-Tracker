@@ -1,4 +1,18 @@
-# 2.8.4
+# 2.8.5
+
+###### FIXES
+
+- Fixed an issue with the checkbox in the options.
+- Fixed issues relative to pets in the options.
+
+###### NEW
+
+- Added new options for changing the font and the text color for the pet name in the options.
+- Added new options for changing the background and border color for the pet in the options.
+
+---
+
+## 2.8.4
 
 - Removed "CENTER" point for relative point in the tracker position. NOTE: If you choiced this value before this update, you may need to reset the position of your tracker.
 

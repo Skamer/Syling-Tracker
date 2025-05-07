@@ -12,6 +12,10 @@ local L = _Locale("zhCN")
 
 if not L then return end
 
+-------------------------------------------------------------------------------
+-- The below tokens are waiting for translation
+-------------------------------------------------------------------------------
+
 -- L.ALWAYS_HIDE = "Always Hide"
 -- L.ALWAYS_SHOW = "Always Show"
 -- L.AUTO_QUEST = "Auto Quest"
@@ -23,13 +27,16 @@ if not L then return end
 -- L.HIDE_COMPLETED_OBJECTIVES = "Hide completed objectives"
 -- L.HIDE_WHEN_CHARACTER_IS_MAX_LEVEL = "Hide when the character is max level"
 -- L.HORRIFIC_VISIONS = "Horrific Visions"
+-- L.PET = "Pet"
 -- L.QUEST_NAME = "Quest Name"
 -- L.SHOW_BACKGROUND = "Show background"
 -- L.SHOW_BORDER = "Show border"
 -- L.SHOW_ONLY_WHEN_QUEST_BELOW_MAX_LEVEL = "Show only when the quest is below max level"
 -- L.SUB_TEXT = "Sub Text"
+-- L.USE_FIXED_COLOR = "Use Fixed Color"
 -- L.VISIBILITY_POLICY = "Visibility Policy"
 
+-------------------------------------------------------------------------------
 L.ACHIEVEMENT = "成就"
 L.ACHIEVEMENTS = "成就"
 L.ACTIVITIES = "活动"

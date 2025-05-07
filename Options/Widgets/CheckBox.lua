@@ -17,15 +17,14 @@ class "CheckBox" (function(_ENV)
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
-  function OnAcquire(self)
-    -- self:InstantApplyStyle()
-  end
-
   function OnRelease(self)
     self:ClearAllPoints()
     self:Hide()
     self:SetParent()
   end
+
+  __InstantApplyStyle__()
+  function __ctor() end
 end)
 -------------------------------------------------------------------------------
 --                                Styles                                     --

@@ -13,6 +13,14 @@ local L = _Locale("ruRU")
 
 if not L then return end
 
+-------------------------------------------------------------------------------
+-- The below tokens are waiting for translation
+-------------------------------------------------------------------------------
+
+-- L.PET = "Pet"
+-- L.USE_FIXED_COLOR = "Use Fixed Color"
+
+-------------------------------------------------------------------------------
 L.ACHIEVEMENT = "Достижение"
 L.ACHIEVEMENTS = "Достижения"
 L.ACTIVITIES = "Активности"
