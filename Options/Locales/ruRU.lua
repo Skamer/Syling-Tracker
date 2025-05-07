@@ -13,14 +13,7 @@ local L = _Locale("ruRU")
 
 if not L then return end
 
--------------------------------------------------------------------------------
--- The below tokens are waiting for translation
--------------------------------------------------------------------------------
 
--- L.PET = "Pet"
--- L.USE_FIXED_COLOR = "Use Fixed Color"
-
--------------------------------------------------------------------------------
 L.ACHIEVEMENT = "Достижение"
 L.ACHIEVEMENTS = "Достижения"
 L.ACTIVITIES = "Активности"
@@ -102,6 +95,7 @@ L.OFFSET_Y = "Смещение Y"
 L.OPTIONS = "Настройки"
 L.ORIENTATION = "Направление"
 L.PARTY = "Группа"
+L.PET = "Питомец"
 L.POSITION = "Положение"
 L.POSITION_OFFSET_X = "Смещение положения X"
 L.PROFESSION = "Профессия"
@@ -161,6 +155,7 @@ L.TRACKER_CREATE = "Создать отслеживание"
 L.TRACKER_DELETE = "Удалить отслеживание"
 L.TRACKER_ENTER_NAME = "Введите название отслеживания"
 L.TRACKER_NAME = "Название отслеживания"
+L.USE_FIXED_COLOR = "Использовать фиксированный цвет"
 L.USE_TRACKER_HEIGHT = "Использовать высоту отслеживания"
 L.VERTICAL = "Вертикальный"
 L.VERTICAL_SPACING = "Расстояние по вертикали"
