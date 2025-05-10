@@ -9,11 +9,13 @@
 Syling                     "SylingTracker.Bootstrap"                         ""
 -- ========================================================================= --
 export {
-  LibDataBroker       = LibStub("LibDataBroker-1.1"),
-  LibDBIcon           = LibStub("LibDBIcon-1.0"),
-  GetAddonVersion     = Utils.GetAddonVersion,
-  RegisterSetting     = API.RegisterSetting,
-  GetSetting          = API.GetSetting
+  LibDataBroker                       = LibStub("LibDataBroker-1.1"),
+  LibDBIcon                           = LibStub("LibDBIcon-1.0"),
+  GetAddonVersion                     = Utils.GetAddonVersion,
+  RegisterSetting                     = API.RegisterSetting,
+  GetSetting                          = API.GetSetting,
+  GetTrackerSettingWithDefault        = API.GetTrackerSettingWithDefault,
+  GetItemBarSettingWithDefault        = API.GetItemBarSettingWithDefault
 }
 
 SLT_LOGO           = [[Interface\AddOns\SylingTracker\Media\logo]]
@@ -152,7 +154,6 @@ function OpenOptions()
   _M:FireSystemEvent("SylingTracker_OPEN_OPTIONS")
 end
 
-
 --- `/slt enable` enable all the trackers
 --- `/slt enable all` the same as above 
 --- `/slt enable trackers` the same as above 
@@ -190,6 +191,87 @@ function DisableElementCommand(args)
     _M:FireSystemEvent("SylingTracker_DISABLE_TRACKERS")
   elseif arg1 == "tracker" then 
     _M:FireSystemEvent("SylingTracker_DISABLE_TRACKER", arg2)
+  end
+end
+
+local function GetParsedEffectiveEnabledTracker(unparsedTrackerID)
+  local defaultTrackerID = "main"
+
+  if not unparsedTrackerID then 
+    local enabled = GetTrackerSettingWithDefault(defaultTrackerID, "enabled")
+    return enabled
+  end
+
+  local invert, trackerID = unparsedTrackerID:match("(!?)(%a+)")
+
+  if invert == "" then 
+    invert = false 
+  else
+    invert = true 
+  end
+
+  if trackerID == "" then 
+    trackerID = defaultTrackerID
+  end
+
+  local enabled = API.GetTrackerSettingWithDefault(trackerID, "enabled")
+
+  if invert then 
+    return not enabled
+  else 
+    return enabled
+  end
+end
+
+--- `/slt toggle` toogle the itembar and all the trackers (sync with main tracker).
+--- `/slt toggle all` the same as above.
+--- `/slt toggle trackers` the same as above except this doesn't include the item bar.
+--- `/slt toggle tracker main` toggle only the main tracker. 
+--- `/slt toggle tracker second` toggle only the tracker with for id: 'second'.
+--- `/slt toggle tracker second main` toggle only the tracker with for id: `second' but sync with the main tracker.
+--- `/slt toggle itembar` toggle only the item bar.
+--- `/slt toggle itembar main` toggle only the item bar but will be synced with the main tracker.
+__SlashCmd__ "slt" "toggle"
+__SlashCmd__ "slt" "tenable"
+function ToggleEnableElementCommand(args)
+  local arg1, arg2, arg3 = strsplit(" ", args)
+  if arg1 == "" or arg1 == "all" then
+    local enabled = GetParsedEffectiveEnabledTracker(arg2)
+    if enabled then 
+      _M:FireSystemEvent("SylingTracker_DISABLE_TRACKERS")
+      _M:FireSystemEvent("SylingTracker_DISABLE_ITEMBAR")
+    else 
+      _M:FireSystemEvent("SylingTracker_ENABLE_TRACKERS")
+      _M:FireSystemEvent("SylingTracker_ENABLE_ITEMBAR")
+    end
+  elseif arg1 == "itembar" then
+    local enabled 
+    if not arg2 or arg2 == "" then 
+      enabled = GetItemBarSettingWithDefault("enabled")
+    else 
+      enabled = GetParsedEffectiveEnabledTracker(arg2)
+    end
+
+    if enabled then
+      _M:FireSystemEvent("SylingTracker_DISABLE_ITEMBAR")
+    else 
+      _M:FireSystemEvent("SylingTracker_ENABLE_ITEMBAR")
+    end
+
+  elseif arg1 == "trackers" then
+    local enabled = GetParsedEffectiveEnabledTracker(arg2)
+    if enabled then 
+      _M:FireSystemEvent("SylingTracker_DISABLE_TRACKERS")
+    else 
+      _M:FireSystemEvent("SylingTracker_ENABLE_TRACKERS")
+    end    
+  elseif arg1 == "tracker" then
+    local enabled = GetParsedEffectiveEnabledTracker(arg3 or arg2)
+    if enabled then 
+       _M:FireSystemEvent("SylingTracker_DISABLE_TRACKER", arg2)
+    else 
+       _M:FireSystemEvent("SylingTracker_ENABLE_TRACKER", arg2)
+    end
   end
 end
 

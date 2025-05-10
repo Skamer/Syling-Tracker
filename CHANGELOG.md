@@ -1,4 +1,12 @@
-# 2.8.5
+# [2.8.6](https://github.com/Skamer/Syling-Tracker/discussions/148#discussioncomment-13100201)
+
+###### NEW
+
+- Added new slash commands: `/slt toggle` and `/slt tenable` ([more details here](https://github.com/Skamer/Syling-Tracker/discussions/148#discussioncomment-13100201)). ([ticket #139](https://github.com/Skamer/Syling-Tracker/issues/139))
+
+---
+
+## 2.8.5
 
 ###### FIXES
 
