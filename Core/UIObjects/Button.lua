@@ -17,6 +17,14 @@ class "Button" (function(_ENV)
   -----------------------------------------------------------------------------
   --                               Handlers                                  --
   -----------------------------------------------------------------------------
+  local function OnEnterHandler(self)
+    self.IsMouseOver = true
+  end 
+
+  local function OnLeaveHandler(self)
+    self.IsMouseOver = false
+  end
+
   local function OnStateChanged(self)
     local parent = self:GetParent()
 
@@ -94,7 +102,9 @@ class "Button" (function(_ENV)
       end
     end
   end
-
+  -----------------------------------------------------------------------------
+  --                               Methods                                   --
+  -----------------------------------------------------------------------------
   function IsIgnoredForAdjustment(self, child)
     if Style[child].excludeFromAutoHeight then
       return true 
@@ -211,6 +221,28 @@ class "Button" (function(_ENV)
     type = Number,
     default = 1,
     event = "OnBackdropChanged"
+  }
+
+  __Observable__()
+  property "IsMouseOver" {
+    type = Boolean,
+    default = false,
+  }
+
+  property "RegisterForMouseOver" {
+    type = Boolean,
+    default = false,
+    handler = function(self, new)
+      if new then 
+        self.OnEnter = self.OnEnter + OnEnterHandler
+        self.OnLeave = self.OnLeave + OnLeaveHandler
+      else 
+        self.OnEnter = self.OnEnter - OnEnterHandler
+        self.OnLeave = self.OnLeave - OnLeaveHandler
+
+        self.IsMouseOver = nil
+      end
+    end
   }
 end)
 

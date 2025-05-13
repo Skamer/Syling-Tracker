@@ -683,7 +683,8 @@ Style.UpdateSkin("Default", {
       borderSize                      = FromUISetting("quest.borderSize"),
       showTooltip                     = FromUISetting("quest.showTooltip"),
       showRewardsInTooltip            = FromUISetting("quest.tooltip.showRewards"),
-
+      paddingBottom                   = FromUIProperty("QuestHasItem"):Map(function(hasItem) return hasItem and 5 or 0 end),
+      
       Header = {
         height                        = 24,
   

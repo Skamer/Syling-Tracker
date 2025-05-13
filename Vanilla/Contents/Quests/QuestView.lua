@@ -512,7 +512,8 @@ Style.UpdateSkin("Default", {
       backdropColor                   = FromUISetting("quest.backgroundColor"),
       backdropBorderColor             = FromUISetting("quest.borderColor"),
       borderSize                      = FromUISetting("quest.borderSize"),
-
+      paddingBottom                   = FromUIProperty("QuestHasItem"):Map(function(hasItem) return hasItem and 5 or 0 end),
+      
       Header = {
         height                        = 24,
   
