@@ -13,6 +13,7 @@ if not C_AddOns.IsAddOnLoaded("PetTracker") then return end
 Syling                   "SylingTracker.Data.PetsData"                       ""
 -- ========================================================================= --
 __DataProperties__ {
+  { name = "id", type = Any },
   { name = "specieID", type = Number},
   { name = "name", type = String },
   { name = "icon", type = Any}, 

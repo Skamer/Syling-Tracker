@@ -1,4 +1,16 @@
-# [2.8.6](https://github.com/Skamer/Syling-Tracker/discussions/148#discussioncomment-13100201)
+# 2.8.7
+
+###### NEW
+
+- Clicking on a pet will now open the pet journal.
+
+###### FIXES
+
+- Fixed an issue where the quest height wasn't enough when an item is visible.
+
+---
+
+## [2.8.6](https://github.com/Skamer/Syling-Tracker/discussions/148#discussioncomment-13100201)
 
 ###### NEW
 

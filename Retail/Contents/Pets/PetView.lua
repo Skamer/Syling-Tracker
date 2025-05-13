@@ -22,9 +22,26 @@ __UIElement__()
 class "PetView" (function(_ENV)
   inherit "Button" extend "IView"
   -----------------------------------------------------------------------------
+  --                               Handlers                                  --
+  -----------------------------------------------------------------------------
+  local function OnClickHandler(self)
+    CollectionsJournal_LoadUI()
+    HideUIPanel(WorldMapFrame)
+    ShowUIPanel(CollectionsJournal)
+
+    CollectionsJournal_SetTab(CollectionsJournal, 2)
+
+    if self.PetID then 
+      PetJournal_SelectPet(PetJournal, self.PetID)
+    elseif self.SpecieID then 
+      PetJournal_SelectSpecies(PetJournal, self.SpecieID)
+    end
+  end
+  -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
   function OnViewUpdate(self, data, metadata)
+    self.PetID = data.id
     self.PetName = data.name
     self.PetIcon = data.icon
     self.SpecieID = data.specieID 
@@ -34,6 +51,11 @@ class "PetView" (function(_ENV)
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
+  __Observable__()
+  property "PetID" {
+    type = Any
+  }
+
   __Observable__()
   property "PetName" {
     type = String,
@@ -66,7 +88,9 @@ class "PetView" (function(_ENV)
     SourceIcon = Texture,
     Name = FontString, 
   }
-  function __ctor(self) end 
+  function __ctor(self) 
+    self.OnClick = self.OnClick + OnClickHandler
+  end 
 end)
 
 __UIElement__()

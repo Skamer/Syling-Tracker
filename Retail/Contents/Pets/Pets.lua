@@ -56,8 +56,9 @@ function LoadAndUpdatePets(self)
         if source then 
           local specieID = specie:GetSpecie()
           local petData = PETS_CONTENT_SUBJECT:AcquirePet(specieID)
-          local name, icon = specie:GetInfo() 
+          local name, icon = specie:GetInfo()
 
+          petData.id = specie:GetID()
           petData.specieID = specieID 
           petData.name = name 
           petData.icon = icon 
