@@ -183,7 +183,7 @@ end
 
 function FromBorderColor()
   return FromUIProperty("PetQuality"):CombineLatest(
-    FromUISettings("pet.useFixedColorForBorder", "pet.backgroundColor"))
+    FromUISettings("pet.useFixedColorForBorder", "pet.borderColor"))
     :Map(function(quality, useFixedColor, fixedColor)
         if useFixedColor then 
           return fixedColor
