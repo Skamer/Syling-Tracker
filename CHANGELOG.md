@@ -1,4 +1,12 @@
-# 2.8.7
+# 2.8.8
+
+###### FIXES
+
+- Fixed an issue where the pet border color incorrectly used the background color setting instead of border color setting.
+
+---
+
+## 2.8.7
 
 ###### NEW
 
