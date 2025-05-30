@@ -1,0 +1,23 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+  <!-- Context Menu Patterns Loading -->
+  <Script file="ContextMenuPatterns.lua" />
+  <!-- Auto Quests -->
+  <Script file="AutoQuests\AutoQuestsData.lua" />
+  <Script file="AutoQuests\AutoQuestView.lua"/>
+  <Script file="AutoQuests\AutoQuestsContentView.lua"/>
+  <Script file="AutoQuests\AutoQuests.lua"/>
+  <!-- Achievements -->
+  <Script file="Achievements\AchievementsData.lua" />
+  <Script file="Achievements\AchievementView.lua"/>
+  <Script file="Achievements\AchievementsContentView.lua"/>
+  <Script file="Achievements\Achievements.lua"/>
+  <!-- Quests -->
+  <Script file="Quests\QuestsData.lua" />
+  <Script file="Quests\QuestView.lua" />
+  <Script file="Quests\QuestCategoryView.lua" />
+  <Script file="Quests\QuestsContentView.lua" />
+  <Script file="Quests\Quests.lua" />
+  <!-- Contents Loading -->
+  <Script file="Contents.lua" />
+</Ui>

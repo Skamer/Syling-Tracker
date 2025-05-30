@@ -45,6 +45,11 @@ function IsRetail()
 end
 
 __AutoCache__()
+function IsMoP()
+  return WOW_TOC_VERSION >= 50000 and WOW_TOC_VERSION < 60000
+end
+
+__AutoCache__()
 function IsCataclysm()
   return WOW_TOC_VERSION >= 40000 and WOW_TOC_VERSION < 50000
 end
@@ -57,7 +62,8 @@ end
 -- Export as Utils
 Utils.GetAddonVersion     = GetAddonVersion
 Utils.GetScorpioVersion   = GetScorpioVersion
-Utils.IsRetail            = IsRetail 
+Utils.IsRetail            = IsRetail
+Utils.IsMoP               = IsMoP 
 Utils.IsCataclysm         = IsCataclysm
 Utils.IsVanilla           = IsVanilla
 

@@ -23,7 +23,7 @@ SLT_LOGO           = [[Interface\AddOns\SylingTracker\Media\logo]]
 BLIZZARD_OBJECTIVE_TRACKER = nil
 if IsVanilla() then 
   BLIZZARD_OBJECTIVE_TRACKER = QuestWatchFrame
-elseif IsCataclysm() then 
+elseif IsCataclysm() or IsMoP() then 
   BLIZZARD_OBJECTIVE_TRACKER = WatchFrame 
 else 
   BLIZZARD_OBJECTIVE_TRACKER = ObjectiveTrackerFrame

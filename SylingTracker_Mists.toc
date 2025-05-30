@@ -1,0 +1,35 @@
+## Interface: 50500
+## Title: |cffff6a00Syling Tracker|r
+## Notes-ruRU: Syling Tracker - дополнение, которое отслеживает различный игровой контент: квесты, сценарии, M+ ключи и многое другое
+## Version: @project-version@
+## Author: Skamer
+## SavedVariables: SylingTrackerDB
+## Dependencies: Scorpio
+## OptionalDeps: LibSharedMedia-3.0, ViragDevTool, PetTracker
+## IconTexture: Interface\AddOns\SylingTracker\Media\logo
+
+## X-Curse-Project-ID: 398177
+## X-Wago-ID: Qb6m146P
+
+# Embed libs
+embeds.xml
+
+SylingModule.lua
+Environment.lua
+
+# Locale files
+Locales\__load.xml
+
+# Utilities files 
+Utils\__load.xml
+
+# Core files
+Core\__load.xml
+
+# Cataclysm files
+MoP\__load.xml
+
+# Skin files 
+Skins\__load.xml
+
+Boot.lua

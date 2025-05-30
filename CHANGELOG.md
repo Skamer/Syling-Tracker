@@ -1,4 +1,10 @@
-# 2.8.8
+# 2.8.9
+
+- Added initial support for Mist of Pandaria Classic.
+
+---
+
+## 2.8.8
 
 ###### FIXES
 
