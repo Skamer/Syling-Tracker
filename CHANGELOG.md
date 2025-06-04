@@ -1,4 +1,13 @@
-# 2.8.9
+# 2.8.10
+
+###### FIXES
+
+- Fixed an issue where the objectives for the Shipping & Handling scenario were not displayed. ([ticket #157](https://github.com/Skamer/Syling-Tracker/issues/157))
+- Updated the click behavior of Activities, Profession Recipes and Achievements. ([ticket #158](https://github.com/Skamer/Syling-Tracker/issues/158))
+
+---
+
+## 2.8.9
 
 - Added initial support for Mist of Pandaria Classic.
 
