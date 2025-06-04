@@ -56,12 +56,14 @@ class "UIWidgetStatusBarPartition" { Texture }
 
 __UIElement__()
 class "UIWidgetStatusBar"(function(_ENV)
-  inherit "ProgressBar" extend "IUIWidget"
+  inherit "Frame" extend "IUIWidget"
   -----------------------------------------------------------------------------
   --                               Handlers                                  --
   -----------------------------------------------------------------------------
   local function OnEnterHandler(self)
-    local tooltip = self.Tooltip
+    local parent = self:GetParent()
+
+    local tooltip = parent.Tooltip
     if tooltip then
       Tooltip:SetOwner(self, "ANCHOR_BOTTOMLEFT")
       Tooltip:SetText(tooltip)
@@ -70,13 +72,14 @@ class "UIWidgetStatusBar"(function(_ENV)
   end
 
   local function OnLeaveHandler(self)
-    if self.Tooltip then 
+    local parent = self:GetParent()
+    if parent.Tooltip then 
       Tooltip:Hide()
     end
   end
 
   local function OnSizeChangedHandler(self, width)
-    self:UpdateParitionsPosition(width)
+    self:GetParent():UpdateParitionsPosition(width)
   end
   -----------------------------------------------------------------------------
   --                               Methods                                   --
@@ -89,6 +92,7 @@ class "UIWidgetStatusBar"(function(_ENV)
     self.OverrideBarTextShownType = widgetData.overrideBarTextShownType
     self.OverrideBarText = widgetData.overrideBarText
     self.Tooltip  = widgetData.tooltip
+    self.Text = widgetData.text
 
     -- Bar Text
     local barValueTextType = widgetData.barValueTextType
@@ -124,8 +128,8 @@ class "UIWidgetStatusBar"(function(_ENV)
     local partition = self.Partitions[index]
     if not partition then 
       partition = UIWidgetStatusBarPartition.Acquire()
-      partition:SetParent(self)
-      partition:SetHeight(self:GetHeight())
+      partition:SetParent(self:GetProgressBar())
+      partition:SetHeight(self:GetProgressBar():GetHeight())
 
       self.Partitions[index] = partition
     end
@@ -154,7 +158,7 @@ class "UIWidgetStatusBar"(function(_ENV)
   function UpdatePartitionPosition(self, partition, partitionValue, barWidth)
     local partitionPercent = ClampedPercentageBetween(partitionValue, self.BarMin, self.BarMax)
     local xOffset = barWidth * partitionPercent
-    partition:SetPoint("CENTER", self:GetStatusBarTexture(), "LEFT", xOffset, 0)
+    partition:SetPoint("CENTER", self:GetProgressBar():GetStatusBarTexture(), "LEFT", xOffset, 0)
   end
 
   function UpdateParitionsPosition(self, barWidth)
@@ -173,9 +177,18 @@ class "UIWidgetStatusBar"(function(_ENV)
       end
     end
   end
+
+  function GetProgressBar(self)
+    return self:GetChild("ProgressBar")
+  end
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------
+  __Observable__()
+  property "Text" {
+    type = String
+  }
+
   __Observable__()
   property "BarMax" {
     type = Number,
@@ -233,11 +246,16 @@ class "UIWidgetStatusBar"(function(_ENV)
   -----------------------------------------------------------------------------
   --                              Constructors                               --
   -----------------------------------------------------------------------------
-  __Template__ {}
+  __Template__ {
+    ProgressBar = ProgressBar,
+    Label = FontString,
+  }
   function __ctor(self)
-    self.OnEnter = self.OnEnter + OnEnterHandler 
-    self.OnLeave = self.OnLeave + OnLeaveHandler
-    self.OnSizeChanged = self.OnSizeChanged + OnSizeChangedHandler
+    local progressBar = self:GetProgressBar()
+
+    progressBar.OnEnter = progressBar.OnEnter + OnEnterHandler 
+    progressBar.OnLeave = progressBar.OnLeave + OnLeaveHandler
+    progressBar.OnSizeChanged = progressBar.OnSizeChanged + OnSizeChangedHandler
   end
 end)
 
@@ -473,6 +491,16 @@ end)
 -------------------------------------------------------------------------------
 --                              Observables                                  --
 -------------------------------------------------------------------------------
+function FromUIPropertyStatusBarLabelVisible()
+  return FromUIProperty("Text"):Map(function(text)
+    if text and text ~= "" then 
+      return true 
+    end 
+
+    return false
+  end)
+end
+
 function FromUIWidgetStatusBarText()
   return FromUIProperty("Mouseover", "BarText", "OverrideBarText", "OverrideBarTextShownType")
     :Map(function(mouseover, barText, overrideBarText, overrideBarTextShownType)
@@ -499,22 +527,40 @@ function FromUIWidgetStatusBarColor()
     return { r = 0, g = 148/255, b = 1, a = 0.9 }
   end)
 end
+
+function FromUIPropertyStatusBarProgressLocation()
+  return FromUIPropertyStatusBarLabelVisible():Map(function(visible)
+    if visible then 
+      return {
+        Anchor("TOP", 0, -5, "Label", "BOTTOM"),
+        Anchor("LEFT"),
+        Anchor("RIGHT")
+      }
+    else 
+      return {
+        Anchor("TOP"),
+        Anchor("LEFT"),
+        Anchor("RIGHT")
+      }
+    end
+  end)
+end
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
   Style.UpdateSkin("Default", {
     [UIWidgets] = {
-      width                             = 175,
-      height                            = 1,
-      backdrop                          = Frame.FromBackdrop(),
-      showBackground                    = true,
-      showBorder                        = true,
-      backdropColor                     =  Color(35/255, 40/255, 46/255, 0.73),
-      backdropBorderColor               = Color(0, 0, 0, 0.4),
-      borderSize                        = 1,
-      paddingTop                        = 5,
-      paddingBottom                     = 5,
-      layoutManager                     = Layout.VerticalLayoutManager(),
+      width                           = 175,
+      height                          = 1,
+      backdrop                        = Frame.FromBackdrop(),
+      showBackground                  = true,
+      showBorder                      = true,
+      backdropColor                   =  Color(35/255, 40/255, 46/255, 0.73),
+      backdropBorderColor             = Color(0, 0, 0, 0.4),
+      borderSize                      = 1,
+      paddingTop                      = 5,
+      paddingBottom                   = 5,
+      layoutManager                   = Layout.VerticalLayoutManager(),
     },
 
     [UIWidgetScenarioHeaderTimer] = {
@@ -522,18 +568,35 @@ end
     },
 
     [UIWidgetStatusBarPartition] = {
-      color = Color.BLACK,
-      width = 1,
+      color                           = Color.BLACK,
+      width                           = 1,
     },
     [UIWidgetStatusBar] = {
-      marginRight = 10,
-      marginLeft = 10,
+      autoAdjustHeight                = true,
+      marginRight                     = 10,
+      marginLeft                      = 10,
+
+      Label = {
+        text                          = FromUIProperty("Text"),
+        visible                       = FromUIPropertyStatusBarLabelVisible(),
+        textColor                     = Color.WHITE,
+        location                      = {
+                                        Anchor("TOP"),
+                                        Anchor("LEFT"),
+                                        Anchor("RIGHT")
+                                      }
+      },
+
+      ProgressBar = {
       minMaxValues                    = FromUIProperty("BarMin", "BarMax"):Map(function(min, max) return MinMax(min, max) end),
       value                           = FromUIProperty("BarValue"),
       statusBarColor                  = FromUIWidgetStatusBarColor(),
-
-      Text = {
+  
+        Text = {
         text                          = FromUIWidgetStatusBarText()
+        },
+
+        location                      = FromUIPropertyStatusBarProgressLocation()
       }
     },
     [UIWidgetTextWithState] = {

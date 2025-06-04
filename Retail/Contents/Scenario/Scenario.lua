@@ -18,7 +18,7 @@ export {
   IsInDelve                         = Utils.IsInDelve,
   IsInScenario                      = C_Scenario.IsInScenario,
   IsInJailersTower                  = IsInJailersTower,
-  GetCriteriaInfo                   = C_Scenario.GetCriteriaInfo,
+  GetCriteriaInfo                   = C_ScenarioInfo.GetCriteriaInfo,
   GetBonusSteps                     = C_Scenario.GetBonusSteps,
   GetCriteriaInfoByStep             = C_Scenario.GetCriteriaInfoByStep,
   IsInInstance                      = IsInInstance,
@@ -27,6 +27,9 @@ export {
 }
 
 SCENARIO_CONTENT_SUBJECT = RegisterObservableContent("scenario", ScenarioContentSubject)
+
+local SCENARIO_TRACKER_WIDGET_SET = 252
+local SCENARIO_TRACKER_TOP_WIDGET_SET = 514
 
 __ActiveOnEvents__ "PLAYER_ENTERING_WORLD" "SCENARIO_POI_UPDATE" "SCENARIO_UPDATE"
 function BecomeActiveOn(self)
@@ -71,18 +74,24 @@ function UpdateScenario(self)
   scenarioData.uiTextureKit = scenarioInfo.uiTextureKit
 
   local scenarioStepInfo = GetScenarioStepInfo()
+
+  -- NOTE: For some reasons, the numCriteria from C_ScenarioInfo is incorrect for 
+  -- Shipping & Handling scenario (ticket #157).
+  -- This seems the numCriteria from C_Scenario is right, so we fallback to it.
+  local numCriteria = select(3, C_Scenario.GetStepInfo())
+
   if scenarioStepInfo then 
     scenarioData.stepID = scenarioStepInfo.stepID
     scenarioData.stepName = scenarioStepInfo.title 
     scenarioData.stepDescription = scenarioStepInfo.description
-    scenarioData.numCriteria = scenarioStepInfo.numCriteria
+    scenarioData.numCriteria = numCriteria
     scenarioData.isStepFailed = scenarioStepInfo.stepFailed 
     scenarioData.isBonusStep = scenarioStepInfo.isBonusStep
     scenarioData.isForCurrentStepOnly = scenarioStepInfo.isForCurrentStepOnly
     scenarioData.shouldShowBonusObjective = scenarioStepInfo.shouldShowBonusObjective
     scenarioData.spells = scenarioStepInfo.spells
     scenarioData.rewardQuestID = scenarioStepInfo.rewardQuestID
-    scenarioData.widgetSetID = scenarioStepInfo.widgetSetID
+    scenarioData.widgetSetID = scenarioStepInfo.widgetSetID or SCENARIO_TRACKER_WIDGET_SET
     scenarioData.stepID = scenarioStepInfo.stepID
     scenarioData.weightedProgress = scenarioStepInfo.weightedProgress
 
@@ -103,7 +112,7 @@ function UpdateScenario(self)
       objectiveData.progressText  = PERCENTAGE_STRING:format(scenarioStepInfo.weightedProgress)
     else
       if scenarioData.numCriteria > 0 then
-        for index = 1, scenarioStepInfo.numCriteria do
+        for index = 1, numCriteria do
           local criteriaInfo = GetCriteriaInfo(index)
 
           local description = criteriaInfo.description
@@ -213,7 +222,6 @@ function UpdateScenario(self)
     scenarioData:StopBonusObjectivesCounter()
   end
 end
-
 
 __SystemEvent__ "SCENARIO_UPDATE" "SCENARIO_POI_UPDATE" "SCENARIO_CRITERIA_UPDATE" "CRITERIA_COMPLETE" "SCENARIO_COMPLETED"
 function UPDATE_SCENARIO()
