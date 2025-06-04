@@ -26,7 +26,21 @@ class "ActivityView" (function(_ENV)
     local contextMenuPattern  = self.ContextMenuPattern
     local activityID          = self.ActivityID
 
-    if mouseButton == "RightButton" then
+    if IsModifiedClick("CHATLINK") and ChatEdit_GetActiveWindow() then
+      local perksActivityLink = C_PerksActivities.GetPerksActivityChatLink(activityID)
+      ChatEdit_InsertLink(perksActivityLink)
+    elseif mouseButton ~= "RightButton" then 
+      if not EncounterJournal then
+        EncounterJournal_LoadUI();
+      end
+      if IsModifiedClick("QUESTWATCHTOGGLE") then
+        C_PerksActivities.RemoveTrackedPerksActivity(activityID);
+      else
+        MonthlyActivitiesFrame_OpenFrameToActivity(activityID);
+      end
+
+      PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+    else
       if contextMenuPattern and activityID then
         ContextMenu_Show(contextMenuPattern, self, activityID)
       end

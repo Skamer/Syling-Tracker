@@ -43,7 +43,32 @@ class "AchievementView" (function(_ENV)
     local achievementID = self.AchievementID
     local contextMenuPattern = self.ContextMenuPattern
 
-    if mouseButton == "RightButton" then 
+    if IsModifiedClick("CHATLINK") and ChatEdit_GetActiveWindow() then
+      local achievementLink = GetAchievementLink(achievementID)
+      if achievementLink then
+        ChatEdit_InsertLink(achievementLink)
+      end
+    elseif mouseButton ~= "RightButton" then 
+      if not AchievementFrame then
+        AchievementFrame_LoadUI()
+      end
+
+      if IsModifiedClick("QUESTWATCHTOGGLE") then
+        C_ContentTracking.StopTracking(_G.Enum.ContentTrackingType.Achievement, achievementID, _G.Enum.ContentTrackingStopType.Manual);
+        if AchievementFrameAchievements_ForceUpdate then
+          AchievementFrameAchievements_ForceUpdate();
+        end
+      elseif not AchievementFrame:IsShown() then
+        AchievementFrame_ToggleAchievementFrame()
+        AchievementFrame_SelectAchievement(achievementID)
+      else
+        if AchievementFrameAchievements.selection ~= achievementID then
+          AchievementFrame_SelectAchievement(achievementID)
+        else
+          AchievementFrame_ToggleAchievementFrame()
+        end
+      end
+    else
       if achievementID and contextMenuPattern then 
         ContextMenu_Show(contextMenuPattern, self, achievementID)
       end

@@ -27,7 +27,29 @@ class "ProfessionRecipeView" (function(_ENV)
     local recipeID            = self.RecipeID
     local isRecraft           = self.IsRecraft
 
-    if mouseButton == "RightButton" then
+    if IsModifiedClick("CHATLINK") and ChatEdit_GetActiveWindow() then 
+      local link = C_TradeSkillUI.GetRecipeLink(recipeID);
+      if link then
+        ChatEdit_InsertLink(link);
+      end
+    elseif mouseButton ~= "RightButton" then
+      if not ProfessionsFrame then
+        ProfessionsFrame_LoadUI();
+      end
+
+      if IsModifiedClick("RECIPEWATCHTOGGLE") then
+        local track = false 
+        C_TradeSkillUI.SetRecipeTracked(recipeID, track, isRecraft)
+      else 
+        if not isRecraft then 
+          if C_TradeSkillUI.IsRecipeProfessionLearned(recipeID) then 
+            C_TradeSkillUI.OpenRecipe(recipeID)
+          else
+            Professions.InspectRecipe(recipeID)
+          end
+        end
+      end
+    else 
       if contextMenuPattern and recipeID then
         ContextMenu_Show(contextMenuPattern, self, recipeID, isRecraft)
       end
