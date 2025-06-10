@@ -43,7 +43,7 @@ class "GridControls" (function(_ENV)
     self.ColumnWidths[columnIndex] = width
   end
 
-  __Abstract__ { Number * 0}
+  __Arguments__ { Number * 0}
   function SetColumnWidths(self, ...)
     for i = 1, select("#", ...) do 
       local value = select(i, ...)
@@ -78,7 +78,7 @@ class "GridControls" (function(_ENV)
 
   __Arguments__ { Number, Number/nil}
   function SetRowMargin(self, rowIndex, margin)
-    sefl.RowMargins(self, rowIndex, margin)
+    self.RowMargins(self, rowIndex, margin)
   end
 
   __Arguments__ { Number/nil }

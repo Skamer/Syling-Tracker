@@ -11,6 +11,7 @@ Syling                "SylingTracker_Options.Bootstrap"                      ""
 export {
   L                             = _Locale,
   IterateTrackers               = SylingTracker.API.IterateTrackers,
+  GetTrackerSetting             = SylingTracker.API.GetTrackerSetting,
   GetAddonVersion               = SylingTracker.Utils.GetAddonVersion,
 }
 
@@ -115,9 +116,9 @@ function CreateTrackerEntries(self, panel)
     end
   }, "trackers")
 
-  for trackerID in IterateTrackers(false) do
+  for trackerID, tracker in IterateTrackers(false) do
     panel:AddCategoryEntry({
-      text = trackerID:gsub("^%l", string.upper),
+      text = GetTrackerSetting(trackerID, "name"),
       id = trackerID,
       value = function()
         local settings = SettingDefinitions.Tracker.Acquire()

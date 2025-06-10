@@ -321,6 +321,10 @@ class "Tracker" (function(_ENV)
     type = String
   }
 
+  property "Name" {
+    type = String
+  }
+
   property "Enabled" {
     type      = Boolean,
     default   = true,
@@ -505,11 +509,20 @@ function private__NewTracker(id)
   return tracker
 end
 
+__Arguments__ { String }
+function BuildTrackerIdByName(trackerName)
+  local id = trackerName:lower()
+  id = id:gsub("%s+", "-")
+
+  return id
+end
+
 --- Create an tracker. 
 --- 
 --- @param id the tracker id to register (note: the id 'main' is reserved)
 __Arguments__ { String }
 function NewTracker(id)
+
   -- the 'main' id is reserved for the main tracker. 
   if id == "main" then 
     return 
@@ -1143,6 +1156,7 @@ API.GetTrackerSettingWithDefault = GetTrackerSettingWithDefault
 API.SetTrackerSetting = SetTrackerSetting
 API.FromTrackerSetting = FromTrackerSetting
 API.GetCurrentTargetTracker = GetCurrentTargetTracker
+API.BuildTrackerIdByName = BuildTrackerIdByName
 
 __UIElement__()
 __ChildProperty__(Tracker, "Mover")
@@ -1160,6 +1174,7 @@ end)
 -------------------------------------------------------------------------------
 --                              UI Settings                                  --
 -------------------------------------------------------------------------------
+RegisterTrackerSetting({ id = "name", defaultHandler = function(trackerID) return trackerID end})
 RegisterTrackerSetting({ id = "enabled", default = true, handler = private__SetEnabledTracker })
 RegisterTrackerSetting({ id = "locked", default = false })
 RegisterTrackerSetting({ id = "scale", default = 1})
@@ -1403,6 +1418,7 @@ Style.UpdateSkin("Default", {
   },
 
   [Tracker] = {
+    name                              = FromTrackerSetting("name"),
     visible                           = FromVisible(),
     locked                            = FromTrackerSetting("locked"),
     scale                             = FromTrackerSetting("scale"),

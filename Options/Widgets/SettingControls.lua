@@ -268,6 +268,9 @@ end)
 __Widget__()
 class "SettingsEditBox" (function(_ENV)
   inherit "Frame"
+
+  __Bubbling__ { EditBox = "OnTextChanged"}
+  event "OnTextChanged"
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------

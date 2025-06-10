@@ -18,7 +18,8 @@ export {
   SetContentTracked             = SylingTracker.API.SetContentTracked,
   GetTrackerSetting             = SylingTracker.API.GetTrackerSetting,
   GetTrackerSettingWithDefault  = SylingTracker.API.GetTrackerSettingWithDefault,
-  SetTrackerSetting             = SylingTracker.API.SetTrackerSetting
+  SetTrackerSetting             = SylingTracker.API.SetTrackerSetting,
+  BuildTrackerIdByName          = SylingTracker.API.BuildTrackerIdByName
 }
 
 __Widget__()
@@ -35,18 +36,36 @@ class "SettingDefinitions.CreateTracker" (function(_ENV)
     wipe(self.ContentsTracked)
 
     ---------------------------------------------------------------------------
-    --- Tracker Name 
+    --- Tracker Name & Id
     ---------------------------------------------------------------------------
     local trackerNameEditBox = Widgets.SettingsEditBox.Acquire(false, self)
     trackerNameEditBox:SetID(10)
     trackerNameEditBox:SetLabel(L.TRACKER_NAME)
     trackerNameEditBox:SetInstructions(L.TRACKER_ENTER_NAME)
     self.SettingControls.trackerNameEditBox = trackerNameEditBox
+    
+    local trackerIdEditBox = Widgets.SettingsEditBox.Acquire(false, self)
+    trackerIdEditBox:SetID(20)
+    trackerIdEditBox:SetLabel("Tracker ID")
+    trackerIdEditBox:GetChild("EditBox"):Disable()
+    self.SettingControls.trackerIdEditBox = trackerIdEditBox
+    
+    local function trackerNameHandler(editBox, userInput)
+      if not userInput then 
+        return 
+      end 
+
+      local id = editBox:GetValue()
+      id = BuildTrackerIdByName(id)
+
+      trackerIdEditBox:SetInstructions(id)
+    end
+    trackerNameEditBox:SetUserHandler("OnTextChanged", trackerNameHandler)
     ---------------------------------------------------------------------------
     --- Contents Tracked Section Header 
     ---------------------------------------------------------------------------
     local contentsTrackedSectionHeader = Widgets.SettingsSectionHeader.Acquire(false, self)
-    contentsTrackedSectionHeader:SetID(20)
+    contentsTrackedSectionHeader:SetID(30)
     contentsTrackedSectionHeader:SetTitle(L.CONTENTS_TRACKED)
     self.SettingControls.contentsTrackedSectionHeader = contentsTrackedSectionHeader
     ---------------------------------------------------------------------------
@@ -58,30 +77,52 @@ class "SettingDefinitions.CreateTracker" (function(_ENV)
       self.ContentsTracked[contentID] = isTracked
     end
 
+    local contentsColumnCount = 2
+    local gridContentsTracked = Widgets.GridControls.Acquire(false, self)
+    gridContentsTracked:SetID(40)
+    gridContentsTracked:SetRowHeight(35)
+    gridContentsTracked:SetColumnCount(contentsColumnCount)
+    gridContentsTracked:SetColumnWidths(350, 350)
+    gridContentsTracked:SetDefaultColumnMargin(20)
+
+    local contentCount = 0
     for index, content in List(IterateContents()):Sort("x,y=>x.Name<y.Name"):GetIterator() do
-      local contentCheckBox = Widgets.SettingsCheckBox.Acquire(false, self)
-      contentCheckBox:SetID(30 * index)
+      local contentCheckBox = Widgets.SettingsCheckBox.Acquire(false, gridContentsTracked)
+      local column = index % contentsColumnCount == 0 and contentsColumnCount or index % contentsColumnCount
+      local row = ceil(index / contentsColumnCount)
+
+      contentCheckBox:SetID(index)
       contentCheckBox:SetLabel(content.FormattedName)
       contentCheckBox:SetChecked(false)
       contentCheckBox:SetUserData("contentID", content.id)
       contentCheckBox:SetUserHandler("OnCheckBoxClick", OnContentCheckBoxClick)
-
+      contentCheckBox:Show()
+      gridContentsTracked:SetCellControl(row, column, contentCheckBox, 1, 1)
       self.SettingControls[contentCheckBox] = contentCheckBox
+      
+      contentCount = contentCount + 1
     end
-      ---------------------------------------------------------------------------
+
+    gridContentsTracked:SetRowCount(ceil(contentCount / contentsColumnCount))
+    gridContentsTracked:Refresh()
+    self.SettingControls.gridContentsTracked = gridContentsTracked
+    ---------------------------------------------------------------------------
     --- Create Button
     ---------------------------------------------------------------------------
     local function OnCreateButtonClick(button)
       local trackerName = trackerNameEditBox:GetValue()
-      if trackerName and trackerName ~= "" then 
-        local tracker = NewTracker(trackerName)
+      local trackerID = BuildTrackerIdByName(trackerName)
+      if trackerID and trackerID ~= "" then 
+        local tracker = NewTracker(trackerID)
+
+        SetTrackerSetting(trackerID, "name", trackerName)
         --- We put TrackContentType in a thread for avoiding small freeze for low end 
         --- computer users if there many content tracked, and these ones need to 
         --- create lof of frame.
         Scorpio.Continue(function()
           for contentID, isTracked in pairs(self.ContentsTracked) do
             -- SetContentTracked(tracker, contentID, isTracked)
-            SetTrackerSetting(trackerName, "contentsTracked", isTracked, nil, contentID)
+            SetTrackerSetting(trackerID, "contentsTracked", isTracked, nil, contentID)
             Scorpio.Next()
           end
         end)
@@ -392,18 +433,35 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     ---------------------------------------------------------------------------
     --- Contents Controls 
     ---------------------------------------------------------------------------
+    local contentsColumnCount = 2
+    local gridContentsTracked = Widgets.GridControls.Acquire(false, self)
+    gridContentsTracked:SetID(20)
+    gridContentsTracked:SetRowHeight(35)
+    gridContentsTracked:SetColumnCount(contentsColumnCount)
+    gridContentsTracked:SetColumnWidths(350, 350)
+    gridContentsTracked:SetDefaultColumnMargin(20)
+
+    local contentCount = 0
     for index, content in List(IterateContents()):Sort("x,y=>x.Name<y.Name"):GetIterator() do
       local contentID = content.id
       local contentTracked = GetTrackerSetting(self.TrackerID, "contentsTracked", contentID)
-
-      local contentCheckBox = Widgets.SettingsCheckBox.Acquire(false, self)
-      contentCheckBox:SetID(20 + index)
+      
+      local contentCheckBox = Widgets.SettingsCheckBox.Acquire(false, gridContentsTracked)
+      local column = index % contentsColumnCount == 0 and contentsColumnCount or index % contentsColumnCount
+      local row = ceil(index / contentsColumnCount)
+      contentCheckBox:SetID(index)
       contentCheckBox:SetLabel(content.FormattedName)
       contentCheckBox:BindTrackerSetting(trackerID, "contentsTracked", contentID)
-      Style[contentCheckBox].MarginLeft = 20
-
+      contentCheckBox:Show()
+      gridContentsTracked:SetCellControl(row, column, contentCheckBox, 1, 1) = 20
       self.ContentTabControls[contentCheckBox] = contentCheckBox
+
+      contentCount = contentCount + 1
     end
+
+    gridContentsTracked:SetRowCount(ceil(contentCount / contentsColumnCount))
+    gridContentsTracked:Refresh()
+    self.ContentTabControls.gridContentsTracked = gridContentsTracked
   end
   -----------------------------------------------------------------------------
   --                 [Contents Tracked] Tab Release                          --
