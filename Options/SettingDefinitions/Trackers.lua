@@ -453,7 +453,7 @@ class "SettingDefinitions.Tracker" (function(_ENV)
       contentCheckBox:SetLabel(content.FormattedName)
       contentCheckBox:BindTrackerSetting(trackerID, "contentsTracked", contentID)
       contentCheckBox:Show()
-      gridContentsTracked:SetCellControl(row, column, contentCheckBox, 1, 1) = 20
+      gridContentsTracked:SetCellControl(row, column, contentCheckBox, 1, 1)
       self.ContentTabControls[contentCheckBox] = contentCheckBox
 
       contentCount = contentCount + 1

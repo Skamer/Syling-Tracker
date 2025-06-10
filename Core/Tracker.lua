@@ -1615,3 +1615,25 @@ function SylingTracker_RESET_POSITION_TRACKER(trackerID)
   SetTrackerSetting(trackerID, "position")
 end
 
+__SystemEvent__()
+function SylingTracker_DATABASE_APPLY_MIGRATION(version)
+  if version == 2 then
+
+    local trackerIDs = {}
+    local trackers = SavedVariables.Path("list").GetValue("trackers")
+    if trackers then 
+      for k, v in pairs(trackers) do
+        tinsert(trackerIDs, k)
+      end
+    end
+
+    for _, trackerID in ipairs(trackerIDs) do
+      local newTrackerID = BuildTrackerIdByName(trackerID)
+
+      SavedVariables.Path("list", "trackers").Rename(trackerID, newTrackerID)
+      SavedVariables.All().Path("trackers").Rename(trackerID, newTrackerID)
+
+      SetTrackerSetting(newTrackerID, "name", trackerID)
+    end
+  end
+end

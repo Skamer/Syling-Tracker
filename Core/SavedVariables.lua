@@ -477,6 +477,10 @@ class "SavedVariables" (function(_ENV)
   --- @See also Path, SetDefaultPath and SetBasePath for changing the path
   __Arguments__ { String, String}
   __Static__() function Rename(fromIndex, toIndex)
+    if fromIndex == toIndex then 
+      return 
+    end
+    
     --- We call it in case where 'Path' has been called, and SetDefaultPath or 
     --- SetBasePath has been used. 
     --- It does nothing if "Path" or "AbsPath" has been used for this current operation.

@@ -51,9 +51,11 @@ if IsRetail() then
 end
 
 function OnLoad(self)
-  _DB:SetDefault{ dbVersion = 2 }
+  local lastestDBVersion = 3
+  
+  _DB:SetDefault{ dbVersion = lastestDBVersion }
   _DB:SetDefault{ minimap = { hide = false }}
-
+  
   -- Register the settings 
   RegisterSetting("showBlizzardObjectiveTracker", false, function(show) BLIZZARD_TRACKER_VISIBLITY_CHANGED(show) end)
   RegisterSetting("showMinimapIcon", true, function(show) 
@@ -70,6 +72,11 @@ function OnLoad(self)
   self:SetupMinimapButton()
 
   -- Apply the migrations
+  local currentDBVersion = _DB.dbVersion
+  for version = currentDBVersion, lastestDBVersion - 1 do 
+    FireSystemEvent("SylingTracker_DATABASE_APPLY_MIGRATION", version)
+  end
+  _DB.dbVersion = lastestDBVersion
 
   -- Fire an event for saying the DATABASE is fully loaded and ready to be fetched
   FireSystemEvent("SylingTracker_DATABASE_LOADED")
