@@ -1,4 +1,16 @@
-# 2.8.10
+# [2.9.0](https://github.com/Skamer/Syling-Tracker/discussions/148#discussioncomment-13431932)
+
+- Changed how tracker IDs work ([more details here](https://github.com/Skamer/Syling-Tracker/discussions/148#discussioncomment-13431932)).
+- All slash commands are now case insensitive.
+- The **"Content Tracked"** section in the tracker options is now displayed in two columns.
+
+###### NEW
+
+- Added a new **"Macros"** tab in the tracker options to display the list of macros.
+
+---
+
+## 2.8.10
 
 ###### FIXES
 
