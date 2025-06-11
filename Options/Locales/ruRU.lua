@@ -13,6 +13,18 @@ local L = _Locale("ruRU")
 
 if not L then return end
 
+-------------------------------------------------------------------------------
+-- The below tokens are waiting for translation
+-------------------------------------------------------------------------------
+
+L.DISABLE = "Disable"
+L.MACROS = "Macros"
+L.RESET_POSITION = "Reset position"
+L.TOGGLE = "Toggle"
+L.TRACKER_ID = "Tracker ID"
+L.UNLOCK = "Unlock"
+
+-------------------------------------------------------------------------------
 
 L.ACHIEVEMENT = "Достижение"
 L.ACHIEVEMENTS = "Достижения"

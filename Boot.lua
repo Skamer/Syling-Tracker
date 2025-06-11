@@ -168,6 +168,8 @@ end
 --- `/slt enable tracker second` enable only the tracker with for id: second
 __SlashCmd__ "slt" "enable"
 function EnableElementCommand(args)
+  args = args:lower()
+
   local arg1, arg2 = strsplit(" ", args)
   if arg1 == "" or arg1 == "all" then 
     _M:FireSystemEvent("SylingTracker_ENABLE_TRACKERS")
@@ -188,6 +190,8 @@ end
 --- `/slt disable tracker second` disable only the tracker with for id: second 
 __SlashCmd__ "slt" "disable"
 function DisableElementCommand(args)
+  args = args:lower()
+
   local arg1, arg2 = strsplit(" ", args)
   if arg1 == "" or arg1 == "all" then 
     _M:FireSystemEvent("SylingTracker_DISABLE_TRACKERS")
@@ -209,7 +213,7 @@ local function GetParsedEffectiveEnabledTracker(unparsedTrackerID)
     return enabled
   end
 
-  local invert, trackerID = unparsedTrackerID:match("(!?)(%a+)")
+  local invert, trackerID = unparsedTrackerID:match("(!?)(.+)")
 
   if invert == "" then 
     invert = false 
@@ -241,6 +245,8 @@ end
 __SlashCmd__ "slt" "toggle"
 __SlashCmd__ "slt" "tenable"
 function ToggleEnableElementCommand(args)
+  args = args:lower()
+
   local arg1, arg2, arg3 = strsplit(" ", args)
   if arg1 == "" or arg1 == "all" then
     local enabled = GetParsedEffectiveEnabledTracker(arg2)
@@ -274,6 +280,7 @@ function ToggleEnableElementCommand(args)
     end    
   elseif arg1 == "tracker" then
     local enabled = GetParsedEffectiveEnabledTracker(arg3 or arg2)
+
     if enabled then 
        _M:FireSystemEvent("SylingTracker_DISABLE_TRACKER", arg2)
     else 
@@ -290,6 +297,8 @@ end
 --- `/slt show tracker second` show only the tracker with for id: second 
 __SlashCmd__ "slt" "show"
 function ShowElementCommand(args)
+  args = args:lower()
+
   local arg1, arg2 = strsplit(" ", args)
   if arg1 == "" or arg1 == "all" then 
     _M:FireSystemEvent("SylingTracker_SHOW_TRACKERS")
@@ -307,6 +316,8 @@ end
 --- `/slt tshow tracker second` toggle show only the tracker with for id: second
 __SlashCmd__ "slt" "tshow"
 function ToggleShowElementCommand(args)
+  args = args:lower()
+
   local arg1, arg2 = strsplit(" ", args)
   if arg1 == "" or arg1 == "all" then 
     -- TODO
@@ -325,6 +336,8 @@ end
 --- `/slt hide tracker second` hide only the tracker with for id: second 
 __SlashCmd__ "slt" "hide"
 function HideElementCommand(args)
+  args = args:lower()
+
   local arg1, arg2 = strsplit(" ", args)
   if arg1 == "" or arg1 == "all" then 
     _M:FireSystemEvent("SylingTracker_HIDE_TRACKERS")
@@ -346,6 +359,8 @@ end
 --- `/slt lock tracker second` lock only the tracker with for id: second 
 __SlashCmd__ "slt" "lock"
 function LockElementCommand(args)
+  args = args:lower()
+
   local arg1, arg2 = strsplit(" ", args)
   if arg1 == "" or arg1 == "all" then 
     _M:FireSystemEvent("SylingTracker_LOCK_TRACKERS")
@@ -367,6 +382,8 @@ end
 --- `/slt unlock tracker second` unlock only the tracker with for id: second 
 __SlashCmd__ "slt" "unlock"
 function UnlockElementCommand(args)
+  args = args:lower()
+
   local arg1, arg2 = strsplit(" ", args)
   if arg1 == "" or arg1 == "all" then 
     _M:FireSystemEvent("SylingTracker_UNLOCK_TRACKERS")
@@ -384,6 +401,8 @@ end
 --- `/slt resetpos tracker second` reset only the tracker position with for id: second 
 __SlashCmd__ "slt" "resetpos"
 function ResetPosElementCommand(args)
+  args = args:lower()
+
   local arg1, arg2 = strsplit(" ", args)
   if arg1 == "" or arg1 == "all" then 
     -- TODO

@@ -46,7 +46,7 @@ class "SettingDefinitions.CreateTracker" (function(_ENV)
     
     local trackerIdEditBox = Widgets.SettingsEditBox.Acquire(false, self)
     trackerIdEditBox:SetID(20)
-    trackerIdEditBox:SetLabel("Tracker ID")
+    trackerIdEditBox:SetLabel(L.TRACKER_ID)
     trackerIdEditBox:GetChild("EditBox"):Disable()
     self.SettingControls.trackerIdEditBox = trackerIdEditBox
     
@@ -618,6 +618,102 @@ class "SettingDefinitions.Tracker" (function(_ENV)
       self.VisibilityRulesControls[index] = nil
     end
   end
+
+  function BuildMacrosTab(self)
+    local function OnFocusGain(editBox)
+      editBox:HighlightText()
+    end
+
+    local function OnFocusLost(editBox)
+      editBox:ClearHighlightText()
+    end
+
+    local enableMacroHeader = Widgets.SettingsSectionHeader.Acquire(false, self)
+    enableMacroHeader:SetID(10)
+    enableMacroHeader:SetTitle(Color.GRAY .. L.ENABLE)
+    self.MacrosControls.enableMacroHeader = enableMacroHeader
+
+    local enableMacroEditBox = Widgets.EditBox.Acquire(false, self)
+    enableMacroEditBox:SetID(20)
+    enableMacroEditBox:SetText("/slt enable tracker " .. self.TrackerID)
+    enableMacroEditBox:SetUserHandler("OnEditFocusGained", OnFocusGain)
+    enableMacroEditBox:SetUserHandler("OnEditFocusLost", OnFocusLost)
+    Style[enableMacroEditBox].marginLeft = 20
+    self.MacrosControls.enableMacroEditBox = enableMacroEditBox
+
+
+    local disableMacroHeader = Widgets.SettingsSectionHeader.Acquire(false, self)
+    disableMacroHeader:SetID(30)
+    disableMacroHeader:SetTitle(Color.GRAY .. L.DISABLE)
+    self.MacrosControls.disableMacroHeader = disableMacroHeader
+
+    local disableMacroEditBox = Widgets.EditBox.Acquire(false, self)
+    disableMacroEditBox:SetID(40)
+    disableMacroEditBox:SetText("/slt disable tracker " .. self.TrackerID)
+    disableMacroEditBox:SetUserHandler("OnEditFocusGained", OnFocusGain)
+    disableMacroEditBox:SetUserHandler("OnEditFocusLost", OnFocusLost)
+    Style[disableMacroEditBox].marginLeft = 20
+    self.MacrosControls.disableMacroEditBox = disableMacroEditBox
+
+    local toggleMacroHeader = Widgets.SettingsSectionHeader.Acquire(false, self)
+    toggleMacroHeader:SetID(50)
+    toggleMacroHeader:SetTitle(Color.GRAY .. L.TOGGLE)
+    self.MacrosControls.toggleMacroHeader = toggleMacroHeader
+
+    local toggleMacroEditBox = Widgets.EditBox.Acquire(false, self)
+    toggleMacroEditBox:SetID(60)
+    toggleMacroEditBox:SetText("/slt toggle tracker " .. self.TrackerID)
+    toggleMacroEditBox:SetUserHandler("OnEditFocusGained", OnFocusGain)
+    toggleMacroEditBox:SetUserHandler("OnEditFocusLost", OnFocusLost)
+    Style[toggleMacroEditBox].marginLeft = 20
+    self.MacrosControls.toggleMacroEditBox = toggleMacroEditBox
+
+    local lockMacroHeader = Widgets.SettingsSectionHeader.Acquire(false, self)
+    lockMacroHeader:SetID(70)
+    lockMacroHeader:SetTitle(Color.GRAY .. L.LOCK)
+    self.MacrosControls.lockMacroHeader = lockMacroHeader
+
+    local lockMacroEditBox = Widgets.EditBox.Acquire(false, self)
+    lockMacroEditBox:SetID(80)
+    lockMacroEditBox:SetText("/slt lock tracker " .. self.TrackerID)
+    lockMacroEditBox:SetUserHandler("OnEditFocusGained", OnFocusGain)
+    lockMacroEditBox:SetUserHandler("OnEditFocusLost", OnFocusLost)
+    Style[lockMacroEditBox].marginLeft = 20
+    self.MacrosControls.lockMacroEditBox = lockMacroEditBox
+
+    local unlockMacroHeader = Widgets.SettingsSectionHeader.Acquire(false, self)
+    unlockMacroHeader:SetID(90)
+    unlockMacroHeader:SetTitle(Color.GRAY .. L.UNLOCK)
+    self.MacrosControls.unlockMacroHeader = unlockMacroHeader
+
+    local unlockMacroEditBox = Widgets.EditBox.Acquire(false, self)
+    unlockMacroEditBox:SetID(100)
+    unlockMacroEditBox:SetText("/slt unlock tracker " .. self.TrackerID)
+    unlockMacroEditBox:SetUserHandler("OnEditFocusGained", OnFocusGain)
+    unlockMacroEditBox:SetUserHandler("OnEditFocusLost", OnFocusLost)
+    Style[unlockMacroEditBox].marginLeft = 20
+    self.MacrosControls.unlockMacroEditBox = unlockMacroEditBox
+
+    local resetPosMacroHeader = Widgets.SettingsSectionHeader.Acquire(false, self)
+    resetPosMacroHeader:SetID(110)
+    resetPosMacroHeader:SetTitle(Color.GRAY .. L.RESET_POSITION)
+    self.MacrosControls.resetPosMacroHeader = resetPosMacroHeader
+
+    local resetPosMacroEditBox = Widgets.EditBox.Acquire(false, self)
+    resetPosMacroEditBox:SetID(120)
+    resetPosMacroEditBox:SetText("/slt resetpos tracker " .. self.TrackerID)
+    resetPosMacroEditBox:SetUserHandler("OnEditFocusGained", OnFocusGain)
+    resetPosMacroEditBox:SetUserHandler("OnEditFocusLost", OnFocusLost)
+    Style[resetPosMacroEditBox].marginLeft = 20
+    self.MacrosControls.resetPosMacroEditBox = resetPosMacroEditBox
+  end
+
+  function ReleaseMacrosTab(self)
+    for index, control in pairs(self.MacrosControls) do 
+      control:Release()
+      self.MacrosControls[index] = nil
+    end
+  end
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
@@ -640,6 +736,12 @@ class "SettingDefinitions.Tracker" (function(_ENV)
       name = L.VISIBILITY_RULES,
       onAcquire = function() self:BuildVisibilityRulesTab() end,
       onRelease = function() self:ReleaseVisibilityRulesTab() end
+    })
+
+    tabControl:AddTabPage({
+      name = L.MACROS,
+      onAcquire = function() self:BuildMacrosTab() end,
+      onRelease = function() self:ReleaseMacrosTab() end,
     })
 
     tabControl:Refresh()
@@ -686,6 +788,11 @@ class "SettingDefinitions.Tracker" (function(_ENV)
   }
 
   property "VisibilityRulesControls" {
+    set = false,
+    default = function() return newtable(false, true) end
+  }
+
+  property "MacrosControls" {
     set = false,
     default = function() return newtable(false, true) end
   }
