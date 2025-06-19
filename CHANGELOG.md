@@ -1,4 +1,11 @@
-# [2.9.0](https://github.com/Skamer/Syling-Tracker/discussions/148#discussioncomment-13431932)
+# 2.9.1
+
+- Updated the toc version for 11.1.7.
+- Updated ruRU locales.
+
+---
+
+## [2.9.0](https://github.com/Skamer/Syling-Tracker/discussions/148#discussioncomment-13431932)
 
 - Changed how tracker IDs work ([more details here](https://github.com/Skamer/Syling-Tracker/discussions/148#discussioncomment-13431932)).
 - All slash commands are now case insensitive.
