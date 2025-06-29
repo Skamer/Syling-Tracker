@@ -29,12 +29,25 @@ WORLD_QUESTS_CACHE                  = {}
 WORLD_QUESTS_WITH_ITEMS             = {}
 
 __ActiveOnEvents__ "PLAYER_ENTERING_WORLD" "QUEST_ACCEPTED" "QUEST_REMOVED"
-function BecomeActiveOn(self)
+function BecomeActiveOn(self, event, ...)
+  if event == "QUEST_ACCEPTED" then
+    local questID = ...
+    return IsWorldQuest(questID)
+  elseif event == "QUEST_REMOVED" then 
+    for questID in pairs(WORLD_QUESTS_CACHE) do 
+      return true 
+    end
+
+    return false 
+  end
+
   return HasWorldQuests()
 end
 
 function OnActive(self)
-  self:LoadWorldQuests()
+  if self:IsActivateByEvent("PLAYER_ENTERING_WORLD") then 
+    self:LoadTasks()
+  end
 end
 
 function OnInactive(self)
@@ -144,6 +157,7 @@ end
 
 __SystemEvent__()
 function QUEST_ACCEPTED(questID)
+
   if not IsWorldQuest(questID) then 
     return 
   end

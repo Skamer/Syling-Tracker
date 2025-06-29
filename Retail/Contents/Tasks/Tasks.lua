@@ -16,6 +16,7 @@ export {
   ItemBar_AddItem                     = API.ItemBar_AddItem,
   ItemBar_RemoveItem                  = API.ItemBar_RemoveItem,
 
+  IsQuestBonusObjective               = QuestUtils_IsQuestBonusObjective,
   HasTasks                            = Utils.HasTasks,
   IsQuestComplete                     = C_QuestLog.IsComplete,
   IsQuestTask                         = C_QuestLog.IsQuestTask,
@@ -32,7 +33,18 @@ TASKS_CACHE = {}
 TASKS_WITH_ITEMS = {}
 
 __ActiveOnEvents__ "PLAYER_ENTERING_WORLD" "QUEST_ACCEPTED" "QUEST_REMOVED"
-function ActivateOn(self, event)
+function ActivateOn(self, event, ...)
+  if event == "QUEST_ACCEPTED" then 
+    local questID = ...
+    return IsQuestBonusObjective(questID)
+  elseif event == "QUEST_REMOVED" then 
+    for questID in pairs(TASKS_CACHE) do 
+      return true 
+    end
+
+    return false
+  end
+
   return HasTasks()
 end
 
@@ -136,6 +148,7 @@ end
 
 __SystemEvent__()
 function QUEST_ACCEPTED(questID)
+
   -- World Quests are considered as tasks so we need to filter them out
   if not IsQuestTask(questID) or IsWorldQuest(questID) then 
     return 
@@ -152,6 +165,7 @@ end
 
 __SystemEvent__()
 function QUEST_REMOVED(questID)
+
   if not TASKS_CACHE[questID] then 
     return 
   end

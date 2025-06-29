@@ -1,4 +1,12 @@
-# 2.9.1
+# 2.9.2
+
+###### FIXES
+
+- Fixed an issue where the World Quests and Bonus Tasks modules weren't enabled automatically when it should be. ([ticket #165](https://github.com/Skamer/Syling-Tracker/issues/165))
+
+---
+
+## 2.9.1
 
 - Updated the toc version for 11.1.7.
 - Updated ruRU locales.
