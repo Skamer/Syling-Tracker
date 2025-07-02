@@ -1,4 +1,4 @@
-## Interface: 110105, 11507, 40402
+## Interface: 110107, 11507, 40402, 50500
 ## Title: |cffff6a00Syling Tracker|r [|cff0094ffOptions|r]
 ## Notes-ruRU: |cffff6a00Syling Tracker|r [|cff0094ffПараметры|r]
 ## Version: @project-version@
