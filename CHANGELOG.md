@@ -1,4 +1,14 @@
-# 2.9.3
+# 2.9.4
+
+##### MoP Classic
+
+###### FIXES
+
+- Fixed errors caused by some quests having certain tags.
+
+---
+
+## 2.9.3
 
 ##### MoP Classic
 

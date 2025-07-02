@@ -413,7 +413,7 @@ end
 
 function FromQuestTagIconTexCoords()
   return FromUIProperty("QuestTagID"):Map(function(tagID)
-      if not tagID then 
+      if not tagID or not QUEST_TAG_TCOORDS[tagID] then
         return 
       end
 
@@ -504,7 +504,7 @@ Style.UpdateSkin("Default", {
         height                        = 24,
   
         Tag = {
-          visible                     = FromUIProperty("QuestTagID"):Map(function(tagID) return tagID and true or false end),
+          visible                     = FromUIProperty("QuestTagID"):Map(function(tagID) return (tagID and QUEST_TAG_TCOORDS[tagID]) and true or false end),
           file                        = [[Interface\QuestFrame\QuestTypeIcons]],
           texCoords                   = FromQuestTagIconTexCoords(),
           height                      = 18,
