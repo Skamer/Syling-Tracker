@@ -1,4 +1,14 @@
-# 2.9.2
+# 2.9.3
+
+##### MoP Classic
+
+###### FIXES
+
+- Fixed an issue where quests were not displayed when the game had no cache and it was the player's first login.
+
+---
+
+## 2.9.2
 
 ###### FIXES
 

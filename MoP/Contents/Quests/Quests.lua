@@ -67,13 +67,18 @@ function OnInactive(self)
   wipe(QUESTS_WITH_ITEMS)
 end
 
+__Async__()
 function LoadQuests(self)
+  -- IMPORTANT: When the game has no cache and it's the player's first login, GetNumQuestLogEntries returns 0,
+  -- even if we know there are quests. This is why we need to delay execution until it returns a value other than 0
+  local numEntries  = GetNumQuestLogEntries()
+  while numEntries == 0 do
+    Next() 
+    numEntries = GetNumQuestLogEntries()
+  end
+
   local currentHeader         = "Misc"
 
-  -- IMPORTANT: Use 'GetNumQuestLogEntries()' for getting the quest entries is prefered but for unknown reasons, the values returned 
-  -- are incorrect after loading and until a 'QUEST_LOG_UPDATE' event is triggered. 
-  --
-  -- This is the reason a while loop is used for fetching the quests data, iterating until the title is nil.
   local i = 1
   local title, level, questTag, isHeader, isCollapsed, isComplete, 
   frequency, questID, startEvent, displayQuestID, isOnMap, 
