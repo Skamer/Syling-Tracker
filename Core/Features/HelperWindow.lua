@@ -12,6 +12,12 @@ local DESCRIPTION_TEXT_FORMAT = _Locale.HELPER_WINDOW_HELP_TEXT
 local ACHIEVEMENT_TEXT        = _Locale.HELPER_WINDOW_ACHIEVEMENT
 local QUEST_TEXT              = _Locale.HELPER_WINDOW_QUEST
 local WOWHEAD_LINK_FORMAT     = _Locale.HELPER_WINDOW_WOWHEAD_LINK_FORMAT
+
+if IsVanilla() then 
+  WOWHEAD_LINK_FORMAT = _Locale.HELPER_WINDOW_CLASSIC_WOWHEAD_LINK_FORMAT
+elseif IsMoP() then 
+  WOWHEAD_LINK_FORMAT = _Locale.HELPER_WINDOW_MOP_WOWHEAD_LINK_FORMAT
+end
 -- ========================================================================= --
 __UIElement__()
 class "HelperWindow" (function(_ENV)

@@ -1,4 +1,14 @@
-# 2.9.4
+# 2.9.5
+
+##### Classic
+
+###### FIXES
+
+- Updated Wowhead links for Vanilla and Mists of Pandaria.
+
+---
+
+## 2.9.4
 
 ##### MoP Classic
 

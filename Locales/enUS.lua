@@ -34,6 +34,8 @@ L.HELPER_WINDOW_COPY_SHORTCUT = "Ctrl + C to copy"
 L.HELPER_WINDOW_HELP_TEXT = "Wowhead may help you to find your way for completing this %s" -- %s will be L.HELPER_WINDOW_ACHIEVEMENT or L.HELPER_WINDOW_QUEST
 L.HELPER_WINDOW_QUEST = "quest"
 L.HELPER_WINDOW_TITLE = "Need Help ?"
+L.HELPER_WINDOW_CLASSIC_WOWHEAD_LINK_FORMAT = "https://www.wowhead.com/classic/%s=%i"
+L.HELPER_WINDOW_MOP_WOWHEAD_LINK_FORMAT = "https://www.wowhead.com/mop-classic/%s=%i"
 L.HELPER_WINDOW_WOWHEAD_LINK_FORMAT = "https://www.wowhead.com/%s=%i"
 L.HORRIFIC_VISIONS = "Horrific Visions"
 L.ITEM_BAR_MOVER = "Item Bar"
