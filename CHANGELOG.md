@@ -1,4 +1,12 @@
-# 2.9.6
+# 2.9.7
+
+##### MoP Classic
+
+- Fixed an lua error triggered at login. ([ticket #168](https://github.com/Skamer/Syling-Tracker/issues/168))
+
+---
+
+## 2.9.6
 
 - Updated the method for hiding the Blizzard Objective Tracker.
 

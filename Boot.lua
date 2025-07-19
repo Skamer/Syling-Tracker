@@ -79,9 +79,9 @@ function BLIZZARD_TRACKER_VISIBLITY_CHANGED(isVisible)
   SHOW_BLIZZARD_OBJECTIVE_TRACKER = isVisible
 
   if isVisible then
-    ObjectiveTrackerFrame:Show()
+    BLIZZARD_OBJECTIVE_TRACKER:Show()
   else
-    ObjectiveTrackerFrame:Hide()
+    BLIZZARD_OBJECTIVE_TRACKER:Hide()
   end
 end
 
