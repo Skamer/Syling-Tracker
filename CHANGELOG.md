@@ -1,4 +1,10 @@
-# 2.9.5
+# 2.9.6
+
+- Updated the method for hiding the Blizzard Objective Tracker.
+
+---
+
+## 2.9.5
 
 ##### Classic
 

@@ -18,9 +18,10 @@ export {
   GetItemBarSettingWithDefault        = API.GetItemBarSettingWithDefault
 }
 
-SLT_LOGO           = [[Interface\AddOns\SylingTracker\Media\logo]]
+local SLT_LOGO           = [[Interface\AddOns\SylingTracker\Media\logo]]
 
-BLIZZARD_OBJECTIVE_TRACKER = nil
+local BLIZZARD_OBJECTIVE_TRACKER = nil
+local SHOW_BLIZZARD_OBJECTIVE_TRACKER = false
 if IsVanilla() then 
   BLIZZARD_OBJECTIVE_TRACKER = QuestWatchFrame
 elseif IsCataclysm() or IsMoP() then 
@@ -29,25 +30,12 @@ else
   BLIZZARD_OBJECTIVE_TRACKER = ObjectiveTrackerFrame
 end
 
--- ObjectiveTrackerFrame
--- QuestWatchFrame
-
--- Since the 11.0, the ObjectiveTrackerFrame is reshown on some events.
--- The goal is to rehide when it's reshown, in addition to keep a secure environment for avoiding to taint it. 
--- 
--- We create our secure handler as child of blizzard objective tracker frame, and we wrap its "OnShow" script, indirectly saying when the blizzard objective tracker
--- is reshown.
-SECURE_HANDLER_FRAME = CreateFrame("Frame", "SylingTracker_SecureHandlerFrame", IsRetail() and BLIZZARD_OBJECTIVE_TRACKER or nil, "SecureHandlerBaseTemplate")
-SECURE_HANDLER_FRAME:SetFrameRef("ObjectiveTrackerFrame", BLIZZARD_OBJECTIVE_TRACKER)
-
 if IsRetail() then 
-  SECURE_HANDLER_FRAME:WrapScript(SECURE_HANDLER_FRAME, "OnShow", [[
-    local hidden = self:GetAttribute("hidden")
-
-    if hidden then 
-      self:GetParent():Hide()
+  BLIZZARD_OBJECTIVE_TRACKER:HookScript("OnShow", function()
+    if not SHOW_BLIZZARD_OBJECTIVE_TRACKER then 
+      BLIZZARD_OBJECTIVE_TRACKER:Hide()
     end
-  ]])
+  end)
 end
 
 function OnLoad(self)
@@ -87,34 +75,13 @@ function OnEnable(self)
 end
 
 __SystemEvent__()
-__AsyncSingle__(true)
 function BLIZZARD_TRACKER_VISIBLITY_CHANGED(isVisible)
-  -- With __AsyncSingle__ only the last call will be handled.
-  -- We are waiting the player leaves the combat as we aren't allowed to update 
-  -- the visibility of blizzard objective tracker in combat. 
-  --
-  -- NOTE: In case where the player reload the ui in combat, Blizzard gives us a 
-  -- short time before lockdown the protected frames, we could show or hide the 
-  -- blizzard objective tracker directly. 
-  NoCombat()
+  SHOW_BLIZZARD_OBJECTIVE_TRACKER = isVisible
 
-  -- We use the secure snippet for avoiding to taint the entire blizzard objective tracker
   if isVisible then
-    SECURE_HANDLER_FRAME:Execute([[
-      self:SetAttribute("hidden", nil)
-
-      ObjectiveTrackerFrame = self:GetFrameRef("ObjectiveTrackerFrame")
-      ObjectiveTrackerFrame:Show()
-      ObjectiveTrackerFrame:SetAlpha(1)
-    ]])
+    ObjectiveTrackerFrame:Show()
   else
-    SECURE_HANDLER_FRAME:Execute([[
-      ObjectiveTrackerFrame = self:GetFrameRef("ObjectiveTrackerFrame")
-      ObjectiveTrackerFrame:Hide()
-      ObjectiveTrackerFrame:SetAlpha(0)
-
-      self:SetAttribute("hidden", true)
-    ]])
+    ObjectiveTrackerFrame:Hide()
   end
 end
 
