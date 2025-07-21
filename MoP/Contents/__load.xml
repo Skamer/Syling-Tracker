@@ -12,6 +12,10 @@
   <Script file="Achievements\AchievementView.lua"/>
   <Script file="Achievements\AchievementsContentView.lua"/>
   <Script file="Achievements\Achievements.lua"/>
+  <!-- Scenario -->
+  <Script file="Scenario\ScenarioData.lua" />
+  <Script file="Scenario\ScenarioContentView.lua" />
+  <Script file="Scenario\Scenario.lua" />
   <!-- Quests -->
   <Script file="Quests\QuestsData.lua" />
   <Script file="Quests\QuestView.lua" />

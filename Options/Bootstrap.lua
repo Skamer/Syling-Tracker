@@ -58,8 +58,12 @@ __Async__() function SylingTracker_OPEN_OPTIONS()
       panel:AddCategoryEntry({ text = L.TASKS, value = SettingDefinitions.Tasks}, "contents")
       -- panel:AddCategoryEntry({ text = "World Quests"}, "contents")
       -- panel:AddCategoryEntry({ text = "Bonus objectives"}, "contents")
+    end
+
+    if not IsVanilla() then
       panel:AddCategoryEntry({ text = L.SCENARIO, value = SettingDefinitions.Scenario}, "contents")
     end
+
     -- panel:AddCategoryEntry({ text = Color.GRAY .. L.KEYSTONE .. " (NYI)"}, "contents")
 
     if not IsVanilla() then 

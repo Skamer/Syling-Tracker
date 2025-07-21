@@ -41,6 +41,20 @@ RegisterContent({
   statusFunc = function(data) return (data and data.achievements) and true or false end
 })
 -------------------------------------------------------------------------------
+--                              Scenario                                     --
+-------------------------------------------------------------------------------
+RegisterContent({
+  id = "scenario",
+  name = _Locale.SCENARIO,
+  formattedName = CreateAtlasMarkup("ScenariosIcon", 16, 16) .. " " .. _Locale.SCENARIO,
+  description = "SCENARIO_PH_DESC",
+  icon = { atlas = AtlasType("ScenariosIcon") },
+  order = 20,
+  viewClass = ScenarioContentView,
+  data = GetObservableContent("scenario"),
+  statusFunc = function(data)return (data and data.scenario) and true or false end
+})
+-------------------------------------------------------------------------------
 --                             Quests                                        --
 -------------------------------------------------------------------------------
 RegisterContent({
