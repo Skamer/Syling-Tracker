@@ -1,4 +1,12 @@
-# 2.9.7
+# 2.9.8
+
+##### MoP Classic
+
+- Added initial support for scenario.
+
+---
+
+## 2.9.7
 
 ##### MoP Classic
 
