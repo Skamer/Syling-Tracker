@@ -1,4 +1,10 @@
-# 2.9.8
+# 2.9.9
+
+- Updated the toc version for 11.2.0
+
+---
+
+## 2.9.8
 
 ##### MoP Classic
 
