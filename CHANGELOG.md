@@ -1,4 +1,12 @@
-# 2.9.9
+# 2.9.10
+
+###### FIXES
+
+- Fixed an error triggered when a quest reward had no icon. It now falls back to question mark icon. ([ticket #172](https://github.com/Skamer/Syling-Tracker/issues/172))
+
+---
+
+## 2.9.9
 
 - Updated the toc version for 11.2.0
 

@@ -106,7 +106,7 @@ function CreateQuestHonorRewardMarkup(honor)
 end
 
 function CreateQuestSkillPointRewardMarkup(skillIcon, skillName, skillPoints)
-  return CreateTextureMarkup(skillIcon, 64, 64, 16, 16, 0.1, 0.9, 0.1, 0.9) .. " " .. format(BONUS_SKILLPOINTS_TOOLTIP, skillPoints, skillName)
+  return CreateTextureMarkup(skillIcon or QUESTION_MARK_ICON, 64, 64, 16, 16, 0.1, 0.9, 0.1, 0.9) .. " " .. format(BONUS_SKILLPOINTS_TOOLTIP, skillPoints, skillName)
 end
 
 local MAJOR_FACTION_REPUTATION_REWARD_ICON_FORMAT = [[Interface\Icons\UI_MajorFaction_%s]]
@@ -120,6 +120,8 @@ function CreateQuestMajorFactionRepRewardMarkup(factionID, amount)
 end
 
 function CreateQuestCurrencyRewardMarkup(texture, name, amount)
+  texture = texture or QUESTION_MARK_ICON
+
   if amount > 1 then 
     return CreateTextureMarkup(texture, 64, 64, 16, 16, 0.1, 0.9, 0.1, 0.9) .. " " .. name .. " x " .. amount
   else 
@@ -128,6 +130,8 @@ function CreateQuestCurrencyRewardMarkup(texture, name, amount)
 end
 
 function CreateQuestChoiceRewardMarkup(index, texture, name, amount)
+  texture = texture or QUESTION_MARK_ICON
+
   local indexAtlas = "services-number-"..index
   local markup = CreateAtlasMarkup(indexAtlas, 20, 22) .. CreateTextureMarkup(texture, 64, 64, 16, 16, 0.1, 0.9, 0.1, 0.9) .. " " .. name
 
