@@ -224,6 +224,9 @@ function AddQuestRewardsToTooltip(tooltip, questID)
 
     for i = 1, numQuestRewards do 
       local name, texture, numItems, quality, isUsable, itemID, itemLevel, questRewardContextFlags = GetQuestLogRewardInfo(i)
+      texture = texture or QUESTION_MARK_ICON
+      name = name or "Unknown"
+
       local color = ITEM_QUALITY_COLORS[quality]
       tooltip:AddLine(rewardItemPrefix .. CreateQuestCurrencyRewardMarkup(texture, name, numItems), color.r, color.g, color.b)
     end
