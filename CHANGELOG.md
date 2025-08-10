@@ -1,4 +1,12 @@
-# 2.9.10
+# 2.9.11
+
+###### FIXES
+
+- Fixed an error relative to quest reward tooltip. ([ticket #172](https://github.com/Skamer/Syling-Tracker/issues/172))
+
+---
+
+## 2.9.10
 
 ###### FIXES
 
