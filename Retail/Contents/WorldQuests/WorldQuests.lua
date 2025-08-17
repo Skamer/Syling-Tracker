@@ -46,7 +46,7 @@ end
 
 function OnActive(self)
   if self:IsActivateByEvent("PLAYER_ENTERING_WORLD") then 
-    self:LoadTasks()
+    self:LoadWorldQuests()
   end
 end
 

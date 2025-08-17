@@ -1,4 +1,12 @@
-# 2.9.12
+# 2.9.13
+
+###### FIXES
+
+- Fixed an error when loading in a world quest zone. ([ticket #178](https://github.com/Skamer/Syling-Tracker/issues/178))
+
+---
+
+## 2.9.12
 
 - Added koKR locales.
 
