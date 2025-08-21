@@ -25,9 +25,12 @@ _G.SylingTracker = {
 -------------------------------------------------------------------------------
 -- Version utils                                                             --
 -------------------------------------------------------------------------------
-ADDON_VERSION     = GetAddOnMetadata("SylingTracker", "Version")
-SCORPIO_VERSION   = tonumber(GetAddOnMetadata("Scorpio", "Version"):match("%d+$"))
-WOW_TOC_VERSION   = select(4, GetBuildInfo())
+local ADDON_VERSION     = GetAddOnMetadata("SylingTracker", "Version")
+local SCORPIO_VERSION   = tonumber(GetAddOnMetadata("Scorpio", "Version"):match("%d+$"))
+local WOW_TOC_VERSION   = select(4, GetBuildInfo())
+
+local STARTED_TIME = 0
+local STARTED_TIME_PLAYED = 0
 
 __AutoCache__()
 function GetAddonVersion() 
@@ -59,19 +62,40 @@ function IsVanilla()
   return WOW_TOC_VERSION >= 10000 and WOW_TOC_VERSION < 20000
 end
 
+function GetTimePlayed()
+  if STARTED_TIME_PLAYED == 0 then 
+    return 0
+  end
+  
+  return STARTED_TIME_PLAYED + (time() - STARTED_TIME)
+end
+
 -- Export as Utils
 Utils.GetAddonVersion     = GetAddonVersion
 Utils.GetScorpioVersion   = GetScorpioVersion
+Utils.GetTimePlayed       = GetTimePlayed
 Utils.IsRetail            = IsRetail
 Utils.IsMoP               = IsMoP 
 Utils.IsCataclysm         = IsCataclysm
 Utils.IsVanilla           = IsVanilla
 
 function OnLoad(self)
+  self:InitTimePLayed()
+
   _DB = SVManager("SylingTrackerDB")
 
   _DB:SetDefault({ dbVersion = 2 })
   _DB:SetDefault{ minimap = { hide = false }}
+end
+
+__Async__()
+function InitTimePLayed()
+  RequestTimePlayed()
+
+  local _, totalTimePlayed = Wait("TIME_PLAYED_MSG")
+
+  STARTED_TIME = time()
+  STARTED_TIME_PLAYED = totalTimePlayed
 end
 -------------------------------------------------------------------------------
 -- Setup the track data features                                             --

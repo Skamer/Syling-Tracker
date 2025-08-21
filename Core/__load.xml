@@ -13,6 +13,7 @@
 
   <Script file="Media.lua" />
   <Script file="SavedVariables.lua" />
+  <Script file="CacheManager.lua" />
   <Script file="Settings.lua" />
   <Script file="UISettings.lua" />
   <Script file="ObjectData.lua" />

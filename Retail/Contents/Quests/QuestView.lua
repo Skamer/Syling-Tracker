@@ -328,6 +328,7 @@ class "QuestView" (function(_ENV)
     end
 
     self.QuestID = data.questID
+    self.IsNew = data.isNew
     self.QuestName = data.name 
     self.QuestLevel = data.level
     self.QuestTagID = data.tag and data.tag.tagID
@@ -435,6 +436,12 @@ class "QuestView" (function(_ENV)
   __Observable__()
   property "QuestTagID" {
     type = Number
+  }
+
+  __Observable__()
+  property "IsNew" {
+    type = Boolean,
+    default = false
   }
 
   property "QuestID" {
@@ -614,6 +621,16 @@ function FromPlayerLevel()
      )
 end
 
+function FromQuestName()
+  return FromUIProperty("QuestName", "IsNew"):Map(function(name, isNew)
+    if isNew then 
+      return WrapTextInColorCode("NEW", "FFFFFFFF") .. " " .. name
+    end 
+
+    return name
+  end)
+end
+
 function FromQuestLevelVisible()
   local maxLevel = 80
 
@@ -704,7 +721,7 @@ Style.UpdateSkin("Default", {
         },
   
         Name = {
-          text                        = FromUIProperty("QuestName"),
+          text                        = FromQuestName(),
           textColor                   = FromUISetting("quest.name.textColor"),
           justifyV                    = "MIDDLE",
           justifyH                    = FromUISetting("quest.name.justifyH"),
