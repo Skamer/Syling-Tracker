@@ -1249,7 +1249,7 @@ Style.UpdateSkin("Default", {
 
     Text = {
       fontObject = Game11Font,
-      textColor = Color.NORMAL,
+      textColor = Color.WHITE,
       setAllPoints = true,
       justifyV = "MIDDLE",
       justifyH = "LEFT"

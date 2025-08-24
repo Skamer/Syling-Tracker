@@ -549,6 +549,7 @@ RegisterUISetting("quest.level.visibilityPolicy", QuestLevetVisibilityPolicyType
 RegisterUISetting("quest.enablePOI", true)
 RegisterUISetting("quest.showTooltip", false)
 RegisterUISetting("quest.tooltip.showRewards", false)
+RegisterUISetting("quest.showNewQuestIndicator", true)
 
 GenerateUISettings("dungeonQuest", "quest", function(generatedSettings)
   if generatedSettings["dungeonQuest.backgroundColor"] then 
@@ -622,13 +623,15 @@ function FromPlayerLevel()
 end
 
 function FromQuestName()
-  return FromUIProperty("QuestName", "IsNew"):Map(function(name, isNew)
-    if isNew then 
-      return WrapTextInColorCode("NEW", "FFFFFFFF") .. " " .. name
-    end 
-
-    return name
-  end)
+  return FromUISetting("quest.showNewQuestIndicator")
+    :CombineLatest(FromUIProperty("QuestName", "IsNew"))
+    :Map(function(showNew, name, isNew)
+      if showNew and isNew then 
+        return WrapTextInColorCode("NEW", "FFFFFFFF") .. " " .. name
+      end
+      
+      return name
+    end)
 end
 
 function FromQuestLevelVisible()

@@ -1,4 +1,15 @@
-# 2.9.14
+# 2.10.0
+
+###### NEW
+
+- Quests can now show a **"new"** indicator.
+- Added settings to choose when a quest stops being marked as new.
+
+**Note:** This feature is currently only available on Retail. Support for Classic and MoP Classic will be added in a future update.
+
+---
+
+## 2.9.14
 
 ##### MoP Classic
 

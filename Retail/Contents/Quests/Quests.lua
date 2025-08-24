@@ -15,6 +15,7 @@ export {
   SetCharCacheValue                   = API.SetCharCacheValue,
   GetCharCacheValue                   = API.GetCharCacheValue,
   RegisterSetting                     = API.RegisterSetting,
+  GetSetting                          = API.GetSetting,
   RegisterObservableContent           = API.RegisterObservableContent,
   ItemBar_AddItem                     = API.ItemBar_AddItem,
   ItemBar_RemoveItem                  = API.ItemBar_RemoveItem,
@@ -60,14 +61,16 @@ export {
   SetSelectedQuest                    = C_QuestLog.SetSelectedQuest
 }
 
-QUESTS_CONTENT_SUBJECT = RegisterObservableContent("quests", QuestsContentSubject)
+local QUESTS_CONTENT_SUBJECT = RegisterObservableContent("quests", QuestsContentSubject)
 
-QUESTS_CACHE = {}
-QUEST_HEADERS_CACHE = {}
-QUESTS_WITH_PROGRESS = {}
-QUESTS_WITH_ITEMS = {}
-QUESTS_REQUESTED = {}
+local QUESTS_CACHE = {}
+local QUEST_HEADERS_CACHE = {}
+local QUESTS_WITH_PROGRESS = {}
+local QUESTS_WITH_ITEMS = {}
+local QUESTS_REQUESTED = {}
 
+local QUEST_NEW_MAX_AGE = nil
+local QUEST_NEW_REMOVE_ON_PROGRESS = nil
 
 __ActiveOnEvents__  "PLAYER_ENTERING_WORLD" "QUEST_WATCH_LIST_CHANGED" "QUEST_ACCEPTED"
 function BecomeActiveOn(self, event, ...)
@@ -413,7 +416,7 @@ function UpdateQuest(self, questID)
 
   questData:SetObjectivesCount(objectiveCount)
 
-  if hasChanged and questData.isNew and questData.age > 5 then
+  if QUEST_NEW_REMOVE_ON_PROGRESS and hasChanged and questData.isNew and questData.age > 5 then
     questData.isNew = false
      SetCharCacheValue("newquests", questID, false)
   end
@@ -622,6 +625,11 @@ function RunAgeUpdater(self)
       if age then 
         local questData = QUESTS_CONTENT_SUBJECT:AcquireQuest(questID)
         questData.age = age
+
+        if questData.isNew and QUEST_NEW_MAX_AGE > 0 and age > QUEST_NEW_MAX_AGE then
+          questData.isNew = false
+          SetCharCacheValue("newquests", questID, false)
+        end
       end
     end
 
@@ -665,6 +673,16 @@ function SetQuestReceivedTime(self, questID, receivedTime)
   else
     SetCharCacheValue("questsReceivedTimePlayed", questID, nil)
   end
+end
+
+function OnLoad(self)
+  RegisterSetting("questNewMaxAge", 600, function(maxAge) QUEST_NEW_MAX_AGE = maxAge end)
+  RegisterSetting("questNewRemoveOnProgress", true, function(removeOnProgress) QUEST_NEW_REMOVE_ON_PROGRESS = removeOnProgress end)
+end
+
+function OnEnable(self)
+  QUEST_NEW_MAX_AGE = GetSetting("questNewMaxAge")
+  QUEST_NEW_REMOVE_ON_PROGRESS = GetSetting("questNewRemoveOnProgress")
 end
 -- ========================================================================= --
 -- Debug Utils Tools
