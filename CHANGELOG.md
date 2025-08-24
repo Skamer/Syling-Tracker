@@ -1,4 +1,14 @@
-# 2.9.13
+# 2.9.14
+
+##### MoP Classic
+
+###### FIXES
+
+- Fixed an error when enabling the advanced visibility rules for trackers.
+
+---
+
+## 2.9.13
 
 ###### FIXES
 
