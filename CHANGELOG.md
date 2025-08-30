@@ -1,4 +1,14 @@
-# 2.10.0
+# 2.10.1
+
+##### MoP Classic
+
+###### NEW
+
+- Added the support of **"new"** indicator for quests.
+
+---
+
+## 2.10.0
 
 ###### NEW
 
