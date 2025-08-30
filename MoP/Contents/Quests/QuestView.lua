@@ -214,6 +214,7 @@ class "QuestView" (function(_ENV)
     end
 
     self.QuestID = data.questID
+    self.IsNew = data.isNew
     self.QuestName = data.name 
     self.QuestLevel = data.level
     self.QuestTagID = data.tag and data.tag.tagID
@@ -260,6 +261,12 @@ class "QuestView" (function(_ENV)
   __Observable__()
   property "QuestTagID" {
     type = Number
+  }
+
+  __Observable__()
+  property "IsNew" {
+    type = Boolean,
+    default = false
   }
 
   property "QuestID" {
@@ -356,6 +363,7 @@ RegisterUISetting("quest.name.justifyH", "CENTER")
 RegisterUISetting("quest.level.mediaFont", FontType("PT Sans Caption Bold", 10))
 RegisterUISetting("quest.level.visibilityPolicy", QuestLevetVisibilityPolicyType.AlwaysShow)
 RegisterUISetting("quest.enablePOI", true)
+RegisterUISetting("quest.showNewQuestIndicator", true)
 
 GenerateUISettings("dungeonQuest", "quest", function(generatedSettings)
   if generatedSettings["dungeonQuest.backgroundColor"] then 
@@ -430,6 +438,19 @@ function FromPlayerLevel()
     Observable(function(observer) return observer:OnNext(UnitLevel("player")) end),
     Wow.FromEvent("PLAYER_LEVEL_UP"):Map(function(newLevel) return newLevel end)
    )
+end
+
+function FromQuestName()
+  return FromUISetting("quest.showNewQuestIndicator")
+    :CombineLatest(FromUIProperty("QuestName", "IsNew"))
+    :Map(function(showNew, name, isNew)
+      
+      if showNew and isNew then 
+        return WrapTextInColorCode("NEW", "FFFFFFFF") .. " " .. name
+      end
+      
+      return name
+    end)
 end
 
 function FromQuestLevelVisible()
@@ -513,7 +534,7 @@ Style.UpdateSkin("Default", {
         },
   
         Name = {
-          text                        = FromUIProperty("QuestName"),
+           text                       = FromQuestName(),
           textColor                   = FromUISetting("quest.name.textColor"),
           justifyV                    = "MIDDLE",
           justifyH                    = FromUISetting("quest.name.justifyH"),

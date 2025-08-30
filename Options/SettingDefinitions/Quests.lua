@@ -26,25 +26,27 @@ class "SettingDefinitions.Quests" (function(_ENV)
     enablePOICheckBox:BindUISetting("quest.enablePOI")
     self.GeneralTabControls.enablePOICheckBox = enablePOICheckBox
 
-    local questNewRemovePoliciesText = Widgets.SettingsText.Acquire(false, self)
-    questNewRemovePoliciesText:SetID(30)
-    questNewRemovePoliciesText:SetText("A quest is no longer considered new when:")
-    self.GeneralTabControls.questNewRemovePoliciesText = questNewRemovePoliciesText
+    if not IsVanilla() then 
+      local questNewRemovePoliciesText = Widgets.SettingsText.Acquire(false, self)
+      questNewRemovePoliciesText:SetID(30)
+      questNewRemovePoliciesText:SetText("A quest is no longer considered new when:")
+      self.GeneralTabControls.questNewRemovePoliciesText = questNewRemovePoliciesText
 
-    local questNewMaxAgeSlider = Widgets.SettingsSlider.Acquire(false, self)
-    questNewMaxAgeSlider:SetID(40)
-    questNewMaxAgeSlider:SetLabel("- it is older than x seconds")
-    questNewMaxAgeSlider:SetMinMaxValues(0, 32140800)
-    questNewMaxAgeSlider:BindSetting("questNewMaxAge")
-    self.GeneralTabControls.questNewMaxAgeSlider = questNewMaxAgeSlider
-    Style[questNewMaxAgeSlider].marginLeft = 20
+      local questNewMaxAgeSlider = Widgets.SettingsSlider.Acquire(false, self)
+      questNewMaxAgeSlider:SetID(40)
+      questNewMaxAgeSlider:SetLabel("- it is older than x seconds")
+      questNewMaxAgeSlider:SetMinMaxValues(0, 32140800)
+      questNewMaxAgeSlider:BindSetting("questNewMaxAge")
+      self.GeneralTabControls.questNewMaxAgeSlider = questNewMaxAgeSlider
+      Style[questNewMaxAgeSlider].marginLeft = 20
 
-    local questNewRemoveOnProgressCheckBox = Widgets.SettingsCheckBox.Acquire(false, self)
-    questNewRemoveOnProgressCheckBox:SetID(50)
-    questNewRemoveOnProgressCheckBox:SetLabel("- it has received progress")
-    questNewRemoveOnProgressCheckBox:BindSetting("questNewRemoveOnProgress")
-    self.GeneralTabControls.questNewRemoveOnProgressCheckBox = questNewRemoveOnProgressCheckBox
-    Style[questNewRemoveOnProgressCheckBox].marginLeft = 20
+      local questNewRemoveOnProgressCheckBox = Widgets.SettingsCheckBox.Acquire(false, self)
+      questNewRemoveOnProgressCheckBox:SetID(50)
+      questNewRemoveOnProgressCheckBox:SetLabel("- it has received progress")
+      questNewRemoveOnProgressCheckBox:BindSetting("questNewRemoveOnProgress")
+      self.GeneralTabControls.questNewRemoveOnProgressCheckBox = questNewRemoveOnProgressCheckBox
+      Style[questNewRemoveOnProgressCheckBox].marginLeft = 20
+    end
     -- ---------------------------------------------------------------------------
     -- --- Background Section
     -- ---------------------------------------------------------------------------
@@ -505,7 +507,7 @@ class "SettingDefinitions.Quests" (function(_ENV)
     showTooltip:BindUISetting("quest.showTooltip")
     self.QuestTabControls.showTooltip = showTooltip
 
-    if IsRetail() then 
+    if not IsVanilla() then 
       local showNewQuestIndicator =  Widgets.SettingsCheckBox.Acquire(false, self)
       showNewQuestIndicator:SetID(70)
       showNewQuestIndicator:SetLabel("Show New Quest Indicator")
