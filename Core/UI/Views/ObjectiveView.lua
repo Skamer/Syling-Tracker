@@ -77,6 +77,17 @@ class "ObjectiveView" (function(_ENV)
 
     self.ObjectiveText = data and data.text
   end
+
+  function OnRelease(self)
+    self.ObjectiveState = nil
+    self.ObjectiveText = nil
+    self.ObjectiveHasProgress = nil 
+    self.ObjectiveProgress = nil 
+    self.ObjectiveMinProgress = nil
+    self.ObjectiveMaxProgress = nil 
+    self.ObjectiveHasTimer = nil 
+    self.ObjectiveProgressText = nil
+  end
   -----------------------------------------------------------------------------
   --                               Properties                                --
   -----------------------------------------------------------------------------

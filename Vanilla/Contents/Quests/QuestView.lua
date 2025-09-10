@@ -242,6 +242,7 @@ class "QuestView" (function(_ENV)
     self.QuestTagID = nil 
     self.QuestID = nil
 
+    Style[self].Content.Objectives = NIL
     Style[self].Content.Timer = NIL
     Style[self].Content.Item = NIL
   end

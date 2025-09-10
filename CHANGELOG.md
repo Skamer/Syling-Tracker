@@ -1,4 +1,12 @@
-# 2.10.1
+# 2.10.2
+
+###### FIXES
+
+- Resolved a problem where the height of objective text didn't update properly based on its content. ([ticket #181](https://github.com/Skamer/Syling-Tracker/issues/181))
+
+---
+
+## 2.10.1
 
 ##### MoP Classic
 
