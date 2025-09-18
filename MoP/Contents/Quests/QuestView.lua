@@ -151,7 +151,7 @@ class "QuestViewContent"(function(_ENV)
     {
       Header = {
         Tag   = Texture,
-        Name  = FontString,
+        Name  = TextFrame,
         Level = FontString
       }
     }
@@ -524,28 +524,33 @@ Style.UpdateSkin("Default", {
 
       Header = {
         height                        = 24,
-  
+        minResize                     = { width = 0, height = 24},
+        autoAdjustHeight              = true,
+
         Tag = {
           visible                     = FromUIProperty("QuestTagID"):Map(function(tagID) return (tagID and QUEST_TAG_TCOORDS[tagID]) and true or false end),
           file                        = [[Interface\QuestFrame\QuestTypeIcons]],
           texCoords                   = FromQuestTagIconTexCoords(),
           height                      = 18,
           width                       = 18,
-          location                    = {Anchor("LEFT", 3, 0) }     
+          location                    = { Anchor("TOPLEFT", 3, -2) }
         },
   
         Name = {
-           text                       = FromQuestName(),
-          textColor                   = FromUISetting("quest.name.textColor"),
-          justifyV                    = "MIDDLE",
-          justifyH                    = FromUISetting("quest.name.justifyH"),
-          mediaFont                   = FromUISetting("quest.name.mediaFont"),
-          textTransform               = FromUISetting("quest.name.textTransform"),
+          Text = {
+            setAllPoints              = true,
+            text                      = FromQuestName(),
+            textColor                 = FromUISetting("quest.name.textColor"),
+            justifyV                  = "TOP",
+            justifyH                  = FromUISetting("quest.name.justifyH"),
+            mediaFont                 = FromUISetting("quest.name.mediaFont"),
+            textTransform             = FromUISetting("quest.name.textTransform"),
+          },
+
           location = {
+            Anchor("TOP", 0, -2),
             Anchor("LEFT", 0, 0, "Tag", "RIGHT"),
-            Anchor("RIGHT", 0, 0, "Level", "LEFT"),
-            Anchor("TOP"),
-            Anchor("BOTTOM")
+            Anchor("RIGHT", 0, 0, "Level", "LEFT")
           }
         },
   
@@ -560,14 +565,13 @@ Style.UpdateSkin("Default", {
              end
           end),
           width = 18,
-          justifyV = "MIDDLE",
+          justifyV = "TOP",
           justifyH = "RIGHT",
           
           mediaFont = FromUISetting("quest.level.mediaFont"),
           location = {
-            Anchor("TOP"),
+            Anchor("TOP", 0, -2),
             Anchor("RIGHT", -5, 0),
-            Anchor("BOTTOM")
           }
         },
   
@@ -611,7 +615,9 @@ Style.UpdateSkin("Default", {
 
       Header = {
         Name = {
-          textColor                   = FromUISetting("legendaryQuest.name.textColor"),
+          Text = {
+            textColor                 = FromUISetting("legendaryQuest.name.textColor"),
+          }
         }
       }
     }
@@ -624,7 +630,9 @@ Style.UpdateSkin("Default", {
 
       Header = {
         Name = {
-          textColor                     = FromUISetting("raidQuest.name.textColor"),
+          Text = {
+            textColor                 = FromUISetting("raidQuest.name.textColor"),
+          }
         }
       }
     }
@@ -636,7 +644,9 @@ Style.UpdateSkin("Default", {
 
       Header = {
         Name = {
-          textColor                     = FromUISetting("dungeonQuest.name.textColor"),
+          Text = {
+            textColor                 = FromUISetting("dungeonQuest.name.textColor"),
+          }
         }
       }
     }

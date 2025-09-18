@@ -1,4 +1,12 @@
-# 2.10.2
+# 2.10.3
+
+###### FIXES
+
+- Quest names now resize dynamically based on their font and text length. ([ticket #181](https://github.com/Skamer/Syling-Tracker/issues/181))
+
+---
+
+## 2.10.2
 
 ###### FIXES
 
