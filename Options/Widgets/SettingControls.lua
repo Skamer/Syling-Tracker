@@ -267,10 +267,32 @@ end)
 
 __Widget__()
 class "SettingsEditBox" (function(_ENV)
-  inherit "Frame"
+  inherit "Frame" extend "IBindSetting"
 
   __Bubbling__ { EditBox = "OnTextChanged"}
   event "OnTextChanged"
+
+  __Bubbling__ { EditBox = "OnEnterPressed" }
+  event "OnEnterPressed"
+
+  __Bubbling__ { EditBox = "OnEscapePressed" }
+  event "OnEscapePressed"
+
+  local function OnEnterPressedHandler(self, text)
+    local setting = self.Setting
+    if setting then
+      local value = self:GetValue()
+      self:TriggerSetSetting(setting, value:gsub("||", "|"))
+      self.PreviousValue = value
+    end
+
+    self:GetChild("EditBox"):ClearFocus()
+  end
+
+  local function OnEscapePressedHandler(self)
+    self:GetChild("EditBox"):ClearFocus()
+    self:SetValue(self.PreviousValue)
+  end
   -----------------------------------------------------------------------------
   --                               Methods                                   --
   -----------------------------------------------------------------------------
@@ -282,23 +304,37 @@ class "SettingsEditBox" (function(_ENV)
   function SetInstructions(self, instructions)
     self:GetChild("EditBox"):SetInstructions(instructions)
   end
-
-  function OnAcquire(self)
-    -- self:InstantApplyStyle()
-  end
-
+  
   function GetValue(self)
     return self:GetChild("EditBox"):GetText()
   end
 
-  function OnRelease(self)
-    -- self:SetID(0)
-    -- self:Hide()
-    -- self:ClearAllPoints()
-    -- self:SetParent(nil)
+  function SetValue(self, text)
+    self:GetChild("EditBox"):SetText(text)
 
+    self.PreviousValue = text
+  end
+
+  function PrepareFromSetting(self, value, hasDefault, defaultValue)
+    value = string.gsub(value, "|", "||")
+
+    if value ~= nil then 
+      self:SetValue(value)
+    elseif hasDefault then 
+      self:SetValue(defaultValue)
+    end
+  end 
+
+  function OnRelease(self)
+    self:BindSetting()
     ResetStyles(self, true)
   end
+  -----------------------------------------------------------------------------
+  --                               Properties                                --
+  -----------------------------------------------------------------------------
+  property "PreviousValue" {
+    type    = Any
+  }
   -----------------------------------------------------------------------------
   --                            Constructors                                 --
   -----------------------------------------------------------------------------
@@ -306,7 +342,12 @@ class "SettingsEditBox" (function(_ENV)
     Label = FontString,
     EditBox = EditBox
   }
-  function __ctor(self) end
+  function __ctor(self)
+    self:GetChild("EditBox"):SetHyperlinksEnabled(true)
+
+    self.OnEnterPressed = self.OnEnterPressed + OnEnterPressedHandler
+    self.OnEscapePressed = self.OnEscapePressed + OnEscapePressedHandler
+  end
 end)
 
 __Widget__()

@@ -513,10 +513,16 @@ class "SettingDefinitions.Quests" (function(_ENV)
       showNewQuestIndicator:SetLabel("Show New Quest Indicator")
       showNewQuestIndicator:BindUISetting("quest.showNewQuestIndicator")
       self.QuestTabControls.showNewQuestIndicator = showNewQuestIndicator
+
+      local newQuestIndicatorTextFormat = Widgets.SettingsEditBox.Acquire(false, self)
+      newQuestIndicatorTextFormat:SetID(80)
+      newQuestIndicatorTextFormat:SetLabel("New Quest Indicator Text Format")
+      newQuestIndicatorTextFormat:BindUISetting("quest.newIndicatorTextFormat")
+      self.QuestTabControls.newQuestIndicatorTextFormat = newQuestIndicatorTextFormat
     end
 
     local showRewardsInTooltip =  Widgets.SettingsCheckBox.Acquire(false, self)
-    showRewardsInTooltip:SetID(80)
+    showRewardsInTooltip:SetID(90)
     showRewardsInTooltip:SetLabel(("|cffff7f00(%s)|r %s"):format(L.EXPERIMENTAL, "Show Rewards in Tooltip"))
     showRewardsInTooltip:BindUISetting("quest.tooltip.showRewards")
     self.QuestTabControls.showRewardsInTooltip = showRewardsInTooltip

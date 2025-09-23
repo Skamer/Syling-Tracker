@@ -365,6 +365,7 @@ RegisterUISetting("quest.level.mediaFont", FontType("PT Sans Caption Bold", 10))
 RegisterUISetting("quest.level.visibilityPolicy", QuestLevetVisibilityPolicyType.AlwaysShow)
 RegisterUISetting("quest.enablePOI", true)
 RegisterUISetting("quest.showNewQuestIndicator", true)
+RegisterUISetting("quest.newIndicatorTextFormat", "|cffffffffNEW|r")
 
 GenerateUISettings("dungeonQuest", "quest", function(generatedSettings)
   if generatedSettings["dungeonQuest.backgroundColor"] then 
@@ -443,11 +444,11 @@ end
 
 function FromQuestName()
   return FromUISetting("quest.showNewQuestIndicator")
+    :CombineLatest(FromUISetting("quest.newIndicatorTextFormat"))
     :CombineLatest(FromUIProperty("QuestName", "IsNew"))
-    :Map(function(showNew, name, isNew)
-      
-      if showNew and isNew then 
-        return WrapTextInColorCode("NEW", "FFFFFFFF") .. " " .. name
+    :Map(function(showNew, newTextFormat, name, isNew)
+      if showNew and isNew then
+        return newTextFormat .. " " .. name
       end
       
       return name

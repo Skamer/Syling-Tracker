@@ -1,4 +1,12 @@
-# 2.10.3
+# 2.10.4
+
+###### NEW
+
+- Added an option to customize the text format of the **"new"** indicator.
+
+---
+
+## 2.10.3
 
 ###### FIXES
 
