@@ -11,6 +11,8 @@ Syling                 "SylingTracker.Contents.KeystoneContentView"          ""
 export {
   FromUIProperty                      = Wow.FromUIProperty,
   GetFrameByType                      = Wow.GetFrameByType,
+  FromUISetting                       = API.FromUISetting,
+  RegisterUISetting                   = API.RegisterUISetting,
 }
 
 enum "KeystoneEnemyForcesFormatType" {
@@ -418,6 +420,13 @@ class "KeystoneContentView" (function(_ENV)
   function __ctor(self) end
 end)
 -------------------------------------------------------------------------------
+--                              UI Settings                                  --
+-------------------------------------------------------------------------------
+RegisterUISetting("keystone.name.mediaFont", FontType("DejaVuSansCondensed Bold", 14))
+RegisterUISetting("keystone.name.textColor", { r = 1, g = 0.914, b = 0.682})
+RegisterUISetting("keystone.timer.mediaFont", FontType("PT Sans Narrow Bold", 21))
+RegisterUISetting("keystone.subTimers.mediaFont", FontType("PT Sans Narrow Bold", 14))
+-------------------------------------------------------------------------------
 --                              Observables                                  --
 -------------------------------------------------------------------------------
 function FromKeystoneStarted()
@@ -599,7 +608,7 @@ API.UpdateBaseSkin({
 
     Text = {
       text                            = FromTimerText(),
-      mediaFont                       = FontType("PT Sans Narrow Bold", 21),
+      mediaFont                       = FromUISetting("keystone.timer.mediaFont"),
     },
 
     TimerBar = {
@@ -621,6 +630,7 @@ API.UpdateBaseSkin({
     },
     TwoChestTimer = {
       height                          = 25,
+      mediaFont                       = FromUISetting("keystone.subTimers.mediaFont"),
       visible                         = FromUIProperty("TwoChestElapsed"):Map(function(elapsed) return not elapsed end),
       text                            = FromTwoChestTimerText(),
       textColor                       = Color.GREEN,
@@ -641,6 +651,7 @@ API.UpdateBaseSkin({
 
     ThreeChestTimer = {
       height                          = 25,
+      mediaFont                       = FromUISetting("keystone.subTimers.mediaFont"),
       visible                         = FromUIProperty("ThreeChestElapsed"):Map(function(elapsed) return not elapsed end),
       text                            = FromThreeChestTimerText(),
       textColor                       = Color.GREEN,
@@ -719,8 +730,8 @@ API.UpdateBaseSkin({
       
       DungeonName = {
         text                          = FromUIProperty("DungeonName"),
-        fontObject                    = Game18Font,
-        textColor                     = { r = 1, g = 0.914, b = 0.682},
+        mediaFont                     = FromUISetting("keystone.name.mediaFont"),
+        textColor                     = FromUISetting("keystone.name.textColor"),
         justifyV                      = "MIDDLE",
         justifyH                      = "CENTER",
       }

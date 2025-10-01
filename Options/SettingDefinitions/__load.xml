@@ -11,6 +11,7 @@
   <Script file="Achievements.lua" />
   <Script file="Scenario.lua" />
   <Script file="Dungeon.lua" />
+  <Script file="Keystone.lua" />
   <Script file="Profession.lua" />
   <Script file="Activities.lua" />
   <Script file="Collections.lua" />

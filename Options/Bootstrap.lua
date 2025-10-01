@@ -64,7 +64,9 @@ __Async__() function SylingTracker_OPEN_OPTIONS()
       panel:AddCategoryEntry({ text = L.SCENARIO, value = SettingDefinitions.Scenario}, "contents")
     end
 
-    -- panel:AddCategoryEntry({ text = Color.GRAY .. L.KEYSTONE .. " (NYI)"}, "contents")
+    if IsRetail() then 
+      panel:AddCategoryEntry({ text = L.KEYSTONE, value = SettingDefinitions.Keystone}, "contents")
+    end
 
     if not IsVanilla() then 
       panel:AddCategoryEntry({ text = L.DUNGEON, value = SettingDefinitions.Dungeon}, "contents")

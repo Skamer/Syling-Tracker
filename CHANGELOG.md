@@ -1,4 +1,12 @@
-# 2.10.4
+# 2.10.5
+
+###### NEW
+
+- Added initial options for Mythic +.
+
+---
+
+## 2.10.4
 
 ###### NEW
 
