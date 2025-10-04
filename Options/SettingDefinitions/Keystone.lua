@@ -94,15 +94,57 @@ class "SettingDefinitions.Keystone" (function(_ENV)
   -----------------------------------------------------------------------------
   --                        [Enemy Forces] Tab Builder                       --
   -----------------------------------------------------------------------------
-  function AcquireEnemyForcesTab(self)
+  _ENTRIES_KEYSTONE_FORMAT_TYPES_DROPDOWN = Array[Widgets.EntryData]()
+  _ENTRIES_KEYSTONE_FORMAT_TYPES_DROPDOWN:Insert({ text = "Only Percent", value = "OnlyPercent"})
+  _ENTRIES_KEYSTONE_FORMAT_TYPES_DROPDOWN:Insert({ text = "Only Absolute", value = "OnlyAbsolute"})
+  _ENTRIES_KEYSTONE_FORMAT_TYPES_DROPDOWN:Insert({ text = "Absolute And Percent", value = "AbsoluteAndPercent"})
+  -- _ENTRIES_KEYSTONE_FORMAT_TYPES_DROPDOWN:Insert({ text = "Custom", value = "Custom"})
 
+  _ENTRIES_KEYSTONE_CURRENT_PULL_FORMAT_TYPES_DROPDOWN = Array[Widgets.EntryData]()
+  _ENTRIES_KEYSTONE_CURRENT_PULL_FORMAT_TYPES_DROPDOWN:Insert({ text = "Only Final Percent", value = "OnlyFinalPercent"})
+  _ENTRIES_KEYSTONE_CURRENT_PULL_FORMAT_TYPES_DROPDOWN:Insert({ text = "Only Final Count", value = "OnlyFinalCount"})
+  _ENTRIES_KEYSTONE_CURRENT_PULL_FORMAT_TYPES_DROPDOWN:Insert({ text = "Only Additive Percent", value = "OnlyAdditivePercent"})
+  _ENTRIES_KEYSTONE_CURRENT_PULL_FORMAT_TYPES_DROPDOWN:Insert({ text = "Only Additive Count", value = "OnlyAdditiveCount"})
+  -- _ENTRIES_KEYSTONE_CURRENT_PULL_FORMAT_TYPES_DROPDOWN:Insert({ text = "Custom", value = "Custom"})
+
+  function AcquireEnemyForcesTab(self)
+    local formatType = Widgets.SettingsDropDown.Acquire(false, self)
+    formatType:SetID(10)
+    formatType:SetLabel("Format Type")
+    formatType:SetEntries(_ENTRIES_KEYSTONE_FORMAT_TYPES_DROPDOWN)
+    formatType:BindUISetting("keystone.enemyForces.formatType")
+    self.EnemyForcesControls.formatType = formatType
+
+    local currentPullFormatType = Widgets.SettingsDropDown.Acquire(false, self)
+    currentPullFormatType:SetID(20)
+    currentPullFormatType:SetLabel("Current Pull Format Type")
+    currentPullFormatType:SetEntries(_ENTRIES_KEYSTONE_CURRENT_PULL_FORMAT_TYPES_DROPDOWN)
+    currentPullFormatType:BindUISetting("keystone.enemyForces.currentPullFormatType")
+    self.EnemyForcesControls.currentPullFormatType = currentPullFormatType
+    ---------------------------------------------------------------------------
+    --- Header Section
+    ---------------------------------------------------------------------------
+    local headerSection = Widgets.ExpandableSection.Acquire(false, self)
+    headerSection:SetExpanded(false)
+    headerSection:SetID(30)
+    headerSection:SetTitle("Header")
+    Style[headerSection].marginTop = 20
+    self.EnemyForcesControls.headerSection = headerSection
+
+    local headerFont = Widgets.SettingsMediaFont.Acquire(false, headerSection)
+    headerFont:SetID(10)
+    headerFont:BindUISetting("keystone.enemyForces.header.mediaFont")
+    self.EnemyForcesControls.headerFont = headerFont
   end
 
   -----------------------------------------------------------------------------
   --                        [Enemy Forces] Release Builder                   --
   -----------------------------------------------------------------------------
   function ReleaseEnemyForcesTab(self)
-
+    for index, control in pairs(self.EnemyForcesControls) do 
+      control:Release()
+      self.EnemyForcesControls[index] = nil
+    end
   end
   -----------------------------------------------------------------------------
   --                               Methods                                   --
@@ -123,11 +165,11 @@ class "SettingDefinitions.Keystone" (function(_ENV)
       onRelease = function() self:ReleaseTimersTab() end,
     })
 
-    -- tabControl:AddTabPage({
-    --   name = "Enemy Forces",
-    --   onAcquire = function() self:AcquireEnemyForcesTab() end,
-    --   onRelease = function() self:ReleaseEnemyForcesTab() end
-    -- })
+    tabControl:AddTabPage({
+      name = "Enemy Forces",
+      onAcquire = function() self:AcquireEnemyForcesTab() end,
+      onRelease = function() self:ReleaseEnemyForcesTab() end
+    })
     
 
     tabControl:Refresh()

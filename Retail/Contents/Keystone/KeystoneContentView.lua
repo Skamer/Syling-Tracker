@@ -12,6 +12,7 @@ export {
   FromUIProperty                      = Wow.FromUIProperty,
   GetFrameByType                      = Wow.GetFrameByType,
   FromUISetting                       = API.FromUISetting,
+  FromUISettings                      = API.FromUISettings,
   RegisterUISetting                   = API.RegisterUISetting,
 }
 
@@ -426,6 +427,9 @@ RegisterUISetting("keystone.name.mediaFont", FontType("DejaVuSansCondensed Bold"
 RegisterUISetting("keystone.name.textColor", { r = 1, g = 0.914, b = 0.682})
 RegisterUISetting("keystone.timer.mediaFont", FontType("PT Sans Narrow Bold", 21))
 RegisterUISetting("keystone.subTimers.mediaFont", FontType("PT Sans Narrow Bold", 14))
+RegisterUISetting("keystone.enemyForces.header.mediaFont", FontType("PT Sans Narrow Bold", 14))
+RegisterUISetting("keystone.enemyForces.formatType", "OnlyPercent")
+RegisterUISetting("keystone.enemyForces.currentPullFormatType", "OnlyAdditivePercent")
 -------------------------------------------------------------------------------
 --                              Observables                                  --
 -------------------------------------------------------------------------------
@@ -525,9 +529,10 @@ function FromEnemyForcesTextColor()
 end
 
 function FromEnemyForcesText()
-  return GetFrameByType(KeystoneEnemyForces, FromUIProperty("EnemyForcesQuantity", "EnemyForcesTotalQuantity", "EnemyForcesPendingQuantity"))
-    :Next()
-    :Map(function(enemyForces)
+  return FromUISettings("keystone.enemyForces.formatType", "keystone.enemyForces.currentPullFormatType")
+    :CombineLatest(GetFrameByType(KeystoneEnemyForces, FromUIProperty("EnemyForcesQuantity", "EnemyForcesTotalQuantity", "EnemyForcesPendingQuantity")):Next())
+    :Map(function(_, _, enemyForces)
+
       local enemyForcesTextFormatType = enemyForces.TextFormatType
       local pullTextFormatType        = enemyForces.PullTextFormatType
       local current                   = enemyForces.EnemyForcesQuantity
@@ -667,9 +672,11 @@ API.UpdateBaseSkin({
 
   [KeystoneEnemyForces] = {
     autoAdjustHeight                  = true,
+    formatType                        = FromUISetting("keystone.enemyForces.formatType"),
+    currentPullFormatType             = FromUISetting("keystone.enemyForces.currentPullFormatType"),
     Text = {
       text                            = "Enemy Forces",
-      mediaFont                       = FontType("PT Sans Narrow Bold", 13),
+      mediaFont                       = FromUISetting("keystone.enemyForces.header.mediaFont"),
       textColor                       = FromEnemyForcesTextColor(),
     },
 

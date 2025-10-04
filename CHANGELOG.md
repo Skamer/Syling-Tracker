@@ -1,4 +1,12 @@
-# 2.10.5
+# 2.10.6
+
+###### NEW
+
+- Added options to change the Format Type and Current Pull Format Type for Enemy Forces in Mythic +
+
+---
+
+## 2.10.5
 
 ###### NEW
 
