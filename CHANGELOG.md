@@ -1,4 +1,12 @@
-# 2.10.6
+# 2.10.7
+
+###### NEW
+
+- The quest categories can now be minimized. ([ticket #9](https://github.com/Skamer/Syling-Tracker/issues/9)), ([ticket #96](https://github.com/Skamer/Syling-Tracker/issues/96))
+
+---
+
+## 2.10.6
 
 ###### NEW
 

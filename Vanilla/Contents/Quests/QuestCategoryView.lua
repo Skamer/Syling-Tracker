@@ -12,22 +12,56 @@ export {
   newtable                            = System.Toolset.newtable,
   FromUIProperty                      = Wow.FromUIProperty,
   RegisterUISetting                   = API.RegisterUISetting,
-  FromUISetting                       = API.FromUISetting
+  FromUISetting                       = API.FromUISetting,
+  GetUISetting                        = API.GetUISetting
 }
 
 __UIElement__()
 class "QuestCategoryView" (function(_ENV)
-  inherit "Frame" extend "IView"
+  inherit "Frame" extend "IView" "IQueueAdjustHeight" "ISizeAnimation"
+  -----------------------------------------------------------------------------
+  --                               Handlers                                  --
+  -----------------------------------------------------------------------------
+  local function OnExpandedHandler(self, new, old)
+    if new then 
+      self:OnExpand()
+    else
+      self:OnCollapse()
+    end
+
+    self:AdjustHeight()
+  end
   -----------------------------------------------------------------------------
   --                                Methods                                  --
   -----------------------------------------------------------------------------
+  function OnExpand(self)
+    if self:GetPropertyChild("Quests") then 
+      Style[self].Quests.visible = true
+    end
+  end
+
+  function OnCollapse(self)
+    if self:GetPropertyChild("Quests") then 
+      Style[self].Quests.visible = false 
+    end
+  end
+
   function OnViewUpdate(self, data, metadata)
-    Style[self].Quests.visible = true 
+
+    Style[self].Quests.visible = self.Expanded
     local questListView = self:GetPropertyChild("Quests")
     questListView:UpdateView(data, metadata)
 
     local id, firstQuestData = next(data)
     self.CategoryName = firstQuestData and firstQuestData.category
+  end
+
+
+  function OnAdjustHeight(self)
+    local height = self:TryToComputeHeightFromChildren()
+    if height then 
+      self:AnimateToTargetHeight(height)
+    end
   end
   -----------------------------------------------------------------------------
   --                               Properties                                --
@@ -37,13 +71,30 @@ class "QuestCategoryView" (function(_ENV)
     type = String,
     default = ""
   }
+
+  __Observable__()
+  property "Expanded" {
+    type = Boolean,
+    default = true,
+    handler = OnExpandedHandler
+  }
   -----------------------------------------------------------------------------
   --                              Constructors                               --
   -----------------------------------------------------------------------------
   __Template__ {
-    Name = FontString
+    Header = Button,
+    {
+      Header = {
+        Name = FontString
+      }
+    }
   }
-  function __ctor(self) end
+  function __ctor(self) 
+    local header = self:GetChild("Header")
+    header.OnClick = header.OnClick + function()
+      self.Expanded = not self.Expanded
+    end
+  end
 end)
 
 __ChildProperty__(QuestCategoryView, "Quests")
@@ -112,6 +163,20 @@ class "QuestCategoryListView" (function(_ENV)
   }
 end)
 -------------------------------------------------------------------------------
+--                              Observables                                  --
+-------------------------------------------------------------------------------
+function FromNameColor()
+  return FromUIProperty("Expanded"):Map(function(expanded)
+    local color = API.GetUISetting("questCategory.name.textColor")
+
+    if expanded then 
+      return color 
+    else 
+      return Color(color.r, color.g, color.b, color.a and color.a * 0.5 or 0.5)
+    end
+  end)
+end
+-------------------------------------------------------------------------------
 --                              UI Settings                                  --
 -------------------------------------------------------------------------------
 RegisterUISetting("questCategory.name.font", FontType("PT Sans Narrow Bold", 12, "NORMAL"))
@@ -123,24 +188,34 @@ RegisterUISetting("questCategory.name.justifyH", "LEFT")
 -------------------------------------------------------------------------------
 Style.UpdateSkin("Default", {
   [QuestCategoryView] = {
-    autoAdjustHeight = true,
+    autoAdjustHeight                    = true,
 
-    Name = {
-      text                            = FromUIProperty("CategoryName"),
-      mediaFont                       = FromUISetting("questCategory.name.font"),
-      textColor                       = FromUISetting("questCategory.name.textColor"),
-      textTransform                   = FromUISetting("questCategory.name.textTransform"),
-      justifyH                        = FromUISetting("questCategory.name.justifyH"),
-      location                        = {
-                                      Anchor("TOP"),
-                                      Anchor("LEFT", 10, 8),
-                                      Anchor("RIGHT")
-                                      }
+    Header = {
+      height                            = 1,
+      autoAdjustHeight                  = true,
+      Name = {
+        text                            = FromUIProperty("CategoryName"),
+        mediaFont                       = FromUISetting("questCategory.name.font"),
+        textColor                       = FromNameColor(),
+        textTransform                   = FromUISetting("questCategory.name.textTransform"),
+        justifyH                        = FromUISetting("questCategory.name.justifyH"),
+        location                        = {
+                                        Anchor("TOP"),
+                                        Anchor("LEFT", 10, 8),
+                                        Anchor("RIGHT")
+                                        }
+      },
+        location                        = {
+                                        Anchor("TOP"),
+                                        Anchor("LEFT", 10, 8),
+                                        Anchor("RIGHT")
+                                        }
+
     },
 
     [QuestCategoryView.Quests] = {
       location                        = {
-                                      Anchor("TOP", 0, -13, "Name", "BOTTOM"),
+                                      Anchor("TOP", 0, -13, "Header", "BOTTOM"),
                                       Anchor("LEFT"),
                                       Anchor("RIGHT")
                                       }
