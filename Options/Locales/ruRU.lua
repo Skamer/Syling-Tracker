@@ -13,6 +13,22 @@ local L = _Locale("ruRU")
 
 if not L then return end
 
+-------------------------------------------------------------------------------
+-- The below tokens are waiting for translation
+-------------------------------------------------------------------------------
+
+-- L.COLUMNS = "Columns"
+-- L.HIDE_OWNED_PETS = "Hide owned pets"
+-- L.NEW_QUEST_INDICATOR_TEXT_FORMAT = "New Quest Indicator Text Format"
+-- L.NEW_QUEST_REMOVE_POLICIES = "A quest is no longer considered new when:"
+-- L.NEW_QUEST_REMOVE_POLICIES_MAX_AGE = "- it is older than x seconds"
+-- L.NEW_QUEST_REMOVE_POLICIES_ON_PROGRESS = "- it has received progress"
+-- L.SHOW_NEW_QUEST_INDICATOR = "Show New Quest Indicator"
+-- L.SHOW_REWARDS_IN_TOOLTIP = "Show Rewards in Tooltip"
+-- L.SHOW_TOOLTIP = "Show Tooltip"
+
+-------------------------------------------------------------------------------
+
 L.ACHIEVEMENT = "Достижение"
 L.ACHIEVEMENTS = "Достижения"
 L.ACTIVITIES = "Активности"

@@ -1,4 +1,17 @@
-# 2.10.7
+# 2.10.8
+
+###### NEW
+
+- Added a way to change the poi button to RIGHT
+
+###### FIXES
+
+- Fixed an issue where the text value in an editbox isn't correctly cleared when reused in the options.
+- Fixed an issue where the tracker name wasn't displayed after creation in the options.
+
+---
+
+## 2.10.7
 
 ###### NEW
 

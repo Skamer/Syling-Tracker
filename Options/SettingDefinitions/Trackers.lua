@@ -113,9 +113,10 @@ class "SettingDefinitions.CreateTracker" (function(_ENV)
       local trackerName = trackerNameEditBox:GetValue()
       local trackerID = BuildTrackerIdByName(trackerName)
       if trackerID and trackerID ~= "" then 
+        SetTrackerSetting(trackerID, "name", trackerName)
+
         local tracker = NewTracker(trackerID)
 
-        SetTrackerSetting(trackerID, "name", trackerName)
         --- We put TrackContentType in a thread for avoiding small freeze for low end 
         --- computer users if there many content tracked, and these ones need to 
         --- create lof of frame.

@@ -19,6 +19,11 @@ class "SettingDefinitions.Quests" (function(_ENV)
   -----------------------------------------------------------------------------
   --                   [General] Tab Builder                                 --
   -----------------------------------------------------------------------------
+   _POI_LOCATION_ENTRIES = Array[Widgets.EntryData]()
+  _POI_LOCATION_ENTRIES:Insert({ text = L.LEFT, value = "LEFT"})
+  _POI_LOCATION_ENTRIES:Insert({ text = L.RIGHT, value = "RIGHT"})
+
+
   function BuildGeneralTab(self)
     local enablePOICheckBox = Widgets.SettingsCheckBox.Acquire(false, self)
     enablePOICheckBox:SetID(10)
@@ -26,15 +31,22 @@ class "SettingDefinitions.Quests" (function(_ENV)
     enablePOICheckBox:BindUISetting("quest.enablePOI")
     self.GeneralTabControls.enablePOICheckBox = enablePOICheckBox
 
+    local poiLocation = Widgets.SettingsDropDown.Acquire(false, self)
+    poiLocation:SetID(20)
+    poiLocation:SetLabel("POI Location")
+    poiLocation:SetEntries(_POI_LOCATION_ENTRIES)
+    poiLocation:BindUISetting("quest.poiLocation")
+    self.GeneralTabControls.poiLocation = poiLocation
+
     if not IsVanilla() then 
       local questNewRemovePoliciesText = Widgets.SettingsText.Acquire(false, self)
       questNewRemovePoliciesText:SetID(30)
-      questNewRemovePoliciesText:SetText("A quest is no longer considered new when:")
+      questNewRemovePoliciesText:SetText(L.NEW_QUEST_REMOVE_POLICIES)
       self.GeneralTabControls.questNewRemovePoliciesText = questNewRemovePoliciesText
 
       local questNewMaxAgeSlider = Widgets.SettingsSlider.Acquire(false, self)
       questNewMaxAgeSlider:SetID(40)
-      questNewMaxAgeSlider:SetLabel("- it is older than x seconds")
+      questNewMaxAgeSlider:SetLabel(L.NEW_QUEST_REMOVE_POLICIES_MAX_AGE)
       questNewMaxAgeSlider:SetMinMaxValues(0, 32140800)
       questNewMaxAgeSlider:BindSetting("questNewMaxAge")
       self.GeneralTabControls.questNewMaxAgeSlider = questNewMaxAgeSlider
@@ -42,7 +54,7 @@ class "SettingDefinitions.Quests" (function(_ENV)
 
       local questNewRemoveOnProgressCheckBox = Widgets.SettingsCheckBox.Acquire(false, self)
       questNewRemoveOnProgressCheckBox:SetID(50)
-      questNewRemoveOnProgressCheckBox:SetLabel("- it has received progress")
+      questNewRemoveOnProgressCheckBox:SetLabel(L.NEW_QUEST_REMOVE_POLICIES_ON_PROGRESS)
       questNewRemoveOnProgressCheckBox:BindSetting("questNewRemoveOnProgress")
       self.GeneralTabControls.questNewRemoveOnProgressCheckBox = questNewRemoveOnProgressCheckBox
       Style[questNewRemoveOnProgressCheckBox].marginLeft = 20
@@ -503,27 +515,27 @@ class "SettingDefinitions.Quests" (function(_ENV)
 
     local showTooltip =  Widgets.SettingsCheckBox.Acquire(false, self)
     showTooltip:SetID(60)
-    showTooltip:SetLabel("Show Tooltip")
+    showTooltip:SetLabel(L.SHOW_TOOLTIP)
     showTooltip:BindUISetting("quest.showTooltip")
     self.QuestTabControls.showTooltip = showTooltip
 
     if not IsVanilla() then 
       local showNewQuestIndicator =  Widgets.SettingsCheckBox.Acquire(false, self)
       showNewQuestIndicator:SetID(70)
-      showNewQuestIndicator:SetLabel("Show New Quest Indicator")
+      showNewQuestIndicator:SetLabel(L.SHOW_NEW_QUEST_INDICATOR)
       showNewQuestIndicator:BindUISetting("quest.showNewQuestIndicator")
       self.QuestTabControls.showNewQuestIndicator = showNewQuestIndicator
 
       local newQuestIndicatorTextFormat = Widgets.SettingsEditBox.Acquire(false, self)
       newQuestIndicatorTextFormat:SetID(80)
-      newQuestIndicatorTextFormat:SetLabel("New Quest Indicator Text Format")
+      newQuestIndicatorTextFormat:SetLabel(L.NEW_QUEST_INDICATOR_TEXT_FORMAT)
       newQuestIndicatorTextFormat:BindUISetting("quest.newIndicatorTextFormat")
       self.QuestTabControls.newQuestIndicatorTextFormat = newQuestIndicatorTextFormat
     end
 
     local showRewardsInTooltip =  Widgets.SettingsCheckBox.Acquire(false, self)
     showRewardsInTooltip:SetID(90)
-    showRewardsInTooltip:SetLabel(("|cffff7f00(%s)|r %s"):format(L.EXPERIMENTAL, "Show Rewards in Tooltip"))
+    showRewardsInTooltip:SetLabel(("|cffff7f00(%s)|r %s"):format(L.EXPERIMENTAL, L.SHOW_REWARDS_IN_TOOLTIP))
     showRewardsInTooltip:BindUISetting("quest.tooltip.showRewards")
     self.QuestTabControls.showRewardsInTooltip = showRewardsInTooltip
 

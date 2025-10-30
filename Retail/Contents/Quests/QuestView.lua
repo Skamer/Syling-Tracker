@@ -548,6 +548,7 @@ RegisterUISetting("quest.name.justifyH", "CENTER")
 RegisterUISetting("quest.level.mediaFont", FontType("PT Sans Caption Bold", 10))
 RegisterUISetting("quest.level.visibilityPolicy", QuestLevetVisibilityPolicyType.AlwaysShow)
 RegisterUISetting("quest.enablePOI", true)
+RegisterUISetting("quest.poiLocation", "LEFT")
 RegisterUISetting("quest.showTooltip", false)
 RegisterUISetting("quest.tooltip.showRewards", false)
 RegisterUISetting("quest.showNewQuestIndicator", true)
@@ -608,11 +609,21 @@ function FromObjectivesLocation()
 end
 
 function FromQuestContentLocation()
-  return FromUISetting("quest.enablePOI"):Map(function(enablePOI)
+  return FromUISetting("quest.enablePOI")
+    :CombineLatest(FromUISetting("quest.poiLocation"))
+    :Map(function(enablePOI, poiLocation)
+      return {
+        Anchor("TOP"),
+        Anchor("LEFT", (enablePOI and poiLocation ~= "RIGHT") and 26 or 0, 0),
+        Anchor("RIGHT", (enablePOI and poiLocation == "RIGHT") and -26 or 0, 0)
+      }
+  end)
+end
+
+function FromQuestPOILocation()
+  return FromUISetting("quest.poiLocation"):Map(function(poiLocation)
     return {
-      Anchor("TOP"),
-      Anchor("LEFT", enablePOI and 26 or 0, 0),
-      Anchor("RIGHT")
+      poiLocation == "RIGHT" and Anchor("RIGHT") or Anchor("LEFT")
     }
   end)
 end
@@ -795,12 +806,9 @@ Style.UpdateSkin("Default", {
     },
 
     [QuestView.POI] = {
-      location = {
-        Anchor("LEFT")
-      }
+      location = FromQuestPOILocation()
     },
   },
-
 
   [LegendaryQuestView] = {
     Content = {
