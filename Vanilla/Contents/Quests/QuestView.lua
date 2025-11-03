@@ -532,7 +532,7 @@ Style.UpdateSkin("Default", {
         Name = {
           Text = {
             setAllPoints              = true,
-            text                      = FromQuestName(),
+            text                      = FromUIProperty("QuestName"),
             textColor                 = FromUISetting("quest.name.textColor"),
             justifyV                  = "TOP",
             justifyH                  = FromUISetting("quest.name.justifyH"),

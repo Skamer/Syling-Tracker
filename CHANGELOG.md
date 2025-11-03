@@ -1,4 +1,14 @@
-# 2.10.8
+# 2.10.9
+
+##### Classic
+
+###### FIXES
+
+- Fixed a critical error preventing the addon to work. ([ticket #188](https://github.com/Skamer/Syling-Tracker/issues/188))
+
+---
+
+## 2.10.8
 
 ###### NEW
 
