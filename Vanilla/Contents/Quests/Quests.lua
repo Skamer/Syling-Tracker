@@ -270,7 +270,9 @@ function QUEST_WATCH_LIST_CHANGED(questID, isAdded)
   end
 
   if isAdded then 
-    QUESTS_CACHE[questID] = true 
+    QUESTS_CACHE[questID] = true
+    
+    _M:UpdateQuest(questID)
   else 
     QUESTS_CACHE[questID] = nil
 

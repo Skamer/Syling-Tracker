@@ -1,4 +1,14 @@
-# 2.10.9
+# 2.10.10
+
+##### Classic
+
+###### FIXES
+
+- Fixed an issue where the quests wasn't displayed when changing their watching status. ([ticket #188](https://github.com/Skamer/Syling-Tracker/issues/188))
+
+---
+
+## 2.10.9
 
 ##### Classic
 
