@@ -30,7 +30,8 @@ else
   BLIZZARD_OBJECTIVE_TRACKER = ObjectiveTrackerFrame
 end
 
-if IsRetail() then 
+-- HACK: need check why blizzard objective tracker is redisplayed on Classic
+if IsRetail() or IsVanilla() then 
   BLIZZARD_OBJECTIVE_TRACKER:HookScript("OnShow", function()
     if not SHOW_BLIZZARD_OBJECTIVE_TRACKER then 
       BLIZZARD_OBJECTIVE_TRACKER:Hide()
