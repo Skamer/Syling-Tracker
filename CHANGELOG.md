@@ -1,4 +1,10 @@
-# 2.10.10
+# 2.10.11
+
+- Updated the toc version for 11.2.7
+
+---
+
+## 2.10.10
 
 ##### Classic
 
