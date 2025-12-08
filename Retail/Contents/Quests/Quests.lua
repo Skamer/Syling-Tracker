@@ -45,7 +45,7 @@ export {
   IsDungeonQuest                      = Utils.IsDungeonQuest,
   IsFailed                            = C_QuestLog.IsFailed,
   IsImportantQuest                    = C_QuestLog.IsImportantQuest,
-  IsLegendaryQuest                    = C_QuestLog.IsLegendaryQuest,
+  IsLegendaryQuest                    = Utils.IsLegendaryQuest,
   IsOnMap                             = C_QuestLog.IsOnMap,
   IsQuestBounty                       = C_QuestLog.IsQuestBounty,
   IsQuestCalling                      = C_QuestLog.IsQuestCalling,

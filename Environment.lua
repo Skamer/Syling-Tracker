@@ -48,6 +48,11 @@ function IsRetail()
 end
 
 __AutoCache__()
+function IsMidnight()
+  return WOW_TOC_VERSION >= 120000
+end
+
+__AutoCache__()
 function IsMoP()
   return WOW_TOC_VERSION >= 50000 and WOW_TOC_VERSION < 60000
 end
@@ -75,6 +80,7 @@ Utils.GetAddonVersion     = GetAddonVersion
 Utils.GetScorpioVersion   = GetScorpioVersion
 Utils.GetTimePlayed       = GetTimePlayed
 Utils.IsRetail            = IsRetail
+Utils.IsMidnight          = IsMidnight
 Utils.IsMoP               = IsMoP 
 Utils.IsCataclysm         = IsCataclysm
 Utils.IsVanilla           = IsVanilla

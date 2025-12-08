@@ -9,8 +9,10 @@
 Syling                  "SylingTracker.Utils.Quests"                         ""
 -- ========================================================================= --
 export {
-  GetQuestTagInfo                      = C_QuestLog.GetQuestTagInfo,
+  GetQuestTagInfo                     = C_QuestLog.GetQuestTagInfo,
+  GetQuestClassification              = C_QuestInfoSystem.GetQuestClassification,
   EnumQuestTag                        = _G.Enum.QuestTag,
+  EnumQuestClassification             = _G.Enum.QuestClassification,
   IsWorldQuest                        = QuestUtils_IsQuestWorldQuest,
   GetTaskInfo                         = GetTaskInfo,
   GetTasksTable                       = GetTasksTable,
@@ -46,6 +48,9 @@ __Static__() function Utils.IsRaidQuest(questID, questTag)
   return false 
 end
 
+__Static__() function Utils.IsLegendaryQuest(questID)
+  return GetQuestClassification(questID) == EnumQuestClassification.Legendary
+end
 
 __Static__() function Utils.HasWorldQuests()
   local tasks = GetTasksTable()
