@@ -1,4 +1,10 @@
-# 2.10.11
+# 2.11.0
+
+- Added initial support for Midnight.
+
+---
+
+## 2.10.11
 
 - Updated the toc version for 11.2.7
 
