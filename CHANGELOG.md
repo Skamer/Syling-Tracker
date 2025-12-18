@@ -1,4 +1,19 @@
-# 2.11.0
+# 2.11.1
+
+###### NEW
+
+- Added a **Test Mode** for Auto Quests to make changes easier to preview.
+- Added new Auto Quest options: **Quest Name** and **Sub Text**.
+
+###### FIXES
+
+- Fixed multiple issues where Auto Quests related options were not working correctly. ([ticket #194](https://github.com/Skamer/Syling-Tracker/issues/194))
+
+---
+
+###### FIXES
+
+## 2.11.0
 
 - Added initial support for Midnight.
 

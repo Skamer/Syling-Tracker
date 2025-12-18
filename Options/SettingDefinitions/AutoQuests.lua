@@ -79,28 +79,107 @@ class "SettingDefinitions.AutoQuests" (function(_ENV)
 
     local headerTextFont = Widgets.SettingsMediaFont.Acquire(false, headerSection)
     headerTextFont:SetID(100)
-    headerTextFont:BindUISetting("collections.header.label.mediaFont")
+    headerTextFont:BindUISetting("autoQuest.header.mediaFont")
     self.AutoQuestTabControls.headerTextFont = headerTextFont
 
-    local headerTextColorPicker = Widgets.SettingsColorPicker.Acquire(false, headerSection)
-    headerTextColorPicker:SetID(200)
-    headerTextColorPicker:SetLabel(L.TEXT_COLOR)
-    headerTextColorPicker:BindUISetting("collections.header.label.textColor")
-    self.AutoQuestTabControls.headerTextColorPicker = headerTextColorPicker
+    -- local headerTextColorPicker = Widgets.SettingsColorPicker.Acquire(false, headerSection)
+    -- headerTextColorPicker:SetID(200)
+    -- headerTextColorPicker:SetLabel(L.TEXT_COLOR)
+    -- headerTextColorPicker:BindUISetting("autoQuest.header.label.textColor")
+    -- self.AutoQuestTabControls.headerTextColorPicker = headerTextColorPicker
 
     local headerTextTransform = Widgets.SettingsDropDown.Acquire(false, headerSection)
     headerTextTransform:SetID(300)
     headerTextTransform:SetLabel(L.TEXT_TRANSFORM)
     headerTextTransform:SetEntries(TEXT_TRANSFORM_ENTRIES)
-    headerTextTransform:BindUISetting("collections.header.label.textTransform")
+    headerTextTransform:BindUISetting("autoQuest.header.textTransform")
     self.AutoQuestTabControls.headerTextTransform = headerTextTransform
 
     local headerTextJustifyH = Widgets.SettingsDropDown.Acquire(false, headerSection)
     headerTextJustifyH:SetID(400)
     headerTextJustifyH:SetLabel(L.TEXT_JUSITFY_H)
     headerTextJustifyH:SetEntries(TEXT_JUSTIFY_H_ENTRIES)
-    headerTextJustifyH:BindUISetting("collections.header.label.justifyH")
+    headerTextJustifyH:BindUISetting("autoQuest.header.justifyH")
     self.AutoQuestTabControls.headerTextJustifyH = headerTextJustifyH
+
+    ---------------------------------------------------------------------------
+    -- [Auto Quest] Quest Name Section
+    ---------------------------------------------------------------------------
+    local questNameSection = Widgets.ExpandableSection.Acquire(false, self)
+    questNameSection:SetExpanded(false)
+    questNameSection:SetID(400)
+    questNameSection:SetTitle("Quest Name")
+    self.AutoQuestTabControls.questNameSection = questNameSection
+
+    local questNameFont = Widgets.SettingsMediaFont.Acquire(false, questNameSection)
+    questNameFont:SetID(100)
+    questNameFont:BindUISetting("autoQuest.questName.mediaFont")
+    self.AutoQuestTabControls.questNameFont = questNameFont
+
+    local questNameColorPicker = Widgets.SettingsColorPicker.Acquire(false, questNameSection)
+    questNameColorPicker:SetID(200)
+    questNameColorPicker:SetLabel(L.TEXT_COLOR)
+    questNameColorPicker:BindUISetting("autoQuest.questName.textColor")
+    self.AutoQuestTabControls.questNameColorPicker = questNameColorPicker
+
+    local questNameTextTransform = Widgets.SettingsDropDown.Acquire(false, questNameSection)
+    questNameTextTransform:SetID(300)
+    questNameTextTransform:SetLabel(L.TEXT_TRANSFORM)
+    questNameTextTransform:SetEntries(TEXT_TRANSFORM_ENTRIES)
+    questNameTextTransform:BindUISetting("autoQuest.questName.textTransform")
+    self.AutoQuestTabControls.questNameTextTransform = questNameTextTransform
+
+    local questNameJustifyH = Widgets.SettingsDropDown.Acquire(false, questNameSection)
+    questNameJustifyH:SetID(400)
+    questNameJustifyH:SetLabel(L.TEXT_JUSITFY_H)
+    questNameJustifyH:SetEntries(TEXT_JUSTIFY_H_ENTRIES)
+    questNameJustifyH:BindUISetting("autoQuest.questName.justifyH")
+    self.AutoQuestTabControls.questNameJustifyH = questNameJustifyH
+
+    ---------------------------------------------------------------------------
+    -- [Auto Quest] Sub Text Section
+    ---------------------------------------------------------------------------
+    local subTextSection = Widgets.ExpandableSection.Acquire(false, self)
+    subTextSection:SetExpanded(false)
+    subTextSection:SetID(500)
+    subTextSection:SetTitle("Sub Text")
+    self.AutoQuestTabControls.subTextSection = subTextSection
+
+    local subTextFont = Widgets.SettingsMediaFont.Acquire(false, subTextSection)
+    subTextFont:SetID(100)
+    subTextFont:BindUISetting("autoQuest.subText.mediaFont")
+    self.AutoQuestTabControls.subTextFont = subTextFont
+
+    local subTextColorPicker = Widgets.SettingsColorPicker.Acquire(false, subTextSection)
+    subTextColorPicker:SetID(200)
+    subTextColorPicker:SetLabel(L.TEXT_COLOR)
+    subTextColorPicker:BindUISetting("autoQuest.subText.textColor")
+    self.AutoQuestTabControls.subTextColorPicker = subTextColorPicker
+
+    local subTextTextTransform = Widgets.SettingsDropDown.Acquire(false, subTextSection)
+    subTextTextTransform:SetID(300)
+    subTextTextTransform:SetLabel(L.TEXT_TRANSFORM)
+    subTextTextTransform:SetEntries(TEXT_TRANSFORM_ENTRIES)
+    subTextTextTransform:BindUISetting("autoQuest.subText.textTransform")
+    self.AutoQuestTabControls.subTextTextTransform = subTextTextTransform
+
+    local subTextJustifyH = Widgets.SettingsDropDown.Acquire(false, subTextSection)
+    subTextJustifyH:SetID(400)
+    subTextJustifyH:SetLabel(L.TEXT_JUSITFY_H)
+    subTextJustifyH:SetEntries(TEXT_JUSTIFY_H_ENTRIES)
+    subTextJustifyH:BindUISetting("autoQuest.subText.justifyH")
+    self.AutoQuestTabControls.subTextJustifyH = subTextJustifyH
+
+    local function OnTestModeToggleClick(button)
+      Scorpio.FireSystemEvent("SylingTracker__TestMode", "AutoQuest")
+    end
+
+    local testModeToggleButton = Widgets.PushButton.Acquire(false, self)
+    testModeToggleButton:SetText("Toggle Test Mode")
+    testModeToggleButton:SetID(600)
+    testModeToggleButton:SetUserHandler("OnClick", OnTestModeToggleClick)
+    Style[testModeToggleButton].marginLeft = 0.35
+    self.AutoQuestTabControls.testModeToggleButton = testModeToggleButton
   end
 
   function ReleaseAutoQuestTab(self)
