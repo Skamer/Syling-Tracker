@@ -65,6 +65,37 @@ __SecureHook__()
 function WatchFrameAutoQuest_ClearPopUp(questID)
   _M:RemoveAutoQuest(questID)
 end
+
+local TEST_MODE_ID = "AutoQuest"
+local IS_TEST_MODE = false
+local TEST_MODE_OFFER_ID = -1
+local TEST_MODE_COMPLETE_ID = -2
+
+__SystemEvent__()
+function SylingTracker__TestMode(id)
+  
+  if TEST_MODE_ID ~= id then 
+    return 
+  end
+
+  if IS_TEST_MODE then
+    AUTO_QUESTS_CONTENT_SUBJECT.autoQuests[TEST_MODE_OFFER_ID] = nil
+    AUTO_QUESTS_CONTENT_SUBJECT.autoQuests[TEST_MODE_COMPLETE_ID] = nil
+  else 
+    local offerAutoQuestData = AUTO_QUESTS_CONTENT_SUBJECT:AcquireAutoQuest(TEST_MODE_OFFER_ID)
+    offerAutoQuestData.questID = TEST_MODE_OFFER_ID
+    offerAutoQuestData.type  = "OFFER"
+    offerAutoQuestData.name  = "Offer AutoQuest Quest Name" 
+
+    local completeAutoQuestData = AUTO_QUESTS_CONTENT_SUBJECT:AcquireAutoQuest(TEST_MODE_COMPLETE_ID)
+    completeAutoQuestData.questID = TEST_MODE_COMPLETE_ID
+    completeAutoQuestData.type  = "COMPLETE"
+    completeAutoQuestData.name  = "Complete AutoQuest Quest Name"
+  end
+
+  IS_TEST_MODE = not IS_TEST_MODE
+end
+
 -- ========================================================================= --
 -- Debug Utils Tools
 -- ========================================================================= --
