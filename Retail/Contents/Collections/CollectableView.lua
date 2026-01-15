@@ -31,6 +31,8 @@ class "CollectableView" (function(_ENV)
       if contextMenuPattern and collectableID and collectableType ~= nil then
         ContextMenu_Show(contextMenuPattern, self, collectableID, collectableType)
       end
+    else 
+      ContentTrackingUtil.OpenMapToTrackable(collectableType, collectableID)
     end
   end
   -----------------------------------------------------------------------------

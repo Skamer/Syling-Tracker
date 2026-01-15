@@ -1,4 +1,12 @@
-# 2.11.1
+# 2.11.2
+
+###### FIXES
+
+- Fixed an issue where left-clicking a collectible would not open the map to the tracked location. ([ticket #196](https://github.com/Skamer/Syling-Tracker/issues/196))
+
+---
+
+## 2.11.1
 
 ###### NEW
 
