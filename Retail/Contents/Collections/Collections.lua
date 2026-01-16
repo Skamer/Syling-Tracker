@@ -32,7 +32,7 @@ end
 
 function OnActive(self)
   if self:IsActivateByEvent("PLAYER_ENTERING_WORLD") then 
-    CONTENT_TRACKING_LIST_UPDATE()
+    COLLECTABLE_UPDATE()
   end
 end
 
@@ -75,8 +75,8 @@ function CONTENT_TRACKING_UPDATE(contentType, id, isTracked)
   end
 end
 
-__SystemEvent__()
-function CONTENT_TRACKING_LIST_UPDATE()
+__SystemEvent__ "CONTENT_TRACKING_LIST_UPDATE" "TRACKING_TARGET_INFO_UPDATE" "TRACKABLE_INFO_UPDATE"
+function COLLECTABLE_UPDATE()
   local trackedAppearances = GetTrackedIDs(AppearanceContentTrackingType)
   for _, appearanceID in ipairs(trackedAppearances) do 
     _M:UpdateCollectable(AppearanceContentTrackingType, appearanceID)

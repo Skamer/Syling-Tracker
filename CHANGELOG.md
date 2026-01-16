@@ -1,4 +1,12 @@
-# 2.11.2
+# 2.11.3
+
+###### FIXES
+
+- Fixed the "Retrieving item data" error for collectibles. ([ticket #196](https://github.com/Skamer/Syling-Tracker/issues/196))
+
+---
+
+## 2.11.2
 
 ###### FIXES
 
