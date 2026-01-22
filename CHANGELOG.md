@@ -1,4 +1,14 @@
-# 2.11.3
+# 2.11.4
+
+- Removed temporarily or permanently the Mythic + pull percentage feature (depending on whether it can be restored with the new API).
+
+###### FIXES
+
+- Fixed an error that occurred after loading.
+
+---
+
+## 2.11.3
 
 ###### FIXES
 

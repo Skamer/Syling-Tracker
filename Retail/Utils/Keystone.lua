@@ -52,17 +52,17 @@ Utils.GetEnemyPullCount               = GetEnemyPullCount
 -------------------------------------------------------------------------------
 --                                Module                                     --
 -------------------------------------------------------------------------------
-__SystemEvent__()
-function COMBAT_LOG_EVENT_UNFILTERED()
-  local _, subEvent, _, _, _, _, _, destGUID = CombatLogGetCurrentEventInfo()
+-- __SystemEvent__()
+-- function COMBAT_LOG_EVENT_UNFILTERED()
+--   local _, subEvent, _, _, _, _, _, destGUID = CombatLogGetCurrentEventInfo()
 
-  if subEvent == "UNIT_DIED" then
-    if destGUID and ENEMIES_PULL[destGUID] then 
-      ENEMIES_PULL[destGUID] = "DEAD"
-      CalculatePullCount()
-    end
-  end
-end
+--   if subEvent == "UNIT_DIED" then
+--     if destGUID and ENEMIES_PULL[destGUID] then 
+--       ENEMIES_PULL[destGUID] = "DEAD"
+--       CalculatePullCount()
+--     end
+--   end
+-- end
 
 __SystemEvent__()
 function UNIT_THREAT_LIST_UPDATE(...)
