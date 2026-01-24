@@ -19,24 +19,6 @@ export {
   IsInHorrificVisions         = Utils.IsInHorrificVisions
 }
 
--- Register settings for content order with defaults
-API.RegisterSetting("autoQuestsOrder", 10)
-API.RegisterSetting("widgetsOrder", 15)
-API.RegisterSetting("scenarioOrder", 20)
-API.RegisterSetting("delveOrder", 25)
-API.RegisterSetting("horrificVisionsOrder", 25)
-API.RegisterSetting("dungeonOrder", 30)
-API.RegisterSetting("keystoneOrder", 40)
-API.RegisterSetting("worldQuestsOrder", 60)
-API.RegisterSetting("tasksOrder", 70)
-API.RegisterSetting("bonusTasksOrder", 80)
-API.RegisterSetting("achievementsOrder", 90)
-API.RegisterSetting("activitiesOrder", 100)
-API.RegisterSetting("professionOrder", 110)
-API.RegisterSetting("collectionsOrder", 120)
-API.RegisterSetting("campaignQuestsOrder", 130)
-API.RegisterSetting("questsOrder", 140)
-API.RegisterSetting("petsOrder", 150)
 -------------------------------------------------------------------------------
 --                             AutoQuests                                 --
 -------------------------------------------------------------------------------

@@ -1263,6 +1263,25 @@ RegisterTrackerSetting({
     tracker.VisibilityRulesShown = GetRulesVisibilityShownForTracker(tracker)
   end
 })
+
+-- Content order tracker settings
+RegisterTrackerSetting({ id = "autoQuestsOrder", default = 10 })
+RegisterTrackerSetting({ id = "widgetsOrder", default = 15 })
+RegisterTrackerSetting({ id = "scenarioOrder", default = 20 })
+RegisterTrackerSetting({ id = "delveOrder", default = 25 })
+RegisterTrackerSetting({ id = "horrificVisionsOrder", default = 25 })
+RegisterTrackerSetting({ id = "dungeonOrder", default = 30 })
+RegisterTrackerSetting({ id = "keystoneOrder", default = 40 })
+RegisterTrackerSetting({ id = "worldQuestsOrder", default = 60 })
+RegisterTrackerSetting({ id = "tasksOrder", default = 70 })
+RegisterTrackerSetting({ id = "bonusTasksOrder", default = 80 })
+RegisterTrackerSetting({ id = "achievementsOrder", default = 90 })
+RegisterTrackerSetting({ id = "activitiesOrder", default = 100 })
+RegisterTrackerSetting({ id = "professionOrder", default = 110 })
+RegisterTrackerSetting({ id = "collectionsOrder", default = 120 })
+RegisterTrackerSetting({ id = "campaignQuestsOrder", default = 130 })
+RegisterTrackerSetting({ id = "questsOrder", default = 140 })
+RegisterTrackerSetting({ id = "petsOrder", default = 150 })
 -------------------------------------------------------------------------------
 --                              Observables                                  --
 -------------------------------------------------------------------------------

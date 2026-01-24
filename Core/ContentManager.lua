@@ -222,9 +222,9 @@ class "Content" (function(_ENV)
   function PrepareView(self, tracker)
     local view = self.ViewClass.Acquire()
 
-    -- Get order from settings, fallback to original order
+    -- Get order from tracker-specific settings, fallback to original order
     local settingId = self.id .. "Order"
-    local customOrder = GetSetting(settingId)
+    local customOrder = API.GetTrackerSetting(tracker.id, settingId)
     -- Convert to number if it's a string, fallback to original order
     view.Order = tonumber(customOrder) or self.Order
 
@@ -524,18 +524,20 @@ function SylingTracker_UNTRACK_CONTENT(tracker, contentID)
   content:UnregisterTracker(tracker)
 end
 
--- Handle settings changes for content order
+-- Handle tracker-specific settings changes for content order
 __SystemEvent__()
-function SylingTracker_SETTING_CHANGED(settingId, newValue, oldValue)
+function SylingTracker_TRACKER_SETTING_UPDATED(settingId, trackerID, newValue)
   -- Check if this is a content order setting
   if settingId:match("Order$") then
     local contentId = settingId:gsub("Order$", "")
     local content = API.GetContent(contentId)
+    local tracker = API.GetTracker(trackerID)
     
-    if content then
-      -- Update all existing views for this content
-      for tracker, view in pairs(content.Views) do
-        local customOrder = GetSetting(settingId)
+    if content and tracker then
+      -- Update existing view for this specific tracker
+      local view = content.Views[tracker]
+      if view then
+        local customOrder = API.GetTrackerSetting(tracker.id, settingId)
         -- Convert to number if it's a string, fallback to original order
         view.Order = tonumber(customOrder) or content.Order
         

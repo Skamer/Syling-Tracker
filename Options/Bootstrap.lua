@@ -40,7 +40,6 @@ __Async__() function SylingTracker_OPEN_OPTIONS()
     -- panel:CreateCategory("userContents", "My Contents")
 
     panel:AddCategoryEntry({ text = L.SETTINGS, value = SettingDefinitions.General }, "general")
-    panel:AddCategoryEntry({ text = L.CONTENT_ORDER, value = SettingDefinitions.ContentOrder }, "general")
     -- panel:AddCategoryEntry({ text = "|cffabababMedia (NYI)|r"}, "general")
     panel:AddCategoryEntry({ text = L.ITEM_BAR, value = SettingDefinitions.ItemBar }, "general")
     -- panel:AddCategoryEntry({ text = "|cffabababContext Menu (NYI)|r"}, "general")
