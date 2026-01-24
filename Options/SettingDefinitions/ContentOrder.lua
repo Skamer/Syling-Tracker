@@ -14,6 +14,11 @@ export {
   SetSetting = SylingTracker.API.SetSetting
 }
 
+-- Content order slider configuration
+local CONTENT_ORDER_MIN = 5
+local CONTENT_ORDER_MAX = 200
+local CONTENT_ORDER_STEP = 5
+
 __Widget__()
 class "SettingDefinitions.ContentOrder" (function(_ENV)
   inherit "Frame"
@@ -22,123 +27,157 @@ class "SettingDefinitions.ContentOrder" (function(_ENV)
   -----------------------------------------------------------------------------
   function BuildSettingControls(self)
     -- Auto Quests Order
-    local autoQuestsOrderEditBox = Widgets.SettingsEditBox.Acquire(false, self)
-    autoQuestsOrderEditBox:SetID(10)
-    autoQuestsOrderEditBox:SetLabel(L.AUTO_QUESTS .. " " .. L.ORDER)
-    autoQuestsOrderEditBox:BindSetting("autoQuestsOrder")
-    self.SettingControls.autoQuestsOrderEditBox = autoQuestsOrderEditBox
+    local autoQuestsOrderSlider = Widgets.SettingsSlider.Acquire(false, self)
+    autoQuestsOrderSlider:SetID(10)
+    autoQuestsOrderSlider:SetLabel(L.AUTO_QUESTS .. " " .. L.ORDER)
+    autoQuestsOrderSlider:SetMinMaxValues(CONTENT_ORDER_MIN, CONTENT_ORDER_MAX)
+    autoQuestsOrderSlider:SetValueStep(CONTENT_ORDER_STEP)
+    autoQuestsOrderSlider:BindSetting("autoQuestsOrder")
+    self.SettingControls.autoQuestsOrderSlider = autoQuestsOrderSlider
 
     -- Widgets Order
-    local widgetsOrderEditBox = Widgets.SettingsEditBox.Acquire(false, self)
-    widgetsOrderEditBox:SetID(20)
-    widgetsOrderEditBox:SetLabel(L.WIDGETS .. " " .. L.ORDER)
-    widgetsOrderEditBox:BindSetting("widgetsOrder")
-    self.SettingControls.widgetsOrderEditBox = widgetsOrderEditBox
+    local widgetsOrderSlider = Widgets.SettingsSlider.Acquire(false, self)
+    widgetsOrderSlider:SetID(20)
+    widgetsOrderSlider:SetLabel(L.WIDGETS .. " " .. L.ORDER)
+    widgetsOrderSlider:SetMinMaxValues(CONTENT_ORDER_MIN, CONTENT_ORDER_MAX)
+    widgetsOrderSlider:SetValueStep(CONTENT_ORDER_STEP)
+    widgetsOrderSlider:BindSetting("widgetsOrder")
+    self.SettingControls.widgetsOrderSlider = widgetsOrderSlider
 
     -- Scenario Order
-    local scenarioOrderEditBox = Widgets.SettingsEditBox.Acquire(false, self)
-    scenarioOrderEditBox:SetID(30)
-    scenarioOrderEditBox:SetLabel(L.SCENARIO .. " " .. L.ORDER)
-    scenarioOrderEditBox:BindSetting("scenarioOrder")
-    self.SettingControls.scenarioOrderEditBox = scenarioOrderEditBox
+    local scenarioOrderSlider = Widgets.SettingsSlider.Acquire(false, self)
+    scenarioOrderSlider:SetID(30)
+    scenarioOrderSlider:SetLabel(L.SCENARIO .. " " .. L.ORDER)
+    scenarioOrderSlider:SetMinMaxValues(CONTENT_ORDER_MIN, CONTENT_ORDER_MAX)
+    scenarioOrderSlider:SetValueStep(CONTENT_ORDER_STEP)
+    scenarioOrderSlider:BindSetting("scenarioOrder")
+    self.SettingControls.scenarioOrderSlider = scenarioOrderSlider
 
     -- Delve Order
-    local delveOrderEditBox = Widgets.SettingsEditBox.Acquire(false, self)
-    delveOrderEditBox:SetID(40)
-    delveOrderEditBox:SetLabel(L.DELVE .. " " .. L.ORDER)
-    delveOrderEditBox:BindSetting("delveOrder")
-    self.SettingControls.delveOrderEditBox = delveOrderEditBox
+    local delveOrderSlider = Widgets.SettingsSlider.Acquire(false, self)
+    delveOrderSlider:SetID(40)
+    delveOrderSlider:SetLabel(L.DELVE .. " " .. L.ORDER)
+    delveOrderSlider:SetMinMaxValues(CONTENT_ORDER_MIN, CONTENT_ORDER_MAX)
+    delveOrderSlider:SetValueStep(CONTENT_ORDER_STEP)
+    delveOrderSlider:BindSetting("delveOrder")
+    self.SettingControls.delveOrderSlider = delveOrderSlider
 
     -- Horrific Visions Order
-    local horrificVisionsOrderEditBox = Widgets.SettingsEditBox.Acquire(false, self)
-    horrificVisionsOrderEditBox:SetID(50)
-    horrificVisionsOrderEditBox:SetLabel(L.HORRIFIC_VISIONS .. " " .. L.ORDER)
-    horrificVisionsOrderEditBox:BindSetting("horrificVisionsOrder")
-    self.SettingControls.horrificVisionsOrderEditBox = horrificVisionsOrderEditBox
+    local horrificVisionsOrderSlider = Widgets.SettingsSlider.Acquire(false, self)
+    horrificVisionsOrderSlider:SetID(50)
+    horrificVisionsOrderSlider:SetLabel(L.HORRIFIC_VISIONS .. " " .. L.ORDER)
+    horrificVisionsOrderSlider:SetMinMaxValues(CONTENT_ORDER_MIN, CONTENT_ORDER_MAX)
+    horrificVisionsOrderSlider:SetValueStep(CONTENT_ORDER_STEP)
+    horrificVisionsOrderSlider:BindSetting("horrificVisionsOrder")
+    self.SettingControls.horrificVisionsOrderSlider = horrificVisionsOrderSlider
 
     -- Dungeon Order
-    local dungeonOrderEditBox = Widgets.SettingsEditBox.Acquire(false, self)
-    dungeonOrderEditBox:SetID(60)
-    dungeonOrderEditBox:SetLabel(L.DUNGEON .. " " .. L.ORDER)
-    dungeonOrderEditBox:BindSetting("dungeonOrder")
-    self.SettingControls.dungeonOrderEditBox = dungeonOrderEditBox
+    local dungeonOrderSlider = Widgets.SettingsSlider.Acquire(false, self)
+    dungeonOrderSlider:SetID(60)
+    dungeonOrderSlider:SetLabel(L.DUNGEON .. " " .. L.ORDER)
+    dungeonOrderSlider:SetMinMaxValues(CONTENT_ORDER_MIN, CONTENT_ORDER_MAX)
+    dungeonOrderSlider:SetValueStep(CONTENT_ORDER_STEP)
+    dungeonOrderSlider:BindSetting("dungeonOrder")
+    self.SettingControls.dungeonOrderSlider = dungeonOrderSlider
 
     -- Keystone Order
-    local keystoneOrderEditBox = Widgets.SettingsEditBox.Acquire(false, self)
-    keystoneOrderEditBox:SetID(70)
-    keystoneOrderEditBox:SetLabel(L.KEYSTONE .. " " .. L.ORDER)
-    keystoneOrderEditBox:BindSetting("keystoneOrder")
-    self.SettingControls.keystoneOrderEditBox = keystoneOrderEditBox
+    local keystoneOrderSlider = Widgets.SettingsSlider.Acquire(false, self)
+    keystoneOrderSlider:SetID(70)
+    keystoneOrderSlider:SetLabel(L.KEYSTONE .. " " .. L.ORDER)
+    keystoneOrderSlider:SetMinMaxValues(CONTENT_ORDER_MIN, CONTENT_ORDER_MAX)
+    keystoneOrderSlider:SetValueStep(CONTENT_ORDER_STEP)
+    keystoneOrderSlider:BindSetting("keystoneOrder")
+    self.SettingControls.keystoneOrderSlider = keystoneOrderSlider
 
     -- World Quests Order
-    local worldQuestsOrderEditBox = Widgets.SettingsEditBox.Acquire(false, self)
-    worldQuestsOrderEditBox:SetID(80)
-    worldQuestsOrderEditBox:SetLabel(L.WORLD_QUESTS .. " " .. L.ORDER)
-    worldQuestsOrderEditBox:BindSetting("worldQuestsOrder")
-    self.SettingControls.worldQuestsOrderEditBox = worldQuestsOrderEditBox
+    local worldQuestsOrderSlider = Widgets.SettingsSlider.Acquire(false, self)
+    worldQuestsOrderSlider:SetID(80)
+    worldQuestsOrderSlider:SetLabel(L.WORLD_QUESTS .. " " .. L.ORDER)
+    worldQuestsOrderSlider:SetMinMaxValues(CONTENT_ORDER_MIN, CONTENT_ORDER_MAX)
+    worldQuestsOrderSlider:SetValueStep(CONTENT_ORDER_STEP)
+    worldQuestsOrderSlider:BindSetting("worldQuestsOrder")
+    self.SettingControls.worldQuestsOrderSlider = worldQuestsOrderSlider
 
     -- Tasks Order
-    local tasksOrderEditBox = Widgets.SettingsEditBox.Acquire(false, self)
-    tasksOrderEditBox:SetID(90)
-    tasksOrderEditBox:SetLabel(L.TASKS .. " " .. L.ORDER)
-    tasksOrderEditBox:BindSetting("tasksOrder")
-    self.SettingControls.tasksOrderEditBox = tasksOrderEditBox
+    local tasksOrderSlider = Widgets.SettingsSlider.Acquire(false, self)
+    tasksOrderSlider:SetID(90)
+    tasksOrderSlider:SetLabel(L.TASKS .. " " .. L.ORDER)
+    tasksOrderSlider:SetMinMaxValues(CONTENT_ORDER_MIN, CONTENT_ORDER_MAX)
+    tasksOrderSlider:SetValueStep(CONTENT_ORDER_STEP)
+    tasksOrderSlider:BindSetting("tasksOrder")
+    self.SettingControls.tasksOrderSlider = tasksOrderSlider
 
     -- Bonus Tasks Order
-    local bonusTasksOrderEditBox = Widgets.SettingsEditBox.Acquire(false, self)
-    bonusTasksOrderEditBox:SetID(100)
-    bonusTasksOrderEditBox:SetLabel(L.BONUS_TASKS .. " " .. L.ORDER)
-    bonusTasksOrderEditBox:BindSetting("bonusTasksOrder")
-    self.SettingControls.bonusTasksOrderEditBox = bonusTasksOrderEditBox
+    local bonusTasksOrderSlider = Widgets.SettingsSlider.Acquire(false, self)
+    bonusTasksOrderSlider:SetID(100)
+    bonusTasksOrderSlider:SetLabel(L.BONUS_TASKS .. " " .. L.ORDER)
+    bonusTasksOrderSlider:SetMinMaxValues(CONTENT_ORDER_MIN, CONTENT_ORDER_MAX)
+    bonusTasksOrderSlider:SetValueStep(CONTENT_ORDER_STEP)
+    bonusTasksOrderSlider:BindSetting("bonusTasksOrder")
+    self.SettingControls.bonusTasksOrderSlider = bonusTasksOrderSlider
 
     -- Achievements Order
-    local achievementsOrderEditBox = Widgets.SettingsEditBox.Acquire(false, self)
-    achievementsOrderEditBox:SetID(110)
-    achievementsOrderEditBox:SetLabel(L.ACHIEVEMENTS .. " " .. L.ORDER)
-    achievementsOrderEditBox:BindSetting("achievementsOrder")
-    self.SettingControls.achievementsOrderEditBox = achievementsOrderEditBox
+    local achievementsOrderSlider = Widgets.SettingsSlider.Acquire(false, self)
+    achievementsOrderSlider:SetID(110)
+    achievementsOrderSlider:SetLabel(L.ACHIEVEMENTS .. " " .. L.ORDER)
+    achievementsOrderSlider:SetMinMaxValues(CONTENT_ORDER_MIN, CONTENT_ORDER_MAX)
+    achievementsOrderSlider:SetValueStep(CONTENT_ORDER_STEP)
+    achievementsOrderSlider:BindSetting("achievementsOrder")
+    self.SettingControls.achievementsOrderSlider = achievementsOrderSlider
 
     -- Activities Order
-    local activitiesOrderEditBox = Widgets.SettingsEditBox.Acquire(false, self)
-    activitiesOrderEditBox:SetID(120)
-    activitiesOrderEditBox:SetLabel(L.ACTIVITIES .. " " .. L.ORDER)
-    activitiesOrderEditBox:BindSetting("activitiesOrder")
-    self.SettingControls.activitiesOrderEditBox = activitiesOrderEditBox
+    local activitiesOrderSlider = Widgets.SettingsSlider.Acquire(false, self)
+    activitiesOrderSlider:SetID(120)
+    activitiesOrderSlider:SetLabel(L.ACTIVITIES .. " " .. L.ORDER)
+    activitiesOrderSlider:SetMinMaxValues(CONTENT_ORDER_MIN, CONTENT_ORDER_MAX)
+    activitiesOrderSlider:SetValueStep(CONTENT_ORDER_STEP)
+    activitiesOrderSlider:BindSetting("activitiesOrder")
+    self.SettingControls.activitiesOrderSlider = activitiesOrderSlider
 
     -- Profession Order
-    local professionOrderEditBox = Widgets.SettingsEditBox.Acquire(false, self)
-    professionOrderEditBox:SetID(130)
-    professionOrderEditBox:SetLabel(L.PROFESSION .. " " .. L.ORDER)
-    professionOrderEditBox:BindSetting("professionOrder")
-    self.SettingControls.professionOrderEditBox = professionOrderEditBox
+    local professionOrderSlider = Widgets.SettingsSlider.Acquire(false, self)
+    professionOrderSlider:SetID(130)
+    professionOrderSlider:SetLabel(L.PROFESSION .. " " .. L.ORDER)
+    professionOrderSlider:SetMinMaxValues(CONTENT_ORDER_MIN, CONTENT_ORDER_MAX)
+    professionOrderSlider:SetValueStep(CONTENT_ORDER_STEP)
+    professionOrderSlider:BindSetting("professionOrder")
+    self.SettingControls.professionOrderSlider = professionOrderSlider
 
     -- Collections Order
-    local collectionsOrderEditBox = Widgets.SettingsEditBox.Acquire(false, self)
-    collectionsOrderEditBox:SetID(140)
-    collectionsOrderEditBox:SetLabel(L.COLLECTIONS .. " " .. L.ORDER)
-    collectionsOrderEditBox:BindSetting("collectionsOrder")
-    self.SettingControls.collectionsOrderEditBox = collectionsOrderEditBox
+    local collectionsOrderSlider = Widgets.SettingsSlider.Acquire(false, self)
+    collectionsOrderSlider:SetID(140)
+    collectionsOrderSlider:SetLabel(L.COLLECTIONS .. " " .. L.ORDER)
+    collectionsOrderSlider:SetMinMaxValues(CONTENT_ORDER_MIN, CONTENT_ORDER_MAX)
+    collectionsOrderSlider:SetValueStep(CONTENT_ORDER_STEP)
+    collectionsOrderSlider:BindSetting("collectionsOrder")
+    self.SettingControls.collectionsOrderSlider = collectionsOrderSlider
 
     -- Campaign Quests Order
-    local campaignQuestsOrderEditBox = Widgets.SettingsEditBox.Acquire(false, self)
-    campaignQuestsOrderEditBox:SetID(150)
-    campaignQuestsOrderEditBox:SetLabel(L.CAMPAIGN_QUESTS .. " " .. L.ORDER)
-    campaignQuestsOrderEditBox:BindSetting("campaignQuestsOrder")
-    self.SettingControls.campaignQuestsOrderEditBox = campaignQuestsOrderEditBox
+    local campaignQuestsOrderSlider = Widgets.SettingsSlider.Acquire(false, self)
+    campaignQuestsOrderSlider:SetID(150)
+    campaignQuestsOrderSlider:SetLabel(L.CAMPAIGN_QUESTS .. " " .. L.ORDER)
+    campaignQuestsOrderSlider:SetMinMaxValues(CONTENT_ORDER_MIN, CONTENT_ORDER_MAX)
+    campaignQuestsOrderSlider:SetValueStep(CONTENT_ORDER_STEP)
+    campaignQuestsOrderSlider:BindSetting("campaignQuestsOrder")
+    self.SettingControls.campaignQuestsOrderSlider = campaignQuestsOrderSlider
 
     -- Quests Order
-    local questsOrderEditBox = Widgets.SettingsEditBox.Acquire(false, self)
-    questsOrderEditBox:SetID(160)
-    questsOrderEditBox:SetLabel(L.QUESTS .. " " .. L.ORDER)
-    questsOrderEditBox:BindSetting("questsOrder")
-    self.SettingControls.questsOrderEditBox = questsOrderEditBox
+    local questsOrderSlider = Widgets.SettingsSlider.Acquire(false, self)
+    questsOrderSlider:SetID(160)
+    questsOrderSlider:SetLabel(L.QUESTS .. " " .. L.ORDER)
+    questsOrderSlider:SetMinMaxValues(CONTENT_ORDER_MIN, CONTENT_ORDER_MAX)
+    questsOrderSlider:SetValueStep(CONTENT_ORDER_STEP)
+    questsOrderSlider:BindSetting("questsOrder")
+    self.SettingControls.questsOrderSlider = questsOrderSlider
 
     -- Pets Order
-    local petsOrderEditBox = Widgets.SettingsEditBox.Acquire(false, self)
-    petsOrderEditBox:SetID(170)
-    petsOrderEditBox:SetLabel("Pets " .. L.ORDER)
-    petsOrderEditBox:BindSetting("petsOrder")
-    self.SettingControls.petsOrderEditBox = petsOrderEditBox
+    local petsOrderSlider = Widgets.SettingsSlider.Acquire(false, self)
+    petsOrderSlider:SetID(170)
+    petsOrderSlider:SetLabel("Pets " .. L.ORDER)
+    petsOrderSlider:SetMinMaxValues(CONTENT_ORDER_MIN, CONTENT_ORDER_MAX)
+    petsOrderSlider:SetValueStep(CONTENT_ORDER_STEP)
+    petsOrderSlider:BindSetting("petsOrder")
+    self.SettingControls.petsOrderSlider = petsOrderSlider
 
     -- Reset to Defaults Button
     local resetButton = Widgets.PushButton.Acquire(false, self)
