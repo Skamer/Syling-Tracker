@@ -14,31 +14,29 @@ export {
   GetObservableContent        = API.GetObservableContent,
   CombineObservableContent    = API.CombineObservableContent,
   CreateAtlasMarkup           = CreateAtlasMarkup,
-  GetSetting                  = API.GetSetting,
-  RegisterSetting             = API.RegisterSetting,
 
   HasObjectiveWidgets         = Utils.HasObjectiveWidgets,
   IsInHorrificVisions         = Utils.IsInHorrificVisions
 }
 
 -- Register settings for content order with defaults
-RegisterSetting("autoQuestsOrder", 10)
-RegisterSetting("widgetsOrder", 15)
-RegisterSetting("scenarioOrder", 20)
-RegisterSetting("delveOrder", 25)
-RegisterSetting("horrificVisionsOrder", 25)
-RegisterSetting("dungeonOrder", 30)
-RegisterSetting("keystoneOrder", 40)
-RegisterSetting("worldQuestsOrder", 60)
-RegisterSetting("tasksOrder", 70)
-RegisterSetting("bonusTasksOrder", 80)
-RegisterSetting("achievementsOrder", 90)
-RegisterSetting("activitiesOrder", 100)
-RegisterSetting("professionOrder", 110)
-RegisterSetting("collectionsOrder", 120)
-RegisterSetting("campaignQuestsOrder", 130)
-RegisterSetting("questsOrder", 140)
-RegisterSetting("petsOrder", 150)
+API.RegisterSetting("autoQuestsOrder", 10)
+API.RegisterSetting("widgetsOrder", 15)
+API.RegisterSetting("scenarioOrder", 20)
+API.RegisterSetting("delveOrder", 25)
+API.RegisterSetting("horrificVisionsOrder", 25)
+API.RegisterSetting("dungeonOrder", 30)
+API.RegisterSetting("keystoneOrder", 40)
+API.RegisterSetting("worldQuestsOrder", 60)
+API.RegisterSetting("tasksOrder", 70)
+API.RegisterSetting("bonusTasksOrder", 80)
+API.RegisterSetting("achievementsOrder", 90)
+API.RegisterSetting("activitiesOrder", 100)
+API.RegisterSetting("professionOrder", 110)
+API.RegisterSetting("collectionsOrder", 120)
+API.RegisterSetting("campaignQuestsOrder", 130)
+API.RegisterSetting("questsOrder", 140)
+API.RegisterSetting("petsOrder", 150)
 -------------------------------------------------------------------------------
 --                             AutoQuests                                 --
 -------------------------------------------------------------------------------
@@ -46,7 +44,7 @@ RegisterContent({
   id = "autoQuests",
   name = _Locale.AUTO_QUESTS_POPUP,
   description = "AUTO_QUESTS_PH_DESC",
-  order = GetSetting("autoQuestsOrder"),
+  order = 10,
   viewClass = AutoQuestsContentView,
   data = GetObservableContent("autoQuests"),
   statusFunc = function(data) return (data and data.autoQuests) and true or false end,
@@ -58,7 +56,7 @@ RegisterContent({
   id = "widgets",
   name = _Locale.WIDGETS,
   description = "WIDGETS_PH_DESC",
-  order = GetSetting("widgetsOrder"),
+  order = 15,
   viewClass = WidgetsContentView,
   events = { "UPDATE_ALL_UI_WIDGETS", "UPDATE_UI_WIDGET", "ZONE_CHANGED_NEW_AREA"},
   statusFunc = function() return HasObjectiveWidgets() end,
@@ -72,7 +70,7 @@ RegisterContent({
   formattedName = CreateAtlasMarkup("ScenariosIcon", 16, 16) .. " " .. _Locale.SCENARIO,
   description = "SCENARIO_PH_DESC",
   icon = { atlas = AtlasType("ScenariosIcon") },
-  order = GetSetting("scenarioOrder"),
+  order = 20,
   viewClass = ScenarioContentView,
   data = GetObservableContent("scenario"),
   statusFunc = function(data)
@@ -92,7 +90,7 @@ RegisterContent({
   formattedName = CreateAtlasMarkup("delves-regular", 16, 16) .. " " .. _Locale.DELVE,
   description = "DELVE_PH_DESC",
   icon = { atlas = AtlasType("delves-regular") },
-  order = GetSetting("delveOrder"),
+  order = 25,
   viewClass = DelveContentView,
   data = GetObservableContent("delve"),
   statusFunc = function(data) return (data and data.name) and true or false end
@@ -106,7 +104,7 @@ RegisterContent({
   formattedName = CreateAtlasMarkup("worldquest-icon-nzoth", 16, 16) .. " " .. _Locale.HORRIFIC_VISIONS,
   description = "HORRIFIC_VISIONS_PH_DESC",
   icon = { atlas = AtlasType("worldquest-icon-nzoth") },
-  order = GetSetting("horrificVisionsOrder"),
+  order = 25,
   viewClass = HorrificVisionsContentView,
   data = CombineObservableContent("scenario", "horrificVisions"),
   statusFunc = function(data) return IsInHorrificVisions() end
@@ -120,7 +118,7 @@ RegisterContent({
   formattedName = CreateAtlasMarkup("Dungeon", 16, 16) .. " " .. _Locale.DUNGEON,
   description = "DUNGEON_PH_DESC",
   icon = { atlas = AtlasType("Dungeon") },
-  order = GetSetting("dungeonOrder"),
+  order = 30,
   viewClass = DungeonContentView,
   data = GetObservableContent("dungeon"),
   statusFunc = function(data) return (data and data.name) and true or false end 
@@ -134,7 +132,7 @@ RegisterContent({
   formattedName = CreateAtlasMarkup("Dungeon", 16, 16) .. " " .. _Locale.KEYSTONE,
   description = "KEYSTONE_PH_DESC",
   icon = { atlas = AtlasType("Dungeon") },
-  order = GetSetting("keystoneOrder"),
+  order = 40,
   viewClass = KeystoneContentView,
   data = GetObservableContent("keystone"),
   statusFunc = function() return C_ChallengeMode.GetActiveKeystoneInfo() > 0 end,
@@ -161,7 +159,7 @@ RegisterContent({
   formattedName = CreateAtlasMarkup("QuestDaily", 16, 16) .. " " .. _Locale.WORLD_QUESTS,
   description = "WORLD_QUESTS_PH_DESC",
   icon = { atlas = AtlasType("QuestDaily") },
-  order = GetSetting("worldQuestsOrder"),
+  order = 60,
   viewClass = TasksContentView,
   data = GetObservableContent("worldQuests"),
   statusFunc = function(data) return (data and data.quests) and true or false end
@@ -175,7 +173,7 @@ RegisterContent({
   formattedName = CreateAtlasMarkup("QuestBonusObjective", 16, 16) .. " " .. _Locale.TASKS,
   description = "TASKS_PH_DESC",
   icon = { atlas = AtlasType("QuestBonusObjective") },
-  order = GetSetting("tasksOrder"),
+  order = 70,
   viewClass = TasksContentView,
   data = GetObservableContent("tasks"):Map(function(data)
     local normalTasks
@@ -203,7 +201,7 @@ RegisterContent({
   formattedName = CreateAtlasMarkup("QuestBonusObjective", 16, 16) .. " " .. _Locale.BONUS_TASKS,
   description = "BONUS_TASKS_PH_DESC",
   icon = { atlas = AtlasType("QuestBonusObjective") },
-  order = GetSetting("bonusTasksOrder"),
+  order = 80,
   viewClass = TasksContentView,
   data = GetObservableContent("tasks"):Map(function(data)
     local bonusTasks
@@ -232,7 +230,7 @@ RegisterContent({
   formattedName = CreateAtlasMarkup("UI-HUD-MicroMenu-Achievements-Mouseover", 16, 16) .. " " ..  _Locale.ACHIEVEMENTS,
   description = "ACHIEVEMENTS_PH_DESC",
   icon = { atlas = AtlasType("UI-HUD-MicroMenu-Achievements-Mouseover")},
-  order = GetSetting("achievementsOrder"),
+  order = 90,
   viewClass = AchievementsContentView,
   data = GetObservableContent("achievements"),
   statusFunc = function(data) return (data and data.achievements) and true or false end
@@ -246,7 +244,7 @@ RegisterContent({
   formattedName = CreateAtlasMarkup("UI-HUD-MicroMenu-AdventureGuide-Mouseover", 16, 16) .. " " .. _Locale.ACTIVITIES,
   description = "ACTIVITIES_PH_DESC",
   icon = { atlas = AtlasType("UI-HUD-MicroMenu-AdventureGuide-Mouseover") },
-  order = GetSetting("activitiesOrder"),
+  order = 100,
   viewClass = ActivitiesContentView,
   data = GetObservableContent("activities"),
   statusFunc = function(data) return (data and data.activities) and true or false end
@@ -260,7 +258,7 @@ RegisterContent({
   formattedName = CreateAtlasMarkup("Professions-Crafting-Orders-Icon", 16, 16) .. " " .. _Locale.PROFESSION,
   description = "PROFESSION_RECIPES_PH_DESC",
   icon = { atlas = AtlasType("Professions-Crafting-Orders-Icon") },
-  order = GetSetting("professionOrder"),
+  order = 110,
   viewClass = ProfessionRecipesContentView,
   data = GetObservableContent("professionRecipes"),
   statusFunc = function(data) return (data and (data.recipes or data.recraftRecipes)) and true or false end
@@ -274,7 +272,7 @@ RegisterContent({
   formattedName = CreateAtlasMarkup("UI-HUD-MicroMenu-Collections-Mouseover", 16, 16) .. " " .. _Locale.COLLECTIONS,
   description = "COLLECTIONS_PH_DESC",
   icon = { atlas = AtlasType("UI-HUD-MicroMenu-Collections-Mouseover") },
-  order = GetSetting("collectionsOrder"),
+  order = 120,
   viewClass = CollectionsContentView,
   data = GetObservableContent("collections"),
   statusFunc = function(data) return (data and data.collections) and true or false end
@@ -305,7 +303,7 @@ RegisterContent({
   formattedName = CreateAtlasMarkup("quest-campaign-available", 16, 16) .. " " .. _Locale.CAMPAIGN_QUESTS,
   description = "CAMPAIGN_QUESTS_PH_DESC",
   icon =  { atlas = AtlasType("quest-campaign-available") },
-  order = GetSetting("campaignQuestsOrder"),
+  order = 130,
   viewClass = QuestsContentView,
   data = campaignQuestsData,
   statusFunc = function(data)
@@ -327,7 +325,7 @@ RegisterContent({
   formattedName = CreateAtlasMarkup("QuestNormal", 16, 16) .. " " .. _Locale.QUESTS,
   description = "QUESTS_PH_DESC",
   icon = { atlas =  AtlasType("QuestNormal") },
-  order = GetSetting("questsOrder"),
+  order = 140,
   viewClass = QuestsContentView,
   data = GetObservableContent("quests"):Map(function(data)
     local quests = {}
@@ -393,7 +391,7 @@ if C_AddOns.IsAddOnLoaded("PetTracker") then
     formattedName = CreateAtlasMarkup("WildBattlePetCapturable", 16, 16) .. " " .. "Pets",
     description = "PETS_PH_DESC",
     icon = { atlas = AtlasType("WildBattlePetCapturable") },
-    order = GetSetting("petsOrder"),
+    order = 150,
     viewClass = PetsContentView,
     data = GetObservableContent("pets"),
     statusFunc = function(data) return (data and data.totalInZone) and true or false end

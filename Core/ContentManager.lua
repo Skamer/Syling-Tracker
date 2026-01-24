@@ -8,6 +8,10 @@
 -- ========================================================================= --
 Syling                  "SylingTracker.Core.ContentManager"                  ""
 -- ========================================================================= --
+export {
+  GetSetting      = API.GetSetting,
+}
+
 _Module                   = _M
 CONTENT_EVENTS_REGISTERED = {}
 
@@ -218,7 +222,11 @@ class "Content" (function(_ENV)
   function PrepareView(self, tracker)
     local view = self.ViewClass.Acquire()
 
-    view.Order = self.Order
+    -- Get order from settings, fallback to original order
+    local settingId = self.id .. "Order"
+    local customOrder = GetSetting(settingId)
+    -- Convert to number if it's a string, fallback to original order
+    view.Order = tonumber(customOrder) or self.Order
 
     -- Add it to tracker
     tracker:AddView(view)
@@ -514,4 +522,31 @@ function SylingTracker_UNTRACK_CONTENT(tracker, contentID)
   end
 
   content:UnregisterTracker(tracker)
+end
+
+-- Handle settings changes for content order
+__SystemEvent__()
+function SylingTracker_SETTING_CHANGED(settingId, newValue, oldValue)
+  -- Check if this is a content order setting
+  if settingId:match("Order$") then
+    local contentId = settingId:gsub("Order$", "")
+    local content = API.GetContent(contentId)
+    
+    if content then
+      -- Update all existing views for this content
+      for tracker, view in pairs(content.Views) do
+        local customOrder = GetSetting(settingId)
+        -- Convert to number if it's a string, fallback to original order
+        view.Order = tonumber(customOrder) or content.Order
+        
+        -- Trigger tracker layout refresh
+        if tracker.OnLayout then
+          tracker:OnLayout()
+        end
+        if tracker.OnAdjustHeight then
+          tracker:OnAdjustHeight()
+        end
+      end
+    end
+  end
 end

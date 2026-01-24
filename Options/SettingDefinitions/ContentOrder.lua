@@ -141,9 +141,9 @@ class "SettingDefinitions.ContentOrder" (function(_ENV)
     self.SettingControls.petsOrderEditBox = petsOrderEditBox
 
     -- Reset to Defaults Button
-    local resetButton = Widgets.SettingsButton.Acquire(false, self)
+    local resetButton = Widgets.PushButton.Acquire(false, self)
     resetButton:SetID(180)
-    resetButton:SetLabel(L.RESET .. " " .. L.CONTENT_ORDER)
+    resetButton:SetText(L.RESET .. " " .. L.CONTENT_ORDER)
     resetButton:SetScript("OnClick", function()
       self:ResetToDefaults()
     end)
@@ -169,6 +169,10 @@ class "SettingDefinitions.ContentOrder" (function(_ENV)
     SetSetting("campaignQuestsOrder", nil)
     SetSetting("questsOrder", nil)
     SetSetting("petsOrder", nil)
+    
+    -- Refresh the UI controls to show default values
+    self:ReleaseSettingControls()
+    self:BuildSettingControls()
   end
 
   function ReleaseSettingControls(self)
