@@ -1,3 +1,10 @@
+# 2.11.5
+
+###### NEW
+
+- Added "Content Order" tab to tracker settings with slider controls for configuring display order of different content types.
+---
+
 # 2.11.4
 
 - Removed temporarily or permanently the Mythic + pull percentage feature (depending on whether it can be restored with the new API).
