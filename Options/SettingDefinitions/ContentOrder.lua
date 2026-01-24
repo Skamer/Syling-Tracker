@@ -10,7 +10,8 @@ Syling          "SylingTracker_Options.SettingDefinitions.ContentOrder"     ""
 -- ========================================================================= --
 export {
   L         = _Locale,
-  newtable  = Toolset.newtable
+  newtable  = Toolset.newtable,
+  SetSetting = SylingTracker.API.SetSetting
 }
 
 __Widget__()
@@ -138,6 +139,36 @@ class "SettingDefinitions.ContentOrder" (function(_ENV)
     petsOrderEditBox:SetLabel("Pets " .. L.ORDER)
     petsOrderEditBox:BindSetting("petsOrder")
     self.SettingControls.petsOrderEditBox = petsOrderEditBox
+
+    -- Reset to Defaults Button
+    local resetButton = Widgets.SettingsButton.Acquire(false, self)
+    resetButton:SetID(180)
+    resetButton:SetLabel(L.RESET .. " " .. L.CONTENT_ORDER)
+    resetButton:SetScript("OnClick", function()
+      self:ResetToDefaults()
+    end)
+    self.SettingControls.resetButton = resetButton
+  end
+
+  function ResetToDefaults(self)
+    -- Reset all content order settings to their defaults
+    SetSetting("autoQuestsOrder", nil)
+    SetSetting("widgetsOrder", nil)
+    SetSetting("scenarioOrder", nil)
+    SetSetting("delveOrder", nil)
+    SetSetting("horrificVisionsOrder", nil)
+    SetSetting("dungeonOrder", nil)
+    SetSetting("keystoneOrder", nil)
+    SetSetting("worldQuestsOrder", nil)
+    SetSetting("tasksOrder", nil)
+    SetSetting("bonusTasksOrder", nil)
+    SetSetting("achievementsOrder", nil)
+    SetSetting("activitiesOrder", nil)
+    SetSetting("professionOrder", nil)
+    SetSetting("collectionsOrder", nil)
+    SetSetting("campaignQuestsOrder", nil)
+    SetSetting("questsOrder", nil)
+    SetSetting("petsOrder", nil)
   end
 
   function ReleaseSettingControls(self)
