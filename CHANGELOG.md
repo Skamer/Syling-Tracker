@@ -2,7 +2,7 @@
 
 ###### NEW
 
-- Added "Content Order" tab to tracker settings with slider controls for configuring display order of different content types.
+- Added "Content Order" tab to tracker settings with drag-and-drop controls for configuring display order of different content types.
 ---
 
 # 2.11.4
