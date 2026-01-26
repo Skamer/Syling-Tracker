@@ -718,39 +718,58 @@ class "SettingDefinitions.Tracker" (function(_ENV)
   -----------------------------------------------------------------------------
   --                   [Content Order] Tab Builder                           --
   -----------------------------------------------------------------------------
-  -- Content order slider configuration
-  _CONTENT_ORDER_MIN = 5
-  _CONTENT_ORDER_MAX = 200
-  _CONTENT_ORDER_STEP = 5
 
   function BuildContentOrderTab(self)
     local trackerID = self.TrackerID
     ---------------------------------------------------------------------------
-    --- Content Order Section Header 
+    --- Instructions (Header)
+    ---------------------------------------------------------------------------
+    --- Help Instructions Header (styled like macros)
     ---------------------------------------------------------------------------
     local contentOrderSectionHeader = Widgets.SettingsSectionHeader.Acquire(false, self)
     contentOrderSectionHeader:SetID(10)
-    contentOrderSectionHeader:SetTitle(L.CONTENT_ORDER)
+    contentOrderSectionHeader:SetTitle(Color.GRAY .. "Drag and drop items to reorder them in your tracker")
     self.ContentOrderTabControls.contentOrderSectionHeader = contentOrderSectionHeader
     ---------------------------------------------------------------------------
-    --- Content Order Controls 
+    --- Content Order Sortable List
     ---------------------------------------------------------------------------
-    local currentID = 20
-    for index, content in List(IterateContents()):Sort("x,y=>x.Order<y.Order"):GetIterator() do
-      local contentOrderSlider = Widgets.SettingsSlider.Acquire(false, self)
-      contentOrderSlider:SetID(currentID)
-      contentOrderSlider:SetLabel(content.FormattedName .. " " .. L.ORDER)
-      contentOrderSlider:SetMinMaxValues(_CONTENT_ORDER_MIN, _CONTENT_ORDER_MAX)
-      contentOrderSlider:SetValueStep(_CONTENT_ORDER_STEP)
-      contentOrderSlider:BindTrackerSetting(trackerID, content.id .. "Order")
-      self.ContentOrderTabControls[contentOrderSlider] = contentOrderSlider
-      currentID = currentID + 10
+    -- Build entries for sortable list, sorted by current order
+    local contentEntries = {}
+    for _, content in IterateContents() do
+      local currentOrder = GetTrackerSetting(trackerID, content.id .. "Order") or content.Order or 100
+      tinsert(contentEntries, {
+        id = content.id,
+        text = content.FormattedName,
+        icon = content.Icon,
+        order = currentOrder,
+        content = content
+      })
     end
+    
+    -- Sort by current order
+    table.sort(contentEntries, function(a, b) return a.order < b.order end)
+    
+    local sortableList = Widgets.SettingsSortableList.Acquire(false, self)
+    sortableList:SetID(20)
+    sortableList:SetPoint("TOP", contentOrderSectionHeader, "BOTTOM", 0, -15)
+    sortableList:SetSize(400, 300)
+    sortableList.EntryHeight = 28 -- Make entries taller like tracker headers
+    sortableList.EntrySpacing = 1
+    sortableList:SetEntries(contentEntries)
+    sortableList.OnOrderChanged = function(contentID, newOrder)
+      SetTrackerSetting(trackerID, contentID .. "Order", newOrder)
+      -- Force tracker refresh to apply new order
+      local tracker = GetTracker(trackerID)
+      if tracker and tracker.RefreshLayout then
+        tracker:RefreshLayout()
+      end
+    end
+    self.ContentOrderTabControls.sortableList = sortableList
     ---------------------------------------------------------------------------
     --- Reset to Defaults Button
     ---------------------------------------------------------------------------
     local resetButton = Widgets.PushButton.Acquire(false, self)
-    resetButton:SetID(currentID)
+    resetButton:SetID(30)
     resetButton:SetText(L.RESET .. " " .. L.CONTENT_ORDER)
     resetButton:SetScript("OnClick", function()
       self:ResetContentOrderToDefaults()
@@ -765,16 +784,38 @@ class "SettingDefinitions.Tracker" (function(_ENV)
       SetTrackerSetting(trackerID, content.id .. "Order", nil)
     end
     
-    -- Refresh the UI controls to show default values
-    self:ReleaseContentOrderTab()
-    self:BuildContentOrderTab()
+    -- Refresh the sortable list to show default values
+    local sortableList = self.ContentOrderTabControls.sortableList
+    if sortableList then
+      -- Rebuild entries with default order
+      local contentEntries = {}
+      for _, content in IterateContents() do
+        tinsert(contentEntries, {
+          id = content.id,
+          text = content.FormattedName,
+          icon = content.Icon,
+          order = content.Order or 100,
+          content = content
+        })
+      end
+      
+      -- Sort by default order
+      table.sort(contentEntries, function(a, b) return a.order < b.order end)
+      sortableList:SetEntries(contentEntries)
+    end
   end
   -----------------------------------------------------------------------------
   --                   [Content Order] Tab Release                           --
   -----------------------------------------------------------------------------
   function ReleaseContentOrderTab(self)
     for index, control in pairs(self.ContentOrderTabControls) do 
-      control:Release()
+      if control.Release then
+        control:Release()
+      else
+        -- Handle plain frames like instructionsFrame
+        control:Hide()
+        control:SetParent(nil)
+      end
       self.ContentOrderTabControls[index] = nil
     end
   end
@@ -808,11 +849,22 @@ class "SettingDefinitions.Tracker" (function(_ENV)
       onRelease = function() self:ReleaseMacrosTab() end,
     })
 
-    tabControl:AddTabPage({
-      name = L.CONTENT_ORDER,
-      onAcquire = function() self:BuildContentOrderTab() end,
-      onRelease = function() self:ReleaseContentOrderTab() end,
-    })
+    -- Only show Content Order tab if there are multiple content types
+    local contentCount = 0
+    for _ in IterateContents() do
+      contentCount = contentCount + 1
+      if contentCount > 1 then
+        break -- No need to count further
+      end
+    end
+    
+    if contentCount > 1 then
+      tabControl:AddTabPage({
+        name = L.CONTENT_ORDER,
+        onAcquire = function() self:BuildContentOrderTab() end,
+        onRelease = function() self:ReleaseContentOrderTab() end,
+      })
+    end
 
     tabControl:Refresh()
     tabControl:SelectTab(1)

@@ -4,6 +4,7 @@
   <Script file="ScrollBar.lua"/>
   <Script file="ScrollBox.lua"/>
   <Script file="Entry.lua"/>
+  <Script file="SortableList.lua"/>
   <Script file="GridControls.lua"/>
   <Script file="Button.lua"/>
   <Script file="CheckBox.lua"/>
