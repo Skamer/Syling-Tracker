@@ -416,6 +416,11 @@ __Static__() function API.RegisterContent(config)
   end
 
   CONTENTS[config.id] = content
+  
+  -- Automatically register tracker setting for content order
+  local orderSettingId = config.id .. "Order"
+  local defaultOrder = config.order or 100
+  SylingTracker.API.RegisterTrackerSetting({ id = orderSettingId, default = defaultOrder })
 end
 
 --- Return a content

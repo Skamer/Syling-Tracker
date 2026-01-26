@@ -735,162 +735,22 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     ---------------------------------------------------------------------------
     --- Content Order Controls 
     ---------------------------------------------------------------------------
-    -- Auto Quests Order
-    local autoQuestsOrderSlider = Widgets.SettingsSlider.Acquire(false, self)
-    autoQuestsOrderSlider:SetID(20)
-    autoQuestsOrderSlider:SetLabel(L.AUTO_QUESTS .. " " .. L.ORDER)
-    autoQuestsOrderSlider:SetMinMaxValues(_CONTENT_ORDER_MIN, _CONTENT_ORDER_MAX)
-    autoQuestsOrderSlider:SetValueStep(_CONTENT_ORDER_STEP)
-    autoQuestsOrderSlider:BindTrackerSetting(trackerID, "autoQuestsOrder")
-    self.ContentOrderTabControls.autoQuestsOrderSlider = autoQuestsOrderSlider
-
-    -- Widgets Order
-    local widgetsOrderSlider = Widgets.SettingsSlider.Acquire(false, self)
-    widgetsOrderSlider:SetID(30)
-    widgetsOrderSlider:SetLabel(L.WIDGETS .. " " .. L.ORDER)
-    widgetsOrderSlider:SetMinMaxValues(_CONTENT_ORDER_MIN, _CONTENT_ORDER_MAX)
-    widgetsOrderSlider:SetValueStep(_CONTENT_ORDER_STEP)
-    widgetsOrderSlider:BindTrackerSetting(trackerID, "widgetsOrder")
-    self.ContentOrderTabControls.widgetsOrderSlider = widgetsOrderSlider
-
-    -- Scenario Order
-    local scenarioOrderSlider = Widgets.SettingsSlider.Acquire(false, self)
-    scenarioOrderSlider:SetID(40)
-    scenarioOrderSlider:SetLabel(L.SCENARIO .. " " .. L.ORDER)
-    scenarioOrderSlider:SetMinMaxValues(_CONTENT_ORDER_MIN, _CONTENT_ORDER_MAX)
-    scenarioOrderSlider:SetValueStep(_CONTENT_ORDER_STEP)
-    scenarioOrderSlider:BindTrackerSetting(trackerID, "scenarioOrder")
-    self.ContentOrderTabControls.scenarioOrderSlider = scenarioOrderSlider
-
-    -- Delve Order
-    local delveOrderSlider = Widgets.SettingsSlider.Acquire(false, self)
-    delveOrderSlider:SetID(50)
-    delveOrderSlider:SetLabel(L.DELVE .. " " .. L.ORDER)
-    delveOrderSlider:SetMinMaxValues(_CONTENT_ORDER_MIN, _CONTENT_ORDER_MAX)
-    delveOrderSlider:SetValueStep(_CONTENT_ORDER_STEP)
-    delveOrderSlider:BindTrackerSetting(trackerID, "delveOrder")
-    self.ContentOrderTabControls.delveOrderSlider = delveOrderSlider
-
-    -- Horrific Visions Order
-    local horrificVisionsOrderSlider = Widgets.SettingsSlider.Acquire(false, self)
-    horrificVisionsOrderSlider:SetID(60)
-    horrificVisionsOrderSlider:SetLabel(L.HORRIFIC_VISIONS .. " " .. L.ORDER)
-    horrificVisionsOrderSlider:SetMinMaxValues(_CONTENT_ORDER_MIN, _CONTENT_ORDER_MAX)
-    horrificVisionsOrderSlider:SetValueStep(_CONTENT_ORDER_STEP)
-    horrificVisionsOrderSlider:BindTrackerSetting(trackerID, "horrificVisionsOrder")
-    self.ContentOrderTabControls.horrificVisionsOrderSlider = horrificVisionsOrderSlider
-
-    -- Dungeon Order
-    local dungeonOrderSlider = Widgets.SettingsSlider.Acquire(false, self)
-    dungeonOrderSlider:SetID(70)
-    dungeonOrderSlider:SetLabel(L.DUNGEON .. " " .. L.ORDER)
-    dungeonOrderSlider:SetMinMaxValues(_CONTENT_ORDER_MIN, _CONTENT_ORDER_MAX)
-    dungeonOrderSlider:SetValueStep(_CONTENT_ORDER_STEP)
-    dungeonOrderSlider:BindTrackerSetting(trackerID, "dungeonOrder")
-    self.ContentOrderTabControls.dungeonOrderSlider = dungeonOrderSlider
-
-    -- Keystone Order
-    local keystoneOrderSlider = Widgets.SettingsSlider.Acquire(false, self)
-    keystoneOrderSlider:SetID(80)
-    keystoneOrderSlider:SetLabel(L.KEYSTONE .. " " .. L.ORDER)
-    keystoneOrderSlider:SetMinMaxValues(_CONTENT_ORDER_MIN, _CONTENT_ORDER_MAX)
-    keystoneOrderSlider:SetValueStep(_CONTENT_ORDER_STEP)
-    keystoneOrderSlider:BindTrackerSetting(trackerID, "keystoneOrder")
-    self.ContentOrderTabControls.keystoneOrderSlider = keystoneOrderSlider
-
-    -- World Quests Order
-    local worldQuestsOrderSlider = Widgets.SettingsSlider.Acquire(false, self)
-    worldQuestsOrderSlider:SetID(90)
-    worldQuestsOrderSlider:SetLabel(L.WORLD_QUESTS .. " " .. L.ORDER)
-    worldQuestsOrderSlider:SetMinMaxValues(_CONTENT_ORDER_MIN, _CONTENT_ORDER_MAX)
-    worldQuestsOrderSlider:SetValueStep(_CONTENT_ORDER_STEP)
-    worldQuestsOrderSlider:BindTrackerSetting(trackerID, "worldQuestsOrder")
-    self.ContentOrderTabControls.worldQuestsOrderSlider = worldQuestsOrderSlider
-
-    -- Tasks Order
-    local tasksOrderSlider = Widgets.SettingsSlider.Acquire(false, self)
-    tasksOrderSlider:SetID(100)
-    tasksOrderSlider:SetLabel(L.TASKS .. " " .. L.ORDER)
-    tasksOrderSlider:SetMinMaxValues(_CONTENT_ORDER_MIN, _CONTENT_ORDER_MAX)
-    tasksOrderSlider:SetValueStep(_CONTENT_ORDER_STEP)
-    tasksOrderSlider:BindTrackerSetting(trackerID, "tasksOrder")
-    self.ContentOrderTabControls.tasksOrderSlider = tasksOrderSlider
-
-    -- Bonus Tasks Order
-    local bonusTasksOrderSlider = Widgets.SettingsSlider.Acquire(false, self)
-    bonusTasksOrderSlider:SetID(110)
-    bonusTasksOrderSlider:SetLabel(L.BONUS_TASKS .. " " .. L.ORDER)
-    bonusTasksOrderSlider:SetMinMaxValues(_CONTENT_ORDER_MIN, _CONTENT_ORDER_MAX)
-    bonusTasksOrderSlider:SetValueStep(_CONTENT_ORDER_STEP)
-    bonusTasksOrderSlider:BindTrackerSetting(trackerID, "bonusTasksOrder")
-    self.ContentOrderTabControls.bonusTasksOrderSlider = bonusTasksOrderSlider
-
-    -- Achievements Order
-    local achievementsOrderSlider = Widgets.SettingsSlider.Acquire(false, self)
-    achievementsOrderSlider:SetID(120)
-    achievementsOrderSlider:SetLabel(L.ACHIEVEMENTS .. " " .. L.ORDER)
-    achievementsOrderSlider:SetMinMaxValues(_CONTENT_ORDER_MIN, _CONTENT_ORDER_MAX)
-    achievementsOrderSlider:SetValueStep(_CONTENT_ORDER_STEP)
-    achievementsOrderSlider:BindTrackerSetting(trackerID, "achievementsOrder")
-    self.ContentOrderTabControls.achievementsOrderSlider = achievementsOrderSlider
-
-    -- Activities Order
-    local activitiesOrderSlider = Widgets.SettingsSlider.Acquire(false, self)
-    activitiesOrderSlider:SetID(130)
-    activitiesOrderSlider:SetLabel(L.ACTIVITIES .. " " .. L.ORDER)
-    activitiesOrderSlider:SetMinMaxValues(_CONTENT_ORDER_MIN, _CONTENT_ORDER_MAX)
-    activitiesOrderSlider:SetValueStep(_CONTENT_ORDER_STEP)
-    activitiesOrderSlider:BindTrackerSetting(trackerID, "activitiesOrder")
-    self.ContentOrderTabControls.activitiesOrderSlider = activitiesOrderSlider
-
-    -- Profession Order
-    local professionOrderSlider = Widgets.SettingsSlider.Acquire(false, self)
-    professionOrderSlider:SetID(140)
-    professionOrderSlider:SetLabel(L.PROFESSION .. " " .. L.ORDER)
-    professionOrderSlider:SetMinMaxValues(_CONTENT_ORDER_MIN, _CONTENT_ORDER_MAX)
-    professionOrderSlider:SetValueStep(_CONTENT_ORDER_STEP)
-    professionOrderSlider:BindTrackerSetting(trackerID, "professionOrder")
-    self.ContentOrderTabControls.professionOrderSlider = professionOrderSlider
-
-    -- Collections Order
-    local collectionsOrderSlider = Widgets.SettingsSlider.Acquire(false, self)
-    collectionsOrderSlider:SetID(150)
-    collectionsOrderSlider:SetLabel(L.COLLECTIONS .. " " .. L.ORDER)
-    collectionsOrderSlider:SetMinMaxValues(_CONTENT_ORDER_MIN, _CONTENT_ORDER_MAX)
-    collectionsOrderSlider:SetValueStep(_CONTENT_ORDER_STEP)
-    collectionsOrderSlider:BindTrackerSetting(trackerID, "collectionsOrder")
-    self.ContentOrderTabControls.collectionsOrderSlider = collectionsOrderSlider
-
-    -- Campaign Quests Order
-    local campaignQuestsOrderSlider = Widgets.SettingsSlider.Acquire(false, self)
-    campaignQuestsOrderSlider:SetID(160)
-    campaignQuestsOrderSlider:SetLabel(L.CAMPAIGN_QUESTS .. " " .. L.ORDER)
-    campaignQuestsOrderSlider:SetMinMaxValues(_CONTENT_ORDER_MIN, _CONTENT_ORDER_MAX)
-    campaignQuestsOrderSlider:SetValueStep(_CONTENT_ORDER_STEP)
-    campaignQuestsOrderSlider:BindTrackerSetting(trackerID, "campaignQuestsOrder")
-    self.ContentOrderTabControls.campaignQuestsOrderSlider = campaignQuestsOrderSlider
-
-    -- Quests Order
-    local questsOrderSlider = Widgets.SettingsSlider.Acquire(false, self)
-    questsOrderSlider:SetID(170)
-    questsOrderSlider:SetLabel(L.QUESTS .. " " .. L.ORDER)
-    questsOrderSlider:SetMinMaxValues(_CONTENT_ORDER_MIN, _CONTENT_ORDER_MAX)
-    questsOrderSlider:SetValueStep(_CONTENT_ORDER_STEP)
-    questsOrderSlider:BindTrackerSetting(trackerID, "questsOrder")
-    self.ContentOrderTabControls.questsOrderSlider = questsOrderSlider
-
-    -- Pets Order
-    local petsOrderSlider = Widgets.SettingsSlider.Acquire(false, self)
-    petsOrderSlider:SetID(180)
-    petsOrderSlider:SetLabel("Pets " .. L.ORDER)
-    petsOrderSlider:SetMinMaxValues(_CONTENT_ORDER_MIN, _CONTENT_ORDER_MAX)
-    petsOrderSlider:SetValueStep(_CONTENT_ORDER_STEP)
-    petsOrderSlider:BindTrackerSetting(trackerID, "petsOrder")
-    self.ContentOrderTabControls.petsOrderSlider = petsOrderSlider
-
-    -- Reset to Defaults Button
+    local currentID = 20
+    for index, content in List(IterateContents()):Sort("x,y=>x.Order<y.Order"):GetIterator() do
+      local contentOrderSlider = Widgets.SettingsSlider.Acquire(false, self)
+      contentOrderSlider:SetID(currentID)
+      contentOrderSlider:SetLabel(content.FormattedName .. " " .. L.ORDER)
+      contentOrderSlider:SetMinMaxValues(_CONTENT_ORDER_MIN, _CONTENT_ORDER_MAX)
+      contentOrderSlider:SetValueStep(_CONTENT_ORDER_STEP)
+      contentOrderSlider:BindTrackerSetting(trackerID, content.id .. "Order")
+      self.ContentOrderTabControls[contentOrderSlider] = contentOrderSlider
+      currentID = currentID + 10
+    end
+    ---------------------------------------------------------------------------
+    --- Reset to Defaults Button
+    ---------------------------------------------------------------------------
     local resetButton = Widgets.PushButton.Acquire(false, self)
-    resetButton:SetID(190)
+    resetButton:SetID(currentID)
     resetButton:SetText(L.RESET .. " " .. L.CONTENT_ORDER)
     resetButton:SetScript("OnClick", function()
       self:ResetContentOrderToDefaults()
@@ -901,23 +761,9 @@ class "SettingDefinitions.Tracker" (function(_ENV)
   function ResetContentOrderToDefaults(self)
     local trackerID = self.TrackerID
     -- Reset all content order settings to their defaults for this tracker
-    SetTrackerSetting(trackerID, "autoQuestsOrder", nil)
-    SetTrackerSetting(trackerID, "widgetsOrder", nil)
-    SetTrackerSetting(trackerID, "scenarioOrder", nil)
-    SetTrackerSetting(trackerID, "delveOrder", nil)
-    SetTrackerSetting(trackerID, "horrificVisionsOrder", nil)
-    SetTrackerSetting(trackerID, "dungeonOrder", nil)
-    SetTrackerSetting(trackerID, "keystoneOrder", nil)
-    SetTrackerSetting(trackerID, "worldQuestsOrder", nil)
-    SetTrackerSetting(trackerID, "tasksOrder", nil)
-    SetTrackerSetting(trackerID, "bonusTasksOrder", nil)
-    SetTrackerSetting(trackerID, "achievementsOrder", nil)
-    SetTrackerSetting(trackerID, "activitiesOrder", nil)
-    SetTrackerSetting(trackerID, "professionOrder", nil)
-    SetTrackerSetting(trackerID, "collectionsOrder", nil)
-    SetTrackerSetting(trackerID, "campaignQuestsOrder", nil)
-    SetTrackerSetting(trackerID, "questsOrder", nil)
-    SetTrackerSetting(trackerID, "petsOrder", nil)
+    for _, content in IterateContents() do
+      SetTrackerSetting(trackerID, content.id .. "Order", nil)
+    end
     
     -- Refresh the UI controls to show default values
     self:ReleaseContentOrderTab()
