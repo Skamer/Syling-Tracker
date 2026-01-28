@@ -736,7 +736,8 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     -- Build entries for sortable list, sorted by current order
     local contentEntries = {}
     for _, content in IterateContents() do
-      local currentOrder = GetTrackerSetting(trackerID, content.id .. "Order") or content.Order or 100
+      local currentOrder = GetTrackerSettingWithDefault(trackerID, "contentsOrder", content.id)
+
       tinsert(contentEntries, {
         id = content.id,
         text = content.FormattedName,
@@ -751,18 +752,13 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     
     local sortableList = Widgets.SettingsSortableList.Acquire(false, self)
     sortableList:SetID(20)
-    sortableList:SetPoint("TOP", contentOrderSectionHeader, "BOTTOM", 0, -15)
-    sortableList:SetSize(400, 300)
+    sortableList:SetSize(600, 450)
     sortableList.EntryHeight = 28 -- Make entries taller like tracker headers
     sortableList.EntrySpacing = 1
     sortableList:SetEntries(contentEntries)
+    Style[sortableList].marginTop = 15
     sortableList.OnOrderChanged = function(contentID, newOrder)
-      SetTrackerSetting(trackerID, contentID .. "Order", newOrder)
-      -- Force tracker refresh to apply new order
-      local tracker = GetTracker(trackerID)
-      if tracker and tracker.RefreshLayout then
-        tracker:RefreshLayout()
-      end
+      SetTrackerSetting(trackerID, "contentsOrder", newOrder, nil, contentID)
     end
     self.ContentOrderTabControls.sortableList = sortableList
     ---------------------------------------------------------------------------
@@ -771,6 +767,7 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     local resetButton = Widgets.PushButton.Acquire(false, self)
     resetButton:SetID(30)
     resetButton:SetText(L.RESET .. " " .. L.CONTENT_ORDER)
+    Style[resetButton].marginTop = 20
     resetButton:SetScript("OnClick", function()
       self:ResetContentOrderToDefaults()
     end)
@@ -781,7 +778,7 @@ class "SettingDefinitions.Tracker" (function(_ENV)
     local trackerID = self.TrackerID
     -- Reset all content order settings to their defaults for this tracker
     for _, content in IterateContents() do
-      SetTrackerSetting(trackerID, content.id .. "Order", nil)
+      SetTrackerSetting(trackerID, "contentsOrder", nil, nil, content.id)
     end
     
     -- Refresh the sortable list to show default values

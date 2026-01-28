@@ -222,9 +222,9 @@ class "Content" (function(_ENV)
   function PrepareView(self, tracker)
     local view = self.ViewClass.Acquire()
 
-    -- Get order from tracker-specific settings, fallback to original order
-    local settingId = self.id .. "Order"
-    local customOrder = API.GetTrackerSetting(tracker.id, settingId)
+    -- Get order from tracker-specific settings
+    local customOrder = API.GetTrackerSettingWithDefault(tracker.id, "contentsOrder", self.id)
+
     -- Convert to number if it's a string, fallback to original order
     view.Order = tonumber(customOrder) or self.Order
 
@@ -416,11 +416,6 @@ __Static__() function API.RegisterContent(config)
   end
 
   CONTENTS[config.id] = content
-  
-  -- Automatically register tracker setting for content order
-  local orderSettingId = config.id .. "Order"
-  local defaultOrder = config.order or 100
-  SylingTracker.API.RegisterTrackerSetting({ id = orderSettingId, default = defaultOrder })
 end
 
 --- Return a content
@@ -531,28 +526,21 @@ end
 
 -- Handle tracker-specific settings changes for content order
 __SystemEvent__()
-function SylingTracker_TRACKER_SETTING_UPDATED(settingId, trackerID, newValue)
+function SylingTracker_TRACKER_SETTING_UPDATED(settingID, trackerID, newValue, ...)
   -- Check if this is a content order setting
-  if settingId:match("Order$") then
-    local contentId = settingId:gsub("Order$", "")
-    local content = API.GetContent(contentId)
+  if settingID == "contentsOrder" then
+    local contentID = ...
+    local content = API.GetContent(contentID)
     local tracker = API.GetTracker(trackerID)
     
     if content and tracker then
       -- Update existing view for this specific tracker
       local view = content.Views[tracker]
       if view then
-        local customOrder = API.GetTrackerSetting(tracker.id, settingId)
-        -- Convert to number if it's a string, fallback to original order
-        view.Order = tonumber(customOrder) or content.Order
-        
-        -- Trigger tracker layout refresh
-        if tracker.OnLayout then
-          tracker:OnLayout()
-        end
-        if tracker.OnAdjustHeight then
-          tracker:OnAdjustHeight()
-        end
+        -- Convert to number if it's a string
+        view.Order = tonumber(newValue)
+        -- Since the tracker is notified when the order changes,
+        -- it refreshes itself automatically, so there is no need to do it here.
       end
     end
   end

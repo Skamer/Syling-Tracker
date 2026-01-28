@@ -1,11 +1,12 @@
-# 2.11.5
+# 2.12.0
 
 ###### NEW
 
-- Added "Content Order" tab to tracker settings with drag-and-drop controls for configuring display order of different content types.
+- Added "Content Order" tab to tracker settings with drag-and-drop controls for configuring display order of different content types. ([ticket #189](https://github.com/Skamer/Syling-Tracker/issues/189), [pull request #200](https://github.com/Skamer/Syling-Tracker/pull/200), thanks to @PanoramicPanda)
+
 ---
 
-# 2.11.4
+## 2.11.4
 
 - Removed temporarily or permanently the Mythic + pull percentage feature (depending on whether it can be restored with the new API).
 

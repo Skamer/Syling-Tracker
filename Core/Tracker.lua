@@ -434,8 +434,7 @@ class "Tracker" (function(_ENV)
       self.Minimized = minimized
     end
 
-    -- @TODO: Finish the handlers part
-    self.OnViewOrderChanged = function() end 
+    self.OnViewOrderChanged = function() self:Layout() end 
     self.OnViewSizeChanged = function() self:AdjustHeight() end 
   end
 end)
@@ -850,7 +849,7 @@ function SetTrackerSetting(trackerID, setting, value, notify, ...)
     end
   end
   
-  _M:FireSystemEvent("SylingTracker_TRACKER_SETTING_UPDATED", setting,  trackerID, value)
+  _M:FireSystemEvent("SylingTracker_TRACKER_SETTING_UPDATED", setting,  trackerID, value, ...)
 end
 
 __Arguments__ { String , Boolean/nil }
@@ -1236,6 +1235,30 @@ RegisterTrackerSetting({
 })
 
 RegisterTrackerSetting({
+  id = "contentsOrder",
+  defaultHandler = function(trackerID, contentID)
+    local content = API.GetContent(contentID)
+    return content and content.Order or 100
+  end,
+  saveHandler = function(trackerID, contentOrder, contentID)
+
+    if not contentID then 
+      return 
+    end 
+
+    SavedVariables.Profile()
+      .Path("trackers", trackerID, "contents", contentID)
+      .SaveValue("order", contentOrder)
+  end,
+
+  getHandler = function(trackerID, contentID)
+    return SavedVariables.Profile()
+      .Path("trackers", trackerID, "contents", contentID)
+      .GetValue("order")
+  end
+})
+
+RegisterTrackerSetting({
   id = "visibilityRules",
   structType = VisibilityRulesType,
   handler = function(trackerID, value, subSetting)
@@ -1263,9 +1286,6 @@ RegisterTrackerSetting({
     tracker.VisibilityRulesShown = GetRulesVisibilityShownForTracker(tracker)
   end
 })
-
--- Content order tracker settings are dynamically registered
--- Each content type will have its Order setting registered automatically
 -------------------------------------------------------------------------------
 --                              Observables                                  --
 -------------------------------------------------------------------------------
