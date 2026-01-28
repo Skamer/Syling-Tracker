@@ -18,6 +18,7 @@ export {
   HasObjectiveWidgets         = Utils.HasObjectiveWidgets,
   IsInHorrificVisions         = Utils.IsInHorrificVisions
 }
+
 -------------------------------------------------------------------------------
 --                             AutoQuests                                 --
 -------------------------------------------------------------------------------

@@ -1263,6 +1263,9 @@ RegisterTrackerSetting({
     tracker.VisibilityRulesShown = GetRulesVisibilityShownForTracker(tracker)
   end
 })
+
+-- Content order tracker settings are dynamically registered
+-- Each content type will have its Order setting registered automatically
 -------------------------------------------------------------------------------
 --                              Observables                                  --
 -------------------------------------------------------------------------------
