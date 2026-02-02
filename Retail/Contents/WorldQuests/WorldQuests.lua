@@ -32,7 +32,9 @@ __ActiveOnEvents__ "PLAYER_ENTERING_WORLD" "QUEST_ACCEPTED" "QUEST_REMOVED"
 function BecomeActiveOn(self, event, ...)
   if event == "QUEST_ACCEPTED" then
     local questID = ...
-    return IsWorldQuest(questID)
+    if IsWorldQuest(questID) then 
+      return true 
+    end
   elseif event == "QUEST_REMOVED" then 
     for questID in pairs(WORLD_QUESTS_CACHE) do 
       return true 

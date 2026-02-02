@@ -1,4 +1,12 @@
-# 2.12.0
+# 2.12.1
+
+###### FIXES
+
+- Fixed an issue where a world quest could be removed while the player was still in its area.
+
+---
+
+## 2.12.0
 
 ###### NEW
 
