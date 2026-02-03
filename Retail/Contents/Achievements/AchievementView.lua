@@ -15,6 +15,7 @@ export {
   RegisterUISetting                   = API.RegisterUISetting,
   FromUISetting                       = API.FromUISetting,
   GenerateUISettings                  = API.GenerateUISettings,
+  OpenAchievement                     = Utils.OpenAchievement
 }
 
 __UIElement__()
@@ -49,24 +50,13 @@ class "AchievementView" (function(_ENV)
         ChatEdit_InsertLink(achievementLink)
       end
     elseif mouseButton ~= "RightButton" then 
-      if not AchievementFrame then
-        AchievementFrame_LoadUI()
-      end
-
       if IsModifiedClick("QUESTWATCHTOGGLE") then
         C_ContentTracking.StopTracking(_G.Enum.ContentTrackingType.Achievement, achievementID, _G.Enum.ContentTrackingStopType.Manual);
         if AchievementFrameAchievements_ForceUpdate then
           AchievementFrameAchievements_ForceUpdate();
         end
-      elseif not AchievementFrame:IsShown() then
-        AchievementFrame_ToggleAchievementFrame()
-        AchievementFrame_SelectAchievement(achievementID)
-      else
-        if AchievementFrameAchievements.selection ~= achievementID then
-          AchievementFrame_SelectAchievement(achievementID)
-        else
-          AchievementFrame_ToggleAchievementFrame()
-        end
+      else 
+        OpenAchievement(achievementID)
       end
     else
       if achievementID and contextMenuPattern then 
