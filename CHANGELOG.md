@@ -4,7 +4,7 @@
 
 - Added Narcissus addon support for Achievements. Clicking on an achievement will open the Narcissus Achievement Panel if the "Use As Primary Achievement Panel" option is enabled in the Narcissus settings. ([ticket #201](https://github.com/Skamer/Syling-Tracker/issues/201))
 
---
+---
 
 ## 2.12.1
 
