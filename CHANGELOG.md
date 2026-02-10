@@ -1,4 +1,10 @@
-# 2.12.2
+###### FIXES
+
+- Updated the Wowhead links for ruRU locale. ([ticket #209](https://github.com/Skamer/Syling-Tracker/issues/209))
+
+---
+
+## 2.12.2
 
 ###### NEW
 
