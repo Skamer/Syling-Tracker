@@ -17,6 +17,11 @@
   <Script file="Activities\ActivityView.lua" />
   <Script file="Activities\ActivitiesContentView.lua"/>
   <Script file="Activities\Activities.lua" />
+  <!-- Endeavors -->
+  <Script file="Endeavors\EndeavorsData.lua" />
+  <Script file="Endeavors\EndeavorView.lua" />
+  <Script file="Endeavors\EndeavorsContentView.lua"/>
+  <Script file="Endeavors\Endeavors.lua" />
   <!-- Collections -->
   <Script file="Collections\CollectionsData.lua" />
   <Script file="Collections\CollectableView.lua"/>
