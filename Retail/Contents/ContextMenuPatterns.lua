@@ -34,6 +34,10 @@ export {
   -- Activity
   RemoveTrackedPerksActivity          = C_PerksActivities.RemoveTrackedPerksActivity,
 
+  -- Endeavor
+  RemoveTrackedInitiativeTask         = C_NeighborhoodInitiative.RemoveTrackedInitiativeTask,
+
+
   -- Collections
   EContentTrackingType                = _G.Enum.ContentTrackingType,
   EContentTrackingStopType            = _G.Enum.ContentTrackingStopType,
@@ -217,6 +221,29 @@ RegisterContextMenuPattern("activity", {
     icon = { atlas = AtlasType("transmog-icon-hidden") },
     handler = function(activityID)
       RemoveTrackedPerksActivity(activityID)
+    end
+  }
+})
+-------------------------------------------------------------------------------
+--                     Endeavor Context Menu Pattern                         --
+-------------------------------------------------------------------------------
+RegisterContextMenuPattern("endavor", {
+  {
+    id = "showDetails",
+    text = _Locale.CONTEXT_MENU_SHOW_DETAILS,
+    order = 10,
+    icon = { atlas = AtlasType("adventureguide-icon-whatsnew") },
+    handler = function(endeavorID)
+      HousingFramesUtil.OpenFrameToTaskID(endeavorID)
+    end
+  },
+  {
+    id = "stopTrackingEndeavor",
+    text = _Locale.CONTEXT_MENU_STOP_TRACKING,
+    order = 20,
+    icon = { atlas = AtlasType("transmog-icon-hidden") },
+    handler = function(endeavorID)
+      RemoveTrackedInitiativeTask(endeavorID)
     end
   }
 })

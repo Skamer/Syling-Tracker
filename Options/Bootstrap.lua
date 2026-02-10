@@ -76,6 +76,7 @@ __Async__() function SylingTracker_OPEN_OPTIONS()
     if IsRetail() then 
       panel:AddCategoryEntry({ text = L.PROFESSION, value = SettingDefinitions.Profession}, "contents")
       panel:AddCategoryEntry({ text = L.ACTIVITIES, value = SettingDefinitions.Activities}, "contents")
+      panel:AddCategoryEntry({ text = L.ENDEAVORS, value = SettingDefinitions.Endeavors}, "contents")
       panel:AddCategoryEntry({ text = L.COLLECTIONS, value = SettingDefinitions.Collections}, "contents")
 
       if C_AddOns.IsAddOnLoaded("PetTracker") then

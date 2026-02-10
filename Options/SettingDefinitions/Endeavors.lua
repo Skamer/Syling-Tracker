@@ -1,0 +1,331 @@
+-- ========================================================================= --
+--                              SylingTracker                                --
+--           https://www.curseforge.com/wow/addons/sylingtracker             --
+--                                                                           --
+--                               Repository:                                 --
+--                   https://github.com/Skamer/SylingTracker                 --
+--                                                                           --
+-- ========================================================================= --
+Syling         "SylingTracker_Options.SettingDefinitions.Endeavors"          ""
+-- ========================================================================= --
+export {
+  L                                   = _Locale,
+  newtable                            = Toolset.newtable
+}
+
+__Widget__()
+class "SettingDefinitions.Endeavors" (function(_ENV)
+  inherit "Frame"
+  -----------------------------------------------------------------------------
+  --                   [General] Tab Builder                                 --
+  -----------------------------------------------------------------------------
+  function BuildGeneralTab(self) end
+  -----------------------------------------------------------------------------
+  --                    [General] Tab Release                                --
+  -----------------------------------------------------------------------------
+  function ReleaseGeneralTab(self)
+    for index, control in pairs(self.GeneralTabControls) do 
+      control:Release()
+      self.GeneralTabControls[index] = nil
+    end
+  end
+  -----------------------------------------------------------------------------
+  --                      [Header] Tab Builder                               --
+  -----------------------------------------------------------------------------
+  function BuildHeaderTab(self)
+    local showHeaderCheckBox = Widgets.SettingsCheckBox.Acquire(false, self)
+    showHeaderCheckBox:SetID(10)
+    showHeaderCheckBox:SetLabel(L.SHOW)
+    showHeaderCheckBox:BindUISetting("endeavors.showHeader")
+    self.HeaderTabControls.showHeaderCheckBox = showHeaderCheckBox
+
+    ---------------------------------------------------------------------------
+    --- Background Section
+    ---------------------------------------------------------------------------
+    local backgroundSection = Widgets.ExpandableSection.Acquire(false, self)
+    backgroundSection:SetExpanded(false)
+    backgroundSection:SetID(30)
+    backgroundSection:SetTitle(L.BACKGROUND)
+    Style[backgroundSection].marginTop = 10
+    self.HeaderTabControls.backgroundSection = backgroundSection
+
+    local showBackgroundCheckBox = Widgets.SettingsCheckBox.Acquire(false, backgroundSection)
+    showBackgroundCheckBox:SetID(10)
+    showBackgroundCheckBox:SetLabel(L.SHOW)
+    showBackgroundCheckBox:BindUISetting("endeavors.header.showBackground")
+    self.HeaderTabControls.showBackgroundCheckBox = showBackgroundCheckBox
+
+    local backgroundColorPicker = Widgets.SettingsColorPicker.Acquire(false, backgroundSection)
+    backgroundColorPicker:SetID(20)
+    backgroundColorPicker:SetLabel(L.COLOR)
+    backgroundColorPicker:BindUISetting("endeavors.header.backgroundColor")
+    self.HeaderTabControls.backgroundColorPicker = backgroundColorPicker
+    ---------------------------------------------------------------------------
+    --- Border Section
+    ---------------------------------------------------------------------------
+    local borderSection = Widgets.ExpandableSection.Acquire(false, self)
+    borderSection:SetExpanded(false)
+    borderSection:SetID(40)
+    borderSection:SetTitle(L.BORDER)
+    self.HeaderTabControls.borderSection = borderSection
+
+    local showBorderCheckBox = Widgets.SettingsCheckBox.Acquire(false, borderSection)
+    showBorderCheckBox:SetID(10)
+    showBorderCheckBox:SetLabel(L.SHOW)
+    showBorderCheckBox:BindUISetting("endeavors.header.showBorder")
+    self.HeaderTabControls.showBorderCheckBox = showBorderCheckBox
+
+    local borderColorPicker = Widgets.SettingsColorPicker.Acquire(false, borderSection)
+    borderColorPicker:SetID(20)
+    borderColorPicker:SetLabel(L.COLOR)
+    borderColorPicker:BindUISetting("endeavors.header.borderColor")
+    self.HeaderTabControls.borderColorPicker = borderColorPicker
+
+    local borderSizeSlider = Widgets.SettingsSlider.Acquire(false, borderSection)
+    borderSizeSlider:SetID(30)
+    borderSizeSlider:SetLabel(L.SIZE)
+    borderSizeSlider:SetMinMaxValues(1, 10)
+    borderSizeSlider:BindUISetting("endeavors.header.borderSize")
+    self.HeaderTabControls.borderSizeSlider = borderSizeSlider
+    ---------------------------------------------------------------------------
+    --- Title Section
+    ---------------------------------------------------------------------------
+    local titleSection = Widgets.ExpandableSection.Acquire(false, self)
+    titleSection:SetExpanded(false)
+    titleSection:SetID(60)
+    titleSection:SetTitle(L.TITLE)
+    self.HeaderTabControls.titleSection = titleSection
+
+    local titleFont = Widgets.SettingsMediaFont.Acquire(false, titleSection)
+    titleFont:SetID(10)
+    titleFont:BindUISetting("endeavors.header.label.mediaFont")
+    self.HeaderTabControls.titleFont = titleFont
+
+    local textColorPicker = Widgets.SettingsColorPicker.Acquire(false, titleSection)
+    textColorPicker:SetID(20)
+    textColorPicker:SetLabel(L.TEXT_COLOR)
+    textColorPicker:BindUISetting("endeavors.header.label.textColor")
+    self.HeaderTabControls.textColorPicker = textColorPicker
+
+    local textTransform = Widgets.SettingsDropDown.Acquire(false, titleSection)
+    textTransform:SetID(30)
+    textTransform:SetLabel(L.TEXT_TRANSFORM)
+    textTransform:SetEntries(TEXT_TRANSFORM_ENTRIES)
+    textTransform:BindUISetting("endeavors.header.label.textTransform")
+    self.HeaderTabControls.textTransform = textTransform
+
+    local textJustifyV = Widgets.SettingsDropDown.Acquire(false, titleSection)
+    textJustifyV:SetID(40)
+    textJustifyV:SetLabel(L.TEXT_JUSITFY_V)
+    textJustifyV:SetEntries(TEXT_JUSTIFY_V_ENTRIES)
+    textJustifyV:BindUISetting("endeavors.header.label.justifyV")
+    self.HeaderTabControls.textJustifyV = textJustifyV
+
+    local textJustifyH = Widgets.SettingsDropDown.Acquire(false, titleSection)
+    textJustifyH:SetID(50)
+    textJustifyH:SetLabel(L.TEXT_JUSITFY_H)
+    textJustifyH:SetEntries(TEXT_JUSTIFY_H_ENTRIES)
+    textJustifyH:BindUISetting("endeavors.header.label.justifyH")
+    self.HeaderTabControls.textJustifyH = textJustifyH
+  end
+  -----------------------------------------------------------------------------
+  --                      [Header] Tab Release                               --
+  -----------------------------------------------------------------------------
+  function ReleaseHeaderTab(self)
+    for index, control in pairs(self.HeaderTabControls) do 
+      control:Release()
+      self.HeaderTabControls[index] = nil
+    end
+  end
+  -----------------------------------------------------------------------------
+  --                       [Endeavor] Tab Builder                            --
+  -----------------------------------------------------------------------------
+  function BuildEndeavorTab(self)
+    ---------------------------------------------------------------------------
+    --- Background Section
+    ---------------------------------------------------------------------------
+    local backgroundSection = Widgets.ExpandableSection.Acquire(false, self)
+    backgroundSection:SetExpanded(false)
+    backgroundSection:SetID(30)
+    backgroundSection:SetTitle(L.BACKGROUND)
+    Style[backgroundSection].marginTop = 10
+    self.EndeavorTabControls.backgroundSection = backgroundSection
+
+    local showBackgroundCheckBox = Widgets.SettingsCheckBox.Acquire(false, backgroundSection)
+    showBackgroundCheckBox:SetID(10)
+    showBackgroundCheckBox:SetLabel(L.SHOW)
+    showBackgroundCheckBox:BindUISetting("endeavor.showBackground")
+    self.EndeavorTabControls.showBackgroundCheckBox = showBackgroundCheckBox
+
+    local backgroundColorPicker = Widgets.SettingsColorPicker.Acquire(false, backgroundSection)
+    backgroundColorPicker:SetID(20)
+    backgroundColorPicker:SetLabel(L.COLOR)
+    backgroundColorPicker:BindUISetting("endeavor.backgroundColor")
+    self.EndeavorTabControls.backgroundColorPicker = backgroundColorPicker
+    ---------------------------------------------------------------------------
+    --- Border Section
+    ---------------------------------------------------------------------------
+    local borderSection = Widgets.ExpandableSection.Acquire(false, self)
+    borderSection:SetExpanded(false)
+    borderSection:SetID(40)
+    borderSection:SetTitle(L.BORDER)
+    self.EndeavorTabControls.borderSection = borderSection
+
+    local showBorderCheckBox = Widgets.SettingsCheckBox.Acquire(false, borderSection)
+    showBorderCheckBox:SetID(10)
+    showBorderCheckBox:SetLabel(L.SHOW)
+    showBorderCheckBox:BindUISetting("endeavor.showBorder")
+    self.EndeavorTabControls.showBorderCheckBox = showBorderCheckBox
+
+    local borderColorPicker = Widgets.SettingsColorPicker.Acquire(false, borderSection)
+    borderColorPicker:SetID(20)
+    borderColorPicker:SetLabel(L.COLOR)
+    borderColorPicker:BindUISetting("endeavor.borderColor")
+    self.EndeavorTabControls.borderColorPicker = borderColorPicker
+
+    local borderSizeSlider = Widgets.SettingsSlider.Acquire(false, borderSection)
+    borderSizeSlider:SetID(30)
+    borderSizeSlider:SetLabel(L.SIZE)
+    borderSizeSlider:SetMinMaxValues(1, 10)
+    borderSizeSlider:BindUISetting("endeavor.borderSize")
+    self.EndeavorTabControls.borderSizeSlider = borderSizeSlider
+    ---------------------------------------------------------------------------
+    --- Header Section
+    ---------------------------------------------------------------------------
+    local headerSection = Widgets.ExpandableSection.Acquire(false, self)
+    headerSection:SetExpanded(false)
+    headerSection:SetID(50)
+    headerSection:SetTitle(L.HEADER)
+    self.EndeavorTabControls.headerSection = headerSection
+    ---------------------------------------------------------------------------
+    --- Header Sub Sections
+    ---------------------------------------------------------------------------
+    local headertabControl = Widgets.TabControl.Acquire(false, headerSection)
+    headertabControl:SetID(50)
+    headertabControl:SetID(1)
+    headertabControl:AddTabPage({
+      name = L.TITLE,
+      onAcquire = function()  
+        local font = Widgets.SettingsMediaFont.Acquire(false, headertabControl)
+        font:SetID(10)
+        font:BindUISetting("endeavor.name.mediaFont")
+        self.EndeavorHeaderTitleTabControls.font = font
+
+        local textTransform = Widgets.SettingsDropDown.Acquire(false, headertabControl)
+        textTransform:SetID(20)
+        textTransform:SetLabel(L.TEXT_TRANSFORM)
+        textTransform:SetEntries(TEXT_TRANSFORM_ENTRIES)
+        textTransform:BindUISetting("endeavor.name.textTransform")
+        self.EndeavorHeaderTitleTabControls.textTransform = textTransform
+      
+      end,
+      onRelease = function()  
+        for index, control in pairs(self.EndeavorHeaderTitleTabControls) do 
+            control:Release()
+            self.EndeavorHeaderTitleTabControls[index] = nil
+        end
+      end,
+    })
+    headertabControl:Refresh()
+    headertabControl:SelectTab(1)
+    self.EndeavorTabControls.headertabControl = headertabControl
+  end
+  -----------------------------------------------------------------------------
+  --                     [Endeavor] Release Builder                          --
+  -----------------------------------------------------------------------------
+  function ReleaseEndeavorTab(self)
+    for index, control in pairs(self.EndeavorTabControls) do 
+      control:Release()
+      self.EndeavorTabControls[index] = nil
+    end
+  end
+  -----------------------------------------------------------------------------
+  --                               Methods                                   --
+  -----------------------------------------------------------------------------
+  function BuildSettingControls(self)
+    local tabControl = Widgets.TabControl.Acquire(false, self)
+    tabControl:SetID(1)
+    -- tabControl:AddTabPage({
+    --   name = "General",
+    --   onAcquire = function() self:BuildGeneralTab() end,
+    --   onRelease = function() self:ReleaseGeneralTab() end,
+    -- })
+    
+    tabControl:AddTabPage({
+      name = L.HEADER,
+      onAcquire = function() self:BuildHeaderTab() end,
+      onRelease = function() self:ReleaseHeaderTab() end,
+    })
+
+    tabControl:AddTabPage({
+      name = L.ENDEAVOR,
+      onAcquire = function() self:BuildEndeavorTab() end,
+      onRelease = function() self:ReleaseEndeavorTab() end,
+    })
+    
+
+    tabControl:Refresh()
+    tabControl:SelectTab(1)
+
+    self.SettingControls.tabControl = tabControl
+  end
+
+  function ReleaseSettingControls(self)
+    self.SettingControls.tabControl:Release()
+    self.SettingControls.tabControl = nil
+
+    self:ReleaseGeneralTab()
+    self:ReleaseHeaderTab()
+    self:ReleaseEndeavorTab()
+    
+    for index, control in pairs(self.EndeavorHeaderTitleTabControls) do 
+      control:Release()
+      self.EndeavorHeaderTitleTabControls[index] = nil
+    end
+  end
+
+  function OnBuildSettings(self)
+    self:BuildSettingControls()
+  end 
+
+  function OnRelease(self)
+    self:ReleaseSettingControls()
+  end
+  -----------------------------------------------------------------------------
+  --                               Properties                                --
+  -----------------------------------------------------------------------------
+  property "SettingControls" {
+    set = false,
+    default = function() return newtable(false, true) end 
+  }
+
+  property "GeneralTabControls" {
+    set = false, 
+    default = function() return newtable(false, true) end
+  }
+
+  property "HeaderTabControls" {
+    set = false,
+    default = function() return newtable(false, true) end
+  }
+
+  property "EndeavorTabControls" {
+    set = false,
+    default = function() return newtable(false, true) end
+  }
+
+  property "EndeavorHeaderTitleTabControls" {
+    set = false, 
+    default = function() return newtable(false, true) end
+  }
+
+end)
+-------------------------------------------------------------------------------
+--                                Styles                                     --
+-------------------------------------------------------------------------------
+Style.UpdateSkin("Default", {
+  [SettingDefinitions.Endeavors] = {
+    height        = 1,
+    layoutManager = Layout.VerticalLayoutManager(true, true)
+  }
+})

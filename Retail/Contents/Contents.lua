@@ -232,6 +232,20 @@ RegisterContent({
   statusFunc = function(data) return (data and data.activities) and true or false end
 })
 -------------------------------------------------------------------------------
+--                             Endeavors                                     --
+-------------------------------------------------------------------------------
+RegisterContent({
+  id = "endeavors",
+  name = _Locale.ENDEAVORS,
+  formattedName = CreateAtlasMarkup("housing-map-deed", 16, 16) .. " " .. _Locale.ENDEAVORS,
+  description = "ENDEAVORS_PH_DESC",
+  icon = { atlas = AtlasType("housing-map-deed") },
+  order = 110,
+  viewClass = EndeavorsContentView,
+  data = GetObservableContent("endeavors"),
+  statusFunc = function(data) return (data and data.endeavors) and true or false end
+})
+-------------------------------------------------------------------------------
 --                             Profession Recipes                            --
 -------------------------------------------------------------------------------
 RegisterContent({
@@ -240,7 +254,7 @@ RegisterContent({
   formattedName = CreateAtlasMarkup("Professions-Crafting-Orders-Icon", 16, 16) .. " " .. _Locale.PROFESSION,
   description = "PROFESSION_RECIPES_PH_DESC",
   icon = { atlas = AtlasType("Professions-Crafting-Orders-Icon") },
-  order = 110,
+  order = 120,
   viewClass = ProfessionRecipesContentView,
   data = GetObservableContent("professionRecipes"),
   statusFunc = function(data) return (data and (data.recipes or data.recraftRecipes)) and true or false end
@@ -254,7 +268,7 @@ RegisterContent({
   formattedName = CreateAtlasMarkup("UI-HUD-MicroMenu-Collections-Mouseover", 16, 16) .. " " .. _Locale.COLLECTIONS,
   description = "COLLECTIONS_PH_DESC",
   icon = { atlas = AtlasType("UI-HUD-MicroMenu-Collections-Mouseover") },
-  order = 120,
+  order = 130,
   viewClass = CollectionsContentView,
   data = GetObservableContent("collections"),
   statusFunc = function(data) return (data and data.collections) and true or false end
@@ -285,7 +299,7 @@ RegisterContent({
   formattedName = CreateAtlasMarkup("quest-campaign-available", 16, 16) .. " " .. _Locale.CAMPAIGN_QUESTS,
   description = "CAMPAIGN_QUESTS_PH_DESC",
   icon =  { atlas = AtlasType("quest-campaign-available") },
-  order = 130,
+  order = 140,
   viewClass = QuestsContentView,
   data = campaignQuestsData,
   statusFunc = function(data)
@@ -307,7 +321,7 @@ RegisterContent({
   formattedName = CreateAtlasMarkup("QuestNormal", 16, 16) .. " " .. _Locale.QUESTS,
   description = "QUESTS_PH_DESC",
   icon = { atlas =  AtlasType("QuestNormal") },
-  order = 140,
+  order = 150,
   viewClass = QuestsContentView,
   data = GetObservableContent("quests"):Map(function(data)
     local quests = {}
@@ -373,7 +387,7 @@ if C_AddOns.IsAddOnLoaded("PetTracker") then
     formattedName = CreateAtlasMarkup("WildBattlePetCapturable", 16, 16) .. " " .. "Pets",
     description = "PETS_PH_DESC",
     icon = { atlas = AtlasType("WildBattlePetCapturable") },
-    order = 150,
+    order = 160,
     viewClass = PetsContentView,
     data = GetObservableContent("pets"),
     statusFunc = function(data) return (data and data.totalInZone) and true or false end

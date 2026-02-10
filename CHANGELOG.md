@@ -1,3 +1,9 @@
+## 2.13.0
+
+###### NEW
+
+- Added support for Endeavors. ([ticket #199](https://github.com/Skamer/Syling-Tracker/issues/199))
+
 ###### FIXES
 
 - Updated the Wowhead links for ruRU locale. ([ticket #209](https://github.com/Skamer/Syling-Tracker/issues/209))
