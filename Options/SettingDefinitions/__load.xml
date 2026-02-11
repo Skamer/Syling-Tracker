@@ -14,6 +14,7 @@
   <Script file="Keystone.lua" />
   <Script file="Profession.lua" />
   <Script file="Activities.lua" />
+  <Script file="Endeavors.lua" />
   <Script file="Collections.lua" />
   <Script file="Pets.lua" />
 </Ui>
