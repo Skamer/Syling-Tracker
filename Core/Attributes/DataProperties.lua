@@ -148,9 +148,9 @@ class "__DataProperties__" (function(_ENV)
         if isMap or isArray then 
           target["Iterate"..methodPluralPart] = function(self)
             if isMap then 
-              return pairs(self[collectionIndex])
+              return pairs(self[collectionIndex] or {})
             elseif isArray then 
-              return self[collectionIndex] and self[collectionIndex]:GetIterator()
+              return self[collectionIndex] and self[collectionIndex]:GetIterator() or ipairs({})
             end
           end
 
