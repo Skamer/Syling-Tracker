@@ -30,6 +30,7 @@ if not L then return end
 -- L.HIDE_OWNED_PETS = "Hide owned pets"
 -- L.HIDE_WHEN_CHARACTER_IS_MAX_LEVEL = "Hide when the character is max level"
 -- L.HORRIFIC_VISIONS = "Horrific Visions"
+-- L.ICON = "Icon"
 -- L.MACROS = "Macros"
 -- L.NEW_QUEST_INDICATOR_TEXT_FORMAT = "New Quest Indicator Text Format"
 -- L.NEW_QUEST_REMOVE_POLICIES = "A quest is no longer considered new when:"

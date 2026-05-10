@@ -1,4 +1,12 @@
-# 2.13.4
+# 2.13.5
+
+###### NEW
+
+- Added an option for hiding the achievement icon.
+
+---
+
+## 2.13.4
 
 ###### FIXES
 

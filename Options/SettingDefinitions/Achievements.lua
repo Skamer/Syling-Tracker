@@ -292,11 +292,26 @@ class "SettingDefinitions.Achievements" (function(_ENV)
       end
     })
 
+    headertabControl:AddTabPage({
+      name = L.ICON,
+      onAcquire = function()
+        local showCheckBox = Widgets.SettingsCheckBox.Acquire(false, headertabControl)
+        showCheckBox:SetID(10)
+        showCheckBox:SetLabel(L.SHOW)
+        showCheckBox:BindUISetting("achievement.showIcon")
+        self.AchievementHeaderIconTabControls.showCheckBox = showCheckBox
+      end,
+      onRelease = function()
+        for index, control in pairs(self.AchievementHeaderIconTabControls) do 
+          control:Release()
+          self.AchievementHeaderIconTabControls[index] = nil
+        end
+      end
+    })
+
     headertabControl:Refresh()
     headertabControl:SelectTab(1)
     self.AchievementTabControls.headertabControl = headertabControl
-
-
   end
 
   function ReleaseAchievementTab(self)
@@ -382,6 +397,11 @@ class "SettingDefinitions.Achievements" (function(_ENV)
 
   property "AchievementHeaderDescTabControls" {
     set = false, 
+    default = function() return newtable(false, true) end
+  }
+
+  property "AchievementHeaderIconTabControls" {
+    set = false,
     default = function() return newtable(false, true) end
   }
 

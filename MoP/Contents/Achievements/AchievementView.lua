@@ -109,6 +109,7 @@ GenerateUISettings("achievement.objectives", "objectives")
 
 RegisterUISetting("achievement.showBackground", true)
 RegisterUISetting("achievement.showBorder", true)
+RegisterUISetting("achievement.showIcon", true)
 RegisterUISetting("achievement.backgroundColor", Color(35/255, 40/255, 46/255, 0.73))
 RegisterUISetting("achievement.borderColor", Color(0, 0, 0, 0.4))
 RegisterUISetting("achievement.borderSize", 1)
@@ -121,6 +122,18 @@ RegisterUISetting("achievement.desc.textColor", Color.WHITE)
 RegisterUISetting("achievement.desc.justifyH", "LEFT")
 RegisterUISetting("achievement.desc.justifyV", "TOP")
 RegisterUISetting("achievement.desc.textTransform", "NONE")
+-------------------------------------------------------------------------------
+--                              Observables                                  --
+-------------------------------------------------------------------------------
+function FromDescriptionLocation()
+  return FromUISetting("achievement.showIcon"):Map(function(showIcon)
+    return {
+      Anchor("TOP", 0, -5, "Name", "BOTTOM"),
+      showIcon and Anchor("LEFT", 5, 0, "Icon", "RIGHT") or Anchor("LEFT", 5, 0),
+      Anchor("RIGHT", -5, 0)
+    }
+  end)
+end
 -------------------------------------------------------------------------------
 --                                Styles                                     --
 -------------------------------------------------------------------------------
@@ -163,15 +176,12 @@ Style.UpdateSkin("Default", {
         justifyH                      = FromUISetting("achievement.desc.justifyH"),
         justifyV                      = FromUISetting("achievement.desc.justifyV"),
         textTransform                 = FromUISetting("achievement.desc.textTransform"),
-        location                      = {
-                                        Anchor("TOP", 0, -5, "Name", "BOTTOM"),
-                                        Anchor("LEFT", 5, 0, "Icon", "RIGHT"),
-                                        Anchor("RIGHT")
-                                      }
+        location                      = FromDescriptionLocation(),
       },
 
       Icon = {
         fileID                        = FromUIProperty("AchievementIconFileID"),
+        visible                       = FromUISetting("achievement.showIcon"),
         width                         = 32,
         height                        = 32,
         texCoords                     = { left = 0.07,  right = 0.93, top = 0.07, bottom = 0.93 } ,

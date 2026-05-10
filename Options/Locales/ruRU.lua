@@ -19,6 +19,7 @@ if not L then return end
 
 -- L.COLUMNS = "Columns"
 -- L.HIDE_OWNED_PETS = "Hide owned pets"
+-- L.ICON = "Icon"
 -- L.NEW_QUEST_INDICATOR_TEXT_FORMAT = "New Quest Indicator Text Format"
 -- L.NEW_QUEST_REMOVE_POLICIES = "A quest is no longer considered new when:"
 -- L.NEW_QUEST_REMOVE_POLICIES_MAX_AGE = "- it is older than x seconds"
