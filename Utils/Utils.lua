@@ -184,5 +184,16 @@ function GetDirectionalOffset(point, x, y, towardCenter)
   return x, y
 end
 
+-- From the 12.1, GetScaledCursorPosition has been removed, so we need to create 
+-- this function for supporting all game versions.
+function X_GetScaledCursorPosition()
+  if IsRetail() then 
+    return InputUtil.GetCursorPosition(UIParent)
+  end
+
+  return GetScaledCursorPosition()
+end
+
 Utils.GetOppositePoint = GetOppositePoint
 Utils.GetDirectionalOffset = GetDirectionalOffset
+Utils.GetScaledCursorPosition = X_GetScaledCursorPosition

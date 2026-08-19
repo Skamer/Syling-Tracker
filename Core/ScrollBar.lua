@@ -9,8 +9,9 @@
 Syling                   "SylingTracker.Core.ScrollBar"                      ""
 -- ========================================================================= --
 export {
-  RegisterSetting   = API.RegisterSetting,
-  GetSetting        = API.GetSetting
+  RegisterSetting           = API.RegisterSetting,
+  GetSetting                = API.GetSetting,
+  GetScaledCursorPosition   = Utils.GetScaledCursorPosition
 }
 
 LEFT_BUTTON_NAME = "LeftButton"

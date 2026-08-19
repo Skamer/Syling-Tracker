@@ -10,6 +10,9 @@ Syling              "SylingTracker_Options.Widgets.ScrollBar"                ""
 -- ========================================================================= --
 namespace               "SylingTracker.Options.Widgets"
 -- ========================================================================= --
+export {
+  GetScaledCursorPosition = SylingTracker.Utils.GetScaledCursorPosition
+}
 
 LEFT_BUTTON_NAME = "LeftButton"
 

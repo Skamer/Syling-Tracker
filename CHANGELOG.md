@@ -1,4 +1,14 @@
-# 2.13.6
+# 2.13.7
+
+- Updated the toc version for the 12.1.0
+
+###### FIXES
+
+- Fixed an error that prevented the scrollbar from working.
+
+---
+
+## 2.13.6
 
 - Updated the toc version.
 
