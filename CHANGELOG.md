@@ -1,4 +1,12 @@
-# 2.13.7
+# 2.13.8
+
+###### NEW
+
+- Added a content for showing only the quests on the current zone. ([ticket #235](https://github.com/Skamer/Syling-Tracker/issues/235))
+
+---
+
+## 2.13.7
 
 - Updated the toc version for the 12.1.0
 

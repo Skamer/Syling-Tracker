@@ -346,6 +346,40 @@ RegisterContent({
   end
 })
 -------------------------------------------------------------------------------
+--                        Quests - Current Zone                              --
+-------------------------------------------------------------------------------
+RegisterContent({
+  id = "questsCurrentZone",
+  name = _Locale.QUESTS .. " - " .. _Locale.CURRENT_ZONE,
+  formattedName = string.format("%s %s - %s", CreateAtlasMarkup("QuestNormal", 16, 16), _Locale.QUESTS, _Locale.CURRENT_ZONE),
+  description = "Contains the quests in the current zone",
+  icon = { atlas = AtlasType("QuestNormal")},
+  order = 135,
+  viewClass = QuestsContentView,
+  data = GetObservableContent("quests"):Map(function(data)
+    local currentZoneQuest = {}
+
+    if data and data.quests then 
+      local currentZone = GetRealZoneText()
+      local currentMinimapZone = GetMinimapZoneText()
+
+      for questID, questData in pairs(data.quests) do 
+        local isOnMap = questData.isOnMap
+        local hasLocalPOI = questData.hasLocalPOI
+        local header = questData.header
+
+        
+        if isOnMap or hasLocalPOI or header == currentZone or header == currentMinimapZone then 
+          currentZoneQuest[questID] = questData
+        end
+      end
+    end
+
+    return { quests = currentZoneQuest }
+  end),
+  statusFunc = function(data) return (data and data.quests) and true or false end,
+})
+-------------------------------------------------------------------------------
 --                             Dungeon Quests                                --
 -------------------------------------------------------------------------------
 -- RegisterContent({
