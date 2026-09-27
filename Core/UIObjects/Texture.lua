@@ -12,6 +12,10 @@ export {
   GetMediaAtlas = API.GetMediaAtlas
 }
 
+-- SVG support is added from the version 12.1.0. 
+-- TODO: We need to determine if this is the case for the classic versions.
+local SUPPORT_SVG = UIParent.CreateVectorGraphics and true or false
+
 struct "MediaTextureType" {
   { name = "name", type = String }, -- deprecated
   { name = "type", type = String }, -- deprecated 
@@ -39,6 +43,7 @@ class "Texture" (function(_ENV)
       Style[self].size      = CLEAR
       Style[self].atlas     = CLEAR
       Style[self].color     = CLEAR
+      if SUPPORT_SVG then Style[self].svg = CLEAR end
       return 
     end
 
@@ -48,6 +53,7 @@ class "Texture" (function(_ENV)
       Style[self].texCoords = CLEAR
       Style[self].color     = CLEAR
       Style[self].file      = CLEAR
+      if SUPPORT_SVG then Style[self].svg = CLEAR end
       Style[self].atlas     = mediaTexture.atlas
       
       if not mediaTexture.atlas.useAtlasSize and mediaTexture.size then 
@@ -56,6 +62,7 @@ class "Texture" (function(_ENV)
     elseif mediaTexture.atlas then 
       Style[self].color     = CLEAR
       Style[self].atlas     = CLEAR
+      if SUPPORT_SVG then Style[self].svg = CLEAR end
       Style[self].texCoords = atlasInfo.texCoords or CLEAR
 
       local atlasInfo = GetMediaAtlas(mediaTexture.atlas.atlas)
@@ -69,11 +76,13 @@ class "Texture" (function(_ENV)
     elseif mediaTexture.file then 
       Style[self].atlas     = CLEAR
       Style[self].color     = CLEAR
+      if SUPPORT_SVG then Style[self].svg = CLEAR end
       Style[self].file      = mediaTexture.file
       Style[self].texCoords = mediaTexture.texCoords or CLEAR
       size                  = mediaTexture.size
     elseif mediaTexture.color then 
       Style[self].color     = mediaTexture.color
+      if SUPPORT_SVG then Style[self].svg = CLEAR end
       Style[self].file      = CLEAR
       Style[self].atlas     = CLEAR
       Style[self].texCoords = CLEAR
@@ -99,13 +108,21 @@ class "Texture" (function(_ENV)
       Style[self].atlas     = value
       Style[self].color     = CLEAR
       Style[self].file      = CLEAR
+      if SUPPORT_SVG then Style[self].svg = CLEAR end
     elseif from == "file" then
       Style[self].file      = value
       Style[self].atlas     = CLEAR
       Style[self].color     = CLEAR
+      if SUPPORT_SVG then Style[self].svg = CLEAR end
     elseif from == "color" then
       Style[self].color     = value
       Style[self].atlas     = CLEAR
+      Style[self].file      = CLEAR
+      if SUPPORT_SVG then Style[self].svg = CLEAR end
+    elseif SUPPORT_SVG and from == "svg" then 
+      Style[self].svg       = value
+      Style[self].atlas     = CLEAR
+      Style[self].color     = CLEAR
       Style[self].file      = CLEAR
     end
   end

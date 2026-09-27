@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="32"
+     height="32"
+     viewBox="0 0 32 32">
+
+  <circle
+      cx="16"
+      cy="16"
+      r="13"
+      fill="none"
+      stroke="#D4A017"
+      stroke-width="3"/>
+
+  <polygon
+      points="9,10 13,12 19,10 23,12 23,22 19,20 13,22 9,20"
+      fill="#D8B67A"
+      stroke="#7A5425"
+      stroke-width="0.7"/>
+
+  <path
+      d="M11 18 Q14 14 21 16"
+      fill="none"
+      stroke="#6F4A1D"
+      stroke-width="1"
+      stroke-dasharray="1.5 1.5"/>
+
+  <circle
+      cx="12"
+      cy="17"
+      r="1.3"
+      fill="#6F4A1D"/>
+
+</svg>

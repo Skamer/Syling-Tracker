@@ -205,7 +205,7 @@ class "Content" (function(_ENV)
     -- Create the metadata. 
     -- The metadata is usefull for giving the context and additional info which 
     -- may be used by the views. 
-    local metadata = {
+    local contentMetadata = {
       contentID = self.id, 
       contentName = self.Name,
       contentIcon = self.Icon,
@@ -213,7 +213,9 @@ class "Content" (function(_ENV)
       contentDescription = self.Description,
     }
 
-    for _, view in pairs(self.Views) do
+    for tracker, view in pairs(self.Views) do
+      local metadata = System.Toolset.clone(contentMetadata)
+      metadata.trackerID = tracker.id 
       view:UpdateView(data, metadata)
     end
   end

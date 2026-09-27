@@ -1,4 +1,19 @@
-# 2.13.8
+# 2.14.0
+
+> **IMPORTANT !**
+> This version requires Scorpio version r262 or higher.
+
+###### CHANGES
+
+- Removed the content "Quest - Current Map", replaced by the filter bar.
+
+###### NEW
+
+- Added a filter bar for quests and campaign quests. There are 4 filters : quests on current zone, completed quests, dungeon quests and raid quests. ([ticket #235](https://github.com/Skamer/Syling-Tracker/issues/235))
+
+---
+
+## 2.13.8
 
 ###### NEW
 
