@@ -83,6 +83,21 @@ class "Tracker" (function(_ENV)
     local contentHeight = visibleHeight + yRange
     scrollBar:SetVisibleExtentPercentage(visibleHeight / contentHeight)
 
+    -- Synchronize the scroll bar position
+    if yRange > 0 then 
+      local currentScroll = scrollFrame:GetVerticalScroll()
+
+      -- if the content has shrunk, cap the scroll at the maximum.
+      if currentScroll > yRange then
+          currentScroll = yRange
+          scrollFrame:SetVerticalScroll(currentScroll)
+      end
+
+      scrollBar:SetScrollPercentage(currentScroll / yRange, false)
+    else 
+      scrollBar:SetScrollPercentage(0, false)
+    end
+
     if self.ShowScrollBar and scrollBar:HasScrollableExtent() then 
       scrollBar:Show()
     else

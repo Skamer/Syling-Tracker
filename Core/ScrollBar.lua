@@ -315,8 +315,13 @@ class "ScrollBar" (function(_ENV)
     return self.ScrollPercentage
   end
 
-  function SetScrollPercentage(self, percentage)
+  __Arguments__ { Number, Boolean/true}
+  function SetScrollPercentage(self, percentage, triggerEvent)
     self.ScrollPercentage = Saturate(percentage)
+
+    if (triggerEvent) then 
+      self:OnScroll(self.ScrollPercentage)
+    end
   end
 
   function SetScrollStepPercentage(self, percentage)
@@ -388,7 +393,6 @@ class "ScrollBar" (function(_ENV)
     default = 0,
     handler = function(self, value)
       self:Update()
-      self:OnScroll(value)
     end
   }
 
