@@ -445,7 +445,14 @@ end
 
 
 __SystemEvent__ "ZONE_CHANGED" "ZONE_CHANGED_NEW_AREA" "AREA_POIS_UPDATED"
-function QUESTS_ON_MAP_UPDATE()
+__AsyncSingle__() function QUESTS_ON_MAP_UPDATE()
+  -- The WoW API sometimes fails to provide Map and POI information when these events occur.
+  -- To ensure we get updated data, we must wait for the next frame or apply a slight delay.
+  --
+  -- We could use Next, but since these 3 events are often triggered simultaneously, 
+  -- we combine AsyncSingle and Delay to merge them into a single call, and avoi unnecessary extra updates.
+  Delay(0.1)
+
   QUESTS_UPDATE()
 
   _M:UpdateDistance()
