@@ -59,6 +59,14 @@ class "SettingDefinitions.Quests" (function(_ENV)
       self.GeneralTabControls.questNewRemoveOnProgressCheckBox = questNewRemoveOnProgressCheckBox
       Style[questNewRemoveOnProgressCheckBox].marginLeft = 20
     end
+
+    if IsRetail() then 
+      local showFilters = Widgets.SettingsCheckBox.Acquire(false, self)
+      showFilters:SetID(60)
+      showFilters:SetLabel(L.SHOW_FILTERS)
+      showFilters:BindUISetting("quests.showFilters")
+      self.GeneralTabControls.showFilters = showFilters
+    end
     -- ---------------------------------------------------------------------------
     -- --- Background Section
     -- ---------------------------------------------------------------------------

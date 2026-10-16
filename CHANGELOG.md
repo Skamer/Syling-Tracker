@@ -1,4 +1,12 @@
-# 2.14.0
+# 2.14.1
+
+###### NEW
+
+- Added an option to hide the filter bar for quests.
+
+---
+
+## 2.14.0
 
 > **IMPORTANT !**
 > This version requires Scorpio version r262 or higher.

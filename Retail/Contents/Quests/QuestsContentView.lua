@@ -12,6 +12,7 @@ export {
   FromUIProperty                      = Wow.FromUIProperty,
   RegisterUISetting                   = API.RegisterUISetting,
   FromUISetting                       = API.FromUISetting,
+  FromUISettings                      = API.FromUISettings,
   GenerateUISettings                  = API.GenerateUISettings,
   GetCacheValue                       = API.GetCacheValue,
   SetCacheValue                       = API.SetCacheValue
@@ -139,6 +140,10 @@ class "QuestsContentView"(function(_ENV)
   end
 
   function ApplyFilters(self, questsData)
+    if not self.EnableFilters then 
+      return questsData
+    end
+
     if not self:HasAnyFilter() then
         return questsData
     end
@@ -292,6 +297,12 @@ class "QuestsContentView"(function(_ENV)
     handler = function(self, new) self:SetCategoriesShown(new) end
   }
 
+  property "EnableFilters" {
+    type = Boolean,
+    default = true,
+    handler = function(self) self:RefreshView() end
+  }
+
   -- Important: Don't forget to use field for filter properties.
   property "FilterInZoneQuests" { 
     type = Boolean,
@@ -340,18 +351,44 @@ class(tostring(QuestsContentView) .. ".Categories") { QuestCategoryListView }
 --                              UI Settings                                  --
 -------------------------------------------------------------------------------
 RegisterUISetting("quests.showCategories", false)
+RegisterUISetting("quests.showFilters", true)
 
 GenerateUISettings("quests", "content")
 -------------------------------------------------------------------------------
 --                              Observables                                  --
 -------------------------------------------------------------------------------
+function FromFilterBarLocation()
+  return FromUISettings("quests.showHeader"):Map(function(showHeader)
+    if showHeader then
+      return {
+        Anchor("TOP", 0, -10, "Header", "BOTTOM" ),
+        Anchor("LEFT"), Anchor("RIGHT")
+      }
+    end
+
+    return {
+      Anchor("TOP"),
+      Anchor("LEFT"),
+      Anchor("RIGHT")
+    }
+  end)
+end
+
 function FromQuestsAndCategoriesLocation()
-  return FromUISetting("quests.showHeader"):Map(function(visible)
-    if visible then 
+  return FromUISettings("quests.showHeader", "quests.showFilters"):Map(function(showHeader, showFilters)
+    if showHeader then 
+      return {
+        Anchor("TOP", 0, -10, showFilters and "FilterBar" or "Header", "BOTTOM"),
+        Anchor("LEFT"),
+        Anchor("RIGHT")        
+      }
+    end
+
+    if showFilters then 
       return {
         Anchor("TOP", 0, -10, "FilterBar", "BOTTOM"),
         Anchor("LEFT"),
-        Anchor("RIGHT")        
+        Anchor("RIGHT")
       }
     end
 
@@ -390,6 +427,7 @@ Style.UpdateSkin("Default", {
 
   [QuestsContentView] = {
     showCategories                    = FromUISetting("quests.showCategories"),
+    enableFilters                     = FromUISetting("quests.showFilters"),
 
     Header = {
       visible                         = FromUISetting("quests.showHeader"),
@@ -409,6 +447,7 @@ Style.UpdateSkin("Default", {
     },
 
     FilterBar = {
+      visible                         = FromUISetting("quests.showFilters"),
       elementType                     = QuestsContentFilterBarItem,
       elementHeight                   = 24,
       elementWidth                    = 24,
@@ -417,10 +456,7 @@ Style.UpdateSkin("Default", {
       vSpacing                        = 5,
       leftToRight                     = true,
       
-      location                        = {
-                                        Anchor("TOP", 0, -10, "Header", "BOTTOM" ),
-                                        Anchor("LEFT"), Anchor("RIGHT")
-                                      }
+      location                        = FromFilterBarLocation()
     },
 
     [QuestsContentView.Quests] = {
