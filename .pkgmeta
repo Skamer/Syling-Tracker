@@ -13,8 +13,6 @@ externals:
     url: https://repos.wowace.com/wow/libstub/trunk
   Libs/CallbackHandler-1.0:
     url: https://repos.wowace.com/wow/callbackhandler/trunk/CallbackHandler-1.0
-  Libs/LibCompress:
-    url: https://repos.wowace.com/wow/libcompress/trunk
   Libs/LibDataBroker-1.1:
     url: https://repos.wowace.com/wow/libdatabroker-1-1
   Libs/LibDBIcon-1.0:
