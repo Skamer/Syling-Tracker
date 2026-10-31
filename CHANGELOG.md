@@ -1,4 +1,12 @@
-# 2.14.1
+# 2.14.2
+
+##### Forever
+
+- Allowed the addon to load in Forever.
+
+---
+
+## 2.14.1
 
 ###### NEW
 
