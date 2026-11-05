@@ -64,9 +64,13 @@ end
 
 __AutoCache__()
 function IsVanilla()
-  return WOW_TOC_VERSION >= 10000 and WOW_TOC_VERSION < 20000
+  return WOW_TOC_VERSION >= 10000 and WOW_TOC_VERSION < 16000
 end
 
+__AutoCache__()
+function IsForever()
+  return WOW_TOC_VERSION >= 16000 and WOW_TOC_VERSION < 20000
+end
 function GetTimePlayed()
   if STARTED_TIME_PLAYED == 0 then 
     return 0
@@ -84,6 +88,7 @@ Utils.IsMidnight          = IsMidnight
 Utils.IsMoP               = IsMoP 
 Utils.IsCataclysm         = IsCataclysm
 Utils.IsVanilla           = IsVanilla
+Utils.IsForever           = IsForever
 
 function OnLoad(self)
   self:InitTimePLayed()

@@ -27,7 +27,7 @@ Utils\__load.xml
 Core\__load.xml
 
 # Vanilla files
-Vanilla\__load.xml
+Forever\__load.xml
 
 # Skin files 
 Skins\__load.xml

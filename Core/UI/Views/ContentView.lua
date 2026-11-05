@@ -95,14 +95,14 @@ end)
 function FromNormalMediaTexture()
   return FromUIProperty("Expanded"):Map(function(expanded)
     if expanded then 
-      if IsRetail() then 
+      if IsRetail() or IsForever() then 
         return { atlas = AtlasType("UI-HUD-Minimap-Zoom-Out") }
       else
         return { atlas = AtlasType("minimal-scrollbar-small-arrow-top")}
       end
     end
 
-    if IsRetail() then
+    if IsRetail() or IsForever() then
       return { atlas = AtlasType("UI-HUD-Minimap-Zoom-In") }
     else
       return { atlas = AtlasType("minimal-scrollbar-small-arrow-bottom") }
