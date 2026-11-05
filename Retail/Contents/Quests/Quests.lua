@@ -239,7 +239,7 @@ function UpdateQuest(self, questID)
   questData.totalTime = totalTime
   questData.elapsedTime = elapsedTime
   questData.startTime =  elapsedTime and GetTime() - elapsedTime
-  questData.hasTimer = (totalTime and elapsedTime) and true
+  questData.hasTimer = (totalTime and elapsedTime and totalTime > elapsedTime) and true
   questData.isOnMap = isOnMap
   questData.hasLocalPOI = hasLocalPOI
   -- questData.questType= tag

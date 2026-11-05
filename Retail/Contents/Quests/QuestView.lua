@@ -321,6 +321,7 @@ class "QuestView" (function(_ENV)
       Style[self].Content.Timer.visible     = true 
       Style[self].Content.Timer.startTime   = data.startTime
       Style[self].Content.Timer.duration    = data.totalTime
+      Style[self].Content.Timer.started     = true
       self.ObjectiveHasTimer        = true 
     else
       Style[self].Content.Timer     = NIL

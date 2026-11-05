@@ -1,4 +1,16 @@
-# 2.14.3
+# 2.14.4
+
+###### FIXES
+
+- Fixed an issue where the quest timer wouldn't start.
+
+##### Forever
+
+- Fixed a performance issue when interacting with the tracker scrollbar.
+
+---
+
+## 2.14.3
 
 ##### Forever
 

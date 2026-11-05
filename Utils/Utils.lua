@@ -187,7 +187,7 @@ end
 -- From the 12.1, GetScaledCursorPosition has been removed, so we need to create 
 -- this function for supporting all game versions.
 function X_GetScaledCursorPosition()
-  if IsRetail() then 
+  if IsRetail() or IsForever() then 
     return InputUtil.GetCursorPosition(UIParent)
   end
 

@@ -19,9 +19,9 @@ TICKER                                = nil
 
 local function RegisterTimer(timer)
   if not TICKER or TICKER:IsCancelled() then 
-    TICKER = C_Timer.NewTicker(0.5, function()
+    TICKER = C_Timer.NewTicker(0.1, function()
       for timer in pairs(TIMERS) do 
-        timer:OnTick(0.5)
+        timer:OnTick(0.1)
       end
     end)
   end
