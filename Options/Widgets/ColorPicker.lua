@@ -74,7 +74,7 @@ class "ColorPicker" (function(_ENV)
       -- As the Hook remains until to next reload, we need to check a hook has been 
       -- yet registered for avoiding useless duplicate calls.
       if not COLOR_PICKER_CONFIRM_BUTTON_HOOKED then 
-        local okayButton = IsRetail() and ColorPickerFrame.Footer.OkayButton or ColorPickerOkayButton
+        local okayButton = (IsRetail() or IsForever()) and ColorPickerFrame.Footer.OkayButton or ColorPickerOkayButton
         
         okayButton:HookScript("OnClick", function()
           local extraInfo = ColorPickerFrame:GetExtraInfo()

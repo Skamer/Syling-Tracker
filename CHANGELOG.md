@@ -1,4 +1,15 @@
-# 2.14.4
+# 2.14.5
+
+##### Forever
+
+###### FIXES
+
+- Fixed an error preventing the color picker from opening. ([ticket #241](https://github.com/Skamer/Syling-Tracker/issues/241))
+- Fixed an error triggered when a quest has a quest item.
+
+---
+
+## 2.14.4
 
 ###### FIXES
 

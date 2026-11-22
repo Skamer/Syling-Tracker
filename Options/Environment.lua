@@ -10,6 +10,7 @@ Syling                  "SylingTracker_Options"                              ""
 -- ========================================================================= --
 export {
   IsRetail                      = SylingTracker.Utils.IsRetail,
+  IsForever                     = SylingTracker.Utils.IsForever,
   IsCataclysm                   = SylingTracker.Utils.IsCataclysm,
   IsVanilla                     = SylingTracker.Utils.IsVanilla
 }

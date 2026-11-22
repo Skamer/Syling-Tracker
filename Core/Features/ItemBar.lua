@@ -52,7 +52,7 @@ class "ItemButton"(function(_ENV)
     end
 
     local questLogIndex
-    if IsRetail() then 
+    if IsRetail() or IsForever() then
       questLogIndex = C_QuestLog.GetLogIndexForQuestID(questID)
     else 
       questLogIndex = GetQuestLogIndexByID(questID)
